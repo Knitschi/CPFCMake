@@ -854,13 +854,12 @@ function( ccbFindConfigFile absFilePathOut configName )
 	else()
 
 		set( searchLocations
-		"${DIR_OF_PROJECT_UTILITIES}/../../../${CCB_CONFIG_DIR}"
-		"${DIR_OF_PROJECT_UTILITIES}/../../../${CCB_SOURCE_DIR}"
-		"${DIR_OF_PROJECT_UTILITIES}/../${CCB_DEFAULT_CONFIGS_DIR}"
+			"${DIR_OF_PROJECT_UTILITIES}/../../../${CCB_CONFIG_DIR}"										# developer specific configs
+			"${DIR_OF_PROJECT_UTILITIES}/../../../${CCB_SOURCE_DIR}/${CCB_PROJECT_CONFIGURATIONS_DIR}"	# project default configs
+			"${DIR_OF_PROJECT_UTILITIES}/../${CCB_DEFAULT_CONFIGS_DIR}"				# CCB provided standard configs
 		)
 
 		foreach( dir ${searchLocations})
-			
 			ccbNormalizeAbsPath( fullConfigFile "${dir}/${configName}${CCB_CONFIG_FILE_ENDING}" )
 			if( EXISTS "${fullConfigFile}" )
 				set( absPath "${fullConfigFile}" )

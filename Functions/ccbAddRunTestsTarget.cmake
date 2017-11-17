@@ -15,15 +15,16 @@ function( ccbAddGlobalRunAllTestsTarget packages)
 		ccbGetSubtargets(runSlowTestsTargets "${packages}" CCB_RUN_TESTS_SUBTARGET)
 
 		# We also need to run the unit tests for the python code.
+		# Maybe the python files should be added to target which has a runAllTests_<package> subtarget.
 		if(TOOL_PYTHON3)
 			
-			set( pythonDir "${CCB_ROOT_DIR}/${CCB_INFRASTRUCTURE_DIR}/BuildAutomatImpl" )
+			set( pythonDir "${CCB_ROOT_DIR}/${CCB_SOURCE_DIR}/CppCodeBaseBuildscripts" )
 			set(pythonFiles
-				${pythonDir}/buildautomat.py
+				${pythonDir}/cppcodebasebuildscripts/buildautomat.py
 			)
 
 			set(stampFile "${CMAKE_BINARY_DIR}/${CCB_PRIVATE_DIR}/runPythonTests.stamp")
-			set(runTestsCommand "\"${TOOL_PYTHON3}\" \"${CCB_ROOT_DIR}/${CCB_INFRASTRUCTURE_DIR}/BuildAutomatImpl_unit_tests.py\"")
+			set(runTestsCommand "\"${TOOL_PYTHON3}\" \"${pythonDir}/run_tests.py\"")
 			set( touchCommand "cmake -E touch \"${stampFile}\"" )
 
 			ccbAddStandardCustomCommand(

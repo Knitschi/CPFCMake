@@ -8,7 +8,6 @@ set(CCB_ROOT_DIR "${CMAKE_SOURCE_DIR}/..")
 set(CCB_GENERATED_DIR Generated)				# The directory that holds all files that are generated.
 set(CCB_SOURCE_DIR Sources)						# The directory that should hold all non generated files that are checked into the repository.
 set(CCB_CONFIG_DIR Configuration)				# The directory that holds files that define cmake variables that are specific to the local project instance, like local paths to dependencies etc.
-set(CCB_INFRASTRUCTURE_DIR Infrastructure)
 set(CCB_PACKAGES_ASSEMBLE_DIR _packaging)		# Utility directory which is used to copy the content of the packages together.
 set(CCB_PRIVATE_DIR _cppcodebase)				# A directory for storing generated helper files of the CppCodeBase project.
 set(CCB_INSTALL_STAGE InstallStage)             # The trailing directory in the default install prefix
@@ -78,7 +77,6 @@ endfunction()
 
 ###### Custom targets ######
 
-# generateDocumentation
 # relative dirs
 set( CCB_DOXYGEN_DIR doxygen )
 set( CCB_DOXYGEN_EXTERNAL_DIR external)
@@ -90,6 +88,7 @@ set( CCB_OPENCPPCOVERAGE_DIR OpenCppCoverage )
 set( CCB_COMPATIBLITY_REPORTS_DIR AbiCheckerReports )
 set( CCB_CURRENT_TO_LAST_BUILD_DIR LastBuildToCurrent )
 set( CCB_CURRENT_TO_LAST_RELEASE_DIR LastReleaseToCurrent )
+set( CCB_PROJECT_CONFIGURATIONS_DIR BuildConfigurations )
 
 # absolute dirs
 set( CCB_PROJECT_HTML_ABS_DIR ${CMAKE_BINARY_DIR}/html)																		# The directory that ccbContains the html page of the project
