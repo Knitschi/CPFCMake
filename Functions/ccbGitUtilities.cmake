@@ -25,8 +25,12 @@ function( ccbGetTags tagsOut branch repositoryDir)
 	else()
 		ccbExecuteProcess( textOutput "git tag --sort=-committerdate --merged ${branch}" "${repositoryDir}")
 	endif()
-	ccbSplitStringAtWhitespaces( tags "${textOutput}")
-	
+
+	set(tags)
+	if(textOutput)
+		ccbSplitStringAtWhitespaces( tags "${textOutput}")
+	endif()
+
 	set( ${tagsOut} ${tags} PARENT_SCOPE)
 
 endfunction()
@@ -278,6 +282,9 @@ function( ccbGetCurrentVersionFromGitRepository versionOut repoDir  )
 
 	ccbGetCurrentBranch( currentBranch "${repoDir}")
 	ccbGetLastReleaseVersionTagOfBranch( lastReleaseTagVersion ${currentBranch} "${repoDir}" TRUE)
+	if(NOT lastReleaseTagVersion)
+		message( FATAL_ERROR "Branch ${currentBranch} of the repository at ${repoDir} has no release version tag. Make sure to tag the first commit of the repository with \"0.0.0\"" )
+	endif()
 	ccbSplitVersion( major minor patch unused ${lastReleaseTagVersion} )
 	
 	# check if the last tag is the currently checked out version.

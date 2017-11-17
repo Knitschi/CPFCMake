@@ -841,8 +841,8 @@ endfunction()
 # configName can be an absolute file path to a .config.cmake file or the base-name of
 # config file which is situated in one of the following directories:
 #    <cppcodebase-root>/Configuration     
-#    <cppcodebase-root>/Sources
-#    <cppcodebase-root>/Sources/CppCodeBase/DefaultConfigurations
+#    <cppcodebase-root>/Sources/BuildConfigurations
+#    <cppcodebase-root>/Sources/CppCodeBaseCMake/DefaultConfigurations
 #
 # If multiple files with the same base-name exist, the one in the directory that comes
 # first in the above list is taken.
@@ -854,9 +854,9 @@ function( ccbFindConfigFile absFilePathOut configName )
 	else()
 
 		set( searchLocations
-			"${DIR_OF_PROJECT_UTILITIES}/../../../${CCB_CONFIG_DIR}"										# developer specific configs
+			"${DIR_OF_PROJECT_UTILITIES}/../../../${CCB_CONFIG_DIR}"									# developer specific configs
 			"${DIR_OF_PROJECT_UTILITIES}/../../../${CCB_SOURCE_DIR}/${CCB_PROJECT_CONFIGURATIONS_DIR}"	# project default configs
-			"${DIR_OF_PROJECT_UTILITIES}/../${CCB_DEFAULT_CONFIGS_DIR}"				# CCB provided standard configs
+			"${DIR_OF_PROJECT_UTILITIES}/../${CCB_DEFAULT_CONFIGS_DIR}"									# CCB provided standard configs
 		)
 
 		foreach( dir ${searchLocations})

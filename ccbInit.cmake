@@ -2,12 +2,14 @@
 
 cmake_minimum_required (VERSION 3.8.0) 
 
-list(APPEND 
+set(DIR_OF_INIT_FILE ${CMAKE_CURRENT_LIST_DIR})
+
+list( APPEND 
 	CMAKE_MODULE_PATH 
-	"${CMAKE_SOURCE_DIR}/CppCodeBase/Functions"
-	"${CMAKE_SOURCE_DIR}/CppCodeBase/Variables"
-	"${CMAKE_SOURCE_DIR}/CppCodeBase"
-	)
+	"${DIR_OF_INIT_FILE}/Functions"
+	"${DIR_OF_INIT_FILE}/Variables"
+	"${DIR_OF_INIT_FILE}"
+)
 
 include(ccbLocations)
 include(ccbProperties)
@@ -51,6 +53,22 @@ function( ccbInit )
 	if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 		message(FATAL_ERROR "CMAKE_BUILD_TYPE must be set when using a single-config generator.")
 	endif()
+
+	# A target that holds the cmake files of the CppCodeBase module.
+	add_subdirectory(${CCB_CPPCODEBASECMAKE_DIR})
+	
+	# Add optional CppCodeBase packages.
+	set( ccbPackageDirs 
+		${CCB_PROJECT_CONFIGURATIONS_DIR}
+		${CCB_BUILDSCRIPTS_DIR}
+		${CCB_JENKINSFILE_DIR}
+		${CCB_MACHINES_DIR}
+	)
+	foreach( dir ${ccbPackageDirs})
+		if(EXISTS ${CMAKE_SOURCE_DIR}/${dir} )
+			add_subdirectory(${dir})
+		endif()
+	endforeach()
 
 endfunction()
 
