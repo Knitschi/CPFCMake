@@ -102,7 +102,10 @@ endfunction()
 # 
 # Arguments:
 # PACKAGE_NAME											The name of the module/target/project
-# TYPE													GUI_APP = executable with switched of console (use for QApplications with ui); CONSOLE_APP = console application; LIB = library (use to create a static or shared libraries )
+# TYPE													GUI_APP = executable with switched of console (use for QApplications with ui); 
+#														CONSOLE_APP = console application; 
+#														LIB = library (use to create a static or shared libraries )
+#														INTERFACE_LIB = header only library
 # PUBLIC_HEADER											All header files that are required by clients of the package in order to compile.
 # PRODUCTION_FILES										All files that belong to the production target. If the target is an executable, there should be a main.cpp that is used for the executable.
 # PUBLIC_FIXTURE_HEADER									All header files in the fixture library that are required by clients of the library.
@@ -336,16 +339,29 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
 		endforeach()
 		# use always static linkage for internal exe target libraries
 		set(prodLibLinkage STATIC)
+		set(productionLibType LIB)
 	else()
 		set(isExe FALSE)
 		set(productionTarget ${package})
-		
+
 		# respect the clients BUILD_SHARED_LIBS setting when the main target is a library
-		if(${BUILD_SHARED_LIBS})
-			set(prodLibLinkage SHARED)
+		if(${type} STREQUAL INTERFACE_LIB)
+			set(prodLibLinkage INTERFACE)
 		else()
-			set(prodLibLinkage STATIC)
+			if(${BUILD_SHARED_LIBS})
+				set(prodLibLinkage SHARED)
+			else()
+				set(prodLibLinkage STATIC)
+			endif()
 		endif()
+
+		# The testlib always uses the linkage defined by BUILD_SHARED_LIBS
+		if(${BUILD_SHARED_LIBS})
+			set(testLibLinkage SHARED)
+		else()
+			set(testLibLinkage STATIC)
+		endif()
+
 	endif()
 	
 	###################### Create production library target ##############################
@@ -392,7 +408,7 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
 			PACKAGE_NAME ${package}
 			EXPORT_MACRO_PREFIX ${packageNamespace}_TESTS
 			TARGET_TYPE LIB
-			LINKAGE ${prodLibLinkage}
+			LINKAGE ${testLibLinkage}
 			NAME ${fixtureTarget}
 			PUBLIC_HEADER ${publicFixtureHeaderFiles}
 			FILES ${fixtureFiles}
@@ -474,12 +490,13 @@ function( ccbAddBinaryTarget	)
     endif()
 
     # library
-    if( ${ARG_TARGET_TYPE} MATCHES LIB)
-        add_library(${ARG_NAME} ${ARG_LINKAGE} ${allSources} )
+    if( ${ARG_TARGET_TYPE} MATCHES LIB )
+		
+		add_library(${ARG_NAME} ${ARG_LINKAGE} ${allSources} )
 		
 		# make sure that clients have the /D <target>_IMPORTS compile option set.
 		if(${ARG_LINKAGE} STREQUAL SHARED AND MSVC)
-			target_compile_definitions(${ARG_NAME} INTERFACE /D ${ARG_NAME}_IMPORTS ) # Note that we currently only have one export header per package.
+			target_compile_definitions(${ARG_NAME} INTERFACE /D ${ARG_NAME}_IMPORTS )
 		endif()
 		
 		# Remove the lib prefix on Linux. We expect that to be part of the package name.
