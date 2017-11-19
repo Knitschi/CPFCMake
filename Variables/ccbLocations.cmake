@@ -22,9 +22,6 @@ set(CCB_PROJECT_CONFIGURATIONS_DIR BuildConfigurations )	# The directory that co
 # This must be the same value as given with the --graphviz option when running the configure step.
 set(CCB_TARGET_DEPENDENCY_GRAPH_FILE "${CMAKE_BINARY_DIR}/CppCodeBaseDependencies.dot")	
 
-# The file that is included in every cpp file that provides the SWITCH_WARNINGS_ON and SWITCH_WARNINGS_OFF macros
-set( CCB_SWITCH_WARNINGS_OFF_MACRO_FILE SwitchOffWarningsMacro.h)
-
 # Developer Config file related
 set( CCB_PACKAGE_CONFIG_TEMPLATE ${CMAKE_SOURCE_DIR}/${CCB_CPPCODEBASECMAKE_DIR}/Templates/Config.cmake.in )
 set( CCB_DEFAULT_CONFIGS_DIR DefaultConfigurations)

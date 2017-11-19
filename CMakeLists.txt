@@ -28,7 +28,6 @@ set( FUNCTION_FILES
 	Functions/ccbAddRunUicTarget.cmake
 	Functions/ccbAddStaticAnalysisTarget.cmake
 	Functions/ccbBaseUtilities.cmake
-	Functions/cotire.cmake
 	Functions/ccbCustomTargetUtilities.cmake
 	Functions/ccbGitUtilities.cmake
 	Functions/ccbProjectUtilities.cmake
@@ -59,6 +58,7 @@ set( SCRIPT_FILES
 # Files that do not fit in any other category.
 set( OTHER_FILES
 	documentation/CppCodeBaseDocumentation.dox
+	cotire/CMake/cotire.cmake
 )
 
 # Template files that are used with the configure_file() command.

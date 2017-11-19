@@ -28,25 +28,32 @@ function( ccbAddDeploySharedLibrariesTarget target package )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# Recursively get either imported or non-imported linked shared libraries of the target
+# Recursively get either imported or non-imported linked shared libraries of the target.
 #
-#
-function( ccbGetRecursiveLinkedLibraries output target )
+function( ccbGetRecursiveLinkedLibraries linkedLibsOut target )
 
-    set(allLinkedLibraries)
+	set(allLinkedLibraries)
     set(outputLocal)
 
-	get_property(linkedLibraries TARGET ${target} PROPERTY LINK_LIBRARIES)														# The linked libraries for non imported targets
+	get_property(linkedLibraries TARGET ${target} PROPERTY INTERFACE_LINK_LIBRARIES)											# The linked libraries for non imported targets
     list(APPEND allLinkedLibraries ${linkedLibraries})
 
-	ccbGetConfigVariableSuffixes(configSuffixes)
-	foreach(configSuffix ${configSuffixes})
-		get_property(importedInterfaceLibraries TARGET ${target} PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES${configSuffix})		# the libraries that are used in the header files of the target
-		list(APPEND allLinkedLibraries ${importedInterfaceLibraries})
-		
-		get_property(importedPrivateLibraries TARGET ${target} PROPERTY IMPORTED_LINK_DEPENDENT_LIBRARIES${configSuffix})
-		list(APPEND allLinkedLibraries ${importedPrivateLibraries})
-	endforeach()
+	get_property(type TARGET ${target} PROPERTY TYPE)	
+	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )		# The following properties can not be accessed for interface libraries.
+
+		get_property(linkedLibraries TARGET ${target} PROPERTY LINK_LIBRARIES)		# The linked libraries for non imported targets
+		list(APPEND allLinkedLibraries ${linkedLibraries})
+
+		ccbGetConfigVariableSuffixes(configSuffixes)
+		foreach(configSuffix ${configSuffixes})
+			get_property(importedInterfaceLibraries TARGET ${target} PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES${configSuffix})		# the libraries that are used in the header files of the target
+			list(APPEND allLinkedLibraries ${importedInterfaceLibraries})
+			
+			get_property(importedPrivateLibraries TARGET ${target} PROPERTY IMPORTED_LINK_DEPENDENT_LIBRARIES${configSuffix})
+			list(APPEND allLinkedLibraries ${importedPrivateLibraries})
+		endforeach()
+
+	endif()
 
 	if(allLinkedLibraries)
 		list(REMOVE_DUPLICATES allLinkedLibraries)
@@ -79,9 +86,92 @@ function( ccbGetRecursiveLinkedLibraries output target )
 		list(REMOVE_DUPLICATES outputLocal)
 	endif()
 
-	set(${output} ${outputLocal} PARENT_SCOPE)
+	set(${linkedLibsOut} ${outputLocal} PARENT_SCOPE)
 
 endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Get all linked libraries from which the given target may inherit compile flags.
+# This is all directly linked non interface libraries and below that the tree of linked
+# interface libraries.
+# This function currently ignores the IMPORTED_LINK_DEPENDENT_LIBRARIES_<CONFIG> and
+# IMPORTED_LINK_INTERFACE_LIBRARIES_<CONFIG> properties.
+#
+function ( ccbGetVisibleLinkedLibraries linkedLibsOut target )
+	
+	set(allLibs)
+	ccbGetLinkLibraries( linkedLibs ${target})
+	
+	list(APPEND allLibs ${linkedLibs})
+	foreach( lib ${linkedLibs} )
+		ccbGetRecursiveLinkedInterfaceLibraries( libs ${lib} )
+		list(APPEND allLibs ${libs})
+	endforeach()
+	if(allLibs)
+		list(REMOVE_DUPLICATES allLibs)
+	endif()
+	set(${linkedLibsOut} ${allLibs} PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Gets all linked librares from the LINK_LIBRARIES and IMPORTED_LINK_DEPENDENT_LIBRARIES properties.
+#
+function( ccbGetLinkLibraries linkedLibsOut target )
+	set(libs)
+	get_property(type TARGET ${target} PROPERTY TYPE)	
+	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )	# The following properties can not be accessed for interface libraries.
+		ccbGetTargetProperties( libs ${target} "LINK_LIBRARIES;IMPORTED_LINK_DEPENDENT_LIBRARIES" )
+	endif()
+	if(libs)
+		list(REMOVE_DUPLICATES libs)
+	endif()
+	set(${linkedLibsOut} ${libs} PARENT_SCOPE)
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Recursively gets all libraries from the INTERFACE_LINK_LIBRARIES and IMPORTED_LINK_INTERFACE_LIBRARIES
+# properties
+function( ccbGetRecursiveLinkedInterfaceLibraries interfaceLibsOut target )
+	
+	set(allLibs)
+	ccbGetInterfaceLinkLibraries( libs ${target})
+	list(APPEND allLibs ${libs})
+	foreach(lib ${libs})
+		ccbGetRecursiveLinkedInterfaceLibraries( libs ${lib})
+		list(APPEND allLibs ${libs})
+	endforeach()
+	if(allLibs)
+		list(REMOVE_DUPLICATES allLibs)
+	endif()
+	set(${interfaceLibsOut} ${allLibs} PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Gets all linked libraries from the INTERFACE_LINK_LIBRARIES and IMPORTED_LINK_INTERFACE_LIBRARIES
+function( ccbGetInterfaceLinkLibraries linkedLibsOut target )
+	
+	get_property(type TARGET ${target} PROPERTY TYPE)	
+	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )	# The following properties can not be accessed for interface libraries.
+		ccbGetTargetProperties( libs1 ${target} "IMPORTED_LINK_INTERFACE_LIBRARIES" )
+	endif()
+	ccbGetTargetProperties( libs2 ${target} "INTERFACE_LINK_LIBRARIES" )
+	if(libs)
+		list(REMOVE_DUPLICATES libs)
+	endif()
+
+	# remove generator expression targets, because they cause trouble
+	set(libs)
+	foreach(lib ${libs1} ${libs2})
+		if(TARGET ${lib})
+			list(APPEND libs ${lib})
+		endif()
+	endforeach()
+
+	set(${linkedLibsOut} ${libs} PARENT_SCOPE)
+endfunction()
+
 
 #---------------------------------------------------------------------------------------------
 # This function returns a list of the given targets plus all targets that are directly or indirectly 

@@ -86,14 +86,14 @@ endfunction()
 # This print function prepends "------------------" to the printed variable and is
 # supposed to be used for temporary debug output while developing the CppCodeBase
 # cmake code.
-function( ccbDevMessage var)
+function( devMessage var)
 	message("------------------ ${var}")
 endfunction()
 
 #----------------------------------------------------------------------------------------
 function( devMessageList list)
     foreach( element IN LISTS list)
-        ccbDevMessage("${element}")
+        devMessage("${element}")
     endforeach()
 endfunction()
 

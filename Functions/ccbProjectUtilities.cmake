@@ -13,12 +13,7 @@ macro( ccbSetDynamicAndCosmeticCompilerOptions )
     
 	ccbGetCompiler(compiler)
     if( ${compiler} STREQUAL Vc) # VC flags
-
-        # Include the warnings switch off macro in all source files
-        # Note that we have to set this for the target to make sure it is included in the generated moc-files.
-        ccbGetCompileOptionForIncludingTheSwitchOffWarningsMacroFile(includeWarningMacrosFlag)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${includeWarningMacrosFlag} /MP") # the /MP flag saved on my 4 core machine 25 % compile time
-        
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") # the /MP flag saved on my 4 core machine 25 % compile time
     endif()
     
 	ccbSetHighWarningLevel()
@@ -28,23 +23,6 @@ macro( ccbSetDynamicAndCosmeticCompilerOptions )
 	endif()
 
 endmacro()
-
-#---------------------------------------------------------------------------------------------
-# 
-function(ccbGetCompileOptionForIncludingTheSwitchOffWarningsMacroFile flag)
-
-	ccbGetCompiler(compiler)
-    if( ${compiler} STREQUAL Gcc)
-        set( incFlag "-include${CMAKE_SOURCE_DIR}/${CCB_SWITCH_WARNINGS_OFF_MACRO_FILE}")
-    elseif( ${compiler} STREQUAL Clang)
-        set( incFlag "-include${CMAKE_SOURCE_DIR}/${CCB_SWITCH_WARNINGS_OFF_MACRO_FILE}")
-    elseif( ${compiler} STREQUAL Vc)
-        set( incFlag "/FI\"${CMAKE_SOURCE_DIR}/${CCB_SWITCH_WARNINGS_OFF_MACRO_FILE}\"")
-    endif()
-
-    set(${flag} "${incFlag}" PARENT_SCOPE)
-    
-endfunction()
 
 #----------------------------------------- set warning level to 4 and set warnings as errors --------------------------------
 macro(ccbSetHighWarningLevel)
@@ -532,13 +510,15 @@ endfunction()
 
 
 #---------------------------------------------------------------------------------------------
-function( ccbGetTargetProperties outputValues targets property )
+function( ccbGetTargetProperties outputValues targets properties )
 
 	set(values)
 
 	foreach(target ${targets})
-		get_property(value TARGET ${target} PROPERTY ${property})
-		list(APPEND values ${value})
+		foreach( property ${properties})
+			get_property(value TARGET ${target} PROPERTY ${property})
+			list(APPEND values ${value})
+		endforeach()
 	endforeach()
 
 	set(${outputValues} ${values} PARENT_SCOPE)

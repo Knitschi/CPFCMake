@@ -338,42 +338,28 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
 			list(REMOVE_ITEM productionFiles ${iconFile})
 		endforeach()
 		# use always static linkage for internal exe target libraries
-		set(prodLibLinkage STATIC)
-		set(productionLibType LIB)
+		set(libLinkage STATIC)
 	else()
 		set(isExe FALSE)
 		set(productionTarget ${package})
 
 		# respect the clients BUILD_SHARED_LIBS setting when the main target is a library
-		if(${type} STREQUAL INTERFACE_LIB)
-			set(prodLibLinkage INTERFACE)
-		else()
-			if(${BUILD_SHARED_LIBS})
-				set(prodLibLinkage SHARED)
-			else()
-				set(prodLibLinkage STATIC)
-			endif()
-		endif()
-
-		# The testlib always uses the linkage defined by BUILD_SHARED_LIBS
 		if(${BUILD_SHARED_LIBS})
-			set(testLibLinkage SHARED)
+			set(libLinkage SHARED)
 		else()
-			set(testLibLinkage STATIC)
+			set(libLinkage STATIC)
 		endif()
 
 	endif()
 	
 	###################### Create production library target ##############################
     if(productionFiles OR publicHeaderFiles)  
-        
-		set( linkedTestLibraries ${linkedTestLibraries} ${TARGET_NAME})
 
         ccbAddBinaryTarget(
 			PACKAGE_NAME ${package}  
 			EXPORT_MACRO_PREFIX ${packageNamespace}
 			TARGET_TYPE LIB
-			LINKAGE ${prodLibLinkage}
+			LINKAGE ${libLinkage}
 			NAME ${productionTarget}
 			PUBLIC_HEADER ${publicHeaderFiles}
 			FILES ${productionFiles}
@@ -408,7 +394,7 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
 			PACKAGE_NAME ${package}
 			EXPORT_MACRO_PREFIX ${packageNamespace}_TESTS
 			TARGET_TYPE LIB
-			LINKAGE ${testLibLinkage}
+			LINKAGE ${libLinkage}
 			NAME ${fixtureTarget}
 			PUBLIC_HEADER ${publicFixtureHeaderFiles}
 			FILES ${fixtureFiles}
@@ -495,7 +481,7 @@ function( ccbAddBinaryTarget	)
 		add_library(${ARG_NAME} ${ARG_LINKAGE} ${allSources} )
 		
 		# make sure that clients have the /D <target>_IMPORTS compile option set.
-		if(${ARG_LINKAGE} STREQUAL SHARED AND MSVC)
+		if( ${ARG_LINKAGE} STREQUAL SHARED AND MSVC)
 			target_compile_definitions(${ARG_NAME} INTERFACE /D ${ARG_NAME}_IMPORTS )
 		endif()
 		
@@ -559,48 +545,48 @@ function(ccbAddPrecompiledHeader targetName )
     set_target_properties(${targetName} PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)  # prevent the generation of unity build targets
     
 	if(CCB_ENABLE_PRECOMPILED_HEADER) 
-        cotire(${targetName})
+		cotire( ${targetName})
+		reAddInheritedCompileOptions( ${targetName})
     endif()
-
-	ccbIncludeSwitchWarningsOffMacroFileAfterPCH(${targetName})
 
 	# add the prefix header to the target files
 	get_property(prefixHeader TARGET ${targetName} PROPERTY COTIRE_CXX_PREFIX_HEADER)
 	set_property(TARGET ${targetName} APPEND PROPERTY SOURCES ${prefixHeader})
 
-
 endfunction()
-
 
 #---------------------------------------------------------------------------------------------
-# The prefix header from cotire must be the first file that is included per compile option or it will cause errors
-function( ccbIncludeSwitchWarningsOffMacroFileAfterPCH targetName)
+# This function compensates a CMake bug (https://gitlab.kitware.com/cmake/cmake/issues/17488)
+# Cotire sets the SOURCE propety COMPILE_FLAGS which removes inherited INTERFACE_COMPILE_OPTIONS due
+# to the bug. We manually re-add the compile options here.
+function( reAddInheritedCompileOptions target )
 
-    ccbGetCompileOptionForIncludingTheSwitchOffWarningsMacroFile(flag)
-    if(MSVC)
-        # the prefix header is included with a compile flag for MSVC
-        # We need to add the include file flag for each file because cotire will remove the include flag when it is
-        # inherited from the target flags.
-        get_property(sourceFiles TARGET ${targetName} PROPERTY SOURCES)
+	# get all inherited compile options
+	set(inheritedCompileOptions)
+	ccbGetVisibleLinkedLibraries( linkedLibs ${target} )
+	foreach( lib ${linkedLibs} )
+		get_property( compileOptions TARGET ${lib} PROPERTY INTERFACE_COMPILE_OPTIONS )
+		list(APPEND inheritedCompileOptions ${compileOptions})
+	endforeach()
+
+	if(inheritedCompileOptions)
+		list(REMOVE_DUPLICATES inheritedCompileOptions )
+		ccbJoinString( inheritedOptionsString "${inheritedCompileOptions}" " ")
+
+		# add them to the SOURCE property COMPILE_FLAGS
+		# adding them with target_compile_options will not work.
+		get_property(sourceFiles TARGET ${target} PROPERTY SOURCES)
 		foreach( file ${sourceFiles})
-            get_filename_component(extension "${file}" EXT)
-            if("${extension}" STREQUAL .cpp)
-                get_source_file_property(flags ${file} COMPILE_FLAGS)
-                if( ${flags} STREQUAL "NOTFOUND")
-                    set(flags "")
-                endif()
-                set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS "${flags} ${flag}")
-            endif()
-        endforeach()
-
-    else()
-
-        # the prefix header is included with a compile option for clang and gcc
-        target_compile_options(${targetName} PRIVATE ${flag} )
-
-    endif()
+			get_filename_component( extension ${file} EXT)
+			if( "${extension}" STREQUAL .cpp ) # we only handle the .cpp extension which is fragile, but hopes are that this code will be removed when the cmake bug is fixed.
+				get_property( flags SOURCE ${file} PROPERTY COMPILE_FLAGS)
+				set_property( SOURCE ${file} PROPERTY COMPILE_FLAGS "${inheritedOptionsString} ${flags}") # inherited options must come before the prefix header include option
+			endif()
+		endforeach()
+	endif()
 
 endfunction()
+
 
 #---------------------------------------------------------------------------------------------
 # Calls the qt5_wrap_ui and qt5_add_resources and adds the generated files to the given file list

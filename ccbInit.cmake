@@ -8,6 +8,7 @@ list( APPEND
 	CMAKE_MODULE_PATH 
 	"${DIR_OF_INIT_FILE}/Functions"
 	"${DIR_OF_INIT_FILE}/Variables"
+	"${DIR_OF_INIT_FILE}/cotire/CMake"
 	"${DIR_OF_INIT_FILE}"
 )
 
