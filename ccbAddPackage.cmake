@@ -546,7 +546,7 @@ function(ccbAddPrecompiledHeader targetName )
     
 	if(CCB_ENABLE_PRECOMPILED_HEADER) 
 		cotire( ${targetName})
-		reAddInheritedCompileOptions( ${targetName})
+		#reAddInheritedCompileOptions( ${targetName})
     endif()
 
 	# add the prefix header to the target files
