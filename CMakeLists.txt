@@ -1,6 +1,13 @@
 # This file bundles the cmake code file into a custom target to make them visible in the vs solution.
 
 include(ccbLocations)
+include(ccbAddPackage)
+
+set( PACKAGE_NAMESPACE CcbBS )
+ccbInitPackageProject(
+	PACKAGE_NAME
+	${PACKAGE_NAMESPACE}
+)
 
 # The files that contain functions that are called by the users of the CppCodeBase
 set( PUBLIC_FILES 
@@ -79,6 +86,5 @@ source_group( Templates FILES ${TEMPLATE_FILES} )
 # Finally add the target.
 set(allCMakeFiles ${PUBLIC_FILES} ${VARIABLES_FILES} ${FUNCTION_FILES} ${TEST_FILES} ${CONFIGURATION_FILES} ${SCRIPT_FILES} ${OTHER_FILES} ${TEMPLATE_FILES}  )
 
-set(targetName CppCodeBase)
-add_custom_target( ${targetName} SOURCES ${allCMakeFiles} )
-set_property( TARGET ${targetName} PROPERTY FOLDER ${targetName} )
+add_custom_target( ${PACKAGE_NAME} SOURCES ${allCMakeFiles} )
+set_property( TARGET ${PACKAGE_NAME} PROPERTY FOLDER ${PACKAGE_NAME} )
