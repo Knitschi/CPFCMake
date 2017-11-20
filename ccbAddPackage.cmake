@@ -217,7 +217,7 @@ function( ccbAddPackage )
 	
 	# Adds the targets that create the distribution packages.
 	ccbAddDistributionPackageTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" "${pluginOptionLists}" )
-  
+
 	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
 	ccbAddPackageDocsTarget( packageLinkFile ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
 	list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )

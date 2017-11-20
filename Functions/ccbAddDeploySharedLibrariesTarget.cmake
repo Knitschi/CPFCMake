@@ -36,7 +36,7 @@ function( ccbGetRecursiveLinkedLibraries linkedLibsOut target )
     set(outputLocal)
 
 	get_property(linkedLibraries TARGET ${target} PROPERTY INTERFACE_LINK_LIBRARIES)											# The linked libraries for non imported targets
-    list(APPEND allLinkedLibraries ${linkedLibraries})
+	list(APPEND allLinkedLibraries ${linkedLibraries})
 
 	get_property(type TARGET ${target} PROPERTY TYPE)	
 	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )		# The following properties can not be accessed for interface libraries.
@@ -74,6 +74,7 @@ function( ccbGetRecursiveLinkedLibraries linkedLibsOut target )
 			ccbContainsGeneratorExpressions( containsGenExp ${lib})
 			if( containsGenExp )
 				ccbDebugMessage("Ignored dependency ${lib} while setting up shared library deployment targets. The deployment mechanism can not handle generator expressions.")
+			elseif( ${lib} STREQUAL "-pthread" ) # ignore system link dependency -pthread
 			else()
 				# The dependency does not seem to be a generator expression, so it should be available here.
 				message(FATAL_ERROR "Linked library ${lib} is not an existing target. Maybe you need to add another find_package() call.")

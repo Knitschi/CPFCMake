@@ -400,10 +400,44 @@ function( ccbPrintTargetProperties target )
 		CCB_DOXYGEN_CONFIG_FILE
 	)
 
+	# For interface targets accessing non whitelisted properties causes errors.
+	set( interfaceTargetPropertyWhitelist
+		COMPATIBLE_INTERFACE_BOOL
+		COMPATIBLE_INTERFACE_NUMBER_MAX
+		COMPATIBLE_INTERFACE_NUMBER_MIN
+		COMPATIBLE_INTERFACE_STRING
+		EXPORT_NAME
+		IMPORTED
+		NAME
+		INTERFACE_AUTOUIC_OPTIONS
+		INTERFACE_COMPILE_DEFINITIONS
+		INTERFACE_COMPILE_OPTIONS
+		INTERFACE_INCLUDE_DIRECTORIES
+		INTERFACE_LINK_LIBRARIES
+		INTERFACE_POSITION_INDEPENDENT_CODE
+		INTERFACE_SOURCES
+		INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
+	)
+
+	set( configInterfaceTargetPropertyWhitelist
+		IMPORTED_LIBNAME
+		MAP_IMPORTED_CONFIG
+	)
+
+	# limit the propeties to the whitelist for interface libraries
+	get_property( type TARGET ${target} PROPERTY TYPE )
+	if(${type} STREQUAL INTERFACE_LIBRARY)
+		set(properties ${interfaceTargetPropertyWhitelist})
+		set(configDependentProperies ${configInterfaceTargetPropertyWhitelist})
+	endif()
+
+
 	# get all conifg suffixes for the target
 	ccbGetConfigVariableSuffixes(suffixes TRUE)
 	if(NOT CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
-		list(APPEND suffixes " ") # also show the variables without the suffix
+		if(NOT ${type} STREQUAL INTERFACE_LIBRARY)
+			list(APPEND suffixes " ") # also show the variables without the suffix
+		endif()
 	endif()
 	
 	# also check imported configurations variables
@@ -413,8 +447,7 @@ function( ccbPrintTargetProperties target )
 		list(APPEND suffixes _${upperConfig})
 	endforeach()
 	list(REMOVE_DUPLICATES suffixes)
-	
-	
+
 	# append all config variants of the properties to the list
 	foreach( configProperty ${configDependentProperies})
 		foreach( suffix ${suffixes})
@@ -424,7 +457,7 @@ function( ccbPrintTargetProperties target )
 	
 	# only append the import only properties if the target is imported
 	get_property( isImported TARGET ${target} PROPERTY IMPORTED )
-	if(isImported)
+	if(isImported AND ( NOT ${type} STREQUAL INTERFACE_LIBRARY ))
 		foreach( configProperty ${onlyImportedTargetsConfigDependentProperties})
 			foreach( suffix ${suffixes})
 				list(APPEND properties ${configProperty}${suffix} )

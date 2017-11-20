@@ -64,7 +64,6 @@ function( ccbAddAbiCheckerTargets package distributionPackageOptionLists )
 		ccbGetPackageVersionCompatibilityCheckTarget( targetName ${package})
 		ccbAddCleanOutputDirsCommands( cleanStamps ${targetName} "${reportFiles};${reportFileApiCheck};${reportFileAbiCheck}" )
 		ccbAddSubTargetBundleTarget( ${targetName} ${package} CCB_ABI_CHECK_SUBTARGETS "${cleanStamps}")
-
 	endif()
 endfunction()
 
@@ -352,6 +351,7 @@ function( ccbGetDistributionPackageExtension extensionOut packageFormat )
 
 endfunction()
 
+#----------------------------------------------------------------------------------------
 function( ccbDownloadAndExtractPackage package packageFormat packageUrl  )
 
 	# downlaod the package
@@ -359,7 +359,7 @@ function( ccbDownloadAndExtractPackage package packageFormat packageUrl  )
 	set( downloadDir "${CCB_PREVIOUS_PACKAGES_ABS_DIR}")
 	set( downloadedPackage "${downloadDir}/${shortName}")
 	ccbDebugMessage("Download package from \"${packageUrl}\"")
-	file(DOWNLOAD "${packageUrl}" "${downloadedPackage}" INACTIVITY_TIMEOUT 10 STATUS resultValues )
+	file(DOWNLOAD "${packageUrl}" "${downloadedPackage}" INACTIVITY_TIMEOUT 1 STATUS resultValues )
 
 	list(GET resultValues 0 returnCode )
 	if( NOT ${returnCode} EQUAL 0)

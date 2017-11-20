@@ -550,7 +550,7 @@ function( ccbAddCompatiblityReportsLinksPageCommands doxFileOut htmlFileOut pack
 		
 			string(APPEND fileContent "\n")
 			string(APPEND fileContent "### ${libraryTarget} ###\n")
-		
+
 			ccbGetAvailableCompatibilityReports( reports titles ${package} ${libraryTarget} )
 
 			set(index 0)
@@ -640,7 +640,7 @@ function( ccbUrlExists boolOut url )
 	if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Linux )
 		# With curl we do not have to download the file for checking if it exists.
 		execute_process(
-			COMMAND curl;--output;/dev/null;--silent;--head;--fail;${url}
+			COMMAND curl;--output;/dev/null;--silent;--head;--fail;--connect-timeout 0.1;${url}
 			RESULT_VARIABLE result
 		)
 		if( NOT result EQUAL 0)
@@ -650,7 +650,7 @@ function( ccbUrlExists boolOut url )
 	else()
 		# For windows we try to download the file.
 		set( downloadedFile "${CMAKE_BINARY_DIR}/${CCB_PRIVATE_DIR}/downloadTest.html")
-		file(DOWNLOAD ${url} ${downloadedFile} STATUS status)
+		file(DOWNLOAD ${url} ${downloadedFile} INACTIVITY_TIMEOUT 1 STATUS status)
 		list(GET status 0 result)
 		if( NOT result EQUAL 0)
 			set( exists FALSE )
