@@ -532,26 +532,26 @@ function( ccbAddBinaryTarget	)
 	# add a target the will be build before the binary target and that will copy all 
 	# depended on shared libraries to the targets output directory.
 	ccbAddDeploySharedLibrariesTarget(${ARG_NAME} ${ARG_PACKAGE_NAME})
-	
+
 endfunction()
 
 
 #----------------------------------------- macro from Lars Christensen to use precompiled headers --------------------------------
 # this was copied from https://gist.github.com/larsch/573926
 # this might be an alternative if this does not work well enough: https://github.com/sakra/cotire
-function(ccbAddPrecompiledHeader targetName )
+function(ccbAddPrecompiledHeader target )
     
     # add the precompiled header (targets and compile flags)
-    set_target_properties(${targetName} PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)  # prevent the generation of unity build targets
+    set_target_properties(${target} PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)  # prevent the generation of unity build targets
     
 	if(CCB_ENABLE_PRECOMPILED_HEADER) 
-		cotire( ${targetName})
-		ccbReAddInheritedCompileOptions( ${targetName})
+		cotire( ${target})
+		ccbReAddInheritedCompileOptions( ${target})
     endif()
 
 	# add the prefix header to the target files
-	get_property(prefixHeader TARGET ${targetName} PROPERTY COTIRE_CXX_PREFIX_HEADER)
-	set_property(TARGET ${targetName} APPEND PROPERTY SOURCES ${prefixHeader})
+	get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
+	set_property(TARGET ${target} APPEND PROPERTY SOURCES ${prefixHeader})
 
 endfunction()
 
@@ -566,6 +566,8 @@ function( ccbReAddInheritedCompileOptions target )
 	if(NOT isVS)
 		return()
 	endif()
+
+	devMessage("")
 
 	# get all inherited compile options
 	set(inheritedCompileOptions)

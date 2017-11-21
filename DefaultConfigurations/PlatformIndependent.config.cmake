@@ -13,7 +13,6 @@ set( CCB_WEBPAGE_URL "" CACHE STRING "The url to the webpage that is created wit
 set( CMAKE_DEBUG_POSTFIX "-debug" CACHE STRING "Postfix for libraries build with Debug configuration." FORCE)
 set( CMAKE_MINSIZEREL_POSTFIX "-minsizerel" CACHE STRING "Postfix for libraries build with Debug configuration." FORCE)
 set( CMAKE_RELWITHDEBINFO_POSTFIX "-relwithdebinfo" CACHE STRING "Postfix for libraries build with Debug configuration." FORCE)
-set( CCB_LASTBUILD_PACKAGES "" CACHE STRING "An url from which the distribution of the last build can be downloaded." FORCE)
 
 # PROJECT SETUP
 set( CCB_WARNINGS_AS_ERRORS ON CACHE BOOL "Allow the developer to switch the \"warnings as errors\" option temporarily off." FORCE)

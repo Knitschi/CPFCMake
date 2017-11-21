@@ -366,7 +366,7 @@ function( ccbDownloadAndExtractPackage package packageFormat packageUrl  )
 		# We only issue a warning here to not break builds when the packages are not available.
 		# This can happen when the variable CCB_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS has been switched ON, or parts of the build have
 		# been disabled during maintanance.
-		message( "Warning: Could not download released destribution package from ${packageUrl}. Comparing the current ABI/API with that package will not be possible.")
+		message( "Warning: Could not download released distribution package from ${packageUrl}. Comparing the current ABI/API with that package will not be possible.")
  	else()
 		# extract the package
 		ccbExecuteProcess( unused "cmake -E tar x ${shortName}" "${downloadDir}" DONT_INTERCEPT_OUTPUT )
