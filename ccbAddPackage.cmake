@@ -546,7 +546,7 @@ function(ccbAddPrecompiledHeader targetName )
     
 	if(CCB_ENABLE_PRECOMPILED_HEADER) 
 		cotire( ${targetName})
-		reAddInheritedCompileOptions( ${targetName})
+		ccbReAddInheritedCompileOptions( ${targetName})
     endif()
 
 	# add the prefix header to the target files
@@ -559,7 +559,13 @@ endfunction()
 # This function compensates a CMake bug (https://gitlab.kitware.com/cmake/cmake/issues/17488)
 # Cotire sets the SOURCE propety COMPILE_FLAGS which removes inherited INTERFACE_COMPILE_OPTIONS due
 # to the bug. We manually re-add the compile options here.
-function( reAddInheritedCompileOptions target )
+function( ccbReAddInheritedCompileOptions target )
+
+	# The problem only occurs for the visual studio generator.
+	ccbIsVisualStudioGenerator(isVS)
+	if(NOT isVS)
+		return()
+	endif()
 
 	# get all inherited compile options
 	set(inheritedCompileOptions)

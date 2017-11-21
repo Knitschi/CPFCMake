@@ -137,6 +137,16 @@ function( ccbIsGccClangDebug var )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Returns true if the current generator is one of the Visual Studio generators.
+function( ccbIsVisualStudioGenerator isVSOut )
+	set(isVS FALSE)
+	if( ${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
+		set(isVS TRUE)
+	endif()
+	set(${isVSOut} ${isVS} PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # reduce the warning level for files that are added over cmakes interface sources mechanism
 macro( ccbRemoveWarningFlagsForSomeExternalFiles targetName )
 
