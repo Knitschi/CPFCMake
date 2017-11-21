@@ -567,8 +567,6 @@ function( ccbReAddInheritedCompileOptions target )
 		return()
 	endif()
 
-	devMessage("")
-
 	# get all inherited compile options
 	set(inheritedCompileOptions)
 	ccbGetVisibleLinkedLibraries( linkedLibs ${target} )
