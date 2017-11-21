@@ -62,7 +62,7 @@ message("-- Update ${MAIN_BRANCH}")
 ccbExecuteProcess( d "git checkout ${MAIN_BRANCH}" "${ROOT_DIR}")
 ccbExecuteProcess( d "git pull origin ${MAIN_BRANCH}" "${ROOT_DIR}")
 
-# Move to the branch that ccbContains the changes and do some checks on the new version number
+# Move to the branch that contains the changes and do some checks on the new version number
 message("-- Sanity checks for the new version number.")
 ccbExecuteProcess( d "git checkout ${tempBranch}" "${ROOT_DIR}")
 ccbExecuteProcess( d "git pull origin ${tempBranch}" "${ROOT_DIR}")
