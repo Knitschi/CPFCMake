@@ -68,18 +68,13 @@ ccbExecuteProcess( d "git checkout ${tempBranch}" "${ROOT_DIR}")
 ccbExecuteProcess( d "git pull origin ${tempBranch}" "${ROOT_DIR}")
 
 # VERSION NUMBER SANITY CHECKS
-ccbGetSourcesSubdirectories( packages "${ROOT_DIR}" )
-
-# For now the merge commands in this script assume that we only deal with one
-# repository. This assertion makes sure that this is still the case.
-assertThatAllPackagesBelongToTheSameRepository( "${packages}" "${ROOT_DIR}")
-set(repoDir "${ROOT_DIR}")
 
 # Make sure the temp-branch is still up-to-date
 # Usually the build job will serialize the commits to the main-branch.
 # If somebody does an direct commit to the main branch while the build-job is running,
 # the version that was just build is out-dated and the later push will fail.
 # We abort here before adding a tag in this case.
+set(repoDir "${ROOT_DIR}")
 assertMergeWillBeFastForward( ${tempBranch} ${MAIN_BRANCH} "${repoDir}")
 
 # DO THE MERGING
