@@ -21,9 +21,9 @@ endfunction()
 function( ccbGetTags tagsOut branch repositoryDir)
 
 	if( "${branch}" STREQUAL "")
-		ccbExecuteProcess( textOutput "git tag --sort=-committerdate" "${repositoryDir}")
+		ccbExecuteProcess( textOutput "git tag -l --sort=-committerdate" "${repositoryDir}")
 	else()
-		ccbExecuteProcess( textOutput "git tag --sort=-committerdate --merged ${branch}" "${repositoryDir}")
+		ccbExecuteProcess( textOutput "git tag -l --sort=-committerdate --merged ${branch}" "${repositoryDir}")
 	endif()
 
 	set(tags)
