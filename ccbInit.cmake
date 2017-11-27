@@ -29,9 +29,12 @@ include(ccbAddCompatibilityCheckTarget)
 #----------------------------------------------------------------------------------------
 function( ccbInit )
 
+	# generate a .gitignore file that contains the generated files of the CppCodeBase
+	configure_file( "${DIR_OF_INIT_FILE}/Templates/.gitignore.in" "${CCB_ROOT_DIR}/.gitignore" COPYONLY )
+
 	# generate the file with the graphviz options
 	configure_file( "${DIR_OF_INIT_FILE}/Templates/${CCB_GRAPHVIZ_OPTIONS_FILE}.in" "${CMAKE_BINARY_DIR}/${CCB_GRAPHVIZ_OPTIONS_FILE}" COPYONLY )
-
+	
 	ccbDebugMessage("Using toolchain file: \"${CMAKE_TOOLCHAIN_FILE}\"")
 	ccbPrintToolchainVariables()
 

@@ -71,8 +71,11 @@ set( OTHER_FILES
 # Template files that are used with the configure_file() command.
 set( TEMPLATE_FILES
 	${CCB_PACKAGE_CONFIG_TEMPLATE}
-    Templates/packageVersion.h.in
-    Templates/packageVersion.cmake.in
+	Templates/packageVersion.h.in
+	Templates/packageVersion.cmake.in
+	Templates/.gitignore.in
+	Templates/${CCB_GRAPHVIZ_OPTIONS_FILE}
+	Templates/DoxygenConfig.cmake.in
 )
 
 # Put the files in directories in visual studio.
