@@ -8,6 +8,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbBaseUtilities.cmake")
 ccbNormalizeAbsPath(installPrefix "${CMAKE_CURRENT_LIST_DIR}/../../../${CCB_GENERATED_DIR}/${CCB_CONFIG}/${CCB_INSTALL_STAGE}")
 set( CMAKE_INSTALL_PREFIX "${installPrefix}" CACHE PATH "The base directory to which the install target will copy all the installed files." )
 set( CCB_WEBPAGE_URL "" CACHE STRING "The url to the webpage that is created with the updateExistingWebPage.cmake script." )
+set( CCB_PLANT_UML_JAR "" CACHE FILEPATH "Setting a path to the plantuml.jar file enables defining UML diagrams in Doxygen comments.")
 
 # OUTPUT NAMES
 set( CMAKE_DEBUG_POSTFIX "-debug" CACHE STRING "Postfix for libraries build with Debug configuration." FORCE)

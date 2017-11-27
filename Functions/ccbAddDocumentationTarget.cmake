@@ -63,6 +63,12 @@ function( ccbAddGlobalMonolithicDocumentationTarget packages)
 	list(APPEND appendedLines "INPUT = \"${CMAKE_SOURCE_DIR}\"")
 	list(APPEND appendedLines "INPUT += \"${CMAKE_BINARY_DIR}/${CCB_GENERATED_DOCS_DIR}\"")
 	
+	# TODO get plantuml.jar with hunter
+	if(CCB_PLANT_UML_JAR)
+		message( STATUS "Enable UML diagrams in doxygen comments.")
+		list(APPEND appendedLines "PLANTUML_JAR_PATH += \"${CCB_PLANT_UML_JAR}\"")
+	endif()
+
 	ccbAddAppendLinesToFileCommands( 
 		INPUT ${doxygenConfigFile}
 		OUTPUT ${tempDoxygenConfigFile}
