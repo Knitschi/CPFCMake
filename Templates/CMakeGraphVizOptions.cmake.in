@@ -1,0 +1,18 @@
+# This file ccbContains options that configure the dependency graph diagramm
+# for the targets in the CppCodeBase
+# 
+
+# Set the name of the graph
+set(GRAPHVIZ_GRAPH_NAME "CppCodeBaseTargetDependencyGraph")
+# Increase the font size of the target names.
+set(GRAPHVIZ_GRAPH_HEADER "node [\n fontsize = \"14\", fontname=\"helvetica\"\n];")
+
+
+# set(GRAPHVIZ_EXECUTABLES TRUE)
+# set(GRAPHVIZ_EXTERNAL_LIBS TRUE)
+# do not generate per target dependency graphs
+set(GRAPHVIZ_GENERATE_PER_TARGET FALSE)
+# do not generate per target depender graphs
+set(GRAPHVIZ_GENERATE_DEPENDERS FALSE)
+# Remove the test targets from the graph to reduce the graph complexity.
+set(GRAPHVIZ_IGNORE_TARGETS "(.+tests|.+fixtures)")

@@ -28,6 +28,9 @@ function( ccbAddGlobalMonolithicDocumentationTarget packages)
 	set(doxygenConfigFile "${CMAKE_SOURCE_DIR}/DoxygenConfig.txt")
 	set(htmlCgiBinDir "${CCB_PROJECT_HTML_ABS_DIR}/${CCB_CGI_BIN_DIR}" )
 
+	# Generate the DoxygenXonfig.txt file if it does not exist.
+	configure_file( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenConfig.txt" ${doxygenConfigFile} COPYONLY )
+
 	# Get dependencies
 	set(fileDependencies)
 	set(targetDependencies)
@@ -153,15 +156,13 @@ function( ccbAddGlobalDocumentationTarget )
 		COMMANDS ${tredCommand}
 	)
 
-	
 	# Add a command to add the package tag files to the global doxygen configuration file.
 	ccbGetDoxygenDependencies( doxygenSubTargets tagFiles PACKAGES ${ARG_PACKAGES})
 	
 	# The config file must contain the names of the depended on xml tag files of other doxygen sub-targets.
 	list(APPEND appendedLines "DOTFILE_DIRS=\"${CCB_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
 	list(APPEND appendedLines "OUTPUT_DIRECTORY=\"${globalHtmlOutputDir}\"")
-	list(APPEND appendedLines "INPUT+=${CCB_SOURCE_DIR}/CppCodeBaseDocumentation.dox")
-	list(APPEND appendedLines "INPUT+=${CCB_SOURCE_DIR}/CMakeGraphVizOptions.cmake")
+	list(APPEND appendedLines "INPUT+=${CCB_SOURCE_DIR}")
 
 	foreach( tagFile ${tagFiles})
 		get_filename_component(extTagFileDir ${tagFile} DIRECTORY)

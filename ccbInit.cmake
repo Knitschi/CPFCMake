@@ -29,6 +29,9 @@ include(ccbAddCompatibilityCheckTarget)
 #----------------------------------------------------------------------------------------
 function( ccbInit )
 
+	# generate the file with the graphviz options
+	configure_file( "${DIR_OF_INIT_FILE}/Templates/${CCB_GRAPHVIZ_OPTIONS_FILE}.in" "${CMAKE_BINARY_DIR}/${CCB_GRAPHVIZ_OPTIONS_FILE}" COPYONLY )
+
 	ccbDebugMessage("Using toolchain file: \"${CMAKE_TOOLCHAIN_FILE}\"")
 	ccbPrintToolchainVariables()
 
@@ -103,7 +106,7 @@ function( ccbAddPackages packages globalFiles )
 
 	if(CCB_ENABLE_STATIC_ANALYSIS_TARGET)
 		list(APPEND SOLUTION_FILES 
-			CMakeGraphVizOptions.cmake # CMake looks for the file in the source directory, so it can not be put in the cmake directory.
+			"${CMAKE_BINARY_DIR}/${CCB_GRAPHVIZ_OPTIONS_FILE}" # CMake looks for the file in the source directory, so it can not be put in the cmake directory.
 		)
 	endif()
 
