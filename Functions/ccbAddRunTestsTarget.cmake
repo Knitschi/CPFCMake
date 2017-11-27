@@ -16,9 +16,10 @@ function( ccbAddGlobalRunAllTestsTarget packages)
 
 		# We also need to run the unit tests for the python code.
 		# Maybe the python files should be added to target which has a runAllTests_<package> subtarget.
-		if(TOOL_PYTHON3)
-			
-			set( pythonDir "${CCB_ROOT_DIR}/${CCB_SOURCE_DIR}/CppCodeBaseBuildscripts" )
+		# TODO move the test run to the build project of CppCodeBaseBuildscripts
+		set( pythonDir "${CCB_ROOT_DIR}/${CCB_SOURCE_DIR}/CppCodeBaseBuildscripts" )
+		if(TOOL_PYTHON3 AND (EXISTS ${pythonDir} ))
+
 			set(pythonFiles
 				${pythonDir}/cppcodebasebuildscripts/buildautomat.py
 			)
@@ -87,27 +88,29 @@ function( ccbAddRunTestTarget runTargetNameArg package runTargetNamePrefix testF
 	# get related targets
 	get_property(productionLib TARGET ${package} PROPERTY CCB_PRODUCTION_LIB_SUBTARGET)
     get_property(testTarget TARGET ${package} PROPERTY CCB_TESTS_SUBTARGET)
+	if(TARGET ${testTarget})
 
-	set(runTargetName ${runTargetNamePrefix}${package})
-	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${runTargetNamePrefix}tests_stamps")
-	file(MAKE_DIRECTORY "${targetBinaryDir}")
-    set(stampFile "${targetBinaryDir}/${runTargetName}.stamp")
+		set(runTargetName ${runTargetNamePrefix}${package})
+		set(targetBinaryDir "${CMAKE_BINARY_DIR}/${runTargetNamePrefix}tests_stamps")
+		file(MAKE_DIRECTORY "${targetBinaryDir}")
+		set(stampFile "${targetBinaryDir}/${runTargetName}.stamp")
 
-	# We need to add an explicit dependency to the production lib executable, because when using dynamic linkage,
-	# the test executable is not rebuild when we only change the .cpp files of the production lib.
-    ccbAddStandardCustomCommand(
-        DEPENDS "$<TARGET_FILE:${testTarget}>" "$<TARGET_FILE:${productionLib}>" ${productionLib} ${testTarget}
-        OUTPUT "${stampFile}" 
-        COMMANDS "$<TARGET_FILE:${testTarget}> -TestFilesDir \"${CCB_TEST_FILES_DIR}/${runTargetName}\" --gtest_filter=${testFilter}" "cmake -E touch \"${stampFile}\""
-    )
+		# We need to add an explicit dependency to the production lib executable, because when using dynamic linkage,
+		# the test executable is not rebuild when we only change the .cpp files of the production lib.
+		ccbAddStandardCustomCommand(
+			DEPENDS "$<TARGET_FILE:${testTarget}>" "$<TARGET_FILE:${productionLib}>" ${productionLib} ${testTarget}
+			OUTPUT "${stampFile}" 
+			COMMANDS "$<TARGET_FILE:${testTarget}> -TestFilesDir \"${CCB_TEST_FILES_DIR}/${runTargetName}\" --gtest_filter=${testFilter}" "cmake -E touch \"${stampFile}\""
+		)
 
-    add_custom_target(
-        ${runTargetName}
-        DEPENDS ${productionLib} ${testTarget} "${stampFile}"
-    )
+		add_custom_target(
+			${runTargetName}
+			DEPENDS ${productionLib} ${testTarget} "${stampFile}"
+		)
 
-    set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/pipeline")
+		set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/pipeline")
 
-	set(${runTargetNameArg} ${runTargetName} PARENT_SCOPE)	 
+		set(${runTargetNameArg} ${runTargetName} PARENT_SCOPE)
 
+	endif()
 endfunction()

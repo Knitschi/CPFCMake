@@ -10,7 +10,7 @@ set( CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/MSVC.cmake" CACHE PATH "The
 # LOCATIONS
 file(TO_CMAKE_PATH "$ENV{HOMEDRIVE}$ENV{HOMEPATH}\\HunterPackages" HUNTER_ROOT)
 set( HUNTER_ROOT "${HUNTER_ROOT}" CACHE PATH "The directory where the package manager will download and compile external packages." FORCE)
-file(TO_CMAKE_PATH "$ENV{TEMP}\\CppCodeBase_tests\\${CPPCODEBASE_CONFIG}" testDir)
+file(TO_CMAKE_PATH "$ENV{TEMP}\\CppCodeBase_tests\\${CCB_CONFIG}" testDir)
 set( CCB_TEST_FILES_DIR "${testDir}" CACHE PATH "The directory under which the automated tests may create temporary files." FORCE) 
 
 

@@ -90,12 +90,23 @@ function( ccbAddPackages packages globalFiles )
 		${globalFiles}
 		${CCB_SWITCH_WARNINGS_OFF_MACRO_FILE}
 		CMakeLists.txt
-		DoxygenConfig.txt
-		DoxygenLayout.xml
-		CMakeGraphVizOptions.cmake		# CMake looks for the file in the source directory, so it can not be put in the cmake directory.
-		"${CCB_ROOT_DIR}/${CCB_CONFIG_DIR}/${CPPCODEBASE_CONFIG}${CCB_CONFIG_FILE_ENDING}"
+		"${CCB_CONFIG_FILE}"
 		"${CMAKE_BINARY_DIR}/CMakeCache.txt"
 	)
+	
+	if(CCB_ENABLE_DOXYGEN_TARGET)
+		list(APPEND SOLUTION_FILES 
+			DoxygenConfig.txt 
+			DoxygenLayout.xml
+		)
+	endif()
+
+	if(CCB_ENABLE_STATIC_ANALYSIS_TARGET)
+		list(APPEND SOLUTION_FILES 
+			CMakeGraphVizOptions.cmake # CMake looks for the file in the source directory, so it can not be put in the cmake directory.
+		)
+	endif()
+
 	add_custom_target( globalFiles SOURCES ${SOLUTION_FILES})
 
 

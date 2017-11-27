@@ -1,7 +1,7 @@
 
-# This script is used to generated ${CPPCODEBASE_CONFIG}.config.cmake files in the Configuration sub directory.
+# This script is used to generated ${CCB_CONFIG}.config.cmake files in the Configuration sub directory.
 # ARGUMENTS
-# CPPCODEBASE_CONFIG			- The base name of the generated file.
+# CCB_CONFIG			- The base name of the generated file.
 # PARENT_CONFIG					- A two element list with one of (Local,Project,CppCodeBase)
 
 #[[
@@ -15,7 +15,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbBaseUtilities.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbProjectUtilities.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/../Variables/ccbLocations.cmake")
 
-ccbAssertScriptArgumentDefined(CPPCODEBASE_CONFIG)
+ccbAssertScriptArgumentDefined(CCB_CONFIG)
 ccbAssertScriptArgumentDefined(PARENT_CONFIG)
 
 # Find the location of the inherited configuration
@@ -29,7 +29,8 @@ list(APPEND fileContent "# This file ccbContains cmake project configuration par
 list(APPEND fileContent "" )
 ccbNormalizeAbsPath( fullProjectUtilities "${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbProjectUtilities.cmake" )
 list(APPEND fileContent "include(\"${fullProjectUtilities}\")" )
-list(APPEND fileContent "set( CPPCODEBASE_CONFIG \"${CPPCODEBASE_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE )" )
+list(APPEND fileContent "set( CCB_CONFIG_FILE "${CMAKE_CURRENT_LIST_FILE}" CACHE FILEPATH \"The path to the used .config.cmake file.\")" )
+list(APPEND fileContent "set( CCB_CONFIG \"${CCB_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE )" )
 list(APPEND fileContent "" )
 list(APPEND fileContent "# Inherit configuration parameters." )
 list(APPEND fileContent "include( \"${fullInheritedConfigFile}\" )" )
@@ -50,7 +51,7 @@ list(APPEND fileContent "" )
 # Add definitions for the variables that were set by using the "-D"-options.
 list(APPEND fileContent "# Overridden or new cache variables." )
 ccbGetScriptDOptionVariableNames( dVariables )
-list(REMOVE_ITEM dVariables CPPCODEBASE_CONFIG PARENT_CONFIG )
+list(REMOVE_ITEM dVariables CCB_CONFIG PARENT_CONFIG )
 foreach( variable ${dVariables})
 	ccbIsCacheVariable( isCacheVar ${variable})
 	if(isCacheVar) 
@@ -65,7 +66,7 @@ endforeach()
 
 
 # Write the lines in fileContent to the config file.
-set(configFilename "${CMAKE_CURRENT_LIST_DIR}/../../../Configuration/${CPPCODEBASE_CONFIG}${CCB_CONFIG_FILE_ENDING}")
+set(configFilename "${CMAKE_CURRENT_LIST_DIR}/../../../Configuration/${CCB_CONFIG}${CCB_CONFIG_FILE_ENDING}")
 file(REMOVE "${configFilename}")
 
 set(commandList)
