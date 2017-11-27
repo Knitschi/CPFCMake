@@ -105,7 +105,6 @@ endfunction()
 # TYPE													GUI_APP = executable with switched of console (use for QApplications with ui); 
 #														CONSOLE_APP = console application; 
 #														LIB = library (use to create a static or shared libraries )
-#														INTERFACE_LIB = header only library
 # PUBLIC_HEADER											All header files that are required by clients of the package in order to compile.
 # PRODUCTION_FILES										All files that belong to the production target. If the target is an executable, there should be a main.cpp that is used for the executable.
 # PUBLIC_FIXTURE_HEADER									All header files in the fixture library that are required by clients of the library.
