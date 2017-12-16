@@ -29,7 +29,7 @@ list(APPEND fileContent "# This file ccbContains cmake project configuration par
 list(APPEND fileContent "" )
 ccbNormalizeAbsPath( fullProjectUtilities "${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbProjectUtilities.cmake" )
 list(APPEND fileContent "include(\"${fullProjectUtilities}\")" )
-list(APPEND fileContent "set( CCB_CONFIG_FILE "${CMAKE_CURRENT_LIST_FILE}" CACHE FILEPATH \"The path to the used .config.cmake file.\")" )
+list(APPEND fileContent "set( CCB_CONFIG_FILE \"${CMAKE_CURRENT_LIST_FILE}\" CACHE FILEPATH \"The path to the used .config.cmake file.\")" )
 list(APPEND fileContent "set( CCB_CONFIG \"${CCB_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE )" )
 list(APPEND fileContent "" )
 list(APPEND fileContent "# Inherit configuration parameters." )
