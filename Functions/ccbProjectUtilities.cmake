@@ -692,22 +692,6 @@ function( ccbGetTypePartOfOutputDir typeDir package outputType )
 
 endfunction()
 
-
-#---------------------------------------------------------------------------------------------
-function( ccbGetRelativeSharedLibraryOutputDir output package config)
-
-	if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-		ccbGetRelativeOutputDir( relDir ${package} RUNTIME)
-	elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-		ccbGetRelativeOutputDir( relDir ${package} LIBRARY)
-	else()
-		message(FATAL_ERROR "Function ccbGetRelativeSharedLibraryOutputDir() needs to be extended for system ${CMAKE_SYSTEM_NAME}")
-	endif()
-	
-	set(${output} ${relDir} PARENT_SCOPE)
-
-endfunction()
-
 #----------------------------------------------------------------------------------------
 # Returns the absolute path to the output directory and the short filename of the output file of an imported or internal target
 #
@@ -912,6 +896,23 @@ function( ccbGetCacheVariablesDefinedInFile variableNamesOut absFilePath )
 	ccbGetList1WithoutList2( variableNames "${cacheVariablesAfter}" "${cacheVariablesBefore}" )
 	set( ${variableNamesOut} ${variableNames} PARENT_SCOPE)
 
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( ccbGetExecutableTargets exeTargetsOut package )
+	set(exeTargets)
+
+	get_property( mainTargetType TARGET ${package} PROPERTY TYPE )
+	if( ${mainTargetType} STREQUAL EXECUTABLE )
+		list(APPEND exeTargets ${package})
+	endif()
+
+	get_property( testTarget TARGET ${package} PROPERTY CCB_TESTS_SUBTARGET )
+	if(testTarget)
+		list(APPEND exeTargets ${testTarget})
+	endif()
+
+	set(${exeTargetsOut} ${exeTargets} PARENT_SCOPE)
 endfunction()
 
 

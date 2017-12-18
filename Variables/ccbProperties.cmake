@@ -7,7 +7,7 @@ include(ccbConstants)
 # This function defines all properties that are added and used by the CppCodeBase cmake code.
 # The properties are mainly used to get the names of generated files and subtargets.
 # 
-function( defineProperties )
+function( ccbDefineProperties )
 
 	# A property that is set on all targets in the CppCodeBase.
     define_property( 

@@ -1,6 +1,6 @@
 # This file ccbContains the main functions of the CppCodeBase cmake module.
 
-cmake_minimum_required (VERSION 3.8.0) 
+cmake_minimum_required (VERSION 3.8.0)
 
 set(DIR_OF_INIT_FILE ${CMAKE_CURRENT_LIST_DIR})
 
@@ -40,7 +40,9 @@ function( ccbInit )
 
 	####################################### OTHER GLOBAL SETTINGS #########################################    
 	# Define properties that are used within the CppCodeBase cmake code.
-	defineProperties()
+	ccbDefineProperties()
+	ccbSetPolicies()
+
     
 	# allow project folders
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -79,6 +81,11 @@ function( ccbInit )
 
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# Set policies to silence the warnings about changed cmake behavior.
+function( ccbSetPolicies )
+	cmake_policy(SET CMP0071 NEW)
+endfunction()
 
 #----------------------------------------------------------------------------------------
 function( ccbAddPackages packages globalFiles )
@@ -135,4 +142,6 @@ function( ccbAddPackages packages globalFiles )
 
 
 endfunction()
+
+
 

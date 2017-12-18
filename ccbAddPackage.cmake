@@ -192,12 +192,17 @@ function( ccbAddPackage )
 	ccbAddPackageBinaryTargets( productionLibrary ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} ${ARG_TYPE} "${ARG_PUBLIC_HEADER}" "${ARG_PRODUCTION_FILES}" "${ARG_PUBLIC_FIXTURE_HEADER}" "${ARG_FIXTURE_FILES}" "${ARG_TEST_FILES}" "${ARG_LINKED_LIBRARIES}" "${ARG_LINKED_TEST_LIBRARIES}" )
 
 	#set some properties
-	set_property(TARGET ${package} PROPERTY CCB_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
-	set_property(TARGET ${package} PROPERTY CCB_PACKAGE_HOMEPAGE ${ARG_HOMEPAGE} )
-	set_property(TARGET ${package} PROPERTY CCB_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
+	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CCB_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
+	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CCB_PACKAGE_HOMEPAGE ${ARG_HOMEPAGE} )
+	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CCB_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
 	
 	
-	# add other custom targets 
+	# add other custom targets
+
+	# add a target the will be build before the binary target and that will copy all 
+	# depended on shared libraries to the targets output directory.
+	ccbAddDeploySharedLibrariesTarget(${ARG_PACKAGE_NAME})
+
 	# Adds target that runs clang-tidy on the given files.
     # Currently this is only added for the production target because clang-tidy does not filter out warnings that come over the GTest macros from external code.
     # When clang-tidy resolves the problem, static analysis should be executed for all binary targets.
@@ -459,7 +464,6 @@ function( ccbAddBinaryTarget	)
 		"PUBLIC_HEADER;FILES;LINKED_LIBRARIES" 
 		${ARGN} 
 	)
-
 	set( allSources ${ARG_PUBLIC_HEADER} ${ARG_FILES})
 
 	ccbQt5AddUIAndQrcFiles( allSources )
@@ -527,10 +531,6 @@ function( ccbAddBinaryTarget	)
 
 	# sort files into folders in visual studio
     ccbSetIDEDirectoriesForTargetSources(${ARG_NAME})
-
-	# add a target the will be build before the binary target and that will copy all 
-	# depended on shared libraries to the targets output directory.
-	ccbAddDeploySharedLibrariesTarget(${ARG_NAME} ${ARG_PACKAGE_NAME})
 
 endfunction()
 
@@ -809,10 +809,10 @@ function( ccbAddPlugins package pluginOptionLists )
 				if(TARGET ${plugin})
 					get_property(isImported TARGET ${plugin} PROPERTY IMPORTED)
 					if(isImported)
-						ccbAddDeployExternalSharedLibsToBuildStageTarget( ${target} ${package} ${plugin} ${subdirectory} )
+						ccbAddDeployExternalSharedLibsToBuildStageTarget( ${package} ${plugin} ${subdirectory} )
 					else()
 						add_dependencies( ${target} ${plugin}) # adds the artifical dependency
-						ccbAddDeployInternalSharedLibsToBuildStageTargets( ${target} ${package} ${plugin} ${subdirectory} ) 
+						ccbAddDeployInternalSharedLibsToBuildStageTargets( ${package} ${plugin} ${subdirectory} ) 
 					endif()
 				endif()
 			endforeach()

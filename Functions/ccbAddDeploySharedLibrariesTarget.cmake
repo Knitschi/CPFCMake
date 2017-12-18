@@ -1,7 +1,6 @@
-
-
 include(ccbCustomTargetUtilities)
 include(ccbBaseUtilities)
+include(ccbProjectUtilities)
 
 
 #----------------------------------------------------------------------------------------
@@ -9,21 +8,29 @@ include(ccbBaseUtilities)
 # linkedLibrarie can contain all linked libraries of the target. The function will pick
 # the shared libraries by itself. 
 #
-function( ccbAddDeploySharedLibrariesTarget target package )
+function( ccbAddDeploySharedLibrariesTarget package )
 
-	# only deploy shared libraries for executables on windows
-	get_property( type TARGET ${target} PROPERTY TYPE )
-	if(NOT ${type} STREQUAL EXECUTABLE )
+	# Only deploy shared libraries on windows. On Linux CMake uses the RPATH to make it work.
+	if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL Windows)
 		return()
 	endif()
 
-	ccbGetRecursiveLinkedLibraries( allLinkedLibraries ${target})
+	# Get all libraries that need to be copied.
+	ccbGetExecutableTargets( exeTargets ${package})
+	set(allLinkedLibraries)
+	foreach(exeTarget ${exeTargets})
+		ccbGetRecursiveLinkedLibraries( targetLinkedLibraries ${exeTarget})
+		list(APPEND allLinkedLibraries ${targetLinkedLibraries})
+	endforeach()
+	list(REMOVE_DUPLICATES allLinkedLibraries)
+
 	ccbFilterInTargetsWithProperty( sharedLibraries "${allLinkedLibraries}" TYPE SHARED_LIBRARY )
 	ccbFilterInTargetsWithProperty( externalSharedLibs "${sharedLibraries}" IMPORTED TRUE )
 	ccbFilterInTargetsWithProperty( internalSharedLibs "${sharedLibraries}" IMPORTED "" )
 
-	ccbAddDeployInternalSharedLibsToBuildStageTargets( ${target} ${package} "${internalSharedLibs}" "" ) 
-	ccbAddDeployExternalSharedLibsToBuildStageTarget( ${target} ${package} "${externalSharedLibs}" "" ) 
+	# Add the targets that copy the dlls
+	ccbAddDeployInternalSharedLibsToBuildStageTargets( ${package} "${internalSharedLibs}" "" ) 
+	ccbAddDeployExternalSharedLibsToBuildStageTarget( ${package} "${externalSharedLibs}" "" ) 
 
 endfunction()
 
@@ -192,14 +199,14 @@ function( ccbGetAllTargetsInLinkTree targetsOut targetsIn )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( ccbAddDeployExternalSharedLibsToBuildStageTarget binaryTarget baseFolder externalLibs outputSubDir)
+function( ccbAddDeployExternalSharedLibsToBuildStageTarget package externalLibs outputSubDir)
 
-	if(NOT externalLibs OR ${CMAKE_SYSTEM_NAME} STREQUAL Linux) # On linux cmake puts the directories of depended on libraries into the rpath
+	if(NOT externalLibs)
 		return()
 	endif()
 
 	# Add one custom target to copy all external libs.
-	ccbGetIndexedTargetName(targetName deployExternal_${binaryTarget})
+	ccbGetIndexedTargetName(targetName deployExternal_${package})
 
 	foreach( lib ${externalLibs})
 		# sadly the add_custom_command() function does currently not take generator expressions for its output
@@ -211,7 +218,7 @@ function( ccbAddDeployExternalSharedLibsToBuildStageTarget binaryTarget baseFold
 			ccbGetLibLocation( libFile ${lib} ${suffix})
 			get_filename_component( shortName ${libFile} NAME)
 			
-			ccbGetSharedLibraryOutputDir( targetDir ${binaryTarget} ${suffix} )
+			ccbGetSharedLibraryOutputDir( targetDir ${package} ${suffix} )
 			if(outputSubDir)
 				set(output "${targetDir}/${outputSubDir}/${shortName}")
 			else()
@@ -234,8 +241,13 @@ function( ccbAddDeployExternalSharedLibsToBuildStageTarget binaryTarget baseFold
 		${targetName}
 		DEPENDS ${outputs} ${externalLibs}
 	)
-	set_property(TARGET ${targetName} PROPERTY FOLDER ${baseFolder}/private)
-	add_dependencies( ${binaryTarget} ${targetName} ) # make sure the copying is done before the target is build
+	set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/private)
+
+	# make sure the copying is done before the target is build
+	ccbGetExecutableTargets(exeTargets ${package})
+	foreach(exeTarget ${exeTargets})
+		add_dependencies( ${exeTarget} ${targetName} )
+	endforeach()
 
 endfunction()
 
@@ -256,16 +268,16 @@ endfunction()
 
 
 #---------------------------------------------------------------------------------------------
-function( ccbAddDeployInternalSharedLibsToBuildStageTargets binaryTarget package libs outputSubDir )
+function( ccbAddDeployInternalSharedLibsToBuildStageTargets package libs outputSubDir )
 
-	if(NOT libs OR ${CMAKE_SYSTEM_NAME} STREQUAL Linux)  # On linux cmake puts the directories of depended on libraries into the rpath
+	if(NOT libs)
 		return()
 	endif()
 
 	foreach( lib ${libs})
 		
 		# Add a custom target for each copied internal shared lib.
-		ccbGetIndexedTargetName(targetName deployInternal_${binaryTarget}${suffix})
+		ccbGetIndexedTargetName(targetName deployInternal_${package}${suffix})
 
 		# Always copy files for all configurations
 		# This leads to unnecessary copying but we have less targets compared
@@ -281,58 +293,53 @@ function( ccbAddDeployInternalSharedLibsToBuildStageTargets binaryTarget package
 		foreach(config ${configs})
 
 			ccbToConfigSuffix( configSuffix ${config})
-			ccbGetSharedLibraryOutputDir( targetDir ${binaryTarget} ${configSuffix} )
+			ccbGetSharedLibraryOutputDir( targetDir ${package} ${configSuffix} )
 			
-			ccbGetTargetOutputFileName(libraryFileName ${lib} ${config} )
+			ccbGetTargetOutputFileName(libraryFileName ${lib} ${config})
 			if(outputSubDir)
 				set(output "${targetDir}/${outputSubDir}/${libraryFileName}")
 			else()
 				set(output "${targetDir}/${libraryFileName}")
 			endif()
 
-            # if the output file already has the GENERATED property, it must have been created by another deploy target.
-            get_property(alreadyDeployed SOURCE ${output} PROPERTY GENERATED)
-            
             ccbGetTargetOutputDirectory( sourceDir ${lib} ${config} )
             set(libFile "${sourceDir}/${libraryFileName}")
-
             if(NOT "${libFile}" STREQUAL "${output}" )  # do not deploy the library that belongs to the same package, because it is already in the same directory
-                if(NOT alreadyDeployed)                 # do not add a deploy rule twice. This can currently happen when deploying libraries for test targets and production targets to the same directory.
-            
-                    set(copyCommand "cmake -E copy \"${libFile}\" \"${output}\"")
-                    set(touchCommand "cmake -E touch \"${output}\"")
-                
-                    #ccbDevMessage("deploy internal: ${output} ${binaryTarget}")
-                
-                    ccbAddConfigurationDependendCommand(
-                        TARGET ${targetName}
-                        OUTPUT ${output}
-                        DEPENDS ${libFile} ${lib}
-                        COMMENT "Deploy or touch \"${output}\""
-                        CONFIG ${config}
-                        COMMANDS_CONFIG ${copyCommand}
-                        COMMANDS_NOT_CONFIG ${touchCommand}
-                    )
 
-                    #ccbDevMessage("deploy internal finished: ${output}")
-                    
-                    list(APPEND outputs ${output})
-                    list(APPEND libs ${lib})
-                
-                endif()
-            endif()
+				set(copyCommand "cmake -E copy \"${libFile}\" \"${output}\"")
+				set(touchCommand "cmake -E touch \"${output}\"")
+
+				ccbAddConfigurationDependendCommand(
+					TARGET ${targetName}
+					OUTPUT ${output}
+					DEPENDS ${lib} ${libFile}
+					COMMENT "Deploy or touch \"${output}\""
+					CONFIG ${config}
+					COMMANDS_CONFIG ${copyCommand}
+					COMMANDS_NOT_CONFIG ${touchCommand}
+				)
+				
+				list(APPEND outputs ${output})
+				list(APPEND libs ${lib})
+					
+			endif()
 		endforeach()
 	endforeach()
 
-    if(outputs) # only add the target if commands have been added
-
+	if(outputs) # only add the target if commands have been added
 		add_custom_target(
             ${targetName}
-            DEPENDS ${outputs} ${libs}
+            DEPENDS ${libs} ${outputs}
         )
-        set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/private)
-        add_dependencies( ${binaryTarget} ${targetName} ) # make sure the copying is done before the target is build
-    endif()
+		set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/private)
+		
+		# make sure the copying is done before the target is build
+		ccbGetExecutableTargets(exeTargets ${package})
+		foreach(exeTarget ${exeTargets})
+			add_dependencies( ${exeTarget} ${targetName} )
+		endforeach()
+		
+	endif()
 
 endfunction()
 
