@@ -546,12 +546,14 @@ function(ccbAddPrecompiledHeader target )
 	if(CCB_ENABLE_PRECOMPILED_HEADER) 
 		cotire( ${target})
 		ccbReAddInheritedCompileOptions( ${target})
+
+		# add the prefix header to the target files
+		get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
+		set_property(TARGET ${target} APPEND PROPERTY SOURCES ${prefixHeader})
+
+		# do not run moc for the generated prefix header, it will cause build errors.
+		set_property(SOURCE ${prefixHeader} PROPERTY SKIP_AUTOMOC ON)
     endif()
-
-	# add the prefix header to the target files
-	get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
-	set_property(TARGET ${target} APPEND PROPERTY SOURCES ${prefixHeader})
-
 endfunction()
 
 #---------------------------------------------------------------------------------------------
@@ -795,27 +797,27 @@ endfunction()
 # 
 function( ccbAddPlugins package pluginOptionLists )
 
+	ccbGetExecutableTargets( exeTargets ${package})
+	if(NOT exeTargets)
+		return()
+	endif()
+
 	ccbGetPluginTargetDirectoryPairLists( pluginTargets pluginDirectories "${pluginOptionLists}" )
 
 	# add deploy and install targets for the plugins
-	get_property( binaryTargets TARGET ${package} PROPERTY CCB_BINARY_SUBTARGETS )
-	foreach( target ${binaryTargets})
-		get_property(type TARGET ${target} PROPERTY TYPE)
-		if(${type} STREQUAL EXECUTABLE)
-			set(index 0)
-			foreach(plugin ${pluginTargets})
-				list(GET pluginDirectories ${index} subdirectory)
-				ccbIncrement(index)
-				if(TARGET ${plugin})
-					get_property(isImported TARGET ${plugin} PROPERTY IMPORTED)
-					if(isImported)
-						ccbAddDeployExternalSharedLibsToBuildStageTarget( ${package} ${plugin} ${subdirectory} )
-					else()
-						add_dependencies( ${target} ${plugin}) # adds the artifical dependency
-						ccbAddDeployInternalSharedLibsToBuildStageTargets( ${package} ${plugin} ${subdirectory} ) 
-					endif()
-				endif()
-			endforeach()
+	set(index 0)
+	foreach(plugin ${pluginTargets})
+		list(GET pluginDirectories ${index} subdirectory)
+		ccbIncrement(index)
+		if(TARGET ${plugin})
+			get_property(isImported TARGET ${plugin} PROPERTY IMPORTED)
+			if(isImported)
+				ccbAddDeployExternalSharedLibsToBuildStageTarget( ${package} ${plugin} ${subdirectory} )
+			else()
+				add_dependencies( ${target} ${plugin}) # adds the artifical dependency
+				ccbAddDeployInternalSharedLibsToBuildStageTargets( ${package} ${plugin} ${subdirectory} ) 
+			endif()
 		endif()
 	endforeach()
+
 endfunction()

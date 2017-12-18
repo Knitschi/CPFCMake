@@ -1,6 +1,6 @@
 # This file ccbContains the main functions of the CppCodeBase cmake module.
 
-cmake_minimum_required (VERSION 3.8.0)
+cmake_minimum_required (VERSION 3.10.0)
 
 set(DIR_OF_INIT_FILE ${CMAKE_CURRENT_LIST_DIR})
 

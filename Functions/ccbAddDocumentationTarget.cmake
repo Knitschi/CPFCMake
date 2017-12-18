@@ -66,7 +66,7 @@ function( ccbAddGlobalMonolithicDocumentationTarget packages)
 	# TODO get plantuml.jar with hunter
 	if(CCB_PLANT_UML_JAR)
 		message( STATUS "Enable UML diagrams in doxygen comments.")
-		list(APPEND appendedLines "PLANTUML_JAR_PATH += \"${CCB_PLANT_UML_JAR}\"")
+		list(APPEND appendedLines "PLANTUML_JAR_PATH = \"${CCB_PLANT_UML_JAR}\"")
 	endif()
 
 	ccbAddAppendLinesToFileCommands( 
