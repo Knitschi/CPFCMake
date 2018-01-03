@@ -11,10 +11,10 @@ set(DIR_OF_PROJECT_UTILITIES ${CMAKE_CURRENT_LIST_DIR})
 # library dependencies upstream. Those must be specified in the cmake toolchain files.
 macro( ccbSetDynamicAndCosmeticCompilerOptions )
     
-	ccbGetCompiler(compiler)
-    if( ${compiler} STREQUAL Vc) # VC flags
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") # the /MP flag saved on my 4 core machine 25 % compile time
-    endif()
+	#ccbGetCompiler(compiler)
+    #if( ${compiler} STREQUAL Vc) # VC flags
+    #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") # the /MP flag saved on my 4 core machine 25 % compile time
+    #endif()
     
 	ccbSetHighWarningLevel()
 
