@@ -75,7 +75,7 @@ set( TEMPLATE_FILES
 	Templates/packageVersion.cmake.in
 	Templates/.gitignore.in
 	Templates/${CCB_GRAPHVIZ_OPTIONS_FILE}
-	Templates/DoxygenConfig.cmake.in
+	Templates/DoxygenConfig.txt.in
 )
 
 # Put the files in directories in visual studio.
