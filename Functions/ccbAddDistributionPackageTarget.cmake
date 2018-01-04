@@ -545,7 +545,7 @@ function( ccbGetBasePackageFilename nameWEOut package config version contentId p
         endif()
         ccbExecuteProcess( architecture "\"${TOOL_DPKG}\" --print-architecture" "${CCB_ROOT_DIR}")
         
-        set( nameWE "${lowerPackage}_${version}-1_${architecture}")
+        set( nameWE "${lowerPackage}_${version}_${architecture}")
     else()
         set( nameWE "${package}.${version}.${CMAKE_SYSTEM_NAME}.${contentId}.${config}")
     endif()
