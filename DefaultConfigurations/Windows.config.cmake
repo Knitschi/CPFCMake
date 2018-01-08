@@ -4,8 +4,8 @@
 include( "${CMAKE_CURRENT_LIST_DIR}/PlatformIndependent.config.cmake" )
 
 # GENERATOR AND TOOLCHAIN
-set( CMAKE_GENERATOR "Visual Studio 14 2015 Win64" CACHE STRING "The CMake generator" FORCE) # When using the "Visual Studio" generators, this must be compatible to the compiler that is defined in the CMAKE_TOOLCHAIN_FILE
-set( CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/MSVC.cmake" CACHE PATH "The file that defines the compiler and compile options for all compile configurations." FORCE)
+set( CMAKE_GENERATOR "Visual Studio 15 2017 Win64" CACHE STRING "The CMake generator" FORCE) # When using the "Visual Studio" generators, this must be compatible to the compiler that is defined in the CMAKE_TOOLCHAIN_FILE
+set( CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/MSVC2017.cmake" CACHE PATH "The file that defines the compiler and compile options for all compile configurations." FORCE)
 
 # LOCATIONS
 file(TO_CMAKE_PATH "$ENV{HOMEDRIVE}$ENV{HOMEPATH}\\HunterPackages" HUNTER_ROOT)
