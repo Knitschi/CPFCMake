@@ -5,9 +5,12 @@
 set( CCB_FIXTURE_TARGET_ENDING _fixtures)
 set( CCB_TESTS_TARGET_ENDING _tests)
 
+#### target names ####
+
+set( CCB_RUN_ALL_TESTS_TARGET_PREFIX runAllTests_)
+
 
 ###### functions to define combined strings ######
-
 
 # This function defines the nameing convention of the <developer>-int-<mainbranch>
 # and <developer>-tmp-<mainbranch> branches.

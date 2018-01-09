@@ -207,7 +207,7 @@ function( ccbAddPackage )
     # Currently this is only added for the production target because clang-tidy does not filter out warnings that come over the GTest macros from external code.
     # When clang-tidy resolves the problem, static analysis should be executed for all binary targets.
     ccbAddStaticAnalysisTarget( BINARY_TARGET ${productionLibrary})
-    ccbAddRunTestsTargets( ${ARG_PACKAGE_NAME})
+    ccbAddRunCppTestsTargets( ${ARG_PACKAGE_NAME})
 	ccbAddDynamicAnalysisTarget(${ARG_PACKAGE_NAME})
 
 	# Plugins must be added before the install targets

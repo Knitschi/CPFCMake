@@ -9,38 +9,7 @@ include(ccbBaseUtilities)
 function( ccbAddGlobalRunAllTestsTarget packages)
 
 	if(CCB_ENABLE_RUN_TESTS_TARGET)
-		
-		set(targetName runAllTests)
-
-		ccbGetSubtargets(runSlowTestsTargets "${packages}" CCB_RUN_TESTS_SUBTARGET)
-
-		# We also need to run the unit tests for the python code.
-		# Maybe the python files should be added to target which has a runAllTests_<package> subtarget.
-		# TODO move the test run to the build project of CppCodeBaseBuildscripts
-		set( pythonDir "${CCB_ROOT_DIR}/${CCB_SOURCE_DIR}/CppCodeBaseBuildscripts" )
-		if(TOOL_PYTHON3 AND (EXISTS ${pythonDir} ))
-
-			set(pythonFiles
-				${pythonDir}/cppcodebasebuildscripts/buildautomat.py
-			)
-
-			set(stampFile "${CMAKE_BINARY_DIR}/${CCB_PRIVATE_DIR}/runPythonTests.stamp")
-			set(runTestsCommand "\"${TOOL_PYTHON3}\" \"${pythonDir}/run_tests.py\"")
-			set( touchCommand "cmake -E touch \"${stampFile}\"" )
-
-			ccbAddStandardCustomCommand(
-				TARGET ${targetName}
-				OUTPUT ${stampFile}
-				DEPENDS ${pythonFiles}
-				COMMANDS ${runTestsCommand} ${touchCommand}
-			)
-		endif()
-
-		add_custom_target(
-			${targetName}
-			DEPENDS ${runSlowTestsTargets} ${stampFile}
-		)
-
+		ccbAddSubTargetBundleTarget( runAllTests "${packages}" CCB_RUN_TESTS_SUBTARGET "")
 	endif()
 	
 endfunction()
@@ -64,18 +33,18 @@ endfunction()
 # Note that this function will add no target if the global CCB_ENABLE_RUN_TESTS_TARGET is set to FALSE
 # 
 # unitTestTarget : The name of t
-function( ccbAddRunTestsTargets package)
+function( ccbAddRunCppTestsTargets package)
 
 	if(CCB_ENABLE_RUN_TESTS_TARGET)
 
 		ccbAssertDefined(CCB_TEST_FILES_DIR)
 		
 		# add target that runs all tests
-		ccbAddRunTestTarget( runTargetName ${package} runAllTests_ "*" )
+		ccbAddRunCppTestTarget( runTargetName ${package} ${CCB_RUN_ALL_TESTS_TARGET_PREFIX} "*" )
         set_property( TARGET ${package} PROPERTY CCB_RUN_TESTS_SUBTARGET ${runTargetName})
 
 		# add target that runs only the fast tests
-		ccbAddRunTestTarget( runTargetName ${package} runFastTests_ "*FastFixture*:*FastTests*" )
+		ccbAddRunCppTestTarget( runTargetName ${package} runFastTests_ "*FastFixture*:*FastTests*" )
         set_property( TARGET ${package} PROPERTY CCB_RUN_FAST_TESTS_SUBTARGET ${runTargetName})
 
 	endif()
@@ -83,7 +52,7 @@ function( ccbAddRunTestsTargets package)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbAddRunTestTarget runTargetNameArg package runTargetNamePrefix testFilter )
+function( ccbAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix testFilter )
 
 	# get related targets
 	get_property(productionLib TARGET ${package} PROPERTY CCB_PRODUCTION_LIB_SUBTARGET)
@@ -91,9 +60,7 @@ function( ccbAddRunTestTarget runTargetNameArg package runTargetNamePrefix testF
 	if(TARGET ${testTarget})
 
 		set(runTargetName ${runTargetNamePrefix}${package})
-		set(targetBinaryDir "${CMAKE_BINARY_DIR}/${runTargetNamePrefix}tests_stamps")
-		file(MAKE_DIRECTORY "${targetBinaryDir}")
-		set(stampFile "${targetBinaryDir}/${runTargetName}.stamp")
+		getRunTestStampFile( stampFile ${runTargetName} ${runTargetNamePrefix})
 
 		# We need to add an explicit dependency to the production lib executable, because when using dynamic linkage,
 		# the test executable is not rebuild when we only change the .cpp files of the production lib.
@@ -113,4 +80,46 @@ function( ccbAddRunTestTarget runTargetNameArg package runTargetNamePrefix testF
 		set(${runTargetNameArg} ${runTargetName} PARENT_SCOPE)
 
 	endif()
+endfunction()
+
+
+#----------------------------------------------------------------------------------------
+function( getRunTestStampFile filenameOut runTargetName targetPrefix )
+	
+	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${targetPrefix}tests_stamps")
+	file(MAKE_DIRECTORY "${targetBinaryDir}")
+	set(stampFile "${targetBinaryDir}/${runTargetName}.stamp")
+
+	set(${filenameOut} ${stampFile} PARENT_SCOPE)
+
+endfunction()
+
+
+#----------------------------------------------------------------------------------------
+function( ccbAddRunPython3TestTarget package testScript sourceFiles )
+
+	if(TOOL_PYTHON3)
+
+		set(runTargetName ${CCB_RUN_ALL_TESTS_TARGET_PREFIX}${PACKAGE_NAME})
+		getRunTestStampFile( stampFile ${runTargetName} ${CCB_RUN_ALL_TESTS_TARGET_PREFIX})
+
+		set( runTestsCommand "\"${TOOL_PYTHON3}\" \"${CMAKE_CURRENT_SOURCE_DIR}/${testScript}\"")
+		set( touchCommand "cmake -E touch \"${stampFile}\"" )
+
+		ccbAddStandardCustomCommand(
+			DEPENDS "${sourceFiles}"
+			OUTPUT "${stampFile}"
+			COMMANDS ${runTestsCommand} ${touchCommand}
+		)
+
+		add_custom_target(
+			${runTargetName}
+			DEPENDS "${stampFile}"
+		)
+
+		set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/pipeline")
+		set_property( TARGET ${PACKAGE_NAME} PROPERTY CCB_RUN_TESTS_SUBTARGET ${runTargetName})
+
+	endif()
+
 endfunction()

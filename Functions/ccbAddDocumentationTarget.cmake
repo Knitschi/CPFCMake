@@ -36,9 +36,11 @@ function( ccbAddGlobalMonolithicDocumentationTarget packages)
 	set(targetDependencies)
 	foreach( package ${packages})
 		ccbGetPackageDoxFilesTargetName( doxFilesTarget ${package} )
-		list(APPEND targetDependencies ${doxFilesTarget})
-		get_property( generatedDoxFiles TARGET ${doxFilesTarget} PROPERTY CCB_OUTPUT_FILES )
-		list(APPEND fileDependencies ${generatedDoxFiles})
+		if( TARGET ${doxFilesTarget}) # not all packages may have the doxFilesTarget
+			list(APPEND targetDependencies ${doxFilesTarget})
+			get_property( generatedDoxFiles TARGET ${doxFilesTarget} PROPERTY CCB_OUTPUT_FILES )
+			list(APPEND fileDependencies ${generatedDoxFiles})
+		endif()
 	endforeach()
 
 	# Add a command to generate the the transitive reduced dependency graph of all targets.
@@ -379,7 +381,7 @@ function( ccbAddPackageDocsTarget fileOut package packageNamespace briefDescript
 
 	add_custom_target(
 		${targetName}
-		DEPENDS ${documentationFile} ${compatibilityReportLinksDoxFile} ${stampFile}
+		DEPENDS ${documentationFile} ${compatibilityReportLinksDoxFile} ${openCppCoverageLinksDoxFile} # ${stampFile}
 	)
 	set_property(TARGET ${targetName} PROPERTY CCB_OUTPUT_FILES ${documentationFile} ${compatibilityReportLinksDoxFile} ${openCppCoverageLinksDoxFile} )
 
@@ -484,14 +486,15 @@ function( ccbAddOpenCppCoverageLinksPageCommands stampFileOut doxFileOut htmlFil
 			list(APPEND writeFileCommands "cmake -DFILE=\"${doxFile}\" -DLINE=\"${line}\" -P \"${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Scripts/appendLineToFile.cmake\"" )
 		endforeach()
 
-		set(touchCommand "cmake -E touch \"${stampFile}\"")
+		#set(touchCommand "cmake -E touch \"${stampFile}\"")
+		set(touchCommand "cmake -E touch \"${doxFile}\"")
 
 		ccbAddConfigurationDependendCommand(
 			TARGET ${target}
 			COMMENT "Generate \"${doxFile}\""
 			CONFIG ${msvcDebugConfig}
-			OUTPUT ${stampFile}
-			COMMANDS_CONFIG ${deleteFileCommand} ${writeFileCommands} ${touchCommand}
+			OUTPUT ${doxFile} #${stampFile}
+			COMMANDS_CONFIG ${deleteFileCommand} ${writeFileCommands} #${touchCommand}
 			COMMANDS_NOT_CONFIG	${touchCommand}
 		)
 

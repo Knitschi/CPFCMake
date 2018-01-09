@@ -145,7 +145,7 @@ function( ccbAddDynamicAnalysisTarget package)
 			)
 			
 			# debug: try if sporadic build errors stop if packaging does not happen at the same time.
-			set( debugDependency distributionPackages_${package} )
+			#set( debugDependency distributionPackages_${package} )
 
 		endif()
 			

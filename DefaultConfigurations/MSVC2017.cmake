@@ -5,10 +5,10 @@
 # before running cmake when not using the "Visual Studio" generator. 
 
 #file(TO_CMAKE_PATH "$ENV{VS140COMNTOOLS}" vs140comntools)
-#set(compilerPath "${vs140comntools}/../../VC/bin/x86_amd64/cl.exe" )
+set(compilerPath "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/Hostx64/x64/cl.exe" )
 
-#set(CMAKE_CXX_COMPILER "${compilerPath}" CACHE FILEPATH "Microsoft cpp compiler" FORCE)
-#set(CMAKE_C_COMPILER "${compilerPath}" CACHE FILEPATH "Microsoft c compiler" FORCE)
+set(CMAKE_CXX_COMPILER "${compilerPath}" CACHE FILEPATH "Microsoft cpp compiler" FORCE)
+set(CMAKE_C_COMPILER "${compilerPath}" CACHE FILEPATH "Microsoft c compiler" FORCE)
 
 # /EHsc sadly I can not remember why the /EHsc flag was introduced. (glaube Qt benötigt es)
 set(CMAKE_CXX_FLAGS "/EHsc" CACHE STRING "C++ compile flags" FORCE)

@@ -63,22 +63,6 @@ function( ccbInit )
 		message(FATAL_ERROR "CMAKE_BUILD_TYPE must be set when using a single-config generator.")
 	endif()
 
-	# A target that holds the cmake files of the CppCodeBase module.
-	add_subdirectory(${CCB_CPPCODEBASECMAKE_DIR})
-	
-	# Add optional CppCodeBase packages.
-	set( ccbPackageDirs 
-		${CCB_PROJECT_CONFIGURATIONS_DIR}
-		${CCB_BUILDSCRIPTS_DIR}
-		${CCB_JENKINSFILE_DIR}
-		${CCB_MACHINES_DIR}
-	)
-	foreach( dir ${ccbPackageDirs})
-		if(EXISTS ${CMAKE_SOURCE_DIR}/${dir} )
-			add_subdirectory(${dir})
-		endif()
-	endforeach()
-
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -92,6 +76,20 @@ function( ccbAddPackages packages globalFiles )
 
 	# set various flags non binary relevant flats like warnings as errors and higher warning levels.
 	ccbSetDynamicAndCosmeticCompilerOptions()
+
+	# Add optional CppCodeBase packages.
+	set( ccbPackageDirs
+		${CCB_CPPCODEBASECMAKE_DIR}
+		${CCB_PROJECT_CONFIGURATIONS_DIR}
+		${CCB_BUILDSCRIPTS_DIR}
+		${CCB_JENKINSFILE_DIR}
+		${CCB_MACHINES_DIR}
+	)
+	foreach( dir ${ccbPackageDirs})
+		if(EXISTS ${CMAKE_SOURCE_DIR}/${dir} )
+			list(APPEND packages ${dir})
+		endif()
+	endforeach()
 
 	foreach( package ${packages})
 		add_subdirectory (${package})
