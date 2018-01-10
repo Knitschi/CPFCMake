@@ -16,7 +16,9 @@ function( ccbAddGlobalCreatePackagesTarget packages)
 	set(packageTargets)
 	foreach(package ${packages})
 		ccbGetDistributionPackagesTargetName( packageTarget ${package})
-		list(APPEND packageTargets ${packageTarget})
+		if(TARGET ${packageTarget}) # not all packages may create distribution packages
+			list(APPEND packageTargets ${packageTarget})
+		endif()
 	endforeach()
 	
 	ccbAddBundleTarget( ${targetName} "${packageTargets}" )
