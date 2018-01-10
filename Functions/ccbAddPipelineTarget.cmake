@@ -33,7 +33,7 @@ function( ccbAddPipelineTarget packages)
 	# add the runTest targets always.
 	ccbIsGccClangDebug(gccClangDebug)
 	if(gccClangDebug)
-		list(REMOVE_ITEM targets runAllTests)
+		list(REMOVE_ITEM pipelineSubTargetProperties CCB_RUN_TESTS_SUBTARGET)
 	endif()
 	
 	ccbGetTargetsFromProperties( targetsFromProperties "${packages}" "${pipelineSubTargetProperties}" )
