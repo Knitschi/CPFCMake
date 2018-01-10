@@ -500,8 +500,12 @@ function( ccbAddBinaryTarget	)
 		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
 		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
 		$<INSTALL_INTERFACE:..>
-	) 
+	)
 	
+	# Hardcode c++ standard to 14 for now.
+	# This should be set by the user in the addPackage() method.
+	set_property(TARGET ${ARG_NAME} PROPERTY CXX_STANDARD 14)
+
 	# set the Visual Studio folder property
 	set_property( TARGET ${ARG_NAME} PROPERTY FOLDER ${ARG_IDE_FOLDER})
 	# public header
