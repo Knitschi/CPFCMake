@@ -111,20 +111,22 @@ endfunction()
 function( ccbGetAllNonGeneratedPackageSources sourceFiles packages )
 
 	foreach( package ${packages})
-		get_property(binaryTargets TARGET ${package} PROPERTY CCB_BINARY_SUBTARGETS )
-		foreach( target ${binaryTargets} globalFiles)
-			get_property(files TARGET ${target} PROPERTY SOURCES)
-			get_property(dir TARGET ${target} PROPERTY SOURCE_DIR)
-			foreach(file ${files})
-                ccbGetPathRoot(root ${file})
-                # Some source files have absolute paths and most not.
-                # We ignore files that have absolute pathes for which we assume that they are the ones in the Generated directory.
-                # Only the files in the Sources directory are used by doxygen.
-                if(${root} STREQUAL NOTFOUND) 
-                    list(APPEND allFiles "${dir}/${file}")
-                endif()
+		if(TARGET ${package}) # non-cppcodebase packages may not have targets set to them
+			get_property(binaryTargets TARGET ${package} PROPERTY CCB_BINARY_SUBTARGETS )
+			foreach( target ${binaryTargets} globalFiles)
+				get_property(files TARGET ${target} PROPERTY SOURCES)
+				get_property(dir TARGET ${target} PROPERTY SOURCE_DIR)
+				foreach(file ${files})
+					ccbGetPathRoot(root ${file})
+					# Some source files have absolute paths and most not.
+					# We ignore files that have absolute pathes for which we assume that they are the ones in the Generated directory.
+					# Only the files in the Sources directory are used by doxygen.
+					if(${root} STREQUAL NOTFOUND) 
+						list(APPEND allFiles "${dir}/${file}")
+					endif()
+				endforeach()
 			endforeach()
-		endforeach()
+		endif()
 	endforeach()
 	
 	set(${sourceFiles} ${allFiles} PARENT_SCOPE)

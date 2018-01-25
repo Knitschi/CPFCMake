@@ -372,8 +372,10 @@ function( ccbGetSubtargets subTargetsOut packages subtargetProperty)
 
 	set(targets)
 	foreach(package ${packages})
-		get_property(subTarget TARGET ${package} PROPERTY ${subtargetProperty})
-		list(APPEND targets ${subTarget} )
+		if(TARGET ${package}) # not all packages have targets
+			get_property(subTarget TARGET ${package} PROPERTY ${subtargetProperty})
+			list(APPEND targets ${subTarget} )
+		endif()
 	endforeach()
 	set(${subTargetsOut} ${targets} PARENT_SCOPE)
 

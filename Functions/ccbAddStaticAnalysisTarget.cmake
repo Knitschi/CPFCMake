@@ -26,16 +26,18 @@ function( ccbAddGlobalStaticAnalysisTarget packages)
 	# get all static analysis targets from the packages
     foreach(package ${packages})
 
-        get_property( binarySubTargets TARGET ${package} PROPERTY CCB_BINARY_SUBTARGETS)
-        foreach( binaryTarget ${binarySubTargets})
-        
-            get_property( staticAnalysisTarget TARGET ${binaryTarget} PROPERTY CCB_STATIC_ANALYSIS_SUBTARGET)
-
-			if(staticAnalysisTarget)	# this is currently only available for the LinuxMakeClang toolchain.
-				list(APPEND staticAnalysisTargets ${staticAnalysisTarget})
-			endif()
+        if(TARGET ${package}) # not all packages may have a target
+            get_property( binarySubTargets TARGET ${package} PROPERTY CCB_BINARY_SUBTARGETS)
+            foreach( binaryTarget ${binarySubTargets})
             
-        endforeach()
+                get_property( staticAnalysisTarget TARGET ${binaryTarget} PROPERTY CCB_STATIC_ANALYSIS_SUBTARGET)
+
+                if(staticAnalysisTarget)	# this is currently only available for the LinuxMakeClang toolchain.
+                    list(APPEND staticAnalysisTargets ${staticAnalysisTarget})
+                endif()
+                
+            endforeach()
+        endif()
     
     endforeach()
     
