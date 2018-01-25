@@ -1,7 +1,5 @@
 # This file ccbContains the main functions of the CppCodeBase cmake module.
 
-cmake_minimum_required (VERSION 3.10.0)
-
 set(DIR_OF_INIT_FILE ${CMAKE_CURRENT_LIST_DIR})
 
 list( APPEND 
@@ -25,6 +23,7 @@ include(ccbAddRunTestsTarget)
 include(ccbAddInstallPackageTarget)
 include(ccbAddCompatibilityCheckTarget)
 
+cmake_minimum_required (VERSION ${CCB_MINIMUM_CMAKE_VERSION})
 
 #----------------------------------------------------------------------------------------
 function( ccbInit )
@@ -69,6 +68,7 @@ endfunction()
 # Set policies to silence the warnings about changed cmake behavior.
 function( ccbSetPolicies )
 	cmake_policy(SET CMP0071 NEW)
+	cmake_policy(SET CMP0007 NEW) # Do not ignore empty list elements
 endfunction()
 
 #----------------------------------------------------------------------------------------

@@ -376,8 +376,8 @@ endfunction()
 #
 function( ccbAssertListsHaveSameLength list1 list2 )
 	
-	list(LENGTH list1 length1)
-	list(LENGTH list2 length2)
+	ccbListLength(LENGTH length1 "${list1}" )
+	ccbListLength(LENGTH length2 "${list2}" )
 	if(NOT ${length1} EQUAL ${length2})
 		message(FATAL_ERROR "Lists are not of same length as required.")
 	endif()
@@ -404,6 +404,18 @@ function( ccbIsSingleConfigGenerator var )
 		set( ${var} TRUE PARENT_SCOPE)
 	endif()
 
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# In contrast to list(LENGTH ...) this function does not need any policies to be set and
+# it does not ignore empty elements.
+#
+function( ccbListLength lengthOut list)
+	set(counter 0)
+	foreach( element IN LISTS list)
+		ccbIncrement(counter)
+	endforeach()
+	set(${lengthOut} ${counter} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -479,7 +491,7 @@ function( ccbFilterInTargetsWithProperty output targets property value )
 		endif()
 	endforeach()
 
-	set(${output} ${filteredTargets} PARENT_SCOPE)
+	set(${output} "${filteredTargets}" PARENT_SCOPE)
 
 endfunction()
 
@@ -496,7 +508,7 @@ function( ccbFilterOutTargetsWithProperty output targets property value )
 		endif()
 	endforeach()
 
-	set(${output} ${filteredTargets} PARENT_SCOPE)
+	set(${output} "${filteredTargets}" PARENT_SCOPE)
 
 endfunction()
 
@@ -518,7 +530,7 @@ function( ccbGetConfigVariableSuffixes suffixes)
 			list(APPEND endings " ")
 		endif()
 	endif()
-	set(${suffixes} ${endings} PARENT_SCOPE)
+	set(${suffixes} "${endings}" PARENT_SCOPE)
 
 endfunction()
 
@@ -602,7 +614,7 @@ function( ccbSplitVersion majorOut minorOut patchOut commitIdOut versionString)
 	set(${minorOut} ${minorVersion} PARENT_SCOPE)
 	set(${patchOut} ${patchNr} PARENT_SCOPE)
 
-	list(LENGTH versionList length)
+	ccbListLength(LENGTH length "${versionList}" )
 	if( ${length} GREATER 3 )
 		list(GET versionList 3 commitsNr)
 		set( ${commitIdOut} ${commitsNr} PARENT_SCOPE)
@@ -656,7 +668,7 @@ function( ccbGetScriptDOptionVariableNames variablesOut )
 		ccbIncrement(argIndex)
 	endwhile()
 
-	set( ${variablesOut} ${variableNames} PARENT_SCOPE )
+	set( ${variablesOut} "${variableNames}" PARENT_SCOPE )
 
 endfunction()
 
@@ -709,9 +721,9 @@ function( ccbGetKeywordValueLists valueListsOut valueListsKeyword otherKeywords 
 		
 	endforeach()
 	
-	set( ${valueListsOut} ${subLists} PARENT_SCOPE)
+	set( ${valueListsOut} "${subLists}" PARENT_SCOPE)
 	foreach( subList ${subLists})
-		set( ${subList} ${${subList}} PARENT_SCOPE )
+		set( ${subList} "${${subList}}" PARENT_SCOPE )
 	endforeach()
 
 endfunction()

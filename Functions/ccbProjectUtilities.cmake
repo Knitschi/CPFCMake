@@ -1,5 +1,6 @@
 
 include("${CMAKE_CURRENT_LIST_DIR}/../Variables/ccbLocations.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/ccbBaseUtilities.cmake")
 
 set(DIR_OF_PROJECT_UTILITIES ${CMAKE_CURRENT_LIST_DIR})
 
@@ -100,7 +101,7 @@ endfunction()
 function( ccbGetCxxFlags flagsOut config)
 	ccbToConfigSuffix( configSuffix ${config})
 	ccbSplitStringAtWhitespaces( flags "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS${configSuffix}}")
-	set( ${flagsOut} ${flags} PARENT_SCOPE)
+	set( ${flagsOut} "${flags}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -564,7 +565,7 @@ function( ccbGetTargetProperties outputValues targets properties )
 		endforeach()
 	endforeach()
 
-	set(${outputValues} ${values} PARENT_SCOPE)
+	set(${outputValues} "${values}" PARENT_SCOPE)
 
 endfunction()
 
@@ -730,7 +731,7 @@ function( ccbGetTargetLocations absolutePathes targets config )
 		ccbGetTargetLocation( dir shortName ${target} ${config} )
 		list(APPEND locations "${dir}/${shortName}")
 	endforeach()
-	set(${absolutePathes} ${locations} PARENT_SCOPE)
+	set(${absolutePathes} "${locations}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -746,7 +747,7 @@ function( ccbGetSharedLibrarySubTargets librarySubTargetsOut package)
 		endif()
 	endforeach()
 	
-	set( ${librarySubTargetsOut} ${libraryTargets} PARENT_SCOPE)
+	set( ${librarySubTargetsOut} "${libraryTargets}" PARENT_SCOPE)
 	
 endfunction()
 
@@ -826,7 +827,7 @@ function( ccbGetSourcesSubdirectories subdirsOut cppCodeBaseRootDir )
 		message(FATAL_ERROR "No possible package directories found in directory \"${fullSourceDir}\"")
 	endif()
 
-	set(${subdirsOut} ${subDirs} PARENT_SCOPE)
+	set(${subdirsOut} "${subDirs}" PARENT_SCOPE)
 
 endfunction()
 
@@ -885,33 +886,83 @@ function( ccbFindConfigFile absFilePathOut configName )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# Returns the names of cache variables that are defined in a file.
+# Returns the names, types, values and descriptions of cache variables that are defined in a given file.
+# 
 #
-#
-function( ccbGetCacheVariablesDefinedInFile variableNamesOut variableTypesOut variableValuesOut variableDescriptionsOut absFilePath )
+function( ccbGetCacheVariablesDefinedInFile variableNamesOut variableValuesOut variableTypesOut variableDescriptionsOut absFilePath )
 	
 	# get and store original chache state
-	get_cmake_property( cacheVariablesBefore CACHE_VARIABLES)
-	set(cacheValuesBefore)
-	foreach(variable ${cacheVariablesBefore})
-		list(APPEND cacheValuesBefore ${${variable}})
-	endforeach()
+	ccbReadCurrentCacheVariables( cacheVariablesBefore cacheValuesBefore cacheTypesBefore cacheDescriptionsBefore)
 
-	# clear the whole cache so we can get all variables from the file
+	# clear the cache so we can read all variables from the file
+	ccbClearAllCacheVariables()
 
 	# load cache variables from file
 	include("${absFilePath}")
-	get_cmake_property( cacheVariablesFile CACHE_VARIABLES)
-	set(cacheValuesFile)
-	foreach(variable ${cacheVariablesFile})
-		list(APPEND cacheValuesFile ${${variable}})
+	ccbReadCurrentCacheVariables( cacheVariablesFile cacheValuesFile cacheTypesFile cacheDescriptionsFile)
+
+	# clear the cache changes from the include
+	ccbClearAllCacheVariables()
+
+	# restore the cache from before the include
+	set(index 0)
+	foreach(variable ${cacheVariablesBefore})
+		list(GET cacheValuesBefore ${index} value )
+		list(GET cacheTypesBefore ${index} type )
+		list(GET cacheDescriptionsBefore ${index} description )	
+		set( ${variable} "${value}" CACHE ${type} "${description}" FORCE )
+		ccbIncrement(index)
 	endforeach()
-	
-	# restore the current cache
 
-	ccbGetList1WithoutList2( variableNames "${cacheVariablesAfter}" "${cacheVariablesBefore}" )
-	set( ${variableNamesOut} ${cacheVariablesFile} PARENT_SCOPE)
+	set( ${variableNamesOut} "${cacheVariablesFile}" PARENT_SCOPE)
+	set( ${variableValuesOut} "${cacheValuesFile}" PARENT_SCOPE)
+	set( ${variableTypesOut} "${cacheTypesFile}" PARENT_SCOPE)
+	set( ${variableDescriptionsOut} "${cacheDescriptionsFile}" PARENT_SCOPE)
 
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns the names, values, types and descriptions of the currently defined cache variabls.
+#
+function( ccbReadCurrentCacheVariables variableNamesOut variableValuesOut variableTypesOut variableDescriptionsOut )
+
+	get_cmake_property( cacheVariables CACHE_VARIABLES)
+	set(cacheValues)
+	set(cacheTypes)
+	set(cacheDescriptions)
+
+	foreach(variable ${cacheVariables})
+		list(APPEND cacheValues "${${variable}}")
+		get_property( type CACHE ${variable} PROPERTY TYPE )
+		list(APPEND cacheTypes ${type})
+		get_property( helpString CACHE ${variable} PROPERTY HELPSTRING )
+		list(APPEND cacheDescriptions "${helpString}")
+	endforeach()
+
+	# assert that all lists are of the same length
+	ccbListLength(namesLength "${cacheVariables}" )
+	ccbListLength(valuesLength "${cacheValues}" )
+	ccbListLength(typesLength "${cacheTypes}" )
+	ccbListLength(descriptionsLength "${cacheDescriptions}" )
+	if(NOT ( (${namesLength} EQUAL ${valuesLength}) AND (${namesLength} EQUAL ${typesLength}) AND(${namesLength} EQUAL ${descriptionsLength}) ))
+		message(FATAL_ERROR "Not all cache variables have all properties defined in function readCurrentCacheVariables().")
+	endif()
+
+	set( ${variableNamesOut} "${cacheVariables}" PARENT_SCOPE)
+	set( ${variableValuesOut} "${cacheValues}" PARENT_SCOPE)
+	set( ${variableTypesOut} "${cacheTypes}" PARENT_SCOPE)
+	set( ${variableDescriptionsOut} "${cacheDescriptions}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Removes all variables from the cache
+#
+function( ccbClearAllCacheVariables )
+	get_cmake_property( cacheVariables CACHE_VARIABLES)
+	foreach(variable ${cacheVariables})
+		unset(${variable} CACHE)
+	endforeach()
 endfunction()
 
 #---------------------------------------------------------------------------------------------
@@ -928,11 +979,8 @@ function( ccbGetExecutableTargets exeTargetsOut package )
 		list(APPEND exeTargets ${testTarget})
 	endif()
 
-	set(${exeTargetsOut} ${exeTargets} PARENT_SCOPE)
+	set(${exeTargetsOut} "${exeTargets}" PARENT_SCOPE)
 endfunction()
-
-
-
 
 
 

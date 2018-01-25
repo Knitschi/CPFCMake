@@ -14,6 +14,9 @@ endforeach()
 include("${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbBaseUtilities.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbProjectUtilities.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/../Variables/ccbLocations.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../Variables/ccbConstants.cmake")
+
+cmake_minimum_required(VERSION ${CCB_MINIMUM_CMAKE_VERSION})
 
 ccbAssertScriptArgumentDefined(CCB_CONFIG)
 ccbAssertScriptArgumentDefined(PARENT_CONFIG)
@@ -37,13 +40,19 @@ list(APPEND fileContent "include( \"${fullInheritedConfigFile}\" )" )
 list(APPEND fileContent "" )
 
 # Add lines with commented inherited definitions.
-list(APPEND fileContent "# Inherited cache variables." )
+ccbGetCacheVariablesDefinedInFile( inheritedCacheVariables inheritedCacheValues inheritedCacheTypes inheritedCacheDescriptions "${fullInheritedConfigFile}")
 
-ccbGetCacheVariablesDefinedInFile( inheritedCacheVariables "${fullInheritedConfigFile}")
+list(APPEND fileContent "# Inherited cache variables." )
+set(index 0)
 foreach( variable ${inheritedCacheVariables} )
-	get_property( type CACHE ${variable} PROPERTY TYPE )
-	get_property( helpString CACHE ${variable} PROPERTY HELPSTRING )
-	list(APPEND fileContent "# set( ${variable} \"${${variable}}\" CACHE ${type} \"${helpString}\" FORCE )" )
+
+	list(GET inheritedCacheValues ${index} value )
+	list(GET inheritedCacheTypes ${index} type )
+	list(GET inheritedCacheDescriptions ${index} description )
+
+	list(APPEND fileContent "# set( ${variable} \"${value}\" CACHE ${type} \"${description}\" FORCE )" )
+	ccbIncrement(index)
+
 endforeach()
 list(APPEND fileContent "" )
 list(APPEND fileContent "" )

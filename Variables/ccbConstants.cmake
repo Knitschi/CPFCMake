@@ -1,6 +1,8 @@
 
 # This file holds cmake constants for the CPPCODEBASE
 
+set( CCB_MINIMUM_CMAKE_VERSION 3.10.0)
+
 # Get definitions of test target appendices for in code macros (todo move this somewhere in the lower parts)
 set( CCB_FIXTURE_TARGET_ENDING _fixtures)
 set( CCB_TESTS_TARGET_ENDING _tests)
