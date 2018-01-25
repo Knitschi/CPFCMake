@@ -1,8 +1,8 @@
 # A toolchain file to compile the project on Linux with the clang compiler
 
 
-set(CMAKE_C_COMPILER gcc-4.9 CACHE STRING "C compiler" FORCE)
-set(CMAKE_CXX_COMPILER g++-4.9 CACHE STRING "C++ compiler" FORCE)
+set(CMAKE_C_COMPILER gcc-6 CACHE STRING "C compiler" FORCE)
+set(CMAKE_CXX_COMPILER g++-6 CACHE STRING "C++ compiler" FORCE)
 
 set(CMAKE_C_FLAGS "" CACHE STRING "C compile flags" FORCE)    # -fPIC is needed when linking to Qt
 set(CMAKE_CXX_FLAGS "" CACHE STRING "C++ compile flags" FORCE)

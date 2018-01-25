@@ -131,11 +131,11 @@ function( ccbAddStaticAnalysisTarget )
                         )
                     
                     list(APPEND stampFiles ${stampFile})
+
                 endif()
 			endif()
         endforeach()
         set_source_files_properties("${stampFiles}" PROPERTIES GENERATED TRUE)   # mark the output file as one that is not created on disc.
-
         add_custom_target( 
 			${targetName}
 			DEPENDS ${stampFiles} ${uicTarget}
