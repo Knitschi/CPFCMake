@@ -886,15 +886,31 @@ endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Returns the names of cache variables that are defined in a file.
-# As a side effect the cache variables are defined after calling this function.
 #
-function( ccbGetCacheVariablesDefinedInFile variableNamesOut absFilePath )
+#
+function( ccbGetCacheVariablesDefinedInFile variableNamesOut variableTypesOut variableValuesOut variableDescriptionsOut absFilePath )
 	
+	# get and store original chache state
 	get_cmake_property( cacheVariablesBefore CACHE_VARIABLES)
+	set(cacheValuesBefore)
+	foreach(variable ${cacheVariablesBefore})
+		list(APPEND cacheValuesBefore ${${variable}})
+	endforeach()
+
+	# clear the whole cache so we can get all variables from the file
+
+	# load cache variables from file
 	include("${absFilePath}")
-	get_cmake_property( cacheVariablesAfter CACHE_VARIABLES)
+	get_cmake_property( cacheVariablesFile CACHE_VARIABLES)
+	set(cacheValuesFile)
+	foreach(variable ${cacheVariablesFile})
+		list(APPEND cacheValuesFile ${${variable}})
+	endforeach()
+	
+	# restore the current cache
+
 	ccbGetList1WithoutList2( variableNames "${cacheVariablesAfter}" "${cacheVariablesBefore}" )
-	set( ${variableNamesOut} ${variableNames} PARENT_SCOPE)
+	set( ${variableNamesOut} ${cacheVariablesFile} PARENT_SCOPE)
 
 endfunction()
 
