@@ -28,7 +28,7 @@ function( ccbAddGlobalMonolithicDocumentationTarget packages)
 	set(doxygenConfigFile "${CMAKE_SOURCE_DIR}/DoxygenConfig.txt")
 	set(htmlCgiBinDir "${CCB_PROJECT_HTML_ABS_DIR}/${CCB_CGI_BIN_DIR}" )
 
-	# Generate the DoxygenXonfig.txt file if it does not exist.
+	# Generate the DoxygenConfig.txt file if it does not exist.
 	configure_file( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenConfig.txt.in" ${doxygenConfigFile} COPYONLY )
 
 	# Get dependencies
