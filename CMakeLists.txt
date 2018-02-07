@@ -1,53 +1,53 @@
 # This file bundles the cmake code file into a custom target to make them visible in the vs solution.
 
-include(ccbLocations)
-include(ccbAddPackage)
+include(cpfLocations)
+include(cpfAddPackage)
 
-set( PACKAGE_NAMESPACE CcbBS )
-ccbInitPackageProject(
+set( PACKAGE_NAMESPACE CPFBS )
+cpfInitPackageProject(
 	PACKAGE_NAME
 	${PACKAGE_NAMESPACE}
 )
 
-# The files that contain functions that are called by the users of the CppCodeBase
+# The files that contain functions that are called by the users of the CMakeProjectFramework
 set( PUBLIC_FILES 
-    ccbAddPackage.cmake
-    ccbInit.cmake
+    cpfAddPackage.cmake
+    cpfInit.cmake
 )
 
 # Files that define variables.
 set( VARIABLES_FILES
-	Variables/ccbConstants.cmake
-	Variables/ccbLocations.cmake
-	Variables/ccbProperties.cmake
+	Variables/cpfConstants.cmake
+	Variables/cpfLocations.cmake
+	Variables/cpfProperties.cmake
 )
 
 # Files that provide functionality.
 set( FUNCTION_FILES 
-	Functions/ccbAddCompatibilityCheckTarget.cmake
-	Functions/ccbAddDeploySharedLibrariesTarget.cmake
-	Functions/ccbAddDistributionPackageTarget.cmake
-	Functions/ccbAddDocumentationTarget.cmake
-	Functions/ccbAddDynamicAnalysisTarget.cmake
-	Functions/ccbAddInstallPackageTarget.cmake
-	Functions/ccbAddPipelineTarget.cmake
-	Functions/ccbAddRunTestsTarget.cmake
-	Functions/ccbAddRunUicTarget.cmake
-	Functions/ccbAddStaticAnalysisTarget.cmake
-	Functions/ccbBaseUtilities.cmake
-	Functions/ccbCustomTargetUtilities.cmake
-	Functions/ccbGitUtilities.cmake
-	Functions/ccbProjectUtilities.cmake
+	Functions/cpfAddCompatibilityCheckTarget.cmake
+	Functions/cpfAddDeploySharedLibrariesTarget.cmake
+	Functions/cpfAddDistributionPackageTarget.cmake
+	Functions/cpfAddDocumentationTarget.cmake
+	Functions/cpfAddDynamicAnalysisTarget.cmake
+	Functions/cpfAddInstallPackageTarget.cmake
+	Functions/cpfAddPipelineTarget.cmake
+	Functions/cpfAddRunTestsTarget.cmake
+	Functions/cpfAddRunUicTarget.cmake
+	Functions/cpfAddStaticAnalysisTarget.cmake
+	Functions/cpfBaseUtilities.cmake
+	Functions/cpfCustomTargetUtilities.cmake
+	Functions/cpfGitUtilities.cmake
+	Functions/cpfProjectUtilities.cmake
 )
 
 # Files that provide default configurations of cmake variables.
 set( CONFIGURATION_FILES 
-	${CCB_DEFAULT_CONFIGS_DIR}/Clang.cmake
-	${CCB_DEFAULT_CONFIGS_DIR}/Gcc.cmake
-	${CCB_DEFAULT_CONFIGS_DIR}/MSVC2017.cmake
-	${CCB_DEFAULT_CONFIGS_DIR}/PlatformIndependent.config.cmake
-	${CCB_DEFAULT_CONFIGS_DIR}/Linux.config.cmake
-	${CCB_DEFAULT_CONFIGS_DIR}/Windows.config.cmake
+	${CPF_DEFAULT_CONFIGS_DIR}/Clang.cmake
+	${CPF_DEFAULT_CONFIGS_DIR}/Gcc.cmake
+	${CPF_DEFAULT_CONFIGS_DIR}/MSVC2017.cmake
+	${CPF_DEFAULT_CONFIGS_DIR}/PlatformIndependent.config.cmake
+	${CPF_DEFAULT_CONFIGS_DIR}/Linux.config.cmake
+	${CPF_DEFAULT_CONFIGS_DIR}/Windows.config.cmake
 )
 
 # Files that are supposed to be used with cmake script mode (-P).
@@ -64,16 +64,16 @@ set( SCRIPT_FILES
 
 # Files that do not fit in any other category.
 set( OTHER_FILES
-	documentation/CppCodeBaseCMake.dox
+	documentation/CPFCMake.dox
 )
 
 # Template files that are used with the configure_file() command.
 set( TEMPLATE_FILES
-	${CCB_PACKAGE_CONFIG_TEMPLATE}
+	${CPF_PACKAGE_CONFIG_TEMPLATE}
 	Templates/packageVersion.h.in
 	Templates/packageVersion.cmake.in
 	Templates/.gitignore.in
-	Templates/${CCB_GRAPHVIZ_OPTIONS_FILE}
+	Templates/${CPF_GRAPHVIZ_OPTIONS_FILE}
 	Templates/DoxygenConfig.txt.in
 )
 

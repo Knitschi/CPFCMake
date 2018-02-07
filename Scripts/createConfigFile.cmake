@@ -1,8 +1,8 @@
 
-# This script is used to generated ${CCB_CONFIG}.config.cmake files in the Configuration sub directory.
+# This script is used to generated ${CPF_CONFIG}.config.cmake files in the Configuration sub directory.
 # ARGUMENTS
-# CCB_CONFIG			- The base name of the generated file.
-# PARENT_CONFIG					- A two element list with one of (Local,Project,CppCodeBase)
+# CPF_CONFIG			- The base name of the generated file.
+# PARENT_CONFIG			- The base name of an inherited config file.
 
 #[[
 get_cmake_property(_variableNames VARIABLES)
@@ -11,36 +11,36 @@ foreach (_variableName ${_variableNames})
 endforeach()
 ]]
 
-include("${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbBaseUtilities.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbProjectUtilities.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/../Variables/ccbLocations.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/../Variables/ccbConstants.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfConstants.cmake")
 
-cmake_minimum_required(VERSION ${CCB_MINIMUM_CMAKE_VERSION})
+cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 
-ccbAssertScriptArgumentDefined(CCB_CONFIG)
-ccbAssertScriptArgumentDefined(PARENT_CONFIG)
+cpfAssertScriptArgumentDefined(CPF_CONFIG)
+cpfAssertScriptArgumentDefined(PARENT_CONFIG)
 
 # Find the location of the inherited configuration
-ccbFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}")
+cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}")
 
 # CREATE CONFIG-FILE CONTENT 
 set(fileContent)
 
 # Add standard lines.
-list(APPEND fileContent "# This file ccbContains cmake project configuration parameters." )
+list(APPEND fileContent "# This file cpfContains cmake project configuration parameters." )
 list(APPEND fileContent "" )
-ccbNormalizeAbsPath( fullProjectUtilities "${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbProjectUtilities.cmake" )
+cpfNormalizeAbsPath( fullProjectUtilities "${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake" )
 list(APPEND fileContent "include(\"${fullProjectUtilities}\")" )
-list(APPEND fileContent "set( CCB_CONFIG_FILE \"${CMAKE_CURRENT_LIST_FILE}\" CACHE FILEPATH \"The path to the used .config.cmake file.\")" )
-list(APPEND fileContent "set( CCB_CONFIG \"${CCB_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE )" )
+list(APPEND fileContent "set( CPF_CONFIG_FILE \"${CMAKE_CURRENT_LIST_FILE}\" CACHE FILEPATH \"The path to the used .config.cmake file.\")" )
+list(APPEND fileContent "set( CPF_CONFIG \"${CPF_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE )" )
 list(APPEND fileContent "" )
 list(APPEND fileContent "# Inherit configuration parameters." )
 list(APPEND fileContent "include( \"${fullInheritedConfigFile}\" )" )
 list(APPEND fileContent "" )
 
 # Add lines with commented inherited definitions.
-ccbGetCacheVariablesDefinedInFile( inheritedCacheVariables inheritedCacheValues inheritedCacheTypes inheritedCacheDescriptions "${fullInheritedConfigFile}")
+cpfGetCacheVariablesDefinedInFile( inheritedCacheVariables inheritedCacheValues inheritedCacheTypes inheritedCacheDescriptions "${fullInheritedConfigFile}")
 
 list(APPEND fileContent "# Inherited cache variables." )
 set(index 0)
@@ -51,7 +51,7 @@ foreach( variable ${inheritedCacheVariables} )
 	list(GET inheritedCacheDescriptions ${index} description )
 
 	list(APPEND fileContent "# set( ${variable} \"${value}\" CACHE ${type} \"${description}\" FORCE )" )
-	ccbIncrement(index)
+	cpfIncrement(index)
 
 endforeach()
 list(APPEND fileContent "" )
@@ -59,10 +59,10 @@ list(APPEND fileContent "" )
 
 # Add definitions for the variables that were set by using the "-D"-options.
 list(APPEND fileContent "# Overridden or new cache variables." )
-ccbGetScriptDOptionVariableNames( dVariables )
-list(REMOVE_ITEM dVariables CCB_CONFIG PARENT_CONFIG )
+cpfGetScriptDOptionVariableNames( dVariables )
+list(REMOVE_ITEM dVariables CPF_CONFIG PARENT_CONFIG )
 foreach( variable ${dVariables})
-	ccbIsCacheVariable( isCacheVar ${variable})
+	cpfIsCacheVariable( isCacheVar ${variable})
 	if(isCacheVar) 
 		# use existing information for overridden variables
 		get_property( type CACHE ${variable} PROPERTY TYPE)
@@ -75,7 +75,7 @@ endforeach()
 
 
 # Write the lines in fileContent to the config file.
-set(configFilename "${CMAKE_CURRENT_LIST_DIR}/../../../Configuration/${CCB_CONFIG}${CCB_CONFIG_FILE_ENDING}")
+set(configFilename "${CMAKE_CURRENT_LIST_DIR}/../../../Configuration/${CPF_CONFIG}${CPF_CONFIG_FILE_ENDING}")
 file(REMOVE "${configFilename}")
 
 set(commandList)

@@ -2,18 +2,18 @@
 # The entries can be files or subdirectories. Subdirectories are deleted recursively.
 #
 # Arguments
-# ARGUMENT_FILE	- The absolute path to a file that ccbContains the arguments of the script.
-#	DIRECTORY	- A cmake variable in the argument file that ccbContains the absolute path to the directory that shall be cleared.
-#	ENTRIES		- A cmake variable in the argument file that ccbContains the entries that shall not be deleted from the directory.
+# ARGUMENT_FILE	- The absolute path to a file that cpfContains the arguments of the script.
+#	DIRECTORY	- A cmake variable in the argument file that cpfContains the absolute path to the directory that shall be cleared.
+#	ENTRIES		- A cmake variable in the argument file that cpfContains the entries that shall not be deleted from the directory.
 
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbBaseUtilities.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
 
-ccbAssertScriptArgumentDefined(ARGUMENT_FILE)
+cpfAssertScriptArgumentDefined(ARGUMENT_FILE)
 
 include("${ARGUMENT_FILE}")
 
-ccbAssertDefined(DIRECTORY)
-ccbAssertDefined(ENTRIES)
+cpfAssertDefined(DIRECTORY)
+cpfAssertDefined(ENTRIES)
 
 file(GLOB existingDirEntriesFull "${DIRECTORY}/*")
 set(existingDirEntries)
@@ -24,7 +24,7 @@ endforeach()
 
 set(deletedEntries)
 foreach( entry ${existingDirEntries})
-	ccbContains( isPersistentEntry "${ENTRIES}" ${entry})
+	cpfContains( isPersistentEntry "${ENTRIES}" ${entry})
 	if(NOT isPersistentEntry)
 		list(APPEND deletedEntries "${DIRECTORY}/${entry}")
 	endif()

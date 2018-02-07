@@ -8,7 +8,7 @@
 #
 # BINARY_TARGET: The name of the binary target to which the ui_files belong
 #		 
-function( ccbAddRunUicTarget)
+function( cpfAddRunUicTarget)
 
 	cmake_parse_arguments(ARG "" "BINARY_TARGET" "" ${ARGN} )
 
@@ -25,7 +25,7 @@ function( ccbAddRunUicTarget)
             set(generatedFile "${CMAKE_CURRENT_BINARY_DIR}/ui_${baseName}.h")
             
             set(command "${TOOL_UIC} -o \"${generatedFile}\" \"${CMAKE_CURRENT_SOURCE_DIR}/${file}\"")
-			ccbAddStandardCustomCommand(
+			cpfAddStandardCustomCommand(
 				OUTPUT ${generatedFile}
 				DEPENDS ${file}
 				COMMANDS ${command}
@@ -44,7 +44,7 @@ function( ccbAddRunUicTarget)
 
 		get_property(baseFolder TARGET ${ARG_BINARY_TARGET} PROPERTY FOLDER )
 		set_property(TARGET ${targetName} PROPERTY FOLDER ${baseFolder}/private)
-		set_property(TARGET ${ARG_BINARY_TARGET} PROPERTY CCB_UIC_SUBTARGET ${targetName})
+		set_property(TARGET ${ARG_BINARY_TARGET} PROPERTY CPF_UIC_SUBTARGET ${targetName})
 
 	endif()
 

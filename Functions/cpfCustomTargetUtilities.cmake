@@ -6,17 +6,17 @@ set(DIR_OF_TARGET_UTILITIES_FILE ${CMAKE_CURRENT_LIST_DIR})
 # This function binds some commonly used arguments for the add_custom_command function
 # to reduce code repetition.
 # It only takes the DEPENDS OUTPUT and COMMANDS options.
-# The COMMANDS option ccbContains full commands as strings.
+# The COMMANDS option contains full commands as strings.
 # DEPENDS - Note that for correct dependency propagation you need to depend on a target, and the files that it is producing.
 # 
-function( ccbAddStandardCustomCommand )
+function( cpfAddStandardCustomCommand )
 
 	cmake_parse_arguments(ARG "" "" "COMMANDS;DEPENDS;OUTPUT" ${ARGN} )
 
 	set(commandArguments)
 	set(comment)
 	foreach(command ${ARG_COMMANDS})
-		ccbSeparateArgumentsForPlatform( argumentList ${command})
+		cpfSeparateArgumentsForPlatform( argumentList ${command})
 		list(APPEND commandArguments COMMAND ${argumentList} )
 		string(APPEND comment "${command} &")
 	endforeach()
@@ -25,7 +25,7 @@ function( ccbAddStandardCustomCommand )
 		OUTPUT ${ARG_OUTPUT}
 		DEPENDS ${ARG_DEPENDS}
 		${commandArguments}
-		WORKING_DIRECTORY ${CCB_ROOT_DIR}
+		WORKING_DIRECTORY ${CPF_ROOT_DIR}
 		COMMENT ${comment}
 		VERBATIM
 	)
@@ -37,9 +37,9 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Adds a custom command for copying a file from source to destination.
 # Both should be absolute paths. 
-function( ccbAddCustomCommandCopyFile source destination )
+function( cpfAddCustomCommandCopyFile source destination )
 
-	ccbAddStandardCustomCommand(
+	cpfAddStandardCustomCommand(
 		OUTPUT ${destination}
 		DEPENDS ${source}
 		COMMANDS "cmake -E copy \"${source}\" \"${destination}\""
@@ -52,13 +52,13 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # This function can be used when a custom target needs to add multiple lines to a file.
 # The function creates a custom command for each line that is added to the file.
-# The inputFile will be left unchanged, while the output file ccbContains the added lines
+# The inputFile will be left unchanged, while the output file cpfContains the added lines
 # Arguments:
 # INPUT The full name of the input text file. This file will be left unchanged.
 # OUTPUT The full name of the generated file that will contain the contents of the INPUT plus the strings given with ADDED_LINES
 # ADDED_LINES A list of strings that will be added as new lines at the end of the given INPUT file. Currently no empty lines can be added.
 # DEPENDS A list of additional files on which the added commands should depend.
-function( ccbAddAppendLinesToFileCommands)
+function( cpfAddAppendLinesToFileCommands)
 
 	cmake_parse_arguments(ARG "" "INPUT;OUTPUT" "ADDED_LINES;DEPENDS" ${ARGN} )
 
@@ -71,14 +71,14 @@ function( ccbAddAppendLinesToFileCommands)
 	set(stampFile ${stampFileDir}/${editedFileWE}_copy_project_config_file.stamp)
 	
 	# first copy the input file
-	ccbAddStandardCustomCommand(
+	cpfAddStandardCustomCommand(
 		OUTPUT ${stampFile}
 		DEPENDS ${ARG_INPUT} ${ARG_DEPENDS}
 		COMMANDS "cmake -E copy \"${ARG_INPUT}\" \"${ARG_OUTPUT}\"" "cmake -E touch \"${stampFile}\""
 	)
 	
 	# now add one command for each appended line except the last one
-	ccbPopBack(lastLine ARG_ADDED_LINES)
+	cpfPopBack(lastLine ARG_ADDED_LINES)
 	set(lineIndex 0)
 	set(dependency ${stampFile})
 	foreach( line ${ARG_ADDED_LINES})
@@ -88,7 +88,7 @@ function( ccbAddAppendLinesToFileCommands)
 		set(stampFile ${stampFileDir}/${editedFileWE}_add_line_${lineIndex}.stamp)
 
 		# Note that for the echo command adding the VERBATIM option leads to incorrect behavior.
-		# That is why we can not use the ccbAddStandardCustomCommand() function here
+		# That is why we can not use the cpfAddStandardCustomCommand() function here
 		add_custom_command(
 			OUTPUT ${stampFile}
 			DEPENDS ${dependency}
@@ -98,7 +98,7 @@ function( ccbAddAppendLinesToFileCommands)
 		)
 		
 		set(dependency ${stampFile})
-		ccbIncrement(lineIndex)
+		cpfIncrement(lineIndex)
 	
 	endforeach()
 	
@@ -116,7 +116,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns a command that will write the given content to the given file.
 # There will be one command for each line in fileContent.
-function( ccbGetWriteFileCommands commandsOut absFilePath fileContent )
+function( cpfGetWriteFileCommands commandsOut absFilePath fileContent )
 	
 	set(commands)
 
@@ -124,7 +124,7 @@ function( ccbGetWriteFileCommands commandsOut absFilePath fileContent )
 	list( APPEND commands COMMAND cmake -E remove -f "${absFilePath}")
 	
 	# Append lines one by one. I was not able to write the whole content in one go.
-	ccbSplitString( lines ${fileContent} "\n" )
+	cpfSplitString( lines ${fileContent} "\n" )
 	foreach( line IN LISTS lines )
 		list( APPEND commands COMMAND cmake -E echo "${line}" >> "${absFilePath}" )
 	endforeach()
@@ -149,7 +149,7 @@ endfunction()
 # If a \ is needed in the final command, set it with \\
 # if a \\ or \" is needed -> only god, or improving this function can help you. Welcome to CMake-escape-hell.
 # If a ; is needed in the final command, set it with $<SEMICOLON>
-function( ccbAddConfigurationDependendCommand )
+function( cpfAddConfigurationDependendCommand )
 
 	cmake_parse_arguments(
 		ARG 
@@ -163,10 +163,10 @@ function( ccbAddConfigurationDependendCommand )
 	list(APPEND variableDefinitions DEFINITION VARIABLE COMMANDS_CONFIG VALUES ${ARG_COMMANDS_CONFIG} )
 	list(APPEND variableDefinitions DEFINITION VARIABLE COMMANDS_NOT_CONFIG VALUES ${ARG_COMMANDS_NOT_CONFIG} )
 
-    ccbSetupArgumentFile( argumentFile ${ARG_TARGET} "${ARG_DEPENDS}" "${variableDefinitions}")
-    file(RELATIVE_PATH relPathArgFile "${CCB_ROOT_DIR}" "${argumentFile}")
+    cpfSetupArgumentFile( argumentFile ${ARG_TARGET} "${ARG_DEPENDS}" "${variableDefinitions}")
+    file(RELATIVE_PATH relPathArgFile "${CPF_ROOT_DIR}" "${argumentFile}")
 
-	ccbAddStandardCustomCommand(
+	cpfAddStandardCustomCommand(
 		OUTPUT ${ARG_OUTPUT}
 		DEPENDS "${argumentFile}" ${ARG_DEPENDS}
 		COMMENT ${ARG_COMMENT}
@@ -177,16 +177,16 @@ endfunction()
 
 
 #----------------------------------------------------------------------------------------
-# This function creates a file that ccbContains definitions for all the given variables with the given values.
+# This function creates a file that cpfContains definitions for all the given variables with the given values.
 # This is intended to be used to pass arguments to cmake scripts. This is a workaround for the problem
 # that there is a limitation to the length of the argument string that can be passed to a script.
 # In these cases we can pass the location of the argument file instead.
 # Argument variableDefinitions		A list of variable definitions that are separated by the keyword  DEFINITION
 #									All list elements must have the structure: DEFINITION VARIABLE <variable-name> VALUES <values> DEFINITION VARIABLE <variable-name> VALUES <values>
-function( ccbSetupArgumentFile filenameOut target depends variableDefinitions )
+function( cpfSetupArgumentFile filenameOut target depends variableDefinitions )
 
 	# create a unique argument file
-	set( dir "${CMAKE_BINARY_DIR}/${CCB_PRIVATE_DIR}/${target}")
+	set( dir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${target}")
     file( MAKE_DIRECTORY "${dir}")
 	string(MD5 hash "${variableDefinitions}")
 	set( filename "${dir}/argumentFile_${hash}.cmake" ) 
@@ -199,7 +199,7 @@ function( ccbSetupArgumentFile filenameOut target depends variableDefinitions )
 	foreach(element ${variableDefinitions})
 		if( "${element}" STREQUAL DEFINITION)
 			if(definition) # do nothing when hitting the first keyword
-				ccbAppendCommandsForVariableDefinition( commands "${definition}" "${filename}" )
+				cpfAppendCommandsForVariableDefinition( commands "${definition}" "${filename}" )
 			endif()
 			# reset for next definition
 			set(definition)
@@ -210,7 +210,7 @@ function( ccbSetupArgumentFile filenameOut target depends variableDefinitions )
 
 	# add the last definition
 	if(definition)
-		ccbAppendCommandsForVariableDefinition( commands "${definition}" "${filename}" )
+		cpfAppendCommandsForVariableDefinition( commands "${definition}" "${filename}" )
 	endif()
 
     add_custom_command(
@@ -225,23 +225,23 @@ function( ccbSetupArgumentFile filenameOut target depends variableDefinitions )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbAppendCommandsForVariableDefinition commandList definition filename )
+function( cpfAppendCommandsForVariableDefinition commandList definition filename )
 	set( commandListLocal ${${commandList}})
 
 	cmake_parse_arguments( "KEY" "" "VARIABLE" "VALUES" ${definition} )
 
-	ccbAddAppendLineCommand( commandListLocal "set( ${KEY_VARIABLE}" ${filename} FALSE)
+	cpfAddAppendLineCommand( commandListLocal "set( ${KEY_VARIABLE}" ${filename} FALSE)
 	foreach( value ${KEY_VALUES})
-		ccbAddAppendLineCommand( commandListLocal "${value}" ${filename} TRUE)
+		cpfAddAppendLineCommand( commandListLocal "${value}" ${filename} TRUE)
 	endforeach()
-	ccbAddAppendLineCommand( commandListLocal ")" ${filename} FALSE)
-	ccbAddAppendLineCommand( commandListLocal "" ${filename} FALSE)
+	cpfAddAppendLineCommand( commandListLocal ")" ${filename} FALSE)
+	cpfAddAppendLineCommand( commandListLocal "" ${filename} FALSE)
 
 	set(${commandList} ${commandListLocal} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbAddAppendLineCommand commandList line file isValue)
+function( cpfAddAppendLineCommand commandList line file isValue)
 	set( commandListLocal ${${commandList}})
 	
 	# Add some empirically determined escape levels to get the special
@@ -266,9 +266,9 @@ endfunction()
 # Destination directories will be created as needed.
 # Files will be touched after copying to update the modification date.
 #
-function( ccbGetInstallFileCommands commandsOut absSourceFilePaths absDestFilePaths)
+function( cpfGetInstallFileCommands commandsOut absSourceFilePaths absDestFilePaths)
 
-	ccbAssertListsHaveSameLength( "${absSourceFilePaths}" "${absDestFilePaths}")
+	cpfAssertListsHaveSameLength( "${absSourceFilePaths}" "${absDestFilePaths}")
 	
 	set(commands)
 
@@ -281,7 +281,7 @@ function( ccbGetInstallFileCommands commandsOut absSourceFilePaths absDestFilePa
 		list(APPEND commands "cmake -E copy \"${sourceFile}\" \"${destFile}\" ")
 		list(APPEND commands "cmake -E touch \"${destFile}\" ")
 
-		ccbIncrement(index)
+		cpfIncrement(index)
 	endforeach()
 
 	set( ${commandsOut} ${commands} PARENT_SCOPE )
@@ -289,7 +289,7 @@ function( ccbGetInstallFileCommands commandsOut absSourceFilePaths absDestFilePa
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbGetTouchFileCommands commandsOut absFilePaths )
+function( cpfGetTouchFileCommands commandsOut absFilePaths )
 
 	set(commands)
 	# get a list of directories that must be created.
@@ -315,26 +315,26 @@ function( ccbGetTouchFileCommands commandsOut absFilePaths )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbGetClearDirectoryCommands commandsOut absDirPath )
+function( cpfGetClearDirectoryCommands commandsOut absDirPath )
 	set( ${commandsOut} "cmake -E remove_directory \"${absDirPath}\"" "cmake -E make_directory \"${absDirPath}\"" PARENT_SCOPE )
 endfunction()
 
 #----------------------------------------------------------------------------------------
 # Adds a custom command that will clear the content of the given directory except for the
 # entries given in the notDeletedEntries variable.
-function( ccbAddClearDirExceptCommand stampFileOut directory notDeletedEntries target dependedOnTargets)
+function( cpfAddClearDirExceptCommand stampFileOut directory notDeletedEntries target dependedOnTargets)
 
 	# we use the argument file mechanism to pass the file list to the script, because it can be a long list.
 	set(variableDefinitions)
 	list(APPEND variableDefinitions DEFINITION VARIABLE DIRECTORY VALUES ${directory} )
 	list(APPEND variableDefinitions DEFINITION VARIABLE ENTRIES VALUES ${notDeletedEntries} )
 	
-	ccbPrependMulti(notDeletedEntriesFull "${directory}/" "${notDeletedEntries}")
-    ccbSetupArgumentFile( argumentFile ${target} "${dependedOnTargets}" "${variableDefinitions}")
+	cpfPrependMulti(notDeletedEntriesFull "${directory}/" "${notDeletedEntries}")
+    cpfSetupArgumentFile( argumentFile ${target} "${dependedOnTargets}" "${variableDefinitions}")
 
-	set(stampFile "${CMAKE_BINARY_DIR}/${CCB_PRIVATE_DIR}/${target}/clearLastBuild.stamp")
+	set(stampFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${target}/clearLastBuild.stamp")
 	
-	ccbAddStandardCustomCommand(
+	cpfAddStandardCustomCommand(
 		OUTPUT ${stampFile}
 		DEPENDS ${argumentFile} # ${notDeletedEntriesFull}
 		COMMENT "Clear directory \"${directory}\""
@@ -348,10 +348,10 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Adds a bundle-target that bundles all the subtargets from the package property
-function( ccbAddSubTargetBundleTarget targetName packages subtargetProperty additionalDependencies )
-	ccbGetSubtargets( dependedOnTargets "${packages}" ${subtargetProperty})
+function( cpfAddSubTargetBundleTarget targetName packages subtargetProperty additionalDependencies )
+	cpfGetSubtargets( dependedOnTargets "${packages}" ${subtargetProperty})
 	if(dependedOnTargets)
-		ccbAddBundleTarget( ${targetName} "${dependedOnTargets};${additionalDependencies}" )
+		cpfAddBundleTarget( ${targetName} "${dependedOnTargets};${additionalDependencies}" )
 	endif()
 endfunction()
 
@@ -359,7 +359,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # This function adds a target that does nothing for it self, but only makes sure that
 # the depended on targets are build.
-function( ccbAddBundleTarget targetName dependedOnTargets )
+function( cpfAddBundleTarget targetName dependedOnTargets )
 	add_custom_target(
 		${targetName}
 		DEPENDS ${dependedOnTargets}
@@ -368,7 +368,7 @@ endfunction()
 
 
 #----------------------------------------------------------------------------------------
-function( ccbGetSubtargets subTargetsOut packages subtargetProperty)
+function( cpfGetSubtargets subTargetsOut packages subtargetProperty)
 
 	set(targets)
 	foreach(package ${packages})

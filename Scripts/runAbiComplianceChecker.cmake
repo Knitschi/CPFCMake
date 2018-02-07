@@ -12,14 +12,14 @@
 # c		Set to NONE, API, ABI. If set, the script will fail if the compatibility is broken.
 
 
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbBaseUtilities.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
 
-ccbAssertScriptArgumentDefined(TOOL_PATH)
-ccbAssertScriptArgumentDefined(BINARY_NAME)
-ccbAssertScriptArgumentDefined(OLD_DUMP_FILE)
-ccbAssertScriptArgumentDefined(NEW_DUMP_FILE)
-ccbAssertScriptArgumentDefined(REPORT_PATH)
-ccbAssertScriptArgumentDefined(ENFORCE_COMPATIBILITY)
+cpfAssertScriptArgumentDefined(TOOL_PATH)
+cpfAssertScriptArgumentDefined(BINARY_NAME)
+cpfAssertScriptArgumentDefined(OLD_DUMP_FILE)
+cpfAssertScriptArgumentDefined(NEW_DUMP_FILE)
+cpfAssertScriptArgumentDefined(REPORT_PATH)
+cpfAssertScriptArgumentDefined(ENFORCE_COMPATIBILITY)
 
 if( "${ENFORCE_COMPATIBILITY}" STREQUAL NONE )
 	set( additionalOptions )
@@ -39,7 +39,7 @@ endif()
 #get_filename_component( reportDir "${REPORT_PATH}" DIRECTORY )
 #file(MAKE_DIRECTORY ${reportDir} )
 
-ccbSeparateArgumentsForPlatform( commandList "\"${TOOL_PATH}\" -l ${BINARY_NAME} -old \"${OLD_DUMP_FILE}\" -new \"${NEW_DUMP_FILE}\" -report-path \"${REPORT_PATH}\" ${additionalOptions}")
+cpfSeparateArgumentsForPlatform( commandList "\"${TOOL_PATH}\" -l ${BINARY_NAME} -old \"${OLD_DUMP_FILE}\" -new \"${NEW_DUMP_FILE}\" -report-path \"${REPORT_PATH}\" ${additionalOptions}")
 
 execute_process(
 	COMMAND ${commandList}

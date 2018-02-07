@@ -5,17 +5,17 @@
 # Arguments:
 # DEVELOPER		: The <developer> part in the developer branch name <developer>-int-<mainbranch> which is currently integrated in the main branch.
 # MAIN_BRANCH	: The <mainbranch> part in the developer branch name <developer>-int-<mainbranch> which is currently integrated in the main branch.
-# ROOT_DIR		: The root directory of the CppCodeBase
+# ROOT_DIR		: The root directory of a CPF project.
 
-include(${CMAKE_CURRENT_LIST_DIR}/../Variables/ccbConstants.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Variables/ccbLocations.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbBaseUtilities.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbProjectUtilities.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbGitUtilities.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfConstants.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfGitUtilities.cmake)
 
-ccbAssertScriptArgumentDefined(DEVELOPER)
-ccbAssertScriptArgumentDefined(MAIN_BRANCH)
-ccbAssertScriptArgumentDefined(ROOT_DIR)
+cpfAssertScriptArgumentDefined(DEVELOPER)
+cpfAssertScriptArgumentDefined(MAIN_BRANCH)
+cpfAssertScriptArgumentDefined(ROOT_DIR)
 
 ################### Functions ######################
 function( assertThatAllPackagesBelongToTheSameRepository packages rootDir )
@@ -24,12 +24,12 @@ function( assertThatAllPackagesBelongToTheSameRepository packages rootDir )
 	set(packageVersions)
 	foreach( package ${packages})
 	
-		ccbGetAbsPackageDirectory( packageDir ${package} "${rootDir}")
+		cpfGetAbsPackageDirectory( packageDir ${package} "${rootDir}")
 
-		ccbGetUrlOfOrigin( packageOriginUrl "${packageDir}")
+		cpfGetUrlOfOrigin( packageOriginUrl "${packageDir}")
 		list(APPEND originUrls "${packageOriginUrl}" )
 		list(REMOVE_DUPLICATES originUrls)
-		ccbListLength(length ${originUrls})
+		cpfListLength(length ${originUrls})
 		if( NOT ${length} EQUAL 1)
 			message(FATAL_ERROR "Script mergeTempBranchToMainBranchAndTag.cmake currently only handles the case that all packages come from one repository. Abort merge to main-branch." )
 		endif()
@@ -42,7 +42,7 @@ function( assertMergeWillBeFastForward tmpBranch mainBranch repoDir)
 	# Check that the master can still be fast forwarded to the temp branches head.
 	# This may not be the case if somehow a commit was added to the master while the build-job was running.
 	# This should normally not be the case because the build-job should be the only one pushing to master.
-	ccbMergeWillBeFastForward( isFastForward ${tmpBranch} ${mainBranch} "${repoDir}")
+	cpfMergeWillBeFastForward( isFastForward ${tmpBranch} ${mainBranch} "${repoDir}")
 	if( NOT isFastForward)
 		message(FATAL_ERROR "It seems there was an external commit to branch ${mainBranch} while the integration process for branch ${tmpBranch} was running. This corrupts the version number, so the integration was aborted.")
 	endif()
@@ -52,20 +52,20 @@ endfunction()
 
 ################### SCRIPT ######################
 
-ccbGetIntegrationBrancheNames( devBranch tempBranch ${DEVELOPER} ${MAIN_BRANCH})
+cpfGetIntegrationBrancheNames( devBranch tempBranch ${DEVELOPER} ${MAIN_BRANCH})
 
 # checkout developer branch to make sure we have it here
-ccbExecuteProcess( d "git checkout ${devBranch}" "${ROOT_DIR}")
+cpfExecuteProcess( d "git checkout ${devBranch}" "${ROOT_DIR}")
 
 # update the main-branch so we can find out if somebody messed around with it while the build ran.
 message("-- Update ${MAIN_BRANCH}")
-ccbExecuteProcess( d "git checkout ${MAIN_BRANCH}" "${ROOT_DIR}")
-ccbExecuteProcess( d "git pull origin ${MAIN_BRANCH}" "${ROOT_DIR}")
+cpfExecuteProcess( d "git checkout ${MAIN_BRANCH}" "${ROOT_DIR}")
+cpfExecuteProcess( d "git pull origin ${MAIN_BRANCH}" "${ROOT_DIR}")
 
 # Move to the branch that contains the changes and do some checks on the new version number
 message("-- Sanity checks for the new version number.")
-ccbExecuteProcess( d "git checkout ${tempBranch}" "${ROOT_DIR}")
-ccbExecuteProcess( d "git pull origin ${tempBranch}" "${ROOT_DIR}")
+cpfExecuteProcess( d "git checkout ${tempBranch}" "${ROOT_DIR}")
+cpfExecuteProcess( d "git pull origin ${tempBranch}" "${ROOT_DIR}")
 
 # VERSION NUMBER SANITY CHECKS
 
@@ -80,20 +80,20 @@ assertMergeWillBeFastForward( ${tempBranch} ${MAIN_BRANCH} "${repoDir}")
 # DO THE MERGING
 message("-- Merge branch ${tempBranch} into ${MAIN_BRANCH}.")
 # Merge the branches, set a new version tag and update origin
-ccbExecuteProcess( d "git checkout ${MAIN_BRANCH}" "${repoDir}")
-ccbExecuteProcess( d "git merge ${tempBranch}" "${repoDir}")
+cpfExecuteProcess( d "git checkout ${MAIN_BRANCH}" "${repoDir}")
+cpfExecuteProcess( d "git merge ${tempBranch}" "${repoDir}")
 
 # Add a new Tag
-ccbGetCurrentVersionFromGitRepository( version "${repoDir}")
-ccbGitRepoHasTag( alreadyHasBuildVersion ${version} "" "${repoDir}")
+cpfGetCurrentVersionFromGitRepository( version "${repoDir}")
+cpfGitRepoHasTag( alreadyHasBuildVersion ${version} "" "${repoDir}")
 if(alreadyHasBuildVersion)
 	message("-- The version tag ${version} in branch ${tempBranch} already exists. Skip tagging.")
 else()
 	message("-- Set new version tag ${version}.")
-	ccbExecuteProcess( d "git tag ${version}" "${repoDir}")
+	cpfExecuteProcess( d "git tag ${version}" "${repoDir}")
 endif()
 
 # Push the commit and tag
-ccbExecuteProcess( d "git push origin ${MAIN_BRANCH}" "${repoDir}")
-ccbExecuteProcess( d "git push --tags origin ${MAIN_BRANCH}" "${repoDir}")
+cpfExecuteProcess( d "git push origin ${MAIN_BRANCH}" "${repoDir}")
+cpfExecuteProcess( d "git push --tags origin ${MAIN_BRANCH}" "${repoDir}")
 

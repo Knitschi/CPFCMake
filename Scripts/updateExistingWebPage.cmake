@@ -6,32 +6,32 @@
 # Arguments:
 # TARGET_DIR		- The html directory with the existing page on the web-server.
 # SOURCE_DIR		- The html directory that was created by the last build.
-# ROOT_DIR: 		- The root directory of the CppCodeBase.
+# ROOT_DIR: 		- The root directory of a CPF project.
 
-include(${CMAKE_CURRENT_LIST_DIR}/../Variables/ccbLocations.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbBaseUtilities.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbProjectUtilities.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake)
 
-ccbAssertScriptArgumentDefined(TARGET_DIR)
-ccbAssertScriptArgumentDefined(SOURCE_DIR)
-ccbAssertScriptArgumentDefined(ROOT_DIR)
+cpfAssertScriptArgumentDefined(TARGET_DIR)
+cpfAssertScriptArgumentDefined(SOURCE_DIR)
+cpfAssertScriptArgumentDefined(ROOT_DIR)
 
 # Delete directories that are obsolete in the target directory.
-file(REMOVE_RECURSE "${TARGET_DIR}/${CCB_DOXYGEN_DIR}")
-file(REMOVE_RECURSE "${TARGET_DIR}/${CCB_CGI_BIN_DIR}/doxysearch.db")
-file(REMOVE_RECURSE "${TARGET_DIR}/${CCB_OPENCPPCOVERAGE_DIR}")
+file(REMOVE_RECURSE "${TARGET_DIR}/${CPF_DOXYGEN_DIR}")
+file(REMOVE_RECURSE "${TARGET_DIR}/${CPF_CGI_BIN_DIR}/doxysearch.db")
+file(REMOVE_RECURSE "${TARGET_DIR}/${CPF_OPENCPPCOVERAGE_DIR}")
 
-ccbGetSourcesSubdirectories( packages "${ROOT_DIR}" )
+cpfGetSourcesSubdirectories( packages "${ROOT_DIR}" )
 foreach( package ${packages})
 	
 	# distribution packages
-	ccbGetRelLastBuildPackagesDir( dir ${package})
+	cpfGetRelLastBuildPackagesDir( dir ${package})
 	file(REMOVE_RECURSE "${TARGET_DIR}/${dir}")
 
 	# abi/api reports
-	ccbGetRelCurrentToLastBuildReportDir( dir ${package} )
+	cpfGetRelCurrentToLastBuildReportDir( dir ${package} )
 	file(REMOVE_RECURSE "${TARGET_DIR}/${dir}")
-	ccbGetRelCurrentToLastReleaseReportDir( dir ${package})
+	cpfGetRelCurrentToLastReleaseReportDir( dir ${package})
 	file(REMOVE_RECURSE "${TARGET_DIR}/${dir}")
 
 endforeach()

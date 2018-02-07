@@ -1,6 +1,6 @@
 
 
-include(ccbCustomTargetUtilities)
+include(cpfCustomTargetUtilities)
 
 #---------------------------------------------------------------------
 #
@@ -8,7 +8,7 @@ include(ccbCustomTargetUtilities)
 # 
 # Arguments
 # Takes a list of all the packages that belong to the project
-function( ccbAddPipelineTarget packages)
+function( cpfAddPipelineTarget packages)
 
 	set( targetName pipeline)
 
@@ -23,20 +23,20 @@ function( ccbAddPipelineTarget packages)
 	# A set package properties that contain custom targets that should be
 	# included in the pipeline.
 	set( pipelineSubTargetProperties
-		CCB_ABI_CHECK_SUBTARGETS
-		CCB_RUN_TESTS_SUBTARGET
+		CPF_ABI_CHECK_SUBTARGETS
+		CPF_RUN_TESTS_SUBTARGET
 	)
 
 	# When we know that the dynamic analysis target exists,
 	# we can omit the extra test run. Note that with multi-config-generators we can only tell
 	# at compile time if the dynamic analysis is run, so for simplicity we
 	# add the runTest targets always.
-	ccbIsGccClangDebug(gccClangDebug)
+	cpfIsGccClangDebug(gccClangDebug)
 	if(gccClangDebug)
-		list(REMOVE_ITEM pipelineSubTargetProperties CCB_RUN_TESTS_SUBTARGET)
+		list(REMOVE_ITEM pipelineSubTargetProperties CPF_RUN_TESTS_SUBTARGET)
 	endif()
 	
-	ccbGetTargetsFromProperties( targetsFromProperties "${packages}" "${pipelineSubTargetProperties}" )
+	cpfGetTargetsFromProperties( targetsFromProperties "${packages}" "${pipelineSubTargetProperties}" )
 
     # only use the custom targets that the user has enabled
     set(existingTargets)
@@ -46,17 +46,17 @@ function( ccbAddPipelineTarget packages)
         endif()
     endforeach()
        
-	ccbAddBundleTarget( ${targetName} "${existingTargets}")
+	cpfAddBundleTarget( ${targetName} "${existingTargets}")
 
 endfunction()
 
 #---------------------------------------------------------------------
 # Retrieves all sub-targets that are stored in the given subTargetProperties, which must be set
 # on the packages main target.
-function( ccbGetTargetsFromProperties targetsOut packages subTargetProperties )
+function( cpfGetTargetsFromProperties targetsOut packages subTargetProperties )
 set(subTargets)
 foreach( property ${subTargetProperties})
-	ccbGetSubtargets(targets "${packages}" ${property})
+	cpfGetSubtargets(targets "${packages}" ${property})
 	list(APPEND subTargets ${targets})
 endforeach()
 set(${targetsOut} ${subTargets} PARENT_SCOPE)

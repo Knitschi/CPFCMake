@@ -1,6 +1,6 @@
-include(ccbCustomTargetUtilities)
-include(ccbBaseUtilities)
-include(ccbProjectUtilities)
+include(cpfCustomTargetUtilities)
+include(cpfBaseUtilities)
+include(cpfProjectUtilities)
 
 
 #----------------------------------------------------------------------------------------
@@ -8,7 +8,7 @@ include(ccbProjectUtilities)
 # linkedLibrarie can contain all linked libraries of the target. The function will pick
 # the shared libraries by itself. 
 #
-function( ccbAddDeploySharedLibrariesTarget package )
+function( cpfAddDeploySharedLibrariesTarget package )
 
 	# Only deploy shared libraries on windows. On Linux CMake uses the RPATH to make it work.
 	if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL Windows)
@@ -16,30 +16,30 @@ function( ccbAddDeploySharedLibrariesTarget package )
 	endif()
 
 	# Get all libraries that need to be copied.
-	ccbGetExecutableTargets( exeTargets ${package})
+	cpfGetExecutableTargets( exeTargets ${package})
 	set(allLinkedLibraries)
 	foreach(exeTarget ${exeTargets})
-		ccbGetRecursiveLinkedLibraries( targetLinkedLibraries ${exeTarget})
+		cpfGetRecursiveLinkedLibraries( targetLinkedLibraries ${exeTarget})
 		list(APPEND allLinkedLibraries ${targetLinkedLibraries})
 	endforeach()
 	if(allLinkedLibraries)
 		list(REMOVE_DUPLICATES allLinkedLibraries)
 	endif()
 
-	ccbFilterInTargetsWithProperty( sharedLibraries "${allLinkedLibraries}" TYPE SHARED_LIBRARY )
-	ccbFilterInTargetsWithProperty( externalSharedLibs "${sharedLibraries}" IMPORTED TRUE )
-	ccbFilterInTargetsWithProperty( internalSharedLibs "${sharedLibraries}" IMPORTED "" )
+	cpfFilterInTargetsWithProperty( sharedLibraries "${allLinkedLibraries}" TYPE SHARED_LIBRARY )
+	cpfFilterInTargetsWithProperty( externalSharedLibs "${sharedLibraries}" IMPORTED TRUE )
+	cpfFilterInTargetsWithProperty( internalSharedLibs "${sharedLibraries}" IMPORTED "" )
 
 	# Add the targets that copy the dlls
-	ccbAddDeployInternalSharedLibsToBuildStageTargets( ${package} "${internalSharedLibs}" "" ) 
-	ccbAddDeployExternalSharedLibsToBuildStageTarget( ${package} "${externalSharedLibs}" "" ) 
+	cpfAddDeployInternalSharedLibsToBuildStageTargets( ${package} "${internalSharedLibs}" "" ) 
+	cpfAddDeployExternalSharedLibsToBuildStageTarget( ${package} "${externalSharedLibs}" "" ) 
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Recursively get either imported or non-imported linked shared libraries of the target.
 #
-function( ccbGetRecursiveLinkedLibraries linkedLibsOut target )
+function( cpfGetRecursiveLinkedLibraries linkedLibsOut target )
 
 	set(allLinkedLibraries)
     set(outputLocal)
@@ -53,7 +53,7 @@ function( ccbGetRecursiveLinkedLibraries linkedLibsOut target )
 		get_property(linkedLibraries TARGET ${target} PROPERTY LINK_LIBRARIES)		# The linked libraries for non imported targets
 		list(APPEND allLinkedLibraries ${linkedLibraries})
 
-		ccbGetConfigVariableSuffixes(configSuffixes)
+		cpfGetConfigVariableSuffixes(configSuffixes)
 		foreach(configSuffix ${configSuffixes})
 			get_property(importedInterfaceLibraries TARGET ${target} PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES${configSuffix})		# the libraries that are used in the header files of the target
 			list(APPEND allLinkedLibraries ${importedInterfaceLibraries})
@@ -74,15 +74,15 @@ function( ccbGetRecursiveLinkedLibraries linkedLibsOut target )
 		if(TARGET ${lib})
 			
 			list( APPEND outputLocal ${lib} )
-			ccbGetRecursiveLinkedLibraries( subLibs ${lib})
+			cpfGetRecursiveLinkedLibraries( subLibs ${lib})
 			list( APPEND outputLocal ${subLibs} )
 
 		else()
 			# dependencies can be given as generator expressions
 			# we can not follow these so we ignore them for now
-			ccbContainsGeneratorExpressions( containsGenExp ${lib})
+			cpfContainsGeneratorExpressions( containsGenExp ${lib})
 			if( containsGenExp )
-				ccbDebugMessage("Ignored dependency ${lib} while setting up shared library deployment targets. The deployment mechanism can not handle generator expressions.")
+				cpfDebugMessage("Ignored dependency ${lib} while setting up shared library deployment targets. The deployment mechanism can not handle generator expressions.")
 			elseif( ${lib} MATCHES "[-].+" ) # ignore libraries that are linked via linker options for now.
 			else()
 				# The dependency does not seem to be a generator expression, so it should be available here.
@@ -107,14 +107,14 @@ endfunction()
 # This function currently ignores the IMPORTED_LINK_DEPENDENT_LIBRARIES_<CONFIG> and
 # IMPORTED_LINK_INTERFACE_LIBRARIES_<CONFIG> properties.
 #
-function ( ccbGetVisibleLinkedLibraries linkedLibsOut target )
+function ( cpfGetVisibleLinkedLibraries linkedLibsOut target )
 	
 	set(allLibs)
-	ccbGetLinkLibraries( linkedLibs ${target})
+	cpfGetLinkLibraries( linkedLibs ${target})
 	
 	list(APPEND allLibs ${linkedLibs})
 	foreach( lib ${linkedLibs} )
-		ccbGetRecursiveLinkedInterfaceLibraries( libs ${lib} )
+		cpfGetRecursiveLinkedInterfaceLibraries( libs ${lib} )
 		list(APPEND allLibs ${libs})
 	endforeach()
 	if(allLibs)
@@ -127,11 +127,11 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Gets all linked librares from the LINK_LIBRARIES and IMPORTED_LINK_DEPENDENT_LIBRARIES properties.
 #
-function( ccbGetLinkLibraries linkedLibsOut target )
+function( cpfGetLinkLibraries linkedLibsOut target )
 	set(libs)
 	get_property(type TARGET ${target} PROPERTY TYPE)	
 	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )	# The following properties can not be accessed for interface libraries.
-		ccbGetTargetProperties( libs ${target} "LINK_LIBRARIES;IMPORTED_LINK_DEPENDENT_LIBRARIES" )
+		cpfGetTargetProperties( libs ${target} "LINK_LIBRARIES;IMPORTED_LINK_DEPENDENT_LIBRARIES" )
 	endif()
 	if(libs)
 		list(REMOVE_DUPLICATES libs)
@@ -142,13 +142,13 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Recursively gets all libraries from the INTERFACE_LINK_LIBRARIES and IMPORTED_LINK_INTERFACE_LIBRARIES
 # properties
-function( ccbGetRecursiveLinkedInterfaceLibraries interfaceLibsOut target )
+function( cpfGetRecursiveLinkedInterfaceLibraries interfaceLibsOut target )
 	
 	set(allLibs)
-	ccbGetInterfaceLinkLibraries( libs ${target})
+	cpfGetInterfaceLinkLibraries( libs ${target})
 	list(APPEND allLibs ${libs})
 	foreach(lib ${libs})
-		ccbGetRecursiveLinkedInterfaceLibraries( libs ${lib})
+		cpfGetRecursiveLinkedInterfaceLibraries( libs ${lib})
 		list(APPEND allLibs ${libs})
 	endforeach()
 	if(allLibs)
@@ -160,13 +160,13 @@ endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Gets all linked libraries from the INTERFACE_LINK_LIBRARIES and IMPORTED_LINK_INTERFACE_LIBRARIES
-function( ccbGetInterfaceLinkLibraries linkedLibsOut target )
+function( cpfGetInterfaceLinkLibraries linkedLibsOut target )
 	
 	get_property(type TARGET ${target} PROPERTY TYPE)	
 	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )	# The following properties can not be accessed for interface libraries.
-		ccbGetTargetProperties( libs1 ${target} "IMPORTED_LINK_INTERFACE_LIBRARIES" )
+		cpfGetTargetProperties( libs1 ${target} "IMPORTED_LINK_INTERFACE_LIBRARIES" )
 	endif()
-	ccbGetTargetProperties( libs2 ${target} "INTERFACE_LINK_LIBRARIES" )
+	cpfGetTargetProperties( libs2 ${target} "INTERFACE_LINK_LIBRARIES" )
 	if(libs)
 		list(REMOVE_DUPLICATES libs)
 	endif()
@@ -186,11 +186,11 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # This function returns a list of the given targets plus all targets that are directly or indirectly 
 # linked to the given targets.
-function( ccbGetAllTargetsInLinkTree targetsOut targetsIn )
+function( cpfGetAllTargetsInLinkTree targetsOut targetsIn )
 
 	set(allLinkedTargets)
 	foreach( target ${targetsIn})
-		ccbGetRecursiveLinkedLibraries( indirectlyLinkedTargets ${target})
+		cpfGetRecursiveLinkedLibraries( indirectlyLinkedTargets ${target})
 		list(APPEND allLinkedTargets ${target} ${indirectlyLinkedTargets} )
 	endforeach()
 	if(allLinkedTargets)
@@ -201,26 +201,26 @@ function( ccbGetAllTargetsInLinkTree targetsOut targetsIn )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( ccbAddDeployExternalSharedLibsToBuildStageTarget package externalLibs outputSubDir)
+function( cpfAddDeployExternalSharedLibsToBuildStageTarget package externalLibs outputSubDir)
 
 	if(NOT externalLibs)
 		return()
 	endif()
 
 	# Add one custom target to copy all external libs.
-	ccbGetIndexedTargetName(targetName deployExternal_${package})
+	cpfGetIndexedTargetName(targetName deployExternal_${package})
 
 	foreach( lib ${externalLibs})
 		# sadly the add_custom_command() function does currently not take generator expressions for its output
 		# https://cmake.org/pipermail/cmake-developers/2016-April/028195.html
 		# This means we have to add custom command for each configuration library file
-		ccbGetConfigVariableSuffixes(configSuffixes)
+		cpfGetConfigVariableSuffixes(configSuffixes)
 		foreach(suffix ${configSuffixes})
 
-			ccbGetLibLocation( libFile ${lib} ${suffix})
+			cpfGetLibLocation( libFile ${lib} ${suffix})
 			get_filename_component( shortName ${libFile} NAME)
 			
-			ccbGetSharedLibraryOutputDir( targetDir ${package} ${suffix} )
+			cpfGetSharedLibraryOutputDir( targetDir ${package} ${suffix} )
 			if(outputSubDir)
 				set(output "${targetDir}/${outputSubDir}/${shortName}")
 			else()
@@ -246,7 +246,7 @@ function( ccbAddDeployExternalSharedLibsToBuildStageTarget package externalLibs 
 	set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/private)
 
 	# make sure the copying is done before the target is build
-	ccbGetExecutableTargets(exeTargets ${package})
+	cpfGetExecutableTargets(exeTargets ${package})
 	foreach(exeTarget ${exeTargets})
 		add_dependencies( ${exeTarget} ${targetName} )
 	endforeach()
@@ -254,14 +254,14 @@ function( ccbAddDeployExternalSharedLibsToBuildStageTarget package externalLibs 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( ccbGetSharedLibraryOutputDir outputDir target configSuffix )
+function( cpfGetSharedLibraryOutputDir outputDir target configSuffix )
     
     if(${CMAKE_SYSTEM_NAME} STREQUAL Windows )
         get_property( sourceDir TARGET ${target} PROPERTY RUNTIME_OUTPUT_DIRECTORY${configSuffix})
     elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
         get_property( sourceDir TARGET ${target} PROPERTY LIBRARY_OUTPUT_DIRECTORY${configSuffix})
     else()
-        message(FATAL_ERROR "Function ccbGetSharedLibraryOutputDir() must be extended for system ${CMAKE_SYSTEM_NAME}")
+        message(FATAL_ERROR "Function cpfGetSharedLibraryOutputDir() must be extended for system ${CMAKE_SYSTEM_NAME}")
     endif()
     
     set(${outputDir} ${sourceDir} PARENT_SCOPE)
@@ -270,7 +270,7 @@ endfunction()
 
 
 #---------------------------------------------------------------------------------------------
-function( ccbAddDeployInternalSharedLibsToBuildStageTargets package libs outputSubDir )
+function( cpfAddDeployInternalSharedLibsToBuildStageTargets package libs outputSubDir )
 
 	if(NOT libs)
 		return()
@@ -279,7 +279,7 @@ function( ccbAddDeployInternalSharedLibsToBuildStageTargets package libs outputS
 	foreach( lib ${libs})
 		
 		# Add a custom target for each copied internal shared lib.
-		ccbGetIndexedTargetName(targetName deployInternal_${package}${suffix})
+		cpfGetIndexedTargetName(targetName deployInternal_${package}${suffix})
 
 		# Always copy files for all configurations
 		# This leads to unnecessary copying but we have less targets compared
@@ -291,27 +291,27 @@ function( ccbAddDeployInternalSharedLibsToBuildStageTargets package libs outputS
 		# only touch deployed library, to avoid copying files that are currently not needed.
 		# When the current configuration is changed, the real file is deployed, because the
 		# source file will be younger than the touched dummy file.
-		ccbGetConfigurations(configs)
+		cpfGetConfigurations(configs)
 		foreach(config ${configs})
 
-			ccbToConfigSuffix( configSuffix ${config})
-			ccbGetSharedLibraryOutputDir( targetDir ${package} ${configSuffix} )
+			cpfToConfigSuffix( configSuffix ${config})
+			cpfGetSharedLibraryOutputDir( targetDir ${package} ${configSuffix} )
 			
-			ccbGetTargetOutputFileName(libraryFileName ${lib} ${config})
+			cpfGetTargetOutputFileName(libraryFileName ${lib} ${config})
 			if(outputSubDir)
 				set(output "${targetDir}/${outputSubDir}/${libraryFileName}")
 			else()
 				set(output "${targetDir}/${libraryFileName}")
 			endif()
 
-            ccbGetTargetOutputDirectory( sourceDir ${lib} ${config} )
+            cpfGetTargetOutputDirectory( sourceDir ${lib} ${config} )
             set(libFile "${sourceDir}/${libraryFileName}")
             if(NOT "${libFile}" STREQUAL "${output}" )  # do not deploy the library that belongs to the same package, because it is already in the same directory
 
 				set(copyCommand "cmake -E copy \"${libFile}\" \"${output}\"")
 				set(touchCommand "cmake -E touch \"${output}\"")
 
-				ccbAddConfigurationDependendCommand(
+				cpfAddConfigurationDependendCommand(
 					TARGET ${targetName}
 					OUTPUT ${output}
 					DEPENDS ${lib} ${libFile}
@@ -336,7 +336,7 @@ function( ccbAddDeployInternalSharedLibsToBuildStageTargets package libs outputS
 		set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/private)
 		
 		# make sure the copying is done before the target is build
-		ccbGetExecutableTargets(exeTargets ${package})
+		cpfGetExecutableTargets(exeTargets ${package})
 		foreach(exeTarget ${exeTargets})
 			add_dependencies( ${exeTarget} ${targetName} )
 		endforeach()
@@ -348,14 +348,14 @@ endfunction()
 
 
 #---------------------------------------------------------------------------------------------
-function( ccbGetLibLocation location lib configSuffix )
+function( cpfGetLibLocation location lib configSuffix )
 
 	get_property( libFile TARGET ${lib} PROPERTY LOCATION${suffix})
 
 	if(NOT libFile) # if the given config is not available for the imported library, we use the RELEASE config instead.
 		get_property( libFile TARGET ${lib} PROPERTY LOCATION_RELEASE)
-		ccbAssertDefinedMessage( libFile "Could not get the location of the .dll/.so file of library ${lib}.")
-		ccbDebugMessage("Library ${lib} has no property LOCATION${suffix} configuration. Defaulting to the LOCATION_RELEASE version.")
+		cpfAssertDefinedMessage( libFile "Could not get the location of the .dll/.so file of library ${lib}.")
+		cpfDebugMessage("Library ${lib} has no property LOCATION${suffix} configuration. Defaulting to the LOCATION_RELEASE version.")
 	endif()
 
 	set(${location} ${libFile} PARENT_SCOPE)
@@ -363,11 +363,11 @@ function( ccbGetLibLocation location lib configSuffix )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( ccbGetIndexedTargetName indexedName baseName )
+function( cpfGetIndexedTargetName indexedName baseName )
 
 	set(index 0)
 	while(TARGET ${baseName}_${index})
-		ccbIncrement(index)
+		cpfIncrement(index)
 	endwhile()
 
 	set(${indexedName} ${baseName}_${index} PARENT_SCOPE)

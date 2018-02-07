@@ -1,4 +1,4 @@
-# This file ccbContains the main functions of the CppCodeBase cmake module.
+# This file cpfContains the main functions of the CMakeProjectFramework cmake module.
 
 set(DIR_OF_INIT_FILE ${CMAKE_CURRENT_LIST_DIR})
 
@@ -9,40 +9,40 @@ list( APPEND
 	"${DIR_OF_INIT_FILE}"
 )
 
-include(ccbLocations)
-include(ccbProperties)
-include(ccbProjectUtilities)
-include(ccbBaseUtilities)
+include(cpfLocations)
+include(cpfProperties)
+include(cpfProjectUtilities)
+include(cpfBaseUtilities)
 	
-include(ccbAddDocumentationTarget)
-include(ccbAddStaticAnalysisTarget)
-include(ccbAddPipelineTarget)
-include(ccbAddRunTestsTarget)
-include(ccbAddInstallPackageTarget)
-include(ccbAddCompatibilityCheckTarget)
+include(cpfAddDocumentationTarget)
+include(cpfAddStaticAnalysisTarget)
+include(cpfAddPipelineTarget)
+include(cpfAddRunTestsTarget)
+include(cpfAddInstallPackageTarget)
+include(cpfAddCompatibilityCheckTarget)
 
 # cotire must be included on the global scope or we get errors thta target xyz already has a custom rule
 include("${CMAKE_SOURCE_DIR}/cotire/CMake/cotire.cmake")
 
-cmake_minimum_required (VERSION ${CCB_MINIMUM_CMAKE_VERSION})
+cmake_minimum_required (VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 
 
 #----------------------------------------------------------------------------------------
-function( ccbInit )
+function( cpfInit )
 
-	# generate a .gitignore file that contains the generated files of the CppCodeBase
-	configure_file( "${DIR_OF_INIT_FILE}/Templates/.gitignore.in" "${CCB_ROOT_DIR}/.gitignore" COPYONLY )
+	# generate a .gitignore file that contains the generated files of a CPFCMake project
+	configure_file( "${DIR_OF_INIT_FILE}/Templates/.gitignore.in" "${CPF_ROOT_DIR}/.gitignore" COPYONLY )
 
 	# generate the file with the graphviz options
-	configure_file( "${DIR_OF_INIT_FILE}/Templates/${CCB_GRAPHVIZ_OPTIONS_FILE}.in" "${CMAKE_BINARY_DIR}/${CCB_GRAPHVIZ_OPTIONS_FILE}" COPYONLY )
+	configure_file( "${DIR_OF_INIT_FILE}/Templates/${CPF_GRAPHVIZ_OPTIONS_FILE}.in" "${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}" COPYONLY )
 	
-	ccbDebugMessage("Using toolchain file: \"${CMAKE_TOOLCHAIN_FILE}\"")
-	ccbPrintToolchainVariables()
+	cpfDebugMessage("Using toolchain file: \"${CMAKE_TOOLCHAIN_FILE}\"")
+	cpfPrintToolchainVariables()
 
 	####################################### OTHER GLOBAL SETTINGS #########################################    
-	# Define properties that are used within the CppCodeBase cmake code.
-	ccbDefineProperties()
-	ccbSetPolicies()
+	# Define properties that are used within the CPFCMake code.
+	cpfDefineProperties()
+	cpfSetPolicies()
 
     
 	# allow project folders
@@ -54,7 +54,7 @@ function( ccbInit )
 	set(AUTOGEN_TARGETS_FOLDER private PARENT_SCOPE)
 	set(AUTOGEN_SOURCE_GROUP Generate PARENT_SCOPE)
 
-	ccbFindRequiredTools()
+	cpfFindRequiredTools()
 
 	# assert variables
 	
@@ -68,26 +68,26 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Set policies to silence the warnings about changed cmake behavior.
-function( ccbSetPolicies )
+function( cpfSetPolicies )
 	cmake_policy(SET CMP0071 NEW)
 	cmake_policy(SET CMP0007 NEW) # Do not ignore empty list elements
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbAddPackages packages globalFiles )
+function( cpfAddPackages packages globalFiles )
 
 	# set various flags non binary relevant flats like warnings as errors and higher warning levels.
-	ccbSetDynamicAndCosmeticCompilerOptions()
+	cpfSetDynamicAndCosmeticCompilerOptions()
 
-	# Add optional CppCodeBase packages.
-	set( ccbPackageDirs
-		${CCB_CPPCODEBASECMAKE_DIR}
-		${CCB_PROJECT_CONFIGURATIONS_DIR}
-		${CCB_BUILDSCRIPTS_DIR}
-		${CCB_JENKINSFILE_DIR}
-		${CCB_MACHINES_DIR}
+	# Add optional CMakeProjectFramework packages.
+	set( cpfPackageDirs
+		${CPF_CMAKE_DIR}
+		${CPF_PROJECT_CONFIGURATIONS_DIR}
+		${CPF_BUILDSCRIPTS_DIR}
+		${CPF_JENKINSFILE_DIR}
+		${CPF_MACHINES_DIR}
 	)
-	foreach( dir ${ccbPackageDirs})
+	foreach( dir ${cpfPackageDirs})
 		if(EXISTS ${CMAKE_SOURCE_DIR}/${dir} )
 			list(APPEND packages ${dir})
 		endif()
@@ -101,22 +101,22 @@ function( ccbAddPackages packages globalFiles )
 	# A target that holds some project wide files
 	set( SOLUTION_FILES 
 		${globalFiles}
-		${CCB_SWITCH_WARNINGS_OFF_MACRO_FILE}
+		${CPF_SWITCH_WARNINGS_OFF_MACRO_FILE}
 		CMakeLists.txt
-		"${CCB_CONFIG_FILE}"
+		"${CPF_CONFIG_FILE}"
 		"${CMAKE_BINARY_DIR}/CMakeCache.txt"
 	)
 	
-	if(CCB_ENABLE_DOXYGEN_TARGET)
+	if(CPF_ENABLE_DOXYGEN_TARGET)
 		list(APPEND SOLUTION_FILES 
 			DoxygenConfig.txt 
 			DoxygenLayout.xml
 		)
 	endif()
 
-	if(CCB_ENABLE_STATIC_ANALYSIS_TARGET)
+	if(CPF_ENABLE_STATIC_ANALYSIS_TARGET)
 		list(APPEND SOLUTION_FILES 
-			"${CMAKE_BINARY_DIR}/${CCB_GRAPHVIZ_OPTIONS_FILE}" # CMake looks for the file in the source directory, so it can not be put in the cmake directory.
+			"${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}" # CMake looks for the file in the source directory, so it can not be put in the cmake directory.
 		)
 	endif()
 
@@ -124,21 +124,21 @@ function( ccbAddPackages packages globalFiles )
 
 
 	# documentation
-	ccbAddGlobalMonolithicDocumentationTarget("${packages}")
+	cpfAddGlobalMonolithicDocumentationTarget("${packages}")
 	# staticAnalysis
-	ccbAddGlobalStaticAnalysisTarget("${packages}")
+	cpfAddGlobalStaticAnalysisTarget("${packages}")
 	# runUnitTests
-	ccbAddGlobalRunUnitTestsTarget("${packages}")
+	cpfAddGlobalRunUnitTestsTarget("${packages}")
 	# runAllTests
-	ccbAddGlobalRunAllTestsTarget("${packages}")
+	cpfAddGlobalRunAllTestsTarget("${packages}")
 	# dynamicAnalysis
-	ccbAddGlobalDynamicAnalysisTarget("${packages}")
+	cpfAddGlobalDynamicAnalysisTarget("${packages}")
 	# distributionPackages
-	ccbAddGlobalCreatePackagesTarget("${packages}")
+	cpfAddGlobalCreatePackagesTarget("${packages}")
 	# abiComplianceCheck
-	ccbAddGlobalAbiCheckerTarget("${packages}")
+	cpfAddGlobalAbiCheckerTarget("${packages}")
 	# pipeline
-	ccbAddPipelineTarget("${packages}")
+	cpfAddPipelineTarget("${packages}")
 
 
 endfunction()

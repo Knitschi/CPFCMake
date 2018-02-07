@@ -1,38 +1,38 @@
 
-include(ccbLocations)
-include(ccbConstants)
+include(cpfLocations)
+include(cpfConstants)
 include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
-include(ccbProjectUtilities)
-include(ccbGitUtilities)
+include(cpfProjectUtilities)
+include(cpfGitUtilities)
 
-include(ccbAddStaticAnalysisTarget)
-include(ccbAddDynamicAnalysisTarget)
-include(ccbAddRunTestsTarget)
-include(ccbAddDeploySharedLibrariesTarget)
-include(ccbAddInstallPackageTarget)
-include(ccbAddDistributionPackageTarget)
-include(ccbAddCompatibilityCheckTarget)
-include(ccbAddDocumentationTarget)
+include(cpfAddStaticAnalysisTarget)
+include(cpfAddDynamicAnalysisTarget)
+include(cpfAddRunTestsTarget)
+include(cpfAddDeploySharedLibrariesTarget)
+include(cpfAddInstallPackageTarget)
+include(cpfAddDistributionPackageTarget)
+include(cpfAddCompatibilityCheckTarget)
+include(cpfAddDocumentationTarget)
 
 set(DIR_OF_ADD_PACKAGE_FILE ${CMAKE_CURRENT_LIST_DIR})
 
 
 #-------------------------------------------------------------------------
-macro( ccbInitPackageProject packageNameOut packageNameSpace )
+macro( cpfInitPackageProject packageNameOut packageNameSpace )
 
 	# The package name is defined by the sub-directory name
-	ccbGetParentFolder( PACKAGE_NAME ${CMAKE_CURRENT_LIST_FILE})
+	cpfGetParentFolder( PACKAGE_NAME ${CMAKE_CURRENT_LIST_FILE})
 
-	ccbConfigurePackageVersionFile( ${PACKAGE_NAME} )
+	cpfConfigurePackageVersionFile( ${PACKAGE_NAME} )
 
 	# get the version number of the packages version file
-	ccbGetPackageVersionFromFile( packageVersion ${PACKAGE_NAME} ${CMAKE_CURRENT_LIST_DIR})
+	cpfGetPackageVersionFromFile( packageVersion ${PACKAGE_NAME} ${CMAKE_CURRENT_LIST_DIR})
 	message(STATUS "Package ${PACKAGE_NAME} is now at version ${packageVersion}")
 	# Configure the c++ header file with the version.
-	ccbConfigurePackageVersionHeader( ${PACKAGE_NAME} ${packageVersion} ${packageNameSpace})
+	cpfConfigurePackageVersionHeader( ${PACKAGE_NAME} ${packageVersion} ${packageNameSpace})
 
-	ccbSplitVersion( major minor patch commitId ${packageVersion})
+	cpfSplitVersion( major minor patch commitId ${packageVersion})
 
 	# create a sub-project for the package
 	project( 
@@ -51,47 +51,47 @@ macro( ccbInitPackageProject packageNameOut packageNameSpace )
 endmacro()
 
 #-----------------------------------------------------------
-# Creates the ccbPackageVersion_<package>.cmake file in the Sources directory, by reading the version from git.
+# Creates the cpfPackageVersion_<package>.cmake file in the Sources directory, by reading the version from git.
 # The file is required to provide a version if the build is done with sources that are not checked out from git.
 #
-function( ccbConfigurePackageVersionFile package )
+function( cpfConfigurePackageVersionFile package )
 
 	# Get the paths of the created files.
-	ccbGetPackageVersionFileName( cmakeVersionFile ${package})
+	cpfGetPackageVersionFileName( cmakeVersionFile ${package})
 	set( absPathCmakeVersionFile "${CMAKE_CURRENT_SOURCE_DIR}/${cmakeVersionFile}")
 	
 	# Check if we work with a git repository.
 	# If so, we retrieve the version from the repository.
 	# If not, this must be an installed archive and the .cmake version file must already exist.
-	ccbIsGitRepositoryDir( isRepoDirOut "${CMAKE_CURRENT_SOURCE_DIR}")
+	cpfIsGitRepositoryDir( isRepoDirOut "${CMAKE_CURRENT_SOURCE_DIR}")
 	if(isRepoDirOut)
 	
-		ccbGetCurrentVersionFromGitRepository( CPPCODEBASE_PACKAGE_VERSION "${CMAKE_CURRENT_SOURCE_DIR}")
-		ccbConfigureFileWithVariables( "${DIR_OF_ADD_PACKAGE_FILE}/Templates/packageVersion.cmake.in" "${absPathCmakeVersionFile}" CPPCODEBASE_PACKAGE_VERSION package  )
+		cpfGetCurrentVersionFromGitRepository( CPF_PACKAGE_VERSION "${CMAKE_CURRENT_SOURCE_DIR}")
+		cpfConfigureFileWithVariables( "${DIR_OF_ADD_PACKAGE_FILE}/Templates/packageVersion.cmake.in" "${absPathCmakeVersionFile}" CPF_PACKAGE_VERSION package  )
 	
 	else()
 		if(NOT EXISTS "${absPathCmakeVersionFile}" )
-			message(FATAL_ERROR "The package source directory \"${CMAKE_CURRENT_SOURCE_DIR}\" neither belongs to a git repository nor ccbContains a .cmake version file.")
+			message(FATAL_ERROR "The package source directory \"${CMAKE_CURRENT_SOURCE_DIR}\" neither belongs to a git repository nor cpfContains a .cmake version file.")
 		endif()
 	endif()
 
 endfunction()
 
 #-----------------------------------------------------------
-function( ccbConfigurePackageVersionHeader package version packageNamespace)
+function( cpfConfigurePackageVersionHeader package version packageNamespace)
 
 	set( PACKAGE_NAMESPACE ${packageNamespace})
-	set( CPPCODEBASE_PACKAGE_VERSION ${version} )
+	set( CPF_PACKAGE_VERSION ${version} )
 
-	ccbGetPackageVersionCppHeaderFileName( versionHeaderFile ${package})
+	cpfGetPackageVersionCppHeaderFileName( versionHeaderFile ${package})
 	set( absPathVersionHeader "${CMAKE_CURRENT_BINARY_DIR}/${versionHeaderFile}")
 
-	ccbConfigureFileWithVariables( "${DIR_OF_ADD_PACKAGE_FILE}/Templates/packageVersion.h.in" "${absPathVersionHeader}" CPPCODEBASE_PACKAGE_VERSION PACKAGE_NAMESPACE ) 
+	cpfConfigureFileWithVariables( "${DIR_OF_ADD_PACKAGE_FILE}/Templates/packageVersion.h.in" "${absPathVersionHeader}" CPF_PACKAGE_VERSION PACKAGE_NAMESPACE ) 
 
 endfunction()
 
 #-----------------------------------------------------------
-# Adds a c++ package to the CppCodeBase.
+# Adds a c++ package to the CMakeProjectFramework.
 # A package consists of a main binary target that has the same name as the package and some helper binary targets for tests and test utilities.
 # The test fixture library, the unit tests exe and the expensive tests exe will only be created if the file lists contain files.  
 # If the target tye is an executable an extra library is created that should contain the code for the exe. The executable target will only contain the main.cpp file with the main function as small as possible. 
@@ -148,7 +148,7 @@ endfunction()
 #
 #	DISTRIBUTION_PACKAGE_FORMAT_OPTIONS					A list of keyword arguments that contain further options for the creation of the distribution packages.
 #
-#		[SYSTEM_PACKAGES_DEB]							This is only relevant when using the DEB package format. The option must be a string that ccbContains the names and versions of the 
+#		[SYSTEM_PACKAGES_DEB]							This is only relevant when using the DEB package format. The option must be a string that cpfContains the names and versions of the 
 #														debian packages that provide the excluded shared libraries from the BINARIES_USER option. E.g.
 #														"libc6 (>= 2.3.1-6), libc6 (< 2.4)"
 #
@@ -157,7 +157,7 @@ endfunction()
 # [HOMEPAGE]											A web address from where the source-code and/or the documentation of the package can be obtained.
 # [MAINTAINER_EMAIL]									An email address under which the maintainers of the package can be reached.
 #
-function( ccbAddPackage )
+function( cpfAddPackage )
 
 	# parse level 0 keywords
 	set( singleValueKeywords PACKAGE_NAME PACKAGE_NAMESPACE TYPE BRIEF_DESCRIPTION LONG_DESCRIPTION HOMEPAGE MAINTAINER_EMAIL)
@@ -171,10 +171,10 @@ function( ccbAddPackage )
 	)
 	# parse argument sublists
 	set( allKeywords ${singleValueKeywords} ${multiValueKeywords})
-	ccbGetKeywordValueLists( pluginOptionLists PLUGIN_DEPENDENCIES "${allKeywords}" "${ARGN}" pluginOptions)
-	ccbGetKeywordValueLists( distributionPackageOptionLists DISTRIBUTION_PACKAGES "${allKeywords}" "${ARGN}" packagOptions)
+	cpfGetKeywordValueLists( pluginOptionLists PLUGIN_DEPENDENCIES "${allKeywords}" "${ARGN}" pluginOptions)
+	cpfGetKeywordValueLists( distributionPackageOptionLists DISTRIBUTION_PACKAGES "${allKeywords}" "${ARGN}" packagOptions)
 	
-	ccbDebugMessage("Add Package ${ARG_PACKAGE_NAME}")
+	cpfDebugMessage("Add Package ${ARG_PACKAGE_NAME}")
 	
 	# By default build test targets.
 	# Hunter sets this to off in order to skip test building.
@@ -182,48 +182,48 @@ function( ccbAddPackage )
 		set( ${ARG_PACKAGE_NAME}_BUILD_TESTS ON)
 	endif()
 
-	ccbDebugAssertLinkedLibrariesExists( linkedLibraries ${ARG_PACKAGE_NAME} "${ARG_LINKED_LIBRARIES}")
-	ccbDebugAssertLinkedLibrariesExists( linkedTestLibraries ${ARG_PACKAGE_NAME} "${ARG_LINKED_TEST_LIBRARIES}")
+	cpfDebugAssertLinkedLibrariesExists( linkedLibraries ${ARG_PACKAGE_NAME} "${ARG_LINKED_LIBRARIES}")
+	cpfDebugAssertLinkedLibrariesExists( linkedTestLibraries ${ARG_PACKAGE_NAME} "${ARG_LINKED_TEST_LIBRARIES}")
 
 	# make sure that the properties of the imported targets follow our assumptions
-	ccbNormalizeImportedTargetProperties( "${linkedLibraries};${linkedTestLibraries}" )
+	cpfNormalizeImportedTargetProperties( "${linkedLibraries};${linkedTestLibraries}" )
 
 	# Add the binary targets
-	ccbAddPackageBinaryTargets( productionLibrary ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} ${ARG_TYPE} "${ARG_PUBLIC_HEADER}" "${ARG_PRODUCTION_FILES}" "${ARG_PUBLIC_FIXTURE_HEADER}" "${ARG_FIXTURE_FILES}" "${ARG_TEST_FILES}" "${ARG_LINKED_LIBRARIES}" "${ARG_LINKED_TEST_LIBRARIES}" )
+	cpfAddPackageBinaryTargets( productionLibrary ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} ${ARG_TYPE} "${ARG_PUBLIC_HEADER}" "${ARG_PRODUCTION_FILES}" "${ARG_PUBLIC_FIXTURE_HEADER}" "${ARG_FIXTURE_FILES}" "${ARG_TEST_FILES}" "${ARG_LINKED_LIBRARIES}" "${ARG_LINKED_TEST_LIBRARIES}" )
 
 	#set some properties
-	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CCB_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
-	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CCB_PACKAGE_HOMEPAGE ${ARG_HOMEPAGE} )
-	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CCB_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
+	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CPF_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
+	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CPF_PACKAGE_HOMEPAGE ${ARG_HOMEPAGE} )
+	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CPF_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
 	
 	
 	# add other custom targets
 
 	# add a target the will be build before the binary target and that will copy all 
 	# depended on shared libraries to the targets output directory.
-	ccbAddDeploySharedLibrariesTarget(${ARG_PACKAGE_NAME})
+	cpfAddDeploySharedLibrariesTarget(${ARG_PACKAGE_NAME})
 
 	# Adds target that runs clang-tidy on the given files.
     # Currently this is only added for the production target because clang-tidy does not filter out warnings that come over the GTest macros from external code.
     # When clang-tidy resolves the problem, static analysis should be executed for all binary targets.
-    ccbAddStaticAnalysisTarget( BINARY_TARGET ${productionLibrary})
-    ccbAddRunCppTestsTargets( ${ARG_PACKAGE_NAME})
-	ccbAddDynamicAnalysisTarget(${ARG_PACKAGE_NAME})
+    cpfAddStaticAnalysisTarget( BINARY_TARGET ${productionLibrary})
+    cpfAddRunCppTestsTargets( ${ARG_PACKAGE_NAME})
+	cpfAddDynamicAnalysisTarget(${ARG_PACKAGE_NAME})
 
 	# Plugins must be added before the install targets
-	ccbAddPlugins( ${ARG_PACKAGE_NAME} "${pluginOptionLists}" )
+	cpfAddPlugins( ${ARG_PACKAGE_NAME} "${pluginOptionLists}" )
 	 
 	# Adds the install rules and the per package install targets.
-	ccbAddInstallRulesAndTargets( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} )
+	cpfAddInstallRulesAndTargets( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} )
 
 	# Adds a target the creates abi-dumps when using clang or gcc with debug options.
-	ccbAddAbiCheckerTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" )
+	cpfAddAbiCheckerTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" )
 	
 	# Adds the targets that create the distribution packages.
-	ccbAddDistributionPackageTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" "${pluginOptionLists}" )
+	cpfAddDistributionPackageTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" "${pluginOptionLists}" )
 
 	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
-	ccbAddPackageDocsTarget( packageLinkFile ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
+	cpfAddPackageDocsTarget( packageLinkFile ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
 	list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
 
 endfunction() 
@@ -232,15 +232,15 @@ endfunction()
 #---------------------------------------------------------------------
 # This function only returns the libraries from the input that actually exist.
 # Lower level packages must be added first.
-# For others a warning is issued when CCB_VERBOSE is ON.
+# For others a warning is issued when CPF_VERBOSE is ON.
 # We allow adding dependencies to non existing targets so we can link to targets that may only be available
 # on certain platforms.
 #
-function( ccbDebugAssertLinkedLibrariesExists linkedLibrariesOut package linkedLibrariesIn )
+function( cpfDebugAssertLinkedLibrariesExists linkedLibrariesOut package linkedLibrariesIn )
 
 	foreach(lib ${linkedLibrariesIn})
 		if(NOT TARGET ${lib} )
-			ccbDebugMessage("${lib} is not a Target when creating package ${package}. If it should be available, make sure to have target ${lib} added before adding this package.")
+			cpfDebugMessage("${lib} is not a Target when creating package ${package}. If it should be available, make sure to have target ${lib} added before adding this package.")
 		else()
 			list(APPEND linkedLibraries ${lib})
 		endif()
@@ -253,27 +253,27 @@ endfunction()
 #---------------------------------------------------------------------
 # This function is used to change properties of imported targets to make
 # sure that property values are set after the same "scheme" on which the
-# rest of the CPPCODEBASE cmake code can rely.
+# rest of the CPF cmake code can rely.
 #
 # E.g. On Linuy the LOCATION_<config> property should hold the location of the actual binary
 # file and not the location of the symlink that points to the binary. The symlink
 # location should be stored in the IMPORTED_SONAME_<config> property.
 #
-function( ccbNormalizeImportedTargetProperties targets )
+function( cpfNormalizeImportedTargetProperties targets )
 
 	# also get indirectly linked targets
-	ccbGetAllTargetsInLinkTree( allLinkedTargets "${targets}")
+	cpfGetAllTargetsInLinkTree( allLinkedTargets "${targets}")
 	
-	ccbFilterInTargetsWithProperty( importedTargets "${allLinkedTargets}" IMPORTED TRUE)
+	cpfFilterInTargetsWithProperty( importedTargets "${allLinkedTargets}" IMPORTED TRUE)
 	foreach(target ${importedTargets})
 	
 		# make sure the location property does not point to a symbolic link but to the real file on linux
 		if( ${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-			ccbIsSingleConfigGenerator( isSingleConfig )
+			cpfIsSingleConfigGenerator( isSingleConfig )
 			if(NOT ${isSingleConfig})
-				message(FATAL_ERROR "Function ccbNormalizeImportedTargetProperties() assumes that there are only single configuration generators on linux.")
+				message(FATAL_ERROR "Function cpfNormalizeImportedTargetProperties() assumes that there are only single configuration generators on linux.")
 			endif()
-			ccbToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} ) 
+			cpfToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} ) 
 			
 			get_property( location TARGET ${target} PROPERTY LOCATION${configSuffix} )
 			if( IS_SYMLINK ${location} )
@@ -307,7 +307,7 @@ endfunction()
 
 #---------------------------------------------------------------------
 #
-function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespace type publicHeaderFiles productionFiles publicFixtureHeaderFiles fixtureFiles testFiles linkedLibraries linkedTestLibraries	)
+function( cpfAddPackageBinaryTargets outProductionLibrary package packageNamespace type publicHeaderFiles productionFiles publicFixtureHeaderFiles fixtureFiles testFiles linkedLibraries linkedTestLibraries	)
 
 	# filter some files
 	foreach( file ${productionFiles})
@@ -325,9 +325,9 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
 	endforeach()
 
 	# add version header and cmake files to the production files
-	ccbGetPackageVersionFileName( versionFile ${package} )
+	cpfGetPackageVersionFileName( versionFile ${package} )
 	list(APPEND productionFiles ${CMAKE_CURRENT_SOURCE_DIR}/${versionFile} )
-	ccbGetPackageVersionCppHeaderFileName( versionHeader ${package} )
+	cpfGetPackageVersionCppHeaderFileName( versionHeader ${package} )
 	list(APPEND productionFiles ${CMAKE_CURRENT_BINARY_DIR}/${versionHeader} )
 	
 
@@ -336,7 +336,7 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
 		set(isExe TRUE)
 		set( productionTarget lib${package})
 		#remove main.cpp from the files
-		ccbAssertDefinedMessage(MAIN_CPP "A package of executable type must contain a main.cpp file.")
+		cpfAssertDefinedMessage(MAIN_CPP "A package of executable type must contain a main.cpp file.")
 		list(REMOVE_ITEM productionFiles ${MAIN_CPP})
 		foreach( iconFile ${iconFiles})
 			list(REMOVE_ITEM productionFiles ${iconFile})
@@ -359,7 +359,7 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
 	###################### Create production library target ##############################
     if(productionFiles OR publicHeaderFiles)  
 
-        ccbAddBinaryTarget(
+        cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}  
 			EXPORT_MACRO_PREFIX ${packageNamespace}
 			TARGET_TYPE LIB
@@ -377,7 +377,7 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
 	if(isExe)
 		
 		set( exeTarget ${package})
-		ccbAddBinaryTarget(
+		cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}
 			TARGET_TYPE ${type}
 			NAME ${exeTarget}
@@ -393,8 +393,8 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
 
     ################### Create fixture library ##############################	
 	if( fixtureFiles OR publicFixtureHeaderFiles )
-        set( fixtureTarget ${productionTarget}${CCB_FIXTURE_TARGET_ENDING})
-	    ccbAddBinaryTarget(
+        set( fixtureTarget ${productionTarget}${CPF_FIXTURE_TARGET_ENDING})
+	    cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}
 			EXPORT_MACRO_PREFIX ${packageNamespace}_TESTS
 			TARGET_TYPE LIB
@@ -410,14 +410,14 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
 		if(${package}_BUILD_TESTS STREQUAL OFF )
 			set_property(TARGET ${fixtureTarget} PROPERTY EXCLUDE_FROM_ALL TRUE )
 		endif()
-		set_property(TARGET ${package} PROPERTY CCB_TEST_FIXTURE_SUBTARGET ${fixtureTarget} )
+		set_property(TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET ${fixtureTarget} )
         
     endif()
 
     ################### Create unit test exe ##############################
 	if( testFiles )
-        set( unitTestsTarget ${productionTarget}${CCB_TESTS_TARGET_ENDING})
-        ccbAddBinaryTarget(
+        set( unitTestsTarget ${productionTarget}${CPF_TESTS_TARGET_ENDING})
+        cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}
 			TARGET_TYPE CONSOLE_APP
 			NAME ${unitTestsTarget}
@@ -425,7 +425,7 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
 			LINKED_LIBRARIES ${productionTarget} ${fixtureTarget} ${linkedTestLibraries}
 			IDE_FOLDER ${package}/${VSTestFolder}
         )
-		set_property(TARGET ${package} PROPERTY CCB_TESTS_SUBTARGET ${unitTestsTarget} )
+		set_property(TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET ${unitTestsTarget} )
 
 		# respect an option that is used by hunter to not compile test targets
 		if(${package}_BUILD_TESTS STREQUAL OFF)
@@ -435,8 +435,8 @@ function( ccbAddPackageBinaryTargets outProductionLibrary package packageNamespa
     endif()
     
 	# Set some properties
-    set_property(TARGET ${package} PROPERTY CCB_BINARY_SUBTARGETS ${exeTarget} ${fixtureTarget} ${productionTarget} ${unitTestsTarget} )
-    set_property(TARGET ${package} PROPERTY CCB_PRODUCTION_LIB_SUBTARGET ${productionTarget} )
+    set_property(TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS ${exeTarget} ${fixtureTarget} ${productionTarget} ${unitTestsTarget} )
+    set_property(TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET ${productionTarget} )
 	set( ${outProductionLibrary} ${productionTarget} PARENT_SCOPE)
 
 endfunction()
@@ -455,7 +455,7 @@ endfunction()
 # FILES						All files that belong to the target.
 # LINKED_LIBRARIES			Other targets on which this target depends.
 # 
-function( ccbAddBinaryTarget	)
+function( cpfAddBinaryTarget	)
 
 	cmake_parse_arguments(
 		ARG 
@@ -466,7 +466,7 @@ function( ccbAddBinaryTarget	)
 	)
 	set( allSources ${ARG_PUBLIC_HEADER} ${ARG_FILES})
 
-	ccbQt5AddUIAndQrcFiles( allSources )
+	cpfQt5AddUIAndQrcFiles( allSources )
 
     # Create Qt ui application
     if( ${ARG_TARGET_TYPE} STREQUAL GUI_APP)
@@ -509,7 +509,7 @@ function( ccbAddBinaryTarget	)
 	# set the Visual Studio folder property
 	set_property( TARGET ${ARG_NAME} PROPERTY FOLDER ${ARG_IDE_FOLDER})
 	# public header
-	set_property( TARGET ${ARG_NAME} PROPERTY CCB_PUBLIC_HEADER ${ARG_PUBLIC_HEADER})
+	set_property( TARGET ${ARG_NAME} PROPERTY CPF_PUBLIC_HEADER ${ARG_PUBLIC_HEADER})
 	# Enable qt auto moc
 	# Note that we AUTOUIC and AUTORCC is not used because I was not able to get the names of
 	# the generated files at cmake time which is required when setting source groups and 
@@ -520,21 +520,21 @@ function( ccbAddBinaryTarget	)
 	set_property( TARGET ${ARG_NAME} PROPERTY SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR} )	# so version depends on the compatibility scheme, we currently have a hard-coded same-minor scheme.
 	
 	# sets all the <bla>_OUTPUT_DIRECTORY_<config> options
-	ccbSetTargetOutputDirectoriesAndNames( ${ARG_PACKAGE_NAME} ${ARG_NAME})
+	cpfSetTargetOutputDirectoriesAndNames( ${ARG_PACKAGE_NAME} ${ARG_NAME})
 
     # link with other libraries
     target_link_libraries(${ARG_NAME} PUBLIC ${ARG_LINKED_LIBRARIES} )
-    ccbRemoveWarningFlagsForSomeExternalFiles(${ARG_NAME})
+    cpfRemoveWarningFlagsForSomeExternalFiles(${ARG_NAME})
 
 	# Generate the header file with the dll export and import macros
-	ccbGenerateExportMacroHeader(${ARG_NAME} "${ARG_EXPORT_MACRO_PREFIX}")
+	cpfGenerateExportMacroHeader(${ARG_NAME} "${ARG_EXPORT_MACRO_PREFIX}")
 
     # set target to use pre-compiled header
     # compile flags can not be changed after this call
-    ccbAddPrecompiledHeader( ${ARG_NAME} )
+    cpfAddPrecompiledHeader( ${ARG_NAME} )
 
 	# sort files into folders in visual studio
-    ccbSetIDEDirectoriesForTargetSources(${ARG_NAME})
+    cpfSetIDEDirectoriesForTargetSources(${ARG_NAME})
 
 endfunction()
 
@@ -542,14 +542,14 @@ endfunction()
 #----------------------------------------- macro from Lars Christensen to use precompiled headers --------------------------------
 # this was copied from https://gist.github.com/larsch/573926
 # this might be an alternative if this does not work well enough: https://github.com/sakra/cotire
-function(ccbAddPrecompiledHeader target )
+function(cpfAddPrecompiledHeader target )
     
     # add the precompiled header (targets and compile flags)
     set_target_properties(${target} PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)  # prevent the generation of unity build targets
     
-	if(CCB_ENABLE_PRECOMPILED_HEADER) 
+	if(CPF_ENABLE_PRECOMPILED_HEADER) 
 		cotire( ${target})
-		ccbReAddInheritedCompileOptions( ${target})
+		cpfReAddInheritedCompileOptions( ${target})
 
 		# add the prefix header to the target files
 		get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
@@ -564,17 +564,17 @@ endfunction()
 # This function compensates a CMake bug (https://gitlab.kitware.com/cmake/cmake/issues/17488)
 # Cotire sets the SOURCE propety COMPILE_FLAGS which removes inherited INTERFACE_COMPILE_OPTIONS due
 # to the bug. We manually re-add the compile options here.
-function( ccbReAddInheritedCompileOptions target )
+function( cpfReAddInheritedCompileOptions target )
 
 	# The problem only occurs for the visual studio generator.
-	ccbIsVisualStudioGenerator(isVS)
+	cpfIsVisualStudioGenerator(isVS)
 	if(NOT isVS)
 		return()
 	endif()
 
 	# get all inherited compile options
 	set(inheritedCompileOptions)
-	ccbGetVisibleLinkedLibraries( linkedLibs ${target} )
+	cpfGetVisibleLinkedLibraries( linkedLibs ${target} )
 	foreach( lib ${linkedLibs} )
 		get_property( compileOptions TARGET ${lib} PROPERTY INTERFACE_COMPILE_OPTIONS )
 		list(APPEND inheritedCompileOptions ${compileOptions})
@@ -582,7 +582,7 @@ function( ccbReAddInheritedCompileOptions target )
 
 	if(inheritedCompileOptions)
 		list(REMOVE_DUPLICATES inheritedCompileOptions )
-		ccbJoinString( inheritedOptionsString "${inheritedCompileOptions}" " ")
+		cpfJoinString( inheritedOptionsString "${inheritedCompileOptions}" " ")
 
 		# add them to the SOURCE property COMPILE_FLAGS
 		# adding them with target_compile_options will not work.
@@ -602,7 +602,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Calls the qt5_wrap_ui and qt5_add_resources and adds the generated files to the given file list
 #
-function( ccbQt5AddUIAndQrcFiles filesOut )
+function( cpfQt5AddUIAndQrcFiles filesOut )
 
 	set(files ${${filesOut}})
 
@@ -639,7 +639,7 @@ endfunction()
 # I failed to add the cotire prefix header to the generated files because
 # it does not belong to the target.
 # The ui_*.h files could also not be added to the generated files because they do not exist when the target is created.
-function( ccbSetIDEDirectoriesForTargetSources targetName )
+function( cpfSetIDEDirectoriesForTargetSources targetName )
 
     # get source files
     get_target_property( allSourceFiles ${targetName} SOURCES)
@@ -653,12 +653,12 @@ function( ccbSetIDEDirectoriesForTargetSources targetName )
 		get_source_file_property( fullName ${file} LOCATION )
 		get_filename_component( dir ${fullName} DIRECTORY)
 
-		ccbIsSubPath( isInSources "${dir}" "${sourceDir}") 
+		cpfIsSubPath( isInSources "${dir}" "${sourceDir}") 
 		if( isInSources )
 			list(APPEND filesInSourceDir ${file})
 		endif()
 
-		ccbIsSubPath( isInBinary "${dir}" "${binaryDir}") 
+		cpfIsSubPath( isInBinary "${dir}" "${binaryDir}") 
 		if( isInBinary )
 			list(APPEND generatedFiles ${file})
 		endif()
@@ -694,37 +694,37 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Sets the <binary-type>_OUTOUT_DIRECTORY_<config> properties of the given target.
 #
-function( ccbSetTargetOutputDirectoriesAndNames package target )
+function( cpfSetTargetOutputDirectoriesAndNames package target )
 
-	ccbGetConfigurations( configs)
+	cpfGetConfigurations( configs)
 	foreach(config ${configs})
-		ccbSetAllOutputDirectoriesAndNames(${target} ${package} ${config} "${CMAKE_BINARY_DIR}/BuildStage/${config}" )
+		cpfSetAllOutputDirectoriesAndNames(${target} ${package} ${config} "${CMAKE_BINARY_DIR}/BuildStage/${config}" )
 	endforeach()
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( ccbSetAllOutputDirectoriesAndNames target package config outputPrefixDir  )
+function( cpfSetAllOutputDirectoriesAndNames target package config outputPrefixDir  )
 
-	ccbToConfigSuffix( configSuffix ${config})
+	cpfToConfigSuffix( configSuffix ${config})
 
-	# Delete the <config>_postfix property and handle things manually in ccbSetOutputDirAndName()
+	# Delete the <config>_postfix property and handle things manually in cpfSetOutputDirAndName()
 	string(TOUPPER ${config} uConfig)
 	set_property( TARGET ${target} PROPERTY ${uConfig}_POSTFIX "" )
 
-	ccbSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} RUNTIME)
-	ccbSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} LIBRARY)
-	ccbSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} ARCHIVE)
+	cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} RUNTIME)
+	cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} LIBRARY)
+	cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} ARCHIVE)
 
-	ccbTargetHasPdbCompileOutput(hasOutput ${target} ${configSuffix})
+	cpfTargetHasPdbCompileOutput(hasOutput ${target} ${configSuffix})
 	if(hasOutput)
-		ccbSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} COMPILE_PDB)
+		cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} COMPILE_PDB)
 		set_property(TARGET ${target} PROPERTY COMPILE_PDB_NAME${configSuffix} ${target}${CMAKE${configSuffix}_POSTFIX}-compiler) # we overwrite the filename to make it more meaningful
 	endif()
 
-	ccbTargetHasPdbLinkerOutput(hasOutput ${target} ${configSuffix})
+	cpfTargetHasPdbLinkerOutput(hasOutput ${target} ${configSuffix})
 	if(hasOutput)
-		ccbSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} PDB)
+		cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} PDB)
 		set_property(TARGET ${target} PROPERTY PDB_NAME${configSuffix} ${target}${CMAKE${configSuffix}_POSTFIX}-linker)  # we overwrite the filename to make it more meaningful
 	endif()
 
@@ -734,10 +734,10 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # This function sets the output name property to make sure that the same target file names are
 # achieved across all platforms.
-function( ccbSetOutputDirAndName target package config prefixDir outputType )
+function( cpfSetOutputDirAndName target package config prefixDir outputType )
 
-	ccbGetRelativeOutputDir( relativeDir ${package} ${outputType})
-	ccbToConfigSuffix(configSuffix ${config})
+	cpfGetRelativeOutputDir( relativeDir ${package} ${outputType})
+	cpfToConfigSuffix(configSuffix ${config})
 	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_DIRECTORY${configSuffix} ${prefixDir}/${relativeDir})
 	# use the config postfix for all target types
 	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME${configSuffix} ${target}${CMAKE_${uConfig}_POSTFIX} )
@@ -745,21 +745,21 @@ function( ccbSetOutputDirAndName target package config prefixDir outputType )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( ccbTargetHasPdbCompileOutput hasPdbOutput target configSuffix )
+function( cpfTargetHasPdbCompileOutput hasPdbOutput target configSuffix )
 
 	set( hasPdbFlag FALSE )
 	if(MSVC)
-		ccbSplitString( flagsList "${CMAKE_CXX_FLAGS${configSuffix}}" " ")
-		ccbContainsOneOf( hasPdbFlag "${flagsList}" /Zi;/ZI )
+		cpfSplitString( flagsList "${CMAKE_CXX_FLAGS${configSuffix}}" " ")
+		cpfContainsOneOf( hasPdbFlag "${flagsList}" /Zi;/ZI )
 	endif()
 	set( ${hasPdbOutput} ${hasPdbFlag} PARENT_SCOPE )
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( ccbTargetHasPdbLinkerOutput hasPdbOutput target configSuffix )
+function( cpfTargetHasPdbLinkerOutput hasPdbOutput target configSuffix )
 
-	ccbTargetHasPdbCompileOutput( hasPdbCompileOutput ${target} ${configSuffix})
+	cpfTargetHasPdbCompileOutput( hasPdbCompileOutput ${target} ${configSuffix})
 	
 	if( hasPdbCompileOutput )
 		get_property( targetType TARGET ${target} PROPERTY TYPE)
@@ -775,8 +775,8 @@ endfunction()
 
 
 #---------------------------------------------------------------------
-# generate a header file that ccbContains the EXPORT macros
-function( ccbGenerateExportMacroHeader target macroBaseName )
+# generate a header file that cpfContains the EXPORT macros
+function( cpfGenerateExportMacroHeader target macroBaseName )
 
 	get_property( targetType TARGET ${target} PROPERTY TYPE)
 	if(NOT ${targetType} STREQUAL EXECUTABLE)
@@ -787,7 +787,7 @@ function( ccbGenerateExportMacroHeader target macroBaseName )
 		)
 		set(exportHeader "${CMAKE_CURRENT_BINARY_DIR}/${macroBaseNameLower}_export.h" )
 		set_property(TARGET ${target} APPEND PROPERTY SOURCES ${exportHeader} )
-		set_property(TARGET ${target} APPEND PROPERTY CCB_PUBLIC_HEADER ${exportHeader} )
+		set_property(TARGET ${target} APPEND PROPERTY CPF_PUBLIC_HEADER ${exportHeader} )
 		source_group(Generated FILES ${exportHeader})
 	endif()
 
@@ -799,27 +799,27 @@ endfunction()
 #
 # pluginDependencies A list where the first element is the relative path of the plugin and the folling elements are the plugin targets.
 # 
-function( ccbAddPlugins package pluginOptionLists )
+function( cpfAddPlugins package pluginOptionLists )
 
-	ccbGetExecutableTargets( exeTargets ${package})
+	cpfGetExecutableTargets( exeTargets ${package})
 	if(NOT exeTargets)
 		return()
 	endif()
 
-	ccbGetPluginTargetDirectoryPairLists( pluginTargets pluginDirectories "${pluginOptionLists}" )
+	cpfGetPluginTargetDirectoryPairLists( pluginTargets pluginDirectories "${pluginOptionLists}" )
 
 	# add deploy and install targets for the plugins
 	set(index 0)
 	foreach(plugin ${pluginTargets})
 		list(GET pluginDirectories ${index} subdirectory)
-		ccbIncrement(index)
+		cpfIncrement(index)
 		if(TARGET ${plugin})
 			get_property(isImported TARGET ${plugin} PROPERTY IMPORTED)
 			if(isImported)
-				ccbAddDeployExternalSharedLibsToBuildStageTarget( ${package} ${plugin} ${subdirectory} )
+				cpfAddDeployExternalSharedLibsToBuildStageTarget( ${package} ${plugin} ${subdirectory} )
 			else()
 				add_dependencies( ${target} ${plugin}) # adds the artifical dependency
-				ccbAddDeployInternalSharedLibsToBuildStageTargets( ${package} ${plugin} ${subdirectory} ) 
+				cpfAddDeployInternalSharedLibsToBuildStageTargets( ${package} ${plugin} ${subdirectory} ) 
 			endif()
 		endif()
 	endforeach()

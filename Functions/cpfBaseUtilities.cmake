@@ -4,20 +4,20 @@
 
 #----------------------------------------------------------------------------------------
 # call the correct version of separate_arguments depending on the current platform
-macro ( ccbSeparateArgumentsForPlatform listArg command)
+macro ( cpfSeparateArgumentsForPlatform listArg command)
 	if(CMAKE_HOST_UNIX)
 		separate_arguments(list UNIX_COMMAND "${command}")
 	elseif(CMAKE_HOST_WIN32)
 		separate_arguments(list WINDOWS_COMMAND "${command}")
 	else()
-		message(FATAL_ERROR "Function ccbSeparateArgumentsForPlatform() needs to be extended for the current host platform.")
+		message(FATAL_ERROR "Function cpfSeparateArgumentsForPlatform() needs to be extended for the current host platform.")
 	endif()
 	set(${listArg} ${list})
 endmacro()
 
 #----------------------------------------------------------------------------------------
 # calls find_programm and triggers an fatal assertion if the program is not found
-function( ccbFindRequiredProgram VAR name comment)
+function( cpfFindRequiredProgram VAR name comment)
 
     find_program(${VAR} ${name} DOC ${comment})
     if( ${${VAR}} STREQUAL ${VAR}-NOTFOUND )
@@ -28,7 +28,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # increments the given number by one
-function(ccbIncrement VAR)
+function(cpfIncrement VAR)
 	set(varPrivate ${${VAR}})
 	math( EXPR varPrivate "${varPrivate} + 1")
 	set( ${VAR} ${varPrivate} PARENT_SCOPE)
@@ -36,7 +36,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # decrements the given number by one
-function(ccbDecrement VAR)
+function(cpfDecrement VAR)
 	set(varPrivate ${${VAR}})
 	math( EXPR varPrivate "${varPrivate} - 1")
 	set( ${VAR} ${varPrivate} PARENT_SCOPE)
@@ -44,7 +44,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Removes the last element from the list and sets it to VAR
-function( ccbPopBack VAR list)
+function( cpfPopBack VAR list)
 	list(GET ${list} "-1" blib)
 	set(${VAR} ${blib} PARENT_SCOPE)
 	list(REMOVE_AT ${list} "-1")
@@ -54,7 +54,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns the part left of the given index and the part right and including the given index
 #
-function( ccbSplitList outLeft outRight list splitIndex )
+function( cpfSplitList outLeft outRight list splitIndex )
 	
 	set(index 0)
 	foreach(element ${list})
@@ -63,7 +63,7 @@ function( ccbSplitList outLeft outRight list splitIndex )
 		else()
 			list(APPEND outRightLocal ${element})
 		endif()
-		ccbIncrement(index)
+		cpfIncrement(index)
 	endforeach()
 
 	set( ${outLeft} ${outLeftLocal} PARENT_SCOPE)
@@ -72,20 +72,19 @@ function( ccbSplitList outLeft outRight list splitIndex )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# The given var is only printed when the global CCB_VERBOSE option is set to ON.
-# The function will prepend "-- [CppCodeBase] " to the given text so it can be identified
-# as output from the CppCodeBase cmake code.
+# The given var is only printed when the global CPF_VERBOSE option is set to ON.
+# The function will prepend "-- [CPF] " to the given text so it can be identified
+# as output from the CPFCMake code.
 #
-function( ccbDebugMessage var)
-	if(CCB_VERBOSE)
-		message("-- [CppCodeBase] ${var}")
+function( cpfDebugMessage var)
+	if(CPF_VERBOSE)
+		message("-- [CPF] ${var}")
 	endif()
 endfunction()
 
 #----------------------------------------------------------------------------------------
 # This print function prepends "------------------" to the printed variable and is
-# supposed to be used for temporary debug output while developing the CppCodeBase
-# cmake code.
+# supposed to be used for temporary debug output while developing the CPFCMake code.
 function( devMessage var)
 	message("------------------ ${var}")
 endfunction()
@@ -99,7 +98,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Writes the name of the immediate parent folder to VAR
-function ( ccbGetParentFolder output fileName )
+function ( cpfGetParentFolder output fileName )
 	
 	get_source_file_property( fullFilename ${fileName} LOCATION)
 	get_filename_component( dir ${fullFilename} DIRECTORY)
@@ -118,7 +117,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns a list with the names of the subdirectories within a given directory
 # 
-function( ccbGetSubdirectories dirsOut absDir )
+function( cpfGetSubdirectories dirsOut absDir )
 
   file(GLOB children RELATIVE ${absDir} ${absDir}/*)
   set(dirlist "")
@@ -138,7 +137,7 @@ endfunction()
 #		subPath = C:/bla/blub/blib path = C:/bleb -> returns FALSE
 #
 # Note that pathes must use / as a separator.
-function( ccbIsSubPath VAR subPath path)
+function( cpfIsSubPath VAR subPath path)
 	
 	set(${VAR} FALSE PARENT_SCOPE )
 	if("${subPath}" MATCHES "^${path}(.*)")
@@ -151,7 +150,7 @@ endfunction()
 # Returns the drive name on windows and / on linux. If the given path is relative
 # VAR is set to NOTFOUND.
 #
-function( ccbGetPathRoot VAR absPath)
+function( cpfGetPathRoot VAR absPath)
 
 	string(SUBSTRING ${absPath} 0 1 firstChar)
 
@@ -173,15 +172,15 @@ function( ccbGetPathRoot VAR absPath)
 		set(${VAR} ${firstChar} PARENT_SCOPE)
 
 	else()
-		message(FATAL_ERROR "Function ccbGetPathRoot() needs to be extended to work on the current host platform.")
+		message(FATAL_ERROR "Function cpfGetPathRoot() needs to be extended to work on the current host platform.")
 	endif()
 
 endfunction()
 
 #----------------------------------------------------------------------------------------
 # returns true if the given path is absolute 
-function( ccbIsAbsolutePath boolOut path)
-	ccbGetPathRoot( root ${path})
+function( cpfIsAbsolutePath boolOut path)
+	cpfGetPathRoot( root ${path})
 	if( ${root} STREQUAL NOTFOUND )
 		set( ${boolOut} FALSE PARENT_SCOPE)
 	else()
@@ -191,15 +190,15 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # removes .. dirUp directories from absolute paths.
-function( ccbNormalizeAbsPath normedPathOut absPath)
-	ccbGetPathRoot( root "${absPath}")
+function( cpfNormalizeAbsPath normedPathOut absPath)
+	cpfGetPathRoot( root "${absPath}")
 	get_filename_component( normedPath "${absPath}" ABSOLUTE BASE_DIR ${root} )
 	set( ${normedPathOut} "${normedPath}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
 # returns multiple relative paths from the fromPath to the toPaths
-function( ccbGetRelativePaths relPathsOut fromPath toPaths )
+function( cpfGetRelativePaths relPathsOut fromPath toPaths )
 	set(relPaths)
 	foreach( toPath ${toPaths})
 		file(RELATIVE_PATH relPath ${fromPath} ${toPath})
@@ -212,7 +211,7 @@ endfunction()
 # Splits the given string into substrings at the location of the separator char
 # The separator will not be contained in the returned substrings
 # 
-function( ccbSplitString VAR string separator)
+function( cpfSplitString VAR string separator)
 	string(REPLACE "${separator}" ";" list ${string})
 	set(${VAR} "${list}" PARENT_SCOPE)
 endfunction()
@@ -221,7 +220,7 @@ endfunction()
 # Splits the given string into substrings at the location where white-spaces occur
 # Multiple contiguous white-spaces do not lead to empty list elements.
 # 
-function( ccbSplitStringAtWhitespaces substringsOut string)
+function( cpfSplitStringAtWhitespaces substringsOut string)
 	string(STRIP ${string} string )
 	string(REGEX REPLACE "[\\\n\\\t\\\r ]+" ";" list ${string})
 	set(${substringsOut} ${list} PARENT_SCOPE)
@@ -231,7 +230,7 @@ endfunction()
 # Joins the elements of the given list into one string were the elements are separated
 # by separator
 # 
-function( ccbJoinString VAR list separator )
+function( cpfJoinString VAR list separator )
 	string(REPLACE ";" "${separator}" joinedString "${list}")
 	set(${VAR} ${joinedString} PARENT_SCOPE)
 endfunction()
@@ -239,7 +238,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Takes a list of strings and prepends the prefix to all elements.
 #
-function( ccbPrependMulti outputList prefix inputList )
+function( cpfPrependMulti outputList prefix inputList )
 
 	set(outLocal)
 	foreach( string ${inputList} )
@@ -252,7 +251,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns the right side of the given string starting with the given index
 #
-function( ccbRightSideOfString ret string index)
+function( cpfRightSideOfString ret string index)
 
 	string(LENGTH ${string} length)
 	math(EXPR lengthRighSide "${length} - ${index}")
@@ -263,11 +262,11 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # This function removes removedLength characters from the end of the string
-function( ccbStringRemoveRight stringOut string removedLength )
+function( cpfStringRemoveRight stringOut string removedLength )
 	string(LENGTH ${string} length)
 	math(EXPR remainingLength "${length} - ${removedLength}")
 	if( ${remainingLength} LESS 0 )
-		message( FATAL_ERROR "Error in function ccbStringRemoveRight(). Tried to remove ${removeLength} characters form string \"${string}\" which only has ${length} characters")
+		message( FATAL_ERROR "Error in function cpfStringRemoveRight(). Tried to remove ${removeLength} characters form string \"${string}\" which only has ${length} characters")
 	endif()
 	string( SUBSTRING ${string} 0 ${remainingLength} leftString )
 	set( ${stringOut} ${leftString} PARENT_SCOPE)
@@ -275,7 +274,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # This function takes two strings and returns the one that has fewer characters
-function( ccbGetShorterString stringOut string1 string2 )
+function( cpfGetShorterString stringOut string1 string2 )
 	string(LENGTH ${string1} length1)
 	string(LENGTH ${string2} length2)
 	if( ${length2} LESS ${length1})
@@ -288,22 +287,22 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Uses the baseString to create a list with N elements where the baseString has an appended
 # index in each element like baseString_0;baseString_1;...;baseString_(length-1)
-function( ccbCreateIndexdStringList list baseString length )
+function( cpfCreateIndexdStringList list baseString length )
 
 	set(index 0)
 	set(localList)
 	while( ${index} LESS ${length} )
 		list(APPEND localList ${baseString}_${index})
-		ccbIncrement(index)
+		cpfIncrement(index)
 	endwhile()
 	set(${list} ${localList} PARENT_SCOPE)
 
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# returns true if the given string ccbContains a generator expression
+# returns true if the given string cpfContains a generator expression
 #
-function( ccbContainsGeneratorExpressions output string )
+function( cpfContainsGeneratorExpressions output string )
 
 	string(FIND ${string} "$<" index)
 	if( ${index} GREATER -1 )
@@ -315,12 +314,12 @@ function( ccbContainsGeneratorExpressions output string )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Causes a fatal error if the string ccbContains a generator expression
+# Causes a fatal error if the string cpfContains a generator expression
 #
-function( ccbAssertContainsNoGeneratorExpressions string message )
+function( cpfAssertContainsNoGeneratorExpressions string message )
 
-	ccbContainsGeneratorExpressions( ccbContains ${string})
-	if(ccbContains)
+	cpfContainsGeneratorExpressions( cpfContains ${string})
+	if(cpfContains)
 		message(FATAL_ERROR "${massage}")
 	endif()
 
@@ -329,7 +328,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # returns the maximum of both numbers
-function( ccbMax VAR first second)
+function( cpfMax VAR first second)
 	if( ${first} LESS ${second})
 		set(${VAR} ${second} PARENT_SCOPE)
 	else()
@@ -340,7 +339,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Takes a variable by name and asserts that it is defined.
 #
-function( ccbAssertDefined variableName )
+function( cpfAssertDefined variableName )
 	if(NOT DEFINED ${variableName})
 		message(FATAL_ERROR "Assertion failed! Variable ${variableName} was not defined.}")
 	endif()
@@ -350,10 +349,10 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # This function can be used at the beginning of a script to check whether a variable
 # was set as a script argument.
-function( ccbAssertScriptArgumentDefined variableName )
+function( cpfAssertScriptArgumentDefined variableName )
 	
 	if(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
-		message(FATAL_ERROR "Function ccbAssertScriptArgumentDefined() is supposed to used in .cmake files that are run in script mode \"cmake -P file\".")
+		message(FATAL_ERROR "Function cpfAssertScriptArgumentDefined() is supposed to used in .cmake files that are run in script mode \"cmake -P file\".")
 	endif()
 	
 	if(NOT DEFINED ${variableName})
@@ -366,7 +365,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Takes a variable by name and asserts that it is defined and prints the given message if not.
 #
-function( ccbAssertDefinedMessage variableName message )
+function( cpfAssertDefinedMessage variableName message )
 	if(NOT DEFINED ${variableName})
 		message(FATAL_ERROR "${message}")
 	endif()
@@ -374,10 +373,10 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 #
-function( ccbAssertListsHaveSameLength list1 list2 )
+function( cpfAssertListsHaveSameLength list1 list2 )
 	
-	ccbListLength(length1 "${list1}" )
-	ccbListLength(length2 "${list2}" )
+	cpfListLength(length1 "${list1}" )
+	cpfListLength(length2 "${list2}" )
 	if(NOT ${length1} EQUAL ${length2})
 		message(FATAL_ERROR "Lists are not of same length as required.")
 	endif()
@@ -388,15 +387,15 @@ endfunction()
 # A version of the configure_file() function that asserts if the given variables
 # contain no values when the function is called.
 #
-function( ccbConfigureFileWithVariables input output variables )
+function( cpfConfigureFileWithVariables input output variables )
 	foreach( variable ${variables})
-		ccbAssertDefined(${variable})
+		cpfAssertDefined(${variable})
 	endforeach()
 	configure_file( "${input}" "${output}" )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbIsSingleConfigGenerator var )
+function( cpfIsSingleConfigGenerator var )
 
 	if(CMAKE_CONFIGURATION_TYPES)
 		set( ${var} FALSE PARENT_SCOPE)
@@ -410,17 +409,17 @@ endfunction()
 # In contrast to list(LENGTH ...) this function does not need any policies to be set and
 # it does not ignore empty elements.
 #
-function( ccbListLength lengthOut list)
+function( cpfListLength lengthOut list)
 	set(counter 0)
 	foreach( element IN LISTS list)
-		ccbIncrement(counter)
+		cpfIncrement(counter)
 	endforeach()
 	set(${lengthOut} ${counter} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Returns true if the given list ccbContains the given element
-function( ccbContains ret list element)
+# Returns true if the given list cpfContains the given element
+function( cpfContains ret list element)
 
 	list(FIND list "${element}" index)
 	if("${index}" STREQUAL -1)
@@ -432,11 +431,11 @@ function( ccbContains ret list element)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Returns true if listLoockedIn ccbContains one of the elements of listSearchStrings
-function( ccbContainsOneOf ret listLookedIn listSearchStrings)
+# Returns true if listLoockedIn cpfContains one of the elements of listSearchStrings
+function( cpfContainsOneOf ret listLookedIn listSearchStrings)
 	
 	foreach( searchString ${listSearchStrings} )
-		ccbContains( hasString "${listLookedIn}" ${searchString})
+		cpfContains( hasString "${listLookedIn}" ${searchString})
 		if(hasString)
 			set(${ret} TRUE PARENT_SCOPE)
 			return()
@@ -448,7 +447,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns the first element in the list that matches the regular expression regex
-function( ccbGetFirstMatch matchedElementOut list regex)
+function( cpfGetFirstMatch matchedElementOut list regex)
 	
 	foreach( element ${list} )
 		if( "${element}" MATCHES "${regex}" )
@@ -462,10 +461,10 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns a list with the elements in list1 that can not be found in list2
-function( ccbGetList1WithoutList2 differenceOut list1 list2)
+function( cpfGetList1WithoutList2 differenceOut list1 list2)
 	set(difference)
 	foreach( element ${list1})
-		ccbContains( isInList2 "${list2}" ${element})
+		cpfContains( isInList2 "${list2}" ${element})
 		if(NOT isInList2)
 			list(APPEND difference ${element})
 		endif()
@@ -476,7 +475,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Takes a list of targets and returns only the targets that have a given property set to a given value.
 # An empty string "" for value means, that the property should not be set.
-function( ccbFilterInTargetsWithProperty output targets property value )
+function( cpfFilterInTargetsWithProperty output targets property value )
 
 	set(filteredTargets)
 
@@ -496,13 +495,13 @@ function( ccbFilterInTargetsWithProperty output targets property value )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# The inverse of ccbFilterInTargetsWithProperty()
-function( ccbFilterOutTargetsWithProperty output targets property value )
+# The inverse of cpfFilterInTargetsWithProperty()
+function( cpfFilterOutTargetsWithProperty output targets property value )
 
 	set(filteredTargets)
 
 	foreach( target ${targets})
-		ccbFilterInTargetsWithProperty( hasProperty "${target}" ${property} ${value})
+		cpfFilterInTargetsWithProperty( hasProperty "${target}" ${property} ${value})
 		if(NOT hasProperty)
 			list(APPEND filteredTargets ${target})
 		endif()
@@ -515,16 +514,16 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns a list of _DEBUG;_RELEASE;etc when using multi-config generators or an empty value otherwise
 #
-function( ccbGetConfigVariableSuffixes suffixes)
+function( cpfGetConfigVariableSuffixes suffixes)
 	
 	if(CMAKE_CONFIGURATION_TYPES)
 		foreach(config ${CMAKE_CONFIGURATION_TYPES})
-			ccbToConfigSuffix( suffix ${config})
+			cpfToConfigSuffix( suffix ${config})
 			list(APPEND endings ${suffix})
 		endforeach()
 	else()
 		if(CMAKE_BUILD_TYPE)
-			ccbToConfigSuffix( suffix ${CMAKE_BUILD_TYPE})
+			cpfToConfigSuffix( suffix ${CMAKE_BUILD_TYPE})
 			list(APPEND endings ${suffix})
 		else()
 			list(APPEND endings " ")
@@ -535,7 +534,7 @@ function( ccbGetConfigVariableSuffixes suffixes)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbToConfigSuffix suffix config)
+function( cpfToConfigSuffix suffix config)
 
 	string(TOUPPER ${config} upperConfig)
 	set(${suffix} _${upperConfig} PARENT_SCOPE)
@@ -544,7 +543,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns the possible configurations in which the project can be build
-function( ccbGetConfigurations configs )
+function( cpfGetConfigurations configs )
 
 	if(CMAKE_CONFIGURATION_TYPES)
 		set( ${configs} ${CMAKE_CONFIGURATION_TYPES} PARENT_SCOPE)
@@ -561,7 +560,7 @@ endfunction()
 # You can add an optional argument PRINT to display the output of the command.
 # Note that the function strips trailing whitespaces (line-endings) from the output.
 #
-function( ccbExecuteProcess stdOut commandString workingDir)
+function( cpfExecuteProcess stdOut commandString workingDir)
 
 	cmake_parse_arguments(ARG "PRINT;DONT_INTERCEPT_OUTPUT" "" "" ${ARGN})
 
@@ -572,7 +571,7 @@ function( ccbExecuteProcess stdOut commandString workingDir)
 		) 
 	endif()
 
-	ccbSeparateArgumentsForPlatform( commandList ${commandString})
+	cpfSeparateArgumentsForPlatform( commandList ${commandString})
 	execute_process(
 		COMMAND ${commandList}
 		WORKING_DIRECTORY "${workingDir}"
@@ -603,9 +602,9 @@ endfunction()
 # assumes that version and has the form 123.12.123 and returns the first number as major version,
 # the second number as minor version and the last number as numberOfCommits
 # 
-function( ccbSplitVersion majorOut minorOut patchOut commitIdOut versionString)
+function( cpfSplitVersion majorOut minorOut patchOut commitIdOut versionString)
 	
-	ccbSplitString( versionList ${versionString} ".")
+	cpfSplitString( versionList ${versionString} ".")
 	list(GET versionList 0 majorVersion)
 	list(GET versionList 1 minorVersion)
 	list(GET versionList 2 patchNr)
@@ -614,7 +613,7 @@ function( ccbSplitVersion majorOut minorOut patchOut commitIdOut versionString)
 	set(${minorOut} ${minorVersion} PARENT_SCOPE)
 	set(${patchOut} ${patchNr} PARENT_SCOPE)
 
-	ccbListLength(length "${versionList}" )
+	cpfListLength(length "${versionList}" )
 	if( ${length} GREATER 3 )
 		list(GET versionList 3 commitsNr)
 		set( ${commitIdOut} ${commitsNr} PARENT_SCOPE)
@@ -627,8 +626,8 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns true if the version number misses the 4th commits number.
 # 
-function( ccbIsReleaseVersion isReleaseOut version)
-	ccbSplitVersion( d d d commits ${version})
+function( cpfIsReleaseVersion isReleaseOut version)
+	cpfSplitVersion( d d d commits ${version})
 	if("${commits}" STREQUAL "")
 		set( ${isReleaseOut} TRUE PARENT_SCOPE)
 	else()
@@ -639,7 +638,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # This function prints all currently set variables.
 #
-function( ccbPrintVariables )
+function( cpfPrintVariables )
 	get_cmake_property(_variableNames VARIABLES)
 	foreach (_variableName ${_variableNames})
 		message(STATUS "${_variableName}=${${_variableName}}")
@@ -649,7 +648,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # This function can be called at the beginning of a .cmake file that is executed in script mode.
 # It will then return the names of the variables that where given to the script with the -D option
-function( ccbGetScriptDOptionVariableNames variablesOut )
+function( cpfGetScriptDOptionVariableNames variablesOut )
 
 	set(argIndex 0)
 	set(variableNames)
@@ -665,7 +664,7 @@ function( ccbGetScriptDOptionVariableNames variablesOut )
 			list(APPEND variableNames ${variableName})
 		endif()
 
-		ccbIncrement(argIndex)
+		cpfIncrement(argIndex)
 	endwhile()
 
 	set( ${variablesOut} "${variableNames}" PARENT_SCOPE )
@@ -674,7 +673,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # returns true if the given variable name belongs to a chache variable
-function( ccbIsCacheVariable isCacheVarOut variableName )
+function( cpfIsCacheVariable isCacheVarOut variableName )
 	get_property( type CACHE ${variableName} PROPERTY TYPE )
 	if( ${type} STREQUAL UNINITIALIZED)
 		set( ${isCacheVarOut} FALSE PARENT_SCOPE)
@@ -687,7 +686,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # This function extracts value lists from keyword based argument lists where one keyword can occur
 # multiple times. 
-# The returned valueListsOut ccbContains a list of listnames that contain the values that where preceeded
+# The returned valueListsOut cpfContains a list of listnames that contain the values that where preceeded
 # by the valueListsKeyword.
 # valueListsOut:		Elements of this list must be dereferenced twice to get the actual list.
 # valueListsKeyword: 	The keyword that can be used multiple times.
@@ -695,7 +694,7 @@ endfunction()
 # argumentList:			The complete list of arguments given to the function.
 # outputListBaseName:	The base name for the lists in valueListsOut. This should be some name that is not used by any other variable in the calling scope.
 #
-function( ccbGetKeywordValueLists valueListsOut valueListsKeyword otherKeywords argumentList outputListBaseName )
+function( cpfGetKeywordValueLists valueListsOut valueListsKeyword otherKeywords argumentList outputListBaseName )
 
 	list(REMOVE_ITEM otherKeywords ${valueListsKeyword})
 
@@ -707,9 +706,9 @@ function( ccbGetKeywordValueLists valueListsOut valueListsKeyword otherKeywords 
 			set( currentBelongsToSublist TRUE)
 			set( currentList ${outputListBaseName}${listNameIndex} ) 
 			list( APPEND subLists ${currentList} )
-			ccbIncrement(listNameIndex)
+			cpfIncrement(listNameIndex)
 		else()
-			ccbContains( isOtherKeyword "${otherKeywords}" "${arg}" )
+			cpfContains( isOtherKeyword "${otherKeywords}" "${arg}" )
 			if(isOtherKeyword)
 				set( currentBelongsToSublist FALSE)
 			else() # it is an argument value

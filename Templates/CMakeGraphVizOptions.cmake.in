@@ -1,9 +1,9 @@
-# This file ccbContains options that configure the dependency graph diagramm
-# for the targets in the CppCodeBase
+# This file contains options that configure the dependency graph diagramm
+# for the targets in a CPF project.
 # 
 
 # Set the name of the graph
-set(GRAPHVIZ_GRAPH_NAME "CppCodeBaseTargetDependencyGraph")
+set(GRAPHVIZ_GRAPH_NAME "CPFTargetDependencyGraph")
 # Increase the font size of the target names.
 set(GRAPHVIZ_GRAPH_HEADER "node [\n fontsize = \"14\", fontname=\"helvetica\"\n];")
 

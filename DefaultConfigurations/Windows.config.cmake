@@ -1,5 +1,5 @@
 
-# This file ccbContains CppCodeBase default configuration settings that are specific to the Windows platform. 
+# This file contains CMakeProjectFramework default configuration settings that are specific to the Windows platform. 
 
 include( "${CMAKE_CURRENT_LIST_DIR}/PlatformIndependent.config.cmake" )
 
@@ -10,7 +10,7 @@ set( CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/MSVC2017.cmake" CACHE PATH 
 # LOCATIONS
 file(TO_CMAKE_PATH "$ENV{HOMEDRIVE}$ENV{HOMEPATH}\\HunterPackages" HUNTER_ROOT)
 set( HUNTER_ROOT "${HUNTER_ROOT}" CACHE PATH "The directory where the package manager will download and compile external packages." FORCE)
-file(TO_CMAKE_PATH "$ENV{TEMP}\\CppCodeBase_tests\\${CCB_CONFIG}" testDir)
-set( CCB_TEST_FILES_DIR "${testDir}" CACHE PATH "The directory under which the automated tests may create temporary files." FORCE) 
+file(TO_CMAKE_PATH "$ENV{TEMP}\\CPF_tests\\${CPF_CONFIG}" testDir)
+set( CPF_TEST_FILES_DIR "${testDir}" CACHE PATH "The directory under which the automated tests may create temporary files." FORCE) 
 
 

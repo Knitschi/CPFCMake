@@ -3,18 +3,18 @@
 # CMAKE_HOST_SYSTEM_NAME
 # CURRENT_CONFIG								- should be set to $<CONFIG>
 # STATIC_CONFIG									- A fixed set configuration
-# ARGUMENT_FILE									- An absolute path to a .cmake file that ccbContains the definitions for the following variables.
+# ARGUMENT_FILE									- An absolute path to a .cmake file that cpfContains the definitions for the following variables.
 #	COMMANDS_CONFIG								- the commands that are executed when CURRENT_CONFIG is not STATIC_CONFIG
 #	COMMANDS_NOT_CONFIG							- the commands that are executed when CURRENT_CONFIG is STATIC_CONFIG
 # PRINT_SKIPPED_INSTEAD_OF_NON_CONFIG_OUTPUT	- If set to true the output of the non-config commands is suppressed and one "... skiped" message is printed instead.
 
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbBaseUtilities.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
 
-ccbAssertScriptArgumentDefined(CMAKE_HOST_SYSTEM_NAME)
-ccbAssertScriptArgumentDefined(CURRENT_CONFIG)
-ccbAssertScriptArgumentDefined(STATIC_CONFIG)
-ccbAssertScriptArgumentDefined(ARGUMENT_FILE)
-ccbAssertScriptArgumentDefined(PRINT_SKIPPED_INSTEAD_OF_NON_CONFIG_OUTPUT)
+cpfAssertScriptArgumentDefined(CMAKE_HOST_SYSTEM_NAME)
+cpfAssertScriptArgumentDefined(CURRENT_CONFIG)
+cpfAssertScriptArgumentDefined(STATIC_CONFIG)
+cpfAssertScriptArgumentDefined(ARGUMENT_FILE)
+cpfAssertScriptArgumentDefined(PRINT_SKIPPED_INSTEAD_OF_NON_CONFIG_OUTPUT)
 
 include("${CMAKE_CURRENT_LIST_DIR}/../../../${ARGUMENT_FILE}")	# get the commands from the argument file
 
@@ -22,7 +22,7 @@ function( executeCommands commands isConfig)
 
 	foreach( command ${commands} )
 		
-        #ccbDevMessage("String from file: ${command}")
+        #cpfDevMessage("String from file: ${command}")
         
         # In order to get the special characters through to the final command
         # we need to re-escape them. The number of escapes was determined empirically.
@@ -31,10 +31,10 @@ function( executeCommands commands isConfig)
         string(REPLACE "\\" "\\\\" commandEscaped ${commandEscaped}) 
         string(REPLACE "\"" "\\\"" commandEscaped ${commandEscaped})
         
-        #ccbDevMessage("Escaped string FINAL: ${commandEscaped}")
+        #cpfDevMessage("Escaped string FINAL: ${commandEscaped}")
 
-        ccbSeparateArgumentsForPlatform(commandList ${commandEscaped})
-        #ccbDevMessage("Separated String: ${commandList}")
+        cpfSeparateArgumentsForPlatform(commandList ${commandEscaped})
+        #cpfDevMessage("Separated String: ${commandList}")
 
         # Print the command in a form that can be copied and executed.
         if(isConfig)

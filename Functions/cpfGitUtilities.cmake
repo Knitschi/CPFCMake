@@ -1,34 +1,34 @@
-# This file ccbContains functions that can be used to interact with a git repository
+# This file contains functions that can be used to interact with a git repository
 
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbBaseUtilities.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
 
 
 #----------------------------------------------------------------------------------------
 # Returns true if the tag exists somewhere in the repository
 # If branch is "", the function will look in the whole repository, otherwise only in the
 # commits that precede the HEAD of the given branch.
-function( ccbGitRepoHasTag hasTagOut tag branch repositoryDir )
+function( cpfGitRepoHasTag hasTagOut tag branch repositoryDir )
 	# get a list of tags from git
-	ccbGetTags( tags "${branch}" "${repositoryDir}" )
+	cpfGetTags( tags "${branch}" "${repositoryDir}" )
 	# check if there is a tag with our version
-	ccbContains( hasVersionTag "${tags}" ${tag})
+	cpfContains( hasVersionTag "${tags}" ${tag})
 	set( ${hasTagOut} ${hasVersionTag} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
 # A list of tags in a branch or the whole repository
 # Tags of younger releases come first in the returned list.
-function( ccbGetTags tagsOut branch repositoryDir)
+function( cpfGetTags tagsOut branch repositoryDir)
 
 	if( "${branch}" STREQUAL "")
-		ccbExecuteProcess( textOutput "git tag -l --sort=-committerdate" "${repositoryDir}")
+		cpfExecuteProcess( textOutput "git tag -l --sort=-committerdate" "${repositoryDir}")
 	else()
-		ccbExecuteProcess( textOutput "git tag -l --sort=-committerdate --merged ${branch}" "${repositoryDir}")
+		cpfExecuteProcess( textOutput "git tag -l --sort=-committerdate --merged ${branch}" "${repositoryDir}")
 	endif()
 
 	set(tags)
 	if(textOutput)
-		ccbSplitStringAtWhitespaces( tags "${textOutput}")
+		cpfSplitStringAtWhitespaces( tags "${textOutput}")
 	endif()
 
 	set( ${tagsOut} ${tags} PARENT_SCOPE)
@@ -36,18 +36,18 @@ function( ccbGetTags tagsOut branch repositoryDir)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbGetTagsOfHEAD tagsOut repositoryDir )
-	ccbGetTagsAtCommit( tags HEAD ${repositoryDir})
+function( cpfGetTagsOfHEAD tagsOut repositoryDir )
+	cpfGetTagsAtCommit( tags HEAD ${repositoryDir})
 	set( ${tagsOut} ${tags} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbGetTagsAtCommit tagsOut commitRef repositoryDir )
+function( cpfGetTagsAtCommit tagsOut commitRef repositoryDir )
 
-	ccbExecuteProcess( textOutput "git tag -l --points-at ${commitRef}" ${repositoryDir})
+	cpfExecuteProcess( textOutput "git tag -l --points-at ${commitRef}" ${repositoryDir})
 	set(tags)
 	if(textOutput)
-		ccbSplitStringAtWhitespaces( tags "${textOutput}")
+		cpfSplitStringAtWhitespaces( tags "${textOutput}")
 	endif()
 	set( ${tagsOut} ${tags} PARENT_SCOPE)
 	
@@ -55,9 +55,9 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns a list of release version tags with the latest tags appearing first in the list.
-function( ccbGetReleaseVersionTags tagsOut repositoryDir )
-	ccbGetTags( tags "" ${repositoryDir})
-	ccbGetReleaseVersionRegExp(versionRegExp)
+function( cpfGetReleaseVersionTags tagsOut repositoryDir )
+	cpfGetTags( tags "" ${repositoryDir})
+	cpfGetReleaseVersionRegExp(versionRegExp)
 	list(FILTER tags INCLUDE REGEX ${versionRegExp})
 	
 	set(${tagsOut} ${tags} PARENT_SCOPE)
@@ -66,9 +66,9 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Get the previous version tag of the checked out branch.
 # This may return a tag to HEAD or the given branch ref
-function( ccbGetLastVersionTagOfBranch lastVersionTagOut branch repositoryDir allowTagsAtHEAD )
+function( cpfGetLastVersionTagOfBranch lastVersionTagOut branch repositoryDir allowTagsAtHEAD )
 
-	ccbGetPrecedingTagsLatestFirst( tags ${branch} ${repositoryDir} ${allowTagsAtHEAD} )
+	cpfGetPrecedingTagsLatestFirst( tags ${branch} ${repositoryDir} ${allowTagsAtHEAD} )
 
 	# The regex should match the following strings
 	# "1.2.3"							release version
@@ -80,11 +80,11 @@ function( ccbGetLastVersionTagOfBranch lastVersionTagOut branch repositoryDir al
 	# "83.54.32-rc"						release-version with comment. The version of a release must be "clean" so it can be directly used in binary names.
 	# "abc12.43.5"						Should not match unclean release version
 
-	ccbGetFirstMatch( latestVersionTag "${tags}" "^[0-9]+[.][0-9]+[.][0-9]+([.]([0-9]+[\\-])?[0-9a-z]+([\\-][0-9a-zA-Z\\-\\_]*)?)?$")
+	cpfGetFirstMatch( latestVersionTag "${tags}" "^[0-9]+[.][0-9]+[.][0-9]+([.]([0-9]+[\\-])?[0-9a-z]+([\\-][0-9a-zA-Z\\-\\_]*)?)?$")
 	# make sure we do not have a release tag at the same version
-	ccbGetTagsAtCommit( siblingTags ${latestVersionTag} ${repositoryDir})
-	ccbGetReleaseVersionRegExp( regexp)
-	ccbGetFirstMatch( releaseVersionTag "${siblingTags}" ${regexp})
+	cpfGetTagsAtCommit( siblingTags ${latestVersionTag} ${repositoryDir})
+	cpfGetReleaseVersionRegExp( regexp)
+	cpfGetFirstMatch( releaseVersionTag "${siblingTags}" ${regexp})
 	if(releaseVersionTag)
 		set(${lastVersionTagOut} ${releaseVersionTag} PARENT_SCOPE)
 	else()
@@ -94,16 +94,16 @@ function( ccbGetLastVersionTagOfBranch lastVersionTagOut branch repositoryDir al
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbGetReleaseVersionRegExp regexpOut )
+function( cpfGetReleaseVersionRegExp regexpOut )
 	set( ${regexpOut} "^[0-9]+[.][0-9]+[.][0-9]+$" PARENT_SCOPE) 
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbGetPrecedingTagsLatestFirst tagsOut branch repositoryDir allowTagsAtHEAD )
+function( cpfGetPrecedingTagsLatestFirst tagsOut branch repositoryDir allowTagsAtHEAD )
 
-	ccbGetTags( tags "${branch}" "${repositoryDir}")
+	cpfGetTags( tags "${branch}" "${repositoryDir}")
 	if(NOT allowTagsAtHEAD)
-		ccbGetTagsOfHEAD( headTags ${repositoryDir} )
+		cpfGetTagsOfHEAD( headTags ${repositoryDir} )
 		if(headTags)
 			list(REMOVE_ITEM tags ${headTags}) # make sure we do not get a tag at HEAD
 		endif()
@@ -116,22 +116,22 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns the last version tag that is a release version.
 # This will not return a tag of HEAD, but only older tags.
-function( ccbGetLastReleaseVersionTagOfBranch lastVersionTagOut branch repositoryDir allowTagsAtHEAD )
+function( cpfGetLastReleaseVersionTagOfBranch lastVersionTagOut branch repositoryDir allowTagsAtHEAD )
 
-	ccbGetPrecedingTagsLatestFirst( tags ${branch} ${repositoryDir} ${allowTagsAtHEAD} )
+	cpfGetPrecedingTagsLatestFirst( tags ${branch} ${repositoryDir} ${allowTagsAtHEAD} )
 
 	# The regex should only match release versions that only contain three numbers with single dots in between them like 1.23.45
-	ccbGetReleaseVersionRegExp(regexp)
-	ccbGetFirstMatch( latestVersionTag "${tags}" ${regexp} )
+	cpfGetReleaseVersionRegExp(regexp)
+	cpfGetFirstMatch( latestVersionTag "${tags}" ${regexp} )
 	set(${lastVersionTagOut} ${latestVersionTag} PARENT_SCOPE)
 
 endfunction()
 
 #----------------------------------------------------------------------------------------
 # get the number of commits since the last tag
-function( ccbGetNumberOfCommitsSinceTag nrCommitsOut tag repositoryDir )
+function( cpfGetNumberOfCommitsSinceTag nrCommitsOut tag repositoryDir )
 
-	ccbExecuteProcess( nrCommitsSinceTag "git rev-list ${tag}..HEAD --count" "${repositoryDir}")
+	cpfExecuteProcess( nrCommitsSinceTag "git rev-list ${tag}..HEAD --count" "${repositoryDir}")
 
 	set(${nrCommitsOut} ${nrCommitsSinceTag} PARENT_SCOPE)
 
@@ -139,49 +139,49 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns the name of the currently checked out branch.
-function( ccbGetCurrentBranch currentBranchOut repositoryDir)
-	ccbExecuteProcess( branch "git rev-parse --abbrev-ref HEAD" "${repositoryDir}")
+function( cpfGetCurrentBranch currentBranchOut repositoryDir)
+	cpfExecuteProcess( branch "git rev-parse --abbrev-ref HEAD" "${repositoryDir}")
 	set(${currentBranchOut} ${branch} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbHasLocalBranch hasBranchOut branch repositoryDir )
+function( cpfHasLocalBranch hasBranchOut branch repositoryDir )
 
-	ccbExecuteProcess( textOutput "git branch" "${repositoryDir}")
-	ccbSplitStringAtWhitespaces( branches "${textOutput}")
-	ccbContains( hasBranch "${branches}" ${branch})
+	cpfExecuteProcess( textOutput "git branch" "${repositoryDir}")
+	cpfSplitStringAtWhitespaces( branches "${textOutput}")
+	cpfContains( hasBranch "${branches}" ${branch})
 	set(${hasBranchOut} ${hasBranch} PARENT_SCOPE)
 
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbDeleteBranch branch repositoryDir )
-	ccbExecuteProcess( dummyOut "git branch -D ${branch}" "${repositoryDir}")
+function( cpfDeleteBranch branch repositoryDir )
+	cpfExecuteProcess( dummyOut "git branch -D ${branch}" "${repositoryDir}")
 endfunction()
 
 #----------------------------------------------------------------------------------------
 # checks if a certain branch exists on a remote repository
-function( ccbRemoteHasBranch hasBranchOut remote branch repositoryDir )
+function( cpfRemoteHasBranch hasBranchOut remote branch repositoryDir )
 
-	ccbExecuteProcess( dummyOut "git fetch -p ${remote}" "${repositoryDir}") # update the local "cache" of remote branches first
-	ccbExecuteProcess( textOutput "git branch -r" "${repositoryDir}")
-	ccbSplitStringAtWhitespaces( branches "${textOutput}")
-	ccbContains( hasBranch "${branches}" ${remote}/${branch})
+	cpfExecuteProcess( dummyOut "git fetch -p ${remote}" "${repositoryDir}") # update the local "cache" of remote branches first
+	cpfExecuteProcess( textOutput "git branch -r" "${repositoryDir}")
+	cpfSplitStringAtWhitespaces( branches "${textOutput}")
+	cpfContains( hasBranch "${branches}" ${remote}/${branch})
 	set(${hasBranchOut} ${hasBranch} PARENT_SCOPE)
 
 endfunction()
 
 #----------------------------------------------------------------------------------------
 # deletes a remote branch
-function( ccbDeleteRemoteBranch remote branch repositoryDir )
-	ccbExecuteProcess( dummyOut "git fetch -p ${remote}" "${repositoryDir}") # update the local "cache" of remote branches first
-	ccbExecuteProcess( textOutput "git push ${remote} -d ${branch}" "${repositoryDir}")
+function( cpfDeleteRemoteBranch remote branch repositoryDir )
+	cpfExecuteProcess( dummyOut "git fetch -p ${remote}" "${repositoryDir}") # update the local "cache" of remote branches first
+	cpfExecuteProcess( textOutput "git push ${remote} -d ${branch}" "${repositoryDir}")
 endfunction()
 
 #----------------------------------------------------------------------------------------
 # returns the url of the origin remote
-function( ccbGetUrlOfOrigin urlOut repositoryDir )
-	ccbExecuteProcess( url "git config --get remote.origin.url" "${repositoryDir}")
+function( cpfGetUrlOfOrigin urlOut repositoryDir )
+	cpfExecuteProcess( url "git config --get remote.origin.url" "${repositoryDir}")
 	set( ${urlOut} "${url}" PARENT_SCOPE)
 endfunction()
 
@@ -189,7 +189,7 @@ endfunction()
 # The function returns true if one of the heads of the branches 1 and 2 is an ancestor
 # to the other. If this is true, merging the branches will be a fast-forward merge without
 # the creation of a new commit.
-function( ccbMergeWillBeFastForward isFastForwardOut branch1 branch2 repoDir )
+function( cpfMergeWillBeFastForward isFastForwardOut branch1 branch2 repoDir )
 
 	set(isFastForward FALSE)
 
@@ -214,7 +214,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # returns True if the given directory is within a git repository.
-function( ccbIsGitRepositoryDir isRepoDirOut absDirPath )
+function( cpfIsGitRepositoryDir isRepoDirOut absDirPath )
 
 	execute_process(
 		COMMAND git;rev-parse;HEAD
@@ -245,16 +245,16 @@ endfunction()
 # append "-dirty" to the version number. However, it is not guaranteed that build-results
 # that have no -dirty version were build from a clean working directory. 
 #
-function( ccbGetCommitIdOfHead commitIdOut lastVersionTag repositoryDir )
+function( cpfGetCommitIdOfHead commitIdOut lastVersionTag repositoryDir )
 	
 	# get the number of commits since the last release version
-	ccbSplitVersion( major minor patch unused ${lastVersionTag})
+	cpfSplitVersion( major minor patch unused ${lastVersionTag})
 	set( lastReleaseTag ${major}.${minor}.${patch})
-	ccbGetNumberOfCommitsSinceTag( nrCommitsOut ${lastReleaseTag} "${repositoryDir}")
+	cpfGetNumberOfCommitsSinceTag( nrCommitsOut ${lastReleaseTag} "${repositoryDir}")
 	set(commitId ${nrCommitsOut} )
 
 	# get the commit has
-	ccbExecuteProcess( hash "git rev-parse --short=4 HEAD" "${repositoryDir}")
+	cpfExecuteProcess( hash "git rev-parse --short=4 HEAD" "${repositoryDir}")
 	string(APPEND commitId -${hash})
 	
 	set( ${commitIdOut} ${commitId} PARENT_SCOPE)
@@ -262,7 +262,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns FALSE if there are no changes in the current working directory
-function( ccbWorkingDirectoryIsDirty isDirtyOut repositoryDir)
+function( cpfWorkingDirectoryIsDirty isDirtyOut repositoryDir)
 	execute_process(
 		COMMAND git;diff-index;--quiet;HEAD
 		WORKING_DIRECTORY "${repositoryDir}"
@@ -278,21 +278,21 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Reads the version of the currently checked out commit from the git repository
-function( ccbGetCurrentVersionFromGitRepository versionOut repoDir  )
+function( cpfGetCurrentVersionFromGitRepository versionOut repoDir  )
 
-	ccbGetCurrentBranch( currentBranch "${repoDir}")
-	ccbGetLastReleaseVersionTagOfBranch( lastReleaseTagVersion ${currentBranch} "${repoDir}" TRUE)
+	cpfGetCurrentBranch( currentBranch "${repoDir}")
+	cpfGetLastReleaseVersionTagOfBranch( lastReleaseTagVersion ${currentBranch} "${repoDir}" TRUE)
 	if(NOT lastReleaseTagVersion)
 		message( FATAL_ERROR "Branch ${currentBranch} of the repository at ${repoDir} has no release version tag. Make sure to tag the first commit of the repository with \"0.0.0\"" )
 	endif()
-	ccbSplitVersion( major minor patch unused ${lastReleaseTagVersion} )
+	cpfSplitVersion( major minor patch unused ${lastReleaseTagVersion} )
 	
 	# check if the last tag is the currently checked out version.
 	# If so we return the tag. This will make sure that the function
 	# will return release version tags that do not have the commit id.
-	ccbGetHashOfTag( hashLastTag ${lastReleaseTagVersion} "${repoDir}")
-	ccbGetHashOfTag( hashHEAD HEAD "${repoDir}")
-	ccbWorkingDirectoryIsDirty(isDirty "${repoDir}")
+	cpfGetHashOfTag( hashLastTag ${lastReleaseTagVersion} "${repoDir}")
+	cpfGetHashOfTag( hashHEAD HEAD "${repoDir}")
+	cpfWorkingDirectoryIsDirty(isDirty "${repoDir}")
 	if( ${hashLastTag} STREQUAL ${hashHEAD} ) 
 		# HEAD already has a version tag. We use this one.
 		set( versionLocal ${lastReleaseTagVersion})
@@ -301,7 +301,7 @@ function( ccbGetCurrentVersionFromGitRepository versionOut repoDir  )
 		endif()
 	else()	
 		# HEAD does not have a version tag. We create a new one.
-		ccbGetCommitIdOfHead( currentCommitId ${lastReleaseTagVersion} "${repoDir}")
+		cpfGetCommitIdOfHead( currentCommitId ${lastReleaseTagVersion} "${repoDir}")
 		set( versionLocal ${major}.${minor}.${patch}.${currentCommitId})
 		if(isDirty)
 			set( versionLocal ${versionLocal}-dirty )
@@ -316,7 +316,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns the commitId hash of a tag or the head.
-function( ccbGetHashOfTag hashOut tag repositoryDir )
-	ccbExecuteProcess( hash "git rev-list -1 ${tag}" "${repositoryDir}")
+function( cpfGetHashOfTag hashOut tag repositoryDir )
+	cpfExecuteProcess( hash "git rev-list -1 ${tag}" "${repositoryDir}")
 	set(${hashOut} ${hash} PARENT_SCOPE)
 endfunction()

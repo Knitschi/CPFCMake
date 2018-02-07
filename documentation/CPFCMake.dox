@@ -1,12 +1,12 @@
 /**
-\defgroup CPFCMakeGroup CppCodeBaseCMake
+\defgroup CPFCMakeGroup CPFCMake
 
 \brief A cmake package that implements a standardized c++ CMake project with additional CI functionality.
 
-The CppCodeBaseCMake package is the most basic component of the CppCodeBase framework. It helps with setting
+The CPFCMake package is the most basic component of the CMakeProjectFramework. It helps with setting
 up a CMake based C++ project with extended functionality. The package tries to solve the following problems:
 
-- Abstraction of common CMake code to a higher level. CppCodeBase projects are set-up by using only
+- Abstraction of common CMake code to a higher level. CMakeProjectFramework projects are set up by using only
 a handfull of CMake functions. This removes implementation details from the `CMakeLists.txt` files.
 - Providing a standardized directory structure for a C++ project.
 - Providing additional CI tasks like code-analysis or documentation-generation as custom targets.

@@ -1,6 +1,6 @@
 
-include("${CMAKE_CURRENT_LIST_DIR}/../Variables/ccbLocations.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/ccbBaseUtilities.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cpfBaseUtilities.cmake")
 
 set(DIR_OF_PROJECT_UTILITIES ${CMAKE_CURRENT_LIST_DIR})
 
@@ -10,25 +10,25 @@ set(DIR_OF_PROJECT_UTILITIES ${CMAKE_CURRENT_LIST_DIR})
 #
 # Make sure to only set compiler options here that do not need to be passed to the static
 # library dependencies upstream. Those must be specified in the cmake toolchain files.
-macro( ccbSetDynamicAndCosmeticCompilerOptions )
+macro( cpfSetDynamicAndCosmeticCompilerOptions )
     
-	ccbGetCompiler(compiler)
+	cpfGetCompiler(compiler)
     if( ${compiler} STREQUAL Vc) # VC flags
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") # the /MP flag saved on my 4 core machine 25 % compile time
     endif()
     
-	ccbSetHighWarningLevel()
+	cpfSetHighWarningLevel()
 
-    if( CCB_WARNINGS_AS_ERRORS )
-		ccbSetWarningsAsErrors()
+    if( CPF_WARNINGS_AS_ERRORS )
+		cpfSetWarningsAsErrors()
 	endif()
 
 endmacro()
 
 #----------------------------------------- set warning level to 4 and set warnings as errors --------------------------------
-macro(ccbSetHighWarningLevel)
+macro(cpfSetHighWarningLevel)
     
-	ccbGetCompiler(compiler)
+	cpfGetCompiler(compiler)
     if(${compiler} STREQUAL Vc)
         # Use the highest warning level for visual studio.
         set(CMAKE_CXX_WARNING_LEVEL 4)
@@ -52,9 +52,9 @@ macro(ccbSetHighWarningLevel)
 endmacro()
 
 #----------------------------------------------------------------------------------------
-macro( ccbSetWarningsAsErrors )
+macro( cpfSetWarningsAsErrors )
 
-	ccbGetCompiler(compiler)
+	cpfGetCompiler(compiler)
     if(${compiler} STREQUAL Vc)
         # Treat warnings as errors
         # TODO only do this optionally when user sets a variable
@@ -80,7 +80,7 @@ endmacro()
 #----------------------------------------------------------------------------------------
 # Returns Vc, Clang, Gcc, or UNKNOWN
 #
-function( ccbGetCompiler compiler)
+function( cpfGetCompiler compiler)
 
 	if(MSVC)
 		set(comp Vc)
@@ -98,9 +98,9 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # returns a list of all currently used CXX_FLAGS
-function( ccbGetCxxFlags flagsOut config)
-	ccbToConfigSuffix( configSuffix ${config})
-	ccbSplitStringAtWhitespaces( flags "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS${configSuffix}}")
+function( cpfGetCxxFlags flagsOut config)
+	cpfToConfigSuffix( configSuffix ${config})
+	cpfSplitStringAtWhitespaces( flags "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS${configSuffix}}")
 	set( ${flagsOut} "${flags}" PARENT_SCOPE)
 endfunction()
 
@@ -110,8 +110,8 @@ function( isMSVCDebugConfig bOut config )
 	set(isMSVCDebug FALSE)
 
 	if(MSVC)
-		ccbGetCxxFlags( flags ${config})
-		ccbContainsOneOf( isMSVCDebug "${flags}" "/Zi;/ZI;/Z7" )
+		cpfGetCxxFlags( flags ${config})
+		cpfContainsOneOf( isMSVCDebug "${flags}" "/Zi;/ZI;/Z7" )
 	endif()
 
 	set( ${bOut} ${isMSVCDebug} PARENT_SCOPE)
@@ -119,14 +119,14 @@ function( isMSVCDebugConfig bOut config )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbIsGccClangDebug var )
+function( cpfIsGccClangDebug var )
 
-	ccbGetCompiler(compiler)
+	cpfGetCompiler(compiler)
 	if(${compiler} STREQUAL Clang OR ${compiler} STREQUAL Gcc)
 
-		ccbGetCxxFlags( flags ${CMAKE_BUILD_TYPE})
-		ccbContains( hasDebugFlag "${flags}" -g )
-		ccbContainsOneOf( hasLowOptimizationFlag "${flags}" "-O1;-O0" )
+		cpfGetCxxFlags( flags ${CMAKE_BUILD_TYPE})
+		cpfContains( hasDebugFlag "${flags}" -g )
+		cpfContainsOneOf( hasLowOptimizationFlag "${flags}" "-O1;-O0" )
 		
 		if(hasDebugFlag AND hasLowOptimizationFlag )
 			set(${var} TRUE PARENT_SCOPE)
@@ -139,7 +139,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns true if the current generator is one of the Visual Studio generators.
-function( ccbIsVisualStudioGenerator isVSOut )
+function( cpfIsVisualStudioGenerator isVSOut )
 	set(isVS FALSE)
 	if( ${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
 		set(isVS TRUE)
@@ -149,7 +149,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # reduce the warning level for files that are added over cmakes interface sources mechanism
-macro( ccbRemoveWarningFlagsForSomeExternalFiles targetName )
+macro( cpfRemoveWarningFlagsForSomeExternalFiles targetName )
 
     set( externalFiles 
         static_qt_plugins.cpp   # added when using staticly linked hunter-qt
@@ -191,7 +191,7 @@ endmacro()
 #----------------------------------------------------------------------------------------
 # This function reads some properties from a target and prints the value if it is set.
 #
-function( ccbPrintTargetProperties target )
+function( cpfPrintTargetProperties target )
 
 	if( NOT TARGET ${target})
 		message("There is no target ${target}")
@@ -398,17 +398,17 @@ function( ccbPrintTargetProperties target )
 		XCODE_EXPLICIT_FILE_TYPE
 		XCODE_PRODUCT_TYPE
 		XCTEST
-		# CPPCODEBASE properties
+		# CPF properties
 		PACKAGE
 		TARGET_STAMP_FILE
-		CCB_UIC_SUBTARGET
-		CCB_STATIC_ANALYSIS_SUBTARGET
-		CCB_RUN_TESTS_SUBTARGET
-		CCB_BINARY_SUBTARGETS
-		CCB_DOXYGEN_SUBTARGET
-		CCB_DOXYGEN_TAGSFILE
-		CCB_DOXYGEN_CONFIG_SUBTARGET
-		CCB_DOXYGEN_CONFIG_FILE
+		CPF_UIC_SUBTARGET
+		CPF_STATIC_ANALYSIS_SUBTARGET
+		CPF_RUN_TESTS_SUBTARGET
+		CPF_BINARY_SUBTARGETS
+		CPF_DOXYGEN_SUBTARGET
+		CPF_DOXYGEN_TAGSFILE
+		CPF_DOXYGEN_CONFIG_SUBTARGET
+		CPF_DOXYGEN_CONFIG_FILE
 	)
 
 	# For interface targets accessing non whitelisted properties causes errors.
@@ -444,7 +444,7 @@ function( ccbPrintTargetProperties target )
 
 
 	# get all conifg suffixes for the target
-	ccbGetConfigVariableSuffixes(suffixes TRUE)
+	cpfGetConfigVariableSuffixes(suffixes TRUE)
 	if(NOT CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
 		if(NOT ${type} STREQUAL INTERFACE_LIBRARY)
 			list(APPEND suffixes " ") # also show the variables without the suffix
@@ -479,7 +479,7 @@ function( ccbPrintTargetProperties target )
 	
 	# print the properties
 	foreach( property ${properties})
-		ccbPrintTargetPropertyIfSet( ${target} ${property})
+		cpfPrintTargetPropertyIfSet( ${target} ${property})
 	endforeach()
 
 endfunction()
@@ -488,7 +488,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Prints the value of the given target property if it is set.
 #
-function( ccbPrintTargetPropertyIfSet target property )
+function( cpfPrintTargetPropertyIfSet target property )
 
 	get_property( value TARGET ${target} PROPERTY ${property} )
 	if(NOT "${value}" STREQUAL "")
@@ -501,47 +501,47 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Prints all CMAKE variables that together define the toolchain
 #
-function( ccbPrintToolchainVariables )
+function( cpfPrintToolchainVariables )
 
-	ccbDebugMessage("Used Buildtools:")
-	ccbDebugMessage("CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
-	ccbDebugMessage("CMAKE_MAKE_PROGRAM: ${CMAKE_MAKE_PROGRAM}")
-	ccbDebugMessage("CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
-	ccbDebugMessage("CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
-	ccbDebugMessage("CMAKE_LINKER: ${CMAKE_LINKER}")
-	ccbDebugMessage("CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
-	ccbDebugMessage("CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
-	ccbDebugMessage("CMAKE_VS_PLATFORM_NAME: ${CMAKE_VS_PLATFORM_NAME}")
+	cpfDebugMessage("Used Buildtools:")
+	cpfDebugMessage("CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
+	cpfDebugMessage("CMAKE_MAKE_PROGRAM: ${CMAKE_MAKE_PROGRAM}")
+	cpfDebugMessage("CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
+	cpfDebugMessage("CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
+	cpfDebugMessage("CMAKE_LINKER: ${CMAKE_LINKER}")
+	cpfDebugMessage("CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+	cpfDebugMessage("CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
+	cpfDebugMessage("CMAKE_VS_PLATFORM_NAME: ${CMAKE_VS_PLATFORM_NAME}")
 
 endfunction()
 
 
 #---------------------------------------------------------------------------------------------
 # This function will find all the tools that are required to build all the custom
-# targets of a CppCodeBase package.
+# targets of a CMakeProjectFramework package.
 # The function will populate the TOOL_<exe> cache entries. Currently they are:
 # TOOL_
 #  
 #
-function( ccbFindRequiredTools )
+function( cpfFindRequiredTools )
 
-	if(CCB_ENABLE_DOXYGEN_TARGET)
-		ccbFindRequiredProgram( TOOL_DOXYGEN doxygen "A tool that generates documentation files by reading in-code comments")
-		ccbFindRequiredProgram( TOOL_DOXYINDEXER doxyindexer "A tool that generates search indexes for doxygen generated html files")
-		ccbFindRequiredProgram( TOOL_TRED tred "A tool from the graphviz library that creates a transitive reduced version of a graphviz graph")
+	if(CPF_ENABLE_DOXYGEN_TARGET)
+		cpfFindRequiredProgram( TOOL_DOXYGEN doxygen "A tool that generates documentation files by reading in-code comments")
+		cpfFindRequiredProgram( TOOL_DOXYINDEXER doxyindexer "A tool that generates search indexes for doxygen generated html files")
+		cpfFindRequiredProgram( TOOL_TRED tred "A tool from the graphviz library that creates a transitive reduced version of a graphviz graph")
 	endif()
 	
-	if(CCB_ENABLE_STATIC_ANALYSIS_TARGET)
-		ccbGetCompiler(compiler)
+	if(CPF_ENABLE_STATIC_ANALYSIS_TARGET)
+		cpfGetCompiler(compiler)
 		if( ${compiler} STREQUAL Clang)
 			set(CLANG_TIDY clang-tidy-3.9) # We should get this from hunter some day.
-			ccbFindRequiredProgram(TOOL_CLANG_TIDY ${CLANG_TIDY} "A tool from the LLVM project that performs static analysis of cpp code")
+			cpfFindRequiredProgram(TOOL_CLANG_TIDY ${CLANG_TIDY} "A tool from the LLVM project that performs static analysis of cpp code")
 		endif()
-		ccbFindRequiredProgram( TOOL_ACYCLIC acyclic "A tool from the graphviz library that can check if a graphviz graph is acyclic")
+		cpfFindRequiredProgram( TOOL_ACYCLIC acyclic "A tool from the graphviz library that can check if a graphviz graph is acyclic")
 	endif()
 
 	if(Qt5Gui_FOUND )
-		ccbFindRequiredProgram( TOOL_UIC uic "A tool from the Qt framework that generates ui_*.h files from *.ui GUI defining xml files")
+		cpfFindRequiredProgram( TOOL_UIC uic "A tool from the Qt framework that generates ui_*.h files from *.ui GUI defining xml files")
 	endif()
 
 	# python is optional
@@ -554,7 +554,7 @@ endfunction()
 
 
 #---------------------------------------------------------------------------------------------
-function( ccbGetTargetProperties outputValues targets properties )
+function( cpfGetTargetProperties outputValues targets properties )
 
 	set(values)
 
@@ -573,7 +573,7 @@ endfunction()
 # This function can be used when there are possibly multiple target properties that may hold the
 # required information. The function will try on property after the other and return the value
 # for the first that holds a value.
-function( ccbGetFirstDefinedTargetProperty valueOut target properties )
+function( cpfGetFirstDefinedTargetProperty valueOut target properties )
     foreach( property ${properties} )
         get_property( value TARGET ${target} PROPERTY ${property})
         if(value)
@@ -587,23 +587,23 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Returns the short output name of the internal target
 #
-function( ccbGetTargetOutputFileName output target config )
+function( cpfGetTargetOutputFileName output target config )
 
-	ccbGetTargetOutputType( outputType ${target})
+	cpfGetTargetOutputType( outputType ${target})
 	get_property( targetType TARGET ${target} PROPERTY TYPE)
-	ccbGetTargetOutputFileNameForTargetType( shortFilename ${target} ${config} ${targetType} ${outputType})
+	cpfGetTargetOutputFileNameForTargetType( shortFilename ${target} ${config} ${targetType} ${outputType})
 	set( ${output} ${shortFilename} PARENT_SCOPE )
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( ccbGetTargetOutputFileNameForTargetType output target config targetType outputType)
+function( cpfGetTargetOutputFileNameForTargetType output target config targetType outputType)
 
-	ccbToConfigSuffix(configSuffix ${config})
+	cpfToConfigSuffix(configSuffix ${config})
 	get_property( outputBaseName TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME${configSuffix} )
 	
-	ccbGetTargetTypeFileExtension( extension ${targetType})
-	ccbTargetIsDynamicLibrary( isDynamicLib ${target})
+	cpfGetTargetTypeFileExtension( extension ${targetType})
+	cpfTargetIsDynamicLibrary( isDynamicLib ${target})
 	if(${CMAKE_SYSTEM_NAME} STREQUAL Linux AND isDynamicLib )
 		get_property(version TARGET ${target} PROPERTY VERSION)
 		set( shortFilename "${outputBaseName}${extension}.${version}")
@@ -616,9 +616,9 @@ function( ccbGetTargetOutputFileNameForTargetType output target config targetTyp
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( ccbGetTargetOutputBaseName nameOut target config)
-	ccbToConfigSuffix( configSuffix ${config})
-	ccbGetTargetOutputType( outputType ${target})
+function( cpfGetTargetOutputBaseName nameOut target config)
+	cpfToConfigSuffix( configSuffix ${config})
+	cpfGetTargetOutputType( outputType ${target})
 	get_property( baseName TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME${configSuffix} )
 	set( ${nameOut} ${baseName} PARENT_SCOPE)
 endfunction()
@@ -626,26 +626,26 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Note that this function defines a part of the directory structure of the deployed files
 #
-function( ccbGetRelativeOutputDir relativeDir package outputType )
+function( cpfGetRelativeOutputDir relativeDir package outputType )
 
-	ccbGetPackagePrefixOutputDir( packagePrefixDir ${package} )
-	ccbGetTypePartOfOutputDir(typeDir ${package} ${outputType})
+	cpfGetPackagePrefixOutputDir( packagePrefixDir ${package} )
+	cpfGetTypePartOfOutputDir(typeDir ${package} ${outputType})
 	set(${relativeDir} ${packagePrefixDir}/${typeDir} PARENT_SCOPE )
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
 # 
-function( ccbGetPackagePrefixOutputDir outputDir package )
+function( cpfGetPackagePrefixOutputDir outputDir package )
 	set(${outputDir} ${package} PARENT_SCOPE )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
 # returns the output directory of the target
-function( ccbGetTargetOutputDirectory output target config )
+function( cpfGetTargetOutputDirectory output target config )
 
-	ccbToConfigSuffix(configSuffix ${config})
-	ccbGetTargetOutputType( outputType ${target})
+	cpfToConfigSuffix(configSuffix ${config})
+	cpfGetTargetOutputType( outputType ${target})
 	get_property( outputDir TARGET ${target} PROPERTY ${outputType}_OUTPUT_DIRECTORY${configSuffix} )
 	set( ${output} "${outputDir}" PARENT_SCOPE )
 
@@ -654,7 +654,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # This function defines the part of the output directory that comes after the config/package add_subdirectory
 #
-function( ccbGetTypePartOfOutputDir typeDir package outputType )
+function( cpfGetTypePartOfOutputDir typeDir package outputType )
 
 	# handle relative dirs that are the same on all platforms
 	if(${outputType} STREQUAL ARCHIVE)
@@ -686,7 +686,7 @@ function( ccbGetTypePartOfOutputDir typeDir package outputType )
 		endif()
 
 	else()
-		message(FATAL_ERROR "Function ccbSetAllOutputDirectoriesAndNames() must be extended for system ${CMAKE_SYSTEM_NAME}")
+		message(FATAL_ERROR "Function cpfSetAllOutputDirectoriesAndNames() must be extended for system ${CMAKE_SYSTEM_NAME}")
 	endif()
 	
 	set( ${typeDir} ${typeDirLocal} PARENT_SCOPE ) 
@@ -696,22 +696,22 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns the absolute path to the output directory and the short filename of the output file of an imported or internal target
 #
-function( ccbGetTargetLocation targetDirOut targetFilenameOut target config )
+function( cpfGetTargetLocation targetDirOut targetFilenameOut target config )
 
 	get_property(isImported TARGET ${target} PROPERTY IMPORTED)
 	if(isImported)
-		ccbToConfigSuffix( configSuffix ${config})
+		cpfToConfigSuffix( configSuffix ${config})
 		# for imported targets it is not clear which property holds the 
 		set( possibleLocationProperties IMPORTED_LOCATION${configSuffix} LOCATION${configSuffix} IMPORTED_LOCATION LOCATION )
-		ccbGetFirstDefinedTargetProperty( fullTargetFile ${target} "${possibleLocationProperties}")
+		cpfGetFirstDefinedTargetProperty( fullTargetFile ${target} "${possibleLocationProperties}")
   
         if("${fullTargetFile}" STREQUAL "") # give up
-            ccbPrintTargetProperties(${target}) # print more debug information about which variable may hold the location
-            message(FATAL_ERROR "Function ccbGetTargetLocation() could not determine the location of the binary file for target ${target} and configuration ${config}")
+            cpfPrintTargetProperties(${target}) # print more debug information about which variable may hold the location
+            message(FATAL_ERROR "Function cpfGetTargetLocation() could not determine the location of the binary file for target ${target} and configuration ${config}")
         endif()
 
 	else()
-		ccbGetFullTargetOutputFile( fullTargetFile ${target} ${config})
+		cpfGetFullTargetOutputFile( fullTargetFile ${target} ${config})
 	endif()
 
 	get_filename_component( shortName "${fullTargetFile}" NAME)
@@ -725,10 +725,10 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns the absolute pathes of the output files of multiple targets.
 #
-function( ccbGetTargetLocations absolutePathes targets config )
+function( cpfGetTargetLocations absolutePathes targets config )
 	set(locations)
 	foreach(target ${targets})
-		ccbGetTargetLocation( dir shortName ${target} ${config} )
+		cpfGetTargetLocation( dir shortName ${target} ${config} )
 		list(APPEND locations "${dir}/${shortName}")
 	endforeach()
 	set(${absolutePathes} "${locations}" PARENT_SCOPE)
@@ -736,12 +736,12 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns a list with the binary sub-targets that are of type SHARED_LIBRARY or MODULE_LIBRARY.
-function( ccbGetSharedLibrarySubTargets librarySubTargetsOut package)
+function( cpfGetSharedLibrarySubTargets librarySubTargetsOut package)
 
 	set(libraryTargets)
-	get_property( binaryTargets TARGET ${package} PROPERTY CCB_BINARY_SUBTARGETS)
+	get_property( binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
 	foreach( binaryTarget ${binaryTargets})
-		ccbTargetIsDynamicLibrary( isDynamic ${binaryTarget})
+		cpfTargetIsDynamicLibrary( isDynamic ${binaryTarget})
 		if(isDynamic)
 			list(APPEND libraryTargets ${binaryTarget})
 		endif()
@@ -753,7 +753,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns true if the target is a SHARED_LIBRARY or MODULE_LIBRARY
-function( ccbTargetIsDynamicLibrary bOut target)
+function( cpfTargetIsDynamicLibrary bOut target)
 	get_property( type TARGET ${target} PROPERTY TYPE )
 	if(${type} STREQUAL SHARED_LIBRARY OR ${type} STREQUAL MODULE_LIBRARY)
 		set(${bOut} TRUE PARENT_SCOPE)
@@ -764,17 +764,17 @@ endfunction()
 
 #---------------------------------------------------------------------------------------------
 # returns the full output filename of the given target
-function( ccbGetFullTargetOutputFile output target config )
+function( cpfGetFullTargetOutputFile output target config )
 
-	ccbGetTargetOutputDirectory( directory ${target} ${config} )
-	ccbGetTargetOutputFileName( name ${target} ${config})
+	cpfGetTargetOutputDirectory( directory ${target} ${config} )
+	cpfGetTargetOutputFileName( name ${target} ${config})
 	set( ${output} "${directory}/${name}" PARENT_SCOPE )
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
 # translates the target type into the output type (ARCHIVE, RUNTIME etc.)
-function( ccbGetTargetOutputType outputTypeOut target )
+function( cpfGetTargetOutputType outputTypeOut target )
 
 	get_property( type TARGET ${target} PROPERTY TYPE)
 	if( ${type} STREQUAL EXECUTABLE )
@@ -792,14 +792,14 @@ function( ccbGetTargetOutputType outputTypeOut target )
 	elseif(${type} STREQUAL INTERFACE_LIBRARY)
 		set( ${outputTypeOut} ARCHIVE PARENT_SCOPE)
 	else()
-		message(FATAL_ERROR "Target type ${type} not supported by function ccbGetTargetOutputType()")
+		message(FATAL_ERROR "Target type ${type} not supported by function cpfGetTargetOutputType()")
 	endif()
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
 # returns the file extension for the type of the given target
-function( ccbGetTargetTypeFileExtension extension targetType)
+function( cpfGetTargetTypeFileExtension extension targetType)
 	
 	if( ${targetType} STREQUAL EXECUTABLE )
 		set( ${extension} ${CMAKE_${targetType}_SUFFIX} PARENT_SCOPE)
@@ -810,19 +810,19 @@ function( ccbGetTargetTypeFileExtension extension targetType)
 	elseif(${targetType} STREQUAL SHARED_LIBRARY)
 		set( ${extension} ${CMAKE_${targetType}_SUFFIX} PARENT_SCOPE)
 	else()
-		message(FATAL_ERROR "Target type ${targetType} not supported by function ccbGetTargetTypeFileExtension()")
+		message(FATAL_ERROR "Target type ${targetType} not supported by function cpfGetTargetTypeFileExtension()")
 	endif()
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# This function returns all the subdirectories in the Sources directory of a CppCodeBase.
+# This function returns all the subdirectories in the Sources directory of a CMakeProjectFramework project.
 #
-function( ccbGetSourcesSubdirectories subdirsOut cppCodeBaseRootDir )
+function( cpfGetSourcesSubdirectories subdirsOut cpfRootDir )
 
 	# get subdirectories in the Sources directory to find potential packages
-	set( fullSourceDir "${cppCodeBaseRootDir}/${CCB_SOURCE_DIR}" )
-	ccbGetSubdirectories( subDirs "${fullSourceDir}" )
+	set( fullSourceDir "${cpfRootDir}/${CPF_SOURCE_DIR}" )
+	cpfGetSubdirectories( subDirs "${fullSourceDir}" )
 	if(NOT subDirs)
 		message(FATAL_ERROR "No possible package directories found in directory \"${fullSourceDir}\"")
 	endif()
@@ -833,14 +833,14 @@ endfunction()
 
 #---------------------------------------------------------------------------------------------
 # This function reads the package version from a packages version file.
-function( ccbGetPackageVersionFromFile versionOut package absPackageSourceDir )
+function( cpfGetPackageVersionFromFile versionOut package absPackageSourceDir )
 
-	ccbGetPackageVersionFileName( versionFile ${package})
+	cpfGetPackageVersionFileName( versionFile ${package})
 	include("${absPackageSourceDir}/${versionFile}")
-	if( "${CPPCODEBASE_${package}_VERSION}" STREQUAL "")
-		message(FATAL_ERROR "Could not read value of variable CPPCODEBASE_${package}_VERSION from file \"${absPackageSourceDir}/${versionFile}\"." )
+	if( "${CPF_${package}_VERSION}" STREQUAL "")
+		message(FATAL_ERROR "Could not read value of variable CPF_${package}_VERSION from file \"${absPackageSourceDir}/${versionFile}\"." )
 	endif()
-	set( ${versionOut} ${CPPCODEBASE_${package}_VERSION} PARENT_SCOPE)
+	set( ${versionOut} ${CPF_${package}_VERSION} PARENT_SCOPE)
 
 endfunction()
 
@@ -848,27 +848,27 @@ endfunction()
 # This function tries to find the location of a config file with the given configName
 # configName can be an absolute file path to a .config.cmake file or the base-name of
 # config file which is situated in one of the following directories:
-#    <cppcodebase-root>/Configuration     
-#    <cppcodebase-root>/Sources/BuildConfigurations
-#    <cppcodebase-root>/Sources/CppCodeBaseCMake/DefaultConfigurations
+#    <cpf-root>/Configuration     
+#    <cpf-root>/Sources/BuildConfigurations
+#    <cpf-root>/Sources/CPFCMake/DefaultConfigurations
 #
 # If multiple files with the same base-name exist, the one in the directory that comes
 # first in the above list is taken.
 #
-function( ccbFindConfigFile absFilePathOut configName )
+function( cpfFindConfigFile absFilePathOut configName )
 
 	if(EXISTS "${configName}")
 		set(absPath "${configName}")
 	else()
 
 		set( searchLocations
-			"${DIR_OF_PROJECT_UTILITIES}/../../../${CCB_CONFIG_DIR}"									# developer specific configs
-			"${DIR_OF_PROJECT_UTILITIES}/../../../${CCB_SOURCE_DIR}/${CCB_PROJECT_CONFIGURATIONS_DIR}"	# project default configs
-			"${DIR_OF_PROJECT_UTILITIES}/../${CCB_DEFAULT_CONFIGS_DIR}"									# CCB provided standard configs
+			"${DIR_OF_PROJECT_UTILITIES}/../../../${CPF_CONFIG_DIR}"				# developer specific configs
+			"${DIR_OF_PROJECT_UTILITIES}/../../${CPF_PROJECT_CONFIGURATIONS_DIR}"	# project default configs
+			"${DIR_OF_PROJECT_UTILITIES}/../${CPF_DEFAULT_CONFIGS_DIR}"				# CPF provided standard configs
 		)
 
 		foreach( dir ${searchLocations})
-			ccbNormalizeAbsPath( fullConfigFile "${dir}/${configName}${CCB_CONFIG_FILE_ENDING}" )
+			cpfNormalizeAbsPath( fullConfigFile "${dir}/${configName}${CPF_CONFIG_FILE_ENDING}" )
 			if( EXISTS "${fullConfigFile}" )
 				set( absPath "${fullConfigFile}" )
 				continue()
@@ -889,20 +889,20 @@ endfunction()
 # Returns the names, types, values and descriptions of cache variables that are defined in a given file.
 # 
 #
-function( ccbGetCacheVariablesDefinedInFile variableNamesOut variableValuesOut variableTypesOut variableDescriptionsOut absFilePath )
+function( cpfGetCacheVariablesDefinedInFile variableNamesOut variableValuesOut variableTypesOut variableDescriptionsOut absFilePath )
 	
 	# get and store original chache state
-	ccbReadCurrentCacheVariables( cacheVariablesBefore cacheValuesBefore cacheTypesBefore cacheDescriptionsBefore)
+	cpfReadCurrentCacheVariables( cacheVariablesBefore cacheValuesBefore cacheTypesBefore cacheDescriptionsBefore)
 
 	# clear the cache so we can read all variables from the file
-	ccbClearAllCacheVariables()
+	cpfClearAllCacheVariables()
 
 	# load cache variables from file
 	include("${absFilePath}")
-	ccbReadCurrentCacheVariables( cacheVariablesFile cacheValuesFile cacheTypesFile cacheDescriptionsFile)
+	cpfReadCurrentCacheVariables( cacheVariablesFile cacheValuesFile cacheTypesFile cacheDescriptionsFile)
 
 	# clear the cache changes from the include
-	ccbClearAllCacheVariables()
+	cpfClearAllCacheVariables()
 
 	# restore the cache from before the include
 	set(index 0)
@@ -911,7 +911,7 @@ function( ccbGetCacheVariablesDefinedInFile variableNamesOut variableValuesOut v
 		list(GET cacheTypesBefore ${index} type )
 		list(GET cacheDescriptionsBefore ${index} description )	
 		set( ${variable} "${value}" CACHE ${type} "${description}" FORCE )
-		ccbIncrement(index)
+		cpfIncrement(index)
 	endforeach()
 
 	set( ${variableNamesOut} "${cacheVariablesFile}" PARENT_SCOPE)
@@ -924,7 +924,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Returns the names, values, types and descriptions of the currently defined cache variabls.
 #
-function( ccbReadCurrentCacheVariables variableNamesOut variableValuesOut variableTypesOut variableDescriptionsOut )
+function( cpfReadCurrentCacheVariables variableNamesOut variableValuesOut variableTypesOut variableDescriptionsOut )
 
 	get_cmake_property( cacheVariables CACHE_VARIABLES)
 	set(cacheValues)
@@ -940,10 +940,10 @@ function( ccbReadCurrentCacheVariables variableNamesOut variableValuesOut variab
 	endforeach()
 
 	# assert that all lists are of the same length
-	ccbListLength(namesLength "${cacheVariables}" )
-	ccbListLength(valuesLength "${cacheValues}" )
-	ccbListLength(typesLength "${cacheTypes}" )
-	ccbListLength(descriptionsLength "${cacheDescriptions}" )
+	cpfListLength(namesLength "${cacheVariables}" )
+	cpfListLength(valuesLength "${cacheValues}" )
+	cpfListLength(typesLength "${cacheTypes}" )
+	cpfListLength(descriptionsLength "${cacheDescriptions}" )
 	if(NOT ( (${namesLength} EQUAL ${valuesLength}) AND (${namesLength} EQUAL ${typesLength}) AND(${namesLength} EQUAL ${descriptionsLength}) ))
 		message(FATAL_ERROR "Not all cache variables have all properties defined in function readCurrentCacheVariables().")
 	endif()
@@ -958,7 +958,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Removes all variables from the cache
 #
-function( ccbClearAllCacheVariables )
+function( cpfClearAllCacheVariables )
 	get_cmake_property( cacheVariables CACHE_VARIABLES)
 	foreach(variable ${cacheVariables})
 		unset(${variable} CACHE)
@@ -966,7 +966,7 @@ function( ccbClearAllCacheVariables )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( ccbGetExecutableTargets exeTargetsOut package )
+function( cpfGetExecutableTargets exeTargetsOut package )
 	set(exeTargets)
 
 	get_property( mainTargetType TARGET ${package} PROPERTY TYPE )
@@ -974,7 +974,7 @@ function( ccbGetExecutableTargets exeTargetsOut package )
 		list(APPEND exeTargets ${package})
 	endif()
 
-	get_property( testTarget TARGET ${package} PROPERTY CCB_TESTS_SUBTARGET )
+	get_property( testTarget TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET )
 	if(testTarget)
 		list(APPEND exeTargets ${testTarget})
 	endif()

@@ -1,32 +1,32 @@
 
-include(ccbLocations)
-include(ccbBaseUtilities)
-include(ccbProjectUtilities)
-include(ccbGitUtilities)
-include(ccbCustomTargetUtilities)
-include(ccbAddCompatibilityCheckTarget)
-include(ccbAddDynamicAnalysisTarget)
+include(cpfLocations)
+include(cpfBaseUtilities)
+include(cpfProjectUtilities)
+include(cpfGitUtilities)
+include(cpfCustomTargetUtilities)
+include(cpfAddCompatibilityCheckTarget)
+include(cpfAddDynamicAnalysisTarget)
 
 set(DIR_OF_DOCUMENTATION_TARGET_FILE ${CMAKE_CURRENT_LIST_DIR})
 
 #----------------------------------------------------------------------------------------
-# Adds a target that runs doxygen on the whole Source directory of the CPPCODEBASE
+# Adds a target that runs doxygen on the whole Source directory of the CPF project.
 #
-# This function should be removed when the problems with the ccbAddGlobalDocumentationTarget() generation get fixed.
-function( ccbAddGlobalMonolithicDocumentationTarget packages)
+# This function should be removed when the problems with the cpfAddGlobalDocumentationTarget() generation get fixed.
+function( cpfAddGlobalMonolithicDocumentationTarget packages)
 
-	if(NOT CCB_ENABLE_DOXYGEN_TARGET)
+	if(NOT CPF_ENABLE_DOXYGEN_TARGET)
 		return()
 	endif()
 
 	set(targetName documentation)
 
 	# Locations
-	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${CCB_PRIVATE_DIR}/${targetName}" )
+	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}" )
 	set(tempDoxygenConfigFile "${targetBinaryDir}/tempDoxygenConfig.txt" )
-	set(reducedGraphFile "${CCB_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/CppCodeBaseDependenciesTransitiveReduced.dot")
+	set(reducedGraphFile "${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/CPFDependenciesTransitiveReduced.dot")
 	set(doxygenConfigFile "${CMAKE_SOURCE_DIR}/DoxygenConfig.txt")
-	set(htmlCgiBinDir "${CCB_PROJECT_HTML_ABS_DIR}/${CCB_CGI_BIN_DIR}" )
+	set(htmlCgiBinDir "${CPF_PROJECT_HTML_ABS_DIR}/${CPF_CGI_BIN_DIR}" )
 
 	# Generate the DoxygenConfig.txt file if it does not exist.
 	configure_file( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenConfig.txt.in" ${doxygenConfigFile} COPYONLY )
@@ -35,10 +35,10 @@ function( ccbAddGlobalMonolithicDocumentationTarget packages)
 	set(fileDependencies)
 	set(targetDependencies)
 	foreach( package ${packages})
-		ccbGetPackageDoxFilesTargetName( doxFilesTarget ${package} )
+		cpfGetPackageDoxFilesTargetName( doxFilesTarget ${package} )
 		if( TARGET ${doxFilesTarget}) # not all packages may have the doxFilesTarget
 			list(APPEND targetDependencies ${doxFilesTarget})
-			get_property( generatedDoxFiles TARGET ${doxFilesTarget} PROPERTY CCB_OUTPUT_FILES )
+			get_property( generatedDoxFiles TARGET ${doxFilesTarget} PROPERTY CPF_OUTPUT_FILES )
 			list(APPEND fileDependencies ${generatedDoxFiles})
 		endif()
 	endforeach()
@@ -47,31 +47,31 @@ function( ccbAddGlobalMonolithicDocumentationTarget packages)
     # The tred tool is from the graphviz suite and does the transitive reduction.
 	# The generated file is used as input of the documentation.
 	get_filename_component(reducedDepGraphDir ${reducedGraphFile} DIRECTORY)
-	set(tredCommand "\"${TOOL_TRED}\" \"${CCB_TARGET_DEPENDENCY_GRAPH_FILE}\" > \"${reducedGraphFile}\"")
-	ccbAddStandardCustomCommand(
+	set(tredCommand "\"${TOOL_TRED}\" \"${CPF_TARGET_DEPENDENCY_GRAPH_FILE}\" > \"${reducedGraphFile}\"")
+	cpfAddStandardCustomCommand(
 		OUTPUT ${reducedGraphFile}
-		DEPENDS ${CCB_TARGET_DEPENDENCY_GRAPH_FILE}
+		DEPENDS ${CPF_TARGET_DEPENDENCY_GRAPH_FILE}
 		COMMANDS "cmake -E make_directory \"${reducedDepGraphDir}\"" ${tredCommand}
 	)
 
 	# add a command to copy the full dependency graph to the doxygen output dir
-	get_filename_component(destShort ${CCB_TARGET_DEPENDENCY_GRAPH_FILE} NAME )
-	set(copiedDependencyGraphFile ${CCB_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/${destShort})
-	ccbAddCustomCommandCopyFile(${CCB_TARGET_DEPENDENCY_GRAPH_FILE} ${copiedDependencyGraphFile} )
+	get_filename_component(destShort ${CPF_TARGET_DEPENDENCY_GRAPH_FILE} NAME )
+	set(copiedDependencyGraphFile ${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/${destShort})
+	cpfAddCustomCommandCopyFile(${CPF_TARGET_DEPENDENCY_GRAPH_FILE} ${copiedDependencyGraphFile} )
 
 	# The config file must contain the names of the depended on xml tag files of other doxygen sub-targets.
-	list(APPEND appendedLines "DOTFILE_DIRS = \"${CCB_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
-	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${CCB_DOXYGEN_OUTPUT_ABS_DIR}\"")
+	list(APPEND appendedLines "DOTFILE_DIRS = \"${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
+	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}\"")
 	list(APPEND appendedLines "INPUT = \"${CMAKE_SOURCE_DIR}\"")
-	list(APPEND appendedLines "INPUT += \"${CMAKE_BINARY_DIR}/${CCB_GENERATED_DOCS_DIR}\"")
+	list(APPEND appendedLines "INPUT += \"${CMAKE_BINARY_DIR}/${CPF_GENERATED_DOCS_DIR}\"")
 	
 	# TODO get plantuml.jar with hunter
-	if(CCB_PLANT_UML_JAR)
+	if(CPF_PLANT_UML_JAR)
 		message( STATUS "Enable UML diagrams in doxygen comments.")
-		list(APPEND appendedLines "PLANTUML_JAR_PATH = \"${CCB_PLANT_UML_JAR}\"")
+		list(APPEND appendedLines "PLANTUML_JAR_PATH = \"${CPF_PLANT_UML_JAR}\"")
 	endif()
 
-	ccbAddAppendLinesToFileCommands( 
+	cpfAddAppendLinesToFileCommands( 
 		INPUT ${doxygenConfigFile}
 		OUTPUT ${tempDoxygenConfigFile}
 		ADDED_LINES ${appendedLines} 
@@ -79,9 +79,9 @@ function( ccbAddGlobalMonolithicDocumentationTarget packages)
 
 	# Add the command for running doxygen
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
-	set( searchDataXmlFile ${CCB_DOXYGEN_OUTPUT_ABS_DIR}/searchdata.xml)
-	ccbGetAllNonGeneratedPackageSources(sourceFiles "${packages}")
-	ccbAddStandardCustomCommand(
+	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/searchdata.xml)
+	cpfGetAllNonGeneratedPackageSources(sourceFiles "${packages}")
+	cpfAddStandardCustomCommand(
 		OUTPUT ${searchDataXmlFile}
 		DEPENDS ${tempDoxygenConfigFile} ${copiedDependencyGraphFile} ${reducedGraphFile} ${sourceFiles} ${linkFiles} ${fileDependencies}
 		COMMANDS ${doxygenCommand}
@@ -92,7 +92,7 @@ function( ccbAddGlobalMonolithicDocumentationTarget packages)
 	# when using the search function of the documentation
 	set(doxyIndexerCommand "\"${TOOL_DOXYINDEXER}\" -o \"${htmlCgiBinDir}\" \"${searchDataXmlFile}\"" )
 	set(doxyIndexerStampFile ${targetBinaryDir}/doxyindexer.stamp)
-	ccbAddStandardCustomCommand(
+	cpfAddStandardCustomCommand(
 		OUTPUT ${doxyIndexerStampFile}
 		DEPENDS ${searchDataXmlFile}
 		COMMANDS "cmake -E make_directory \"${htmlCgiBinDir}\"" ${doxyIndexerCommand} "cmake -E touch \"${doxyIndexerStampFile}\""
@@ -108,16 +108,16 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # read all sources from all binary targets of the given packages
-function( ccbGetAllNonGeneratedPackageSources sourceFiles packages )
+function( cpfGetAllNonGeneratedPackageSources sourceFiles packages )
 
 	foreach( package ${packages})
-		if(TARGET ${package}) # non-cppcodebase packages may not have targets set to them
-			get_property(binaryTargets TARGET ${package} PROPERTY CCB_BINARY_SUBTARGETS )
+		if(TARGET ${package}) # non-cpf packages may not have targets set to them
+			get_property(binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
 			foreach( target ${binaryTargets} globalFiles)
 				get_property(files TARGET ${target} PROPERTY SOURCES)
 				get_property(dir TARGET ${target} PROPERTY SOURCE_DIR)
 				foreach(file ${files})
-					ccbGetPathRoot(root ${file})
+					cpfGetPathRoot(root ${file})
 					# Some source files have absolute paths and most not.
 					# We ignore files that have absolute pathes for which we assume that they are the ones in the Generated directory.
 					# Only the files in the Sources directory are used by doxygen.
@@ -136,7 +136,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # A custom target that generates the doxygen documentation for the whole project.
-# In contrast to the target that is added with the ccbAddGlobalMonolithicDocumentationTarget() function
+# In contrast to the target that is added with the cpfAddGlobalMonolithicDocumentationTarget() function
 # This target uses the doxygen subtargets to run doxygen separately for all packages.
 #
 # Warning: The documentation generated with this target does include all classes in its
@@ -144,7 +144,7 @@ endfunction()
 #
 # Arguments:
 # PACKAGES A list of packages that contribute tag files as input for the documentation.
-function( ccbAddGlobalDocumentationTarget )
+function( cpfAddGlobalDocumentationTarget )
 
 	message(FATAL_ERROR "TODO: add doxyindexer command here and make sure the search works.")
 
@@ -153,26 +153,26 @@ function( ccbAddGlobalDocumentationTarget )
 	set(targetName generateDocumentation)
 	
 	# Locations
-	set(tempDoxygenConfigFile ${CPPCODEBASE_GLOBAL_DOXYGEN_BIN_DIR}/tempDoxygenConfig.txt )
-	set(globalHtmlOutputDir ${CPPCODEBASE_DOXYGEN_HTML_OUTPUT}/All)
+	set(tempDoxygenConfigFile ${CPF_GLOBAL_DOXYGEN_BIN_DIR}/tempDoxygenConfig.txt )
+	set(globalHtmlOutputDir ${CPF_DOXYGEN_HTML_OUTPUT}/All)
 
     # Add a command to generate the the transitive reduced dependency graph of all targets.
     # The tred tool is from the graphviz suite and does the transitive reduction.
 	# The generated file is used as input of the documentation.
-	set(tredCommand "\"${TOOL_TRED}\" ${CCB_TARGET_DEPENDENCY_GRAPH_FILE} > ${reducedGraphFile}")
-	ccbAddStandardCustomCommand(
+	set(tredCommand "\"${TOOL_TRED}\" ${CPF_TARGET_DEPENDENCY_GRAPH_FILE} > ${reducedGraphFile}")
+	cpfAddStandardCustomCommand(
 		OUTPUT ${reducedGraphFile}
-		DEPENDS ${CCB_TARGET_DEPENDENCY_GRAPH_FILE}
+		DEPENDS ${CPF_TARGET_DEPENDENCY_GRAPH_FILE}
 		COMMANDS ${tredCommand}
 	)
 
 	# Add a command to add the package tag files to the global doxygen configuration file.
-	ccbGetDoxygenDependencies( doxygenSubTargets tagFiles PACKAGES ${ARG_PACKAGES})
+	cpfGetDoxygenDependencies( doxygenSubTargets tagFiles PACKAGES ${ARG_PACKAGES})
 	
 	# The config file must contain the names of the depended on xml tag files of other doxygen sub-targets.
-	list(APPEND appendedLines "DOTFILE_DIRS=\"${CCB_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
+	list(APPEND appendedLines "DOTFILE_DIRS=\"${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
 	list(APPEND appendedLines "OUTPUT_DIRECTORY=\"${globalHtmlOutputDir}\"")
-	list(APPEND appendedLines "INPUT+=${CCB_SOURCE_DIR}")
+	list(APPEND appendedLines "INPUT+=${CPF_SOURCE_DIR}")
 
 	foreach( tagFile ${tagFiles})
 		get_filename_component(extTagFileDir ${tagFile} DIRECTORY)
@@ -180,21 +180,21 @@ function( ccbAddGlobalDocumentationTarget )
 		list(APPEND appendedLines "TAGFILES+=${tagFile}=${relPath}")
 	endforeach()
 	
-	ccbAddAppendLinesToFileCommands( 
+	cpfAddAppendLinesToFileCommands( 
 		INPUT ${doxygenConfigFile}
 		OUTPUT ${tempDoxygenConfigFile}
 		ADDED_LINES ${appendedLines} 
 	)
 	
 	# add a command to copy the full dependency graph to the doxygen output dir
-	get_filename_component(destShort ${CCB_TARGET_DEPENDENCY_GRAPH_FILE} NAME )
-	set(copiedDependencyGraphFile ${CCB_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/${destShort})
-	ccbAddCustomCommandCopyFile(${CCB_TARGET_DEPENDENCY_GRAPH_FILE} ${copiedDependencyGraphFile} )
+	get_filename_component(destShort ${CPF_TARGET_DEPENDENCY_GRAPH_FILE} NAME )
+	set(copiedDependencyGraphFile ${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/${destShort})
+	cpfAddCustomCommandCopyFile(${CPF_TARGET_DEPENDENCY_GRAPH_FILE} ${copiedDependencyGraphFile} )
 	
 	# Create the command for running doxygen
 	set(doxygenCommand "\"${TOOL_DOXYGEN}\" ${tempDoxygenConfigFile}")
-	set( targetStampFile ${CPPCODEBASE_GLOBAL_DOXYGEN_BIN_DIR}/globalDoxygenTarget.stamp)
-	ccbAddStandardCustomCommand(
+	set( targetStampFile ${CPF_GLOBAL_DOXYGEN_BIN_DIR}/globalDoxygenTarget.stamp)
+	cpfAddStandardCustomCommand(
 		OUTPUT ${targetStampFile}
 		DEPENDS ${tempDoxygenConfigFile} ${tagFiles} ${copiedDependencyGraphFile} ${reducedGraphFile}
 		COMMANDS ${doxygenCommand} "cmake -E touch ${targetStampFile}"
@@ -216,15 +216,15 @@ endfunction()
 # subtargets: Output variable that will contain all the doxygen tag subtargets.
 # tagFiles: Output variable that will contain all the doxygen tag files.
 # PACKAGES: A list of packages that may or may not have a generateDoxygenTags subtarget.
-function( ccbGetDoxygenDependencies subtargetsArg tagFilesArg )
+function( cpfGetDoxygenDependencies subtargetsArg tagFilesArg )
 
 	cmake_parse_arguments(ARG "" "" "PACKAGES" ${ARGN} )
 
 	foreach( library ${ARG_PACKAGES})
-		get_property( subTarget TARGET ${library} PROPERTY CCB_DOXYGEN_SUBTARGET)
+		get_property( subTarget TARGET ${library} PROPERTY CPF_DOXYGEN_SUBTARGET)
 		if(subTarget)
 			list(APPEND subTargets ${subTarget})
-			get_property( tagFile TARGET ${subTarget} PROPERTY CCB_DOXYGEN_TAGSFILE)
+			get_property( tagFile TARGET ${subTarget} PROPERTY CPF_DOXYGEN_TAGSFILE)
 			list(APPEND tagFiles ${tagFile})
 		endif()
 	endforeach()
@@ -240,7 +240,7 @@ endfunction()
 # PACKAGE: The package name
 # LINKED_LIBRARIES: The dependencies of the package.
 # DOCUMENTED_SOURCE_FILES: The source files that are parsed by doxygen. They are used as dependency for the doxygen command to trigger reruns of doxygen.
-function( ccbAddDoxygenSubTarget )
+function( cpfAddDoxygenSubTarget )
 
 	cmake_parse_arguments(ARG "" PACKAGE "LINKED_LIBRARIES;DOCUMENTED_SOURCE_FILES" ${ARGN} )
 	
@@ -248,15 +248,15 @@ function( ccbAddDoxygenSubTarget )
 	set( targetName ${ARG_PACKAGE}_runDoxygen)
 	
 	# Locations
-	set( outputDir ${CPPCODEBASE_DOXYGEN_HTML_OUTPUT}/${ARG_PACKAGE})
+	set( outputDir ${CPF_DOXYGEN_HTML_OUTPUT}/${ARG_PACKAGE})
 	set(generatedDoxygenTagsfile ${outputDir}/${ARG_PACKAGE}Doxygen.tag )
 	
 	# Get tag files and doxygen targets of the dependencies.
 	# The tag files are needed as an input for this doxygen run.
-	ccbGetDoxygenDependencies( dependedOnDoxygenSubTargets dependedOnTagsFiles PACKAGES ${ARG_LINKED_LIBRARIES})
+	cpfGetDoxygenDependencies( dependedOnDoxygenSubTargets dependedOnTagsFiles PACKAGES ${ARG_LINKED_LIBRARIES})
 	
 	# Add the target that generates the per target doxygen config file
-	ccbAddDoxygenConfigurationTarget(
+	cpfAddDoxygenConfigurationTarget(
 		OUTPUT_DIR ${outputDir}
 		PACKAGE ${ARG_PACKAGE}
 		GENERATED_TAG_FILE ${generatedDoxygenTagsfile}
@@ -264,8 +264,8 @@ function( ccbAddDoxygenSubTarget )
 	)
 	
 	# Get the path to the doxygen config file
-	get_property( configSubTarget TARGET ${ARG_PACKAGE} PROPERTY CCB_DOXYGEN_CONFIG_SUBTARGET )
-	get_property( packageDoxygenConfigFile TARGET ${configSubTarget} PROPERTY CCB_DOXYGEN_CONFIG_FILE )
+	get_property( configSubTarget TARGET ${ARG_PACKAGE} PROPERTY CPF_DOXYGEN_CONFIG_SUBTARGET )
+	get_property( packageDoxygenConfigFile TARGET ${configSubTarget} PROPERTY CPF_DOXYGEN_CONFIG_FILE )
 	
 	# Transform source file names to full filenames
 	foreach(file ${ARG_DOCUMENTED_SOURCE_FILES} )
@@ -274,7 +274,7 @@ function( ccbAddDoxygenSubTarget )
 	
 	# Add the command for running doxygen
 	set(doxygenCommand "\"${TOOL_DOXYGEN}\" \"${packageDoxygenConfigFile}\"")
-	ccbAddStandardCustomCommand(
+	cpfAddStandardCustomCommand(
 		OUTPUT ${generatedDoxygenTagsfile}
 		DEPENDS ${packageDoxygenConfigFile} ${fullSourceFiles}
 		COMMANDS ${doxygenCommand}
@@ -287,8 +287,8 @@ function( ccbAddDoxygenSubTarget )
     )
 	
 	set_property(TARGET ${targetName} PROPERTY FOLDER ${ARG_PACKAGE}/private)
-	set_property(TARGET ${targetName} PROPERTY CCB_DOXYGEN_TAGSFILE ${generatedDoxygenTagsfile})
-	set_property(TARGET ${ARG_PACKAGE} PROPERTY CCB_DOXYGEN_SUBTARGET ${targetName})
+	set_property(TARGET ${targetName} PROPERTY CPF_DOXYGEN_TAGSFILE ${generatedDoxygenTagsfile})
+	set_property(TARGET ${ARG_PACKAGE} PROPERTY CPF_DOXYGEN_SUBTARGET ${targetName})
 
 endfunction()
 
@@ -299,7 +299,7 @@ endfunction()
 # Arguments: 
 # PACKAGE: The package name
 # DOXYGEN_TAG_FILE_DEPENDENCIES: Doxygen .xml tag files that deliver input for this targets tag file.
-function( ccbAddDoxygenConfigurationTarget)
+function( cpfAddDoxygenConfigurationTarget)
 
 	cmake_parse_arguments(ARG "" "OUTPUT_DIR;PACKAGE;GENERATED_TAG_FILE" "DOXYGEN_TAG_FILE_DEPENDENCIES" ${ARGN} )
 
@@ -319,11 +319,11 @@ function( ccbAddDoxygenConfigurationTarget)
 	foreach( tagFile ${ARG_DOXYGEN_TAG_FILE_DEPENDENCIES})
 		get_filename_component(extTagFileDir ${tagFile} DIRECTORY)
 		file(RELATIVE_PATH relPath ${ARG_OUTPUT_DIR} ${extTagFileDir})
-		file(RELATIVE_PATH tagFileRelPath ${CCB_ROOT_DIR} ${tagFile})
+		file(RELATIVE_PATH tagFileRelPath ${CPF_ROOT_DIR} ${tagFile})
 		list(APPEND appendedLines "TAGFILES+=${tagFileRelPath}=${relPath}")
 	endforeach()
 
-	ccbAddAppendLinesToFileCommands( 
+	cpfAddAppendLinesToFileCommands( 
 		INPUT ${doxygenConfigFile}
 		OUTPUT ${packageDoxygenConfigFile}
 		ADDED_LINES ${appendedLines} 
@@ -337,14 +337,14 @@ function( ccbAddDoxygenConfigurationTarget)
 	
 	# Set properties
 	set_property(TARGET ${targetName} PROPERTY FOLDER ${ARG_PACKAGE}/private)
-	set_property(TARGET ${targetName} PROPERTY CCB_DOXYGEN_CONFIG_FILE ${packageDoxygenConfigFile})
-	set_property(TARGET ${ARG_PACKAGE} PROPERTY CCB_DOXYGEN_CONFIG_SUBTARGET ${targetName})
+	set_property(TARGET ${targetName} PROPERTY CPF_DOXYGEN_CONFIG_FILE ${packageDoxygenConfigFile})
+	set_property(TARGET ${ARG_PACKAGE} PROPERTY CPF_DOXYGEN_CONFIG_SUBTARGET ${targetName})
 
 endfunction()
 
 #-------------------------------------------------------------------------
 # This targets generates .dox files that provide the doxygen documentation for the package.
-# The documentation ccbContains the given briefDescription, longDescription and links to the packages distribution
+# The documentation cpfContains the given briefDescription, longDescription and links to the packages distribution
 # packages, coverage reports and abi/api compatibility reports.
 # The documentation can be extended by using \addtogroup <package>Group in another doxygen comment.
 #
@@ -361,48 +361,48 @@ endfunction()
 # 
 # Despite all these problems, this solution seemed to be the most practical one.
 # 
-function( ccbAddPackageDocsTarget fileOut package packageNamespace briefDescription longDescription)
+function( cpfAddPackageDocsTarget fileOut package packageNamespace briefDescription longDescription)
 
-	if(NOT CCB_ENABLE_DOXYGEN_TARGET)
+	if(NOT CPF_ENABLE_DOXYGEN_TARGET)
 		return()
 	endif()
 
-	ccbGetGeneratedDocumentationDirectory(documentationDir)
+	cpfGetGeneratedDocumentationDirectory(documentationDir)
 	file(MAKE_DIRECTORY ${documentationDir} )
 
-	ccbGetPackageDoxFilesTargetName( targetName ${package} )
+	cpfGetPackageDoxFilesTargetName( targetName ${package} )
 
 	# Generate the OpenCppCoverageReport output only when compiling the configuration that generates it.
-	ccbAddOpenCppCoverageLinksPageCommands( stampFile openCppCoverageLinksDoxFile openCppCoverageLinksHtmlFile ${targetName} ${package} )
+	cpfAddOpenCppCoverageLinksPageCommands( stampFile openCppCoverageLinksDoxFile openCppCoverageLinksHtmlFile ${targetName} ${package} )
 
 	# Optionally add commands for creating the page with the links to the abi compatibility reports.
-	ccbAddCompatiblityReportsLinksPageCommands( compatibilityReportLinksDoxFile compatibilityReportsLinkHtmlFile ${package} )
+	cpfAddCompatiblityReportsLinksPageCommands( compatibilityReportLinksDoxFile compatibilityReportsLinkHtmlFile ${package} )
 
 	# Always create the basic package documentation page.	
-	ccbAddPackageDocumentationDoxFileCommands( documentationFile ${package} ${openCppCoverageLinksHtmlFile} ${compatibilityReportsLinkHtmlFile} )
+	cpfAddPackageDocumentationDoxFileCommands( documentationFile ${package} ${openCppCoverageLinksHtmlFile} ${compatibilityReportsLinkHtmlFile} )
 
 	add_custom_target(
 		${targetName}
 		DEPENDS ${documentationFile} ${compatibilityReportLinksDoxFile} ${openCppCoverageLinksDoxFile} # ${stampFile}
 	)
-	set_property(TARGET ${targetName} PROPERTY CCB_OUTPUT_FILES ${documentationFile} ${compatibilityReportLinksDoxFile} ${openCppCoverageLinksDoxFile} )
+	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${documentationFile} ${compatibilityReportLinksDoxFile} ${openCppCoverageLinksDoxFile} )
 
 	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/private" )
 
 endfunction()
 
 #-------------------------------------------------------------------------
-function( ccbGetPackageDoxFilesTargetName targetNameOut package)
+function( cpfGetPackageDoxFilesTargetName targetNameOut package)
 	set(${targetNameOut} packageDoxFiles_${package} PARENT_SCOPE)
 endfunction()
 
 #-------------------------------------------------------------------------
-function( ccbGetGeneratedDocumentationDirectory dirOut )
-	set(${dirOut} "${CMAKE_BINARY_DIR}/${CCB_GENERATED_DOCS_DIR}" PARENT_SCOPE)
+function( cpfGetGeneratedDocumentationDirectory dirOut )
+	set(${dirOut} "${CMAKE_BINARY_DIR}/${CPF_GENERATED_DOCS_DIR}" PARENT_SCOPE)
 endfunction()
 
 #-------------------------------------------------------------------------
-function( ccbAddPackageDocumentationDoxFileCommands fileOut package openCppCoverageLinksPage compatibilityReportsLinkPage )
+function( cpfAddPackageDocumentationDoxFileCommands fileOut package openCppCoverageLinksPage compatibilityReportsLinkPage )
 
 	set( fileContent "
 /// The namespace of the ${package} package.
@@ -432,8 +432,8 @@ ${longDescription}
 
 	string(APPEND fileContent "\n*/}\n")
 	
-	ccbGetPackageDocumentationFileName( fileName ${package} )
-	ccbGetWriteFileCommands( commands ${fileName} ${fileContent} )
+	cpfGetPackageDocumentationFileName( fileName ${package} )
+	cpfGetWriteFileCommands( commands ${fileName} ${fileContent} )
 	add_custom_command(
 		OUTPUT "${fileName}"
 		${commands}
@@ -445,24 +445,24 @@ ${longDescription}
 endfunction()
 
 #-------------------------------------------------------------------------
-function( ccbGetPackageDocumentationFileName fileOut package )
-	ccbGetGeneratedDocumentationDirectory(documentationDir)
+function( cpfGetPackageDocumentationFileName fileOut package )
+	cpfGetGeneratedDocumentationDirectory(documentationDir)
 	set( ${fileOut} "${documentationDir}/${package}Documentation.dox" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
 # stamp file is only set when the config is not the config that generates the coverage report
 # doxFileOut is only set when the config is the config that generates the coverage report
-function( ccbAddOpenCppCoverageLinksPageCommands stampFileOut doxFileOut htmlFileOut target package )
+function( cpfAddOpenCppCoverageLinksPageCommands stampFileOut doxFileOut htmlFileOut target package )
 
 	string(TOLOWER ${package} lowerPackage) # doxygen html pages only use lower case with spaces.
 	set(htmlFileBaseName open_cpp_coverage_reports_${lowerPackage})
 
 	# Add links to OpenCppCoverage reports
-	ccbGetFirstMSVCDebugConfig( msvcDebugConfig )
-	if( msvcDebugConfig AND CCB_ENABLE_DYNAMIC_ANALYSIS_TARGET )
+	cpfGetFirstMSVCDebugConfig( msvcDebugConfig )
+	if( msvcDebugConfig AND CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET )
 		
-		ccbGetGeneratedDocumentationDirectory(documentationDir)
+		cpfGetGeneratedDocumentationDirectory(documentationDir)
 		set(doxFile "${documentationDir}/${package}OpenCppCoverageReportLinks.dox" )
 
 		# Assemble file content.
@@ -470,16 +470,16 @@ function( ccbAddOpenCppCoverageLinksPageCommands stampFileOut doxFileOut htmlFil
 		list(APPEND fileContent "/**")
 		list(APPEND fileContent "\\page ${htmlFileBaseName} ${package} OpenCppCoverage Reports")
 		set(index 0)
-		ccbGetOpenCppCoverageReportFiles( reports titles ${package} )
+		cpfGetOpenCppCoverageReportFiles( reports titles ${package} )
 		foreach( report ${reports} )
 			list(GET titles ${index} title )
 			list(APPEND fileContent "- <a href=\"../${report}\">${title}</a>")
-			ccbIncrement(index)
+			cpfIncrement(index)
 		endforeach()
 		list(APPEND fileContent "*/")
 
 		# Add custom command that generates the file for the fitting configuration.
-		set( stampFile "${CMAKE_BINARY_DIR}/${CCB_PRIVATE_DIR}/${target}/generateOpenCppCoverageLinkFile.stamp")
+		set( stampFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${target}/generateOpenCppCoverageLinkFile.stamp")
 		
 		set(deleteFileCommand "cmake -E remove -f \"${doxFile}\"")
 
@@ -491,7 +491,7 @@ function( ccbAddOpenCppCoverageLinksPageCommands stampFileOut doxFileOut htmlFil
 		#set(touchCommand "cmake -E touch \"${stampFile}\"")
 		set(touchCommand "cmake -E touch \"${doxFile}\"")
 
-		ccbAddConfigurationDependendCommand(
+		cpfAddConfigurationDependendCommand(
 			TARGET ${target}
 			COMMENT "Generate \"${doxFile}\""
 			CONFIG ${msvcDebugConfig}
@@ -509,24 +509,24 @@ function( ccbAddOpenCppCoverageLinksPageCommands stampFileOut doxFileOut htmlFil
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbGetOpenCppCoverageReportFiles relReportPathsOut titlesOut package )
+function( cpfGetOpenCppCoverageReportFiles relReportPathsOut titlesOut package )
 	
 	set(reports)
 	set(titles)
 
-	ccbGetFirstMSVCDebugConfig( msvcDebugConfig )
+	cpfGetFirstMSVCDebugConfig( msvcDebugConfig )
 	
-	get_property( prodLib TARGET ${package} PROPERTY CCB_PRODUCTION_LIB_SUBTARGET )
-	get_property( fixtureLib TARGET ${package} PROPERTY CCB_TEST_FIXTURE_SUBTARGET)
-	get_property( testExe TARGET ${package} PROPERTY CCB_TESTS_SUBTARGET)
+	get_property( prodLib TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET )
+	get_property( fixtureLib TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET)
+	get_property( testExe TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET)
 	set(targets ${prodLib} ${fixtureLib} ${testExe})
 	
 	foreach( target ${targets})
-		ccbToConfigSuffix( configSuffix ${msvcDebugConfig} )
+		cpfToConfigSuffix( configSuffix ${msvcDebugConfig} )
 		get_property( pdbOutput TARGET ${target} PROPERTY PDB_NAME${configSuffix}) # reports are generated for all targets that have linker generated .pdb files.
 		if(pdbOutput)
-			ccbGetTargetOutputBaseName( baseName ${target} ${msvcDebugConfig})
-			list( APPEND reports "${CCB_OPENCPPCOVERAGE_DIR}/Modules/${baseName}.html" )
+			cpfGetTargetOutputBaseName( baseName ${target} ${msvcDebugConfig})
+			list( APPEND reports "${CPF_OPENCPPCOVERAGE_DIR}/Modules/${baseName}.html" )
 			list( APPEND titles "${baseName}" )
 		endif()
 	endforeach()
@@ -537,16 +537,16 @@ function( ccbGetOpenCppCoverageReportFiles relReportPathsOut titlesOut package )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( ccbAddCompatiblityReportsLinksPageCommands doxFileOut htmlFileOut package )
+function( cpfAddCompatiblityReportsLinksPageCommands doxFileOut htmlFileOut package )
 	
 	string(TOLOWER ${package} lowerPackage) # doxygen html pages only use lower case with spaces.
 	set(htmlFileBaseName compatibilitiy_reports_${lowerPackage})
 	set(doxFile)
 
 	# Add links to available abi reports
-	if(CCB_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS)
+	if(CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS)
 		
-		ccbGetGeneratedDocumentationDirectory(documentationDir)
+		cpfGetGeneratedDocumentationDirectory(documentationDir)
 		set(doxFile "${documentationDir}/${package}CompatibilityReportLinks.dox" )
 
 		set(fileContent)
@@ -554,7 +554,7 @@ function( ccbAddCompatiblityReportsLinksPageCommands doxFileOut htmlFileOut pack
 		string(APPEND fileContent "\n")
 		string(APPEND fileContent "\\page ${htmlFileBaseName} ${package} ABI/API Compatibility Reports\n")
 	
-		ccbGetSharedLibrarySubTargets( libraryTargets ${package})
+		cpfGetSharedLibrarySubTargets( libraryTargets ${package})
 		if(libraryTargets)
 			list(REVERSE libraryTargets) # put main-lib first
 		endif()
@@ -563,20 +563,20 @@ function( ccbAddCompatiblityReportsLinksPageCommands doxFileOut htmlFileOut pack
 			string(APPEND fileContent "\n")
 			string(APPEND fileContent "### ${libraryTarget} ###\n")
 
-			ccbGetAvailableCompatibilityReports( reports titles ${package} ${libraryTarget} )
+			cpfGetAvailableCompatibilityReports( reports titles ${package} ${libraryTarget} )
 
 			set(index 0)
 			foreach(report ${reports})
 				list(GET titles ${index} title )
 				string(APPEND fileContent "- <a href=\"../${report}\">${title}</a>\n")
-				ccbIncrement(index)
+				cpfIncrement(index)
 			endforeach()
 		
 		endforeach()
 
 		string(APPEND fileContent "*/\n")
 
-		ccbGetWriteFileCommands( commands ${doxFile} ${fileContent} )
+		cpfGetWriteFileCommands( commands ${doxFile} ${fileContent} )
 		add_custom_command(
 			OUTPUT "${doxFile}"
 			${commands}
@@ -591,7 +591,7 @@ function( ccbAddCompatiblityReportsLinksPageCommands doxFileOut htmlFileOut pack
 endfunction()
 
 #-------------------------------------------------------------------------
-function( ccbGetAvailableCompatibilityReports reportsOut titlesOut package binaryTarget)
+function( cpfGetAvailableCompatibilityReports reportsOut titlesOut package binaryTarget)
 
 	set(reports)
 	set(titles)
@@ -601,8 +601,8 @@ function( ccbGetAvailableCompatibilityReports reportsOut titlesOut package binar
 	# Handle the two reports that compare the current version to the last build and last release.
 	# We always add links for those because they will be created with this build.
 	get_property( currentVersion TARGET ${binaryTarget} PROPERTY VERSION )
-	ccbGetLastBuildAndLastReleaseVersion( lastBuildVersion lastReleaseVersion)
-	ccbGetReportBaseNamesAndOutputDirs( reportDirs reportBaseNames ${package} ${binaryTarget} ${currentVersion} "${lastBuildVersion};${lastReleaseVersion}")
+	cpfGetLastBuildAndLastReleaseVersion( lastBuildVersion lastReleaseVersion)
+	cpfGetReportBaseNamesAndOutputDirs( reportDirs reportBaseNames ${package} ${binaryTarget} ${currentVersion} "${lastBuildVersion};${lastReleaseVersion}")
 	set( thisBuildReportsTitles "Last build to current build" "Last release to current build" )
 		
 	set(index 0)
@@ -613,22 +613,22 @@ function( ccbGetAvailableCompatibilityReports reportsOut titlesOut package binar
 		list(APPEND reports "${reportDir}/${baseName}.html")
 		list(APPEND titles ${title} )
 			
-		ccbIncrement(index)
+		cpfIncrement(index)
 	endforeach()
 		
 	# Now handle the reports for between old releases.
 	# They may not exist anymore, so we check on the web-page which are
 	# still available.
-	ccbGetReleaseVersionTags( releaseVersions ${CMAKE_CURRENT_SOURCE_DIR})
+	cpfGetReleaseVersionTags( releaseVersions ${CMAKE_CURRENT_SOURCE_DIR})
 	set(youngerVersion)
 	foreach( version ${releaseVersions})
 		if(youngerVersion)
 
-			ccbGetReportBaseNamesAndOutputDirs( reportDir reportBaseName ${package} ${binaryTarget} ${youngerVersion} ${version} )
+			cpfGetReportBaseNamesAndOutputDirs( reportDir reportBaseName ${package} ${binaryTarget} ${youngerVersion} ${version} )
 			set( relReportPath "${reportDir}/${reportBaseName}.html" )
-			set( reportWebUrl "${CCB_WEBPAGE_URL}/${relReportPath}")
+			set( reportWebUrl "${CPF_WEBPAGE_URL}/${relReportPath}")
 			
-			ccbUrlExists( reportExists ${reportWebUrl} )
+			cpfUrlExists( reportExists ${reportWebUrl} )
 			if(reportExists)
 				list(APPEND reports "${relReportPath}")
 				list(APPEND titles "${version} to ${youngerVersion}" )
@@ -645,7 +645,7 @@ endfunction()
 
 
 #-------------------------------------------------------------------------
-function( ccbUrlExists boolOut url )
+function( cpfUrlExists boolOut url )
 	
 	set( exists TRUE )
 
@@ -661,7 +661,7 @@ function( ccbUrlExists boolOut url )
 
 	else()
 		# For windows we try to download the file.
-		set( downloadedFile "${CMAKE_BINARY_DIR}/${CCB_PRIVATE_DIR}/downloadTest.html")
+		set( downloadedFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/downloadTest.html")
 		file(DOWNLOAD ${url} ${downloadedFile} INACTIVITY_TIMEOUT 1 STATUS status)
 		list(GET status 0 result)
 		if( NOT result EQUAL 0)

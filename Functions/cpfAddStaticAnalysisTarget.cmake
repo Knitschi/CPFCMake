@@ -1,16 +1,16 @@
 
 
-include(ccbAddRunUicTarget)
-include(ccbBaseUtilities)
-include(ccbLocations)
+include(cpfAddRunUicTarget)
+include(cpfBaseUtilities)
+include(cpfLocations)
 
 #----------------------------------------------------------------------------------------
 # Creates a target that runs all the static analysis targets that are added by the given packages
 # The target will also check that the target dependency graph of all packages is acyclic.
 #
-function( ccbAddGlobalStaticAnalysisTarget packages)
+function( cpfAddGlobalStaticAnalysisTarget packages)
 
-	if(NOT CCB_ENABLE_STATIC_ANALYSIS_TARGET)
+	if(NOT CPF_ENABLE_STATIC_ANALYSIS_TARGET)
 		return()
 	endif()
 
@@ -18,19 +18,19 @@ function( ccbAddGlobalStaticAnalysisTarget packages)
 
 	# Create the .json compile command file.
 	# This is needed for the clang-tidy calls
-	ccbGetCompiler(compiler)
+	cpfGetCompiler(compiler)
 	if( ${compiler} STREQUAL Clang)
-		set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Create a .json file that ccbContains all compiler calls. This is needed for clang-tidy." FORCE)
+		set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Create a .json file that cpfContains all compiler calls. This is needed for clang-tidy." FORCE)
 	endif()
 
 	# get all static analysis targets from the packages
     foreach(package ${packages})
 
         if(TARGET ${package}) # not all packages may have a target
-            get_property( binarySubTargets TARGET ${package} PROPERTY CCB_BINARY_SUBTARGETS)
+            get_property( binarySubTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
             foreach( binaryTarget ${binarySubTargets})
             
-                get_property( staticAnalysisTarget TARGET ${binaryTarget} PROPERTY CCB_STATIC_ANALYSIS_SUBTARGET)
+                get_property( staticAnalysisTarget TARGET ${binaryTarget} PROPERTY CPF_STATIC_ANALYSIS_SUBTARGET)
 
                 if(staticAnalysisTarget)	# this is currently only available for the LinuxMakeClang toolchain.
                     list(APPEND staticAnalysisTargets ${staticAnalysisTarget})
@@ -42,12 +42,12 @@ function( ccbAddGlobalStaticAnalysisTarget packages)
     endforeach()
     
     # Add the command for doing the acyclicity check
-    set(command "\"${TOOL_ACYCLIC}\" -nv \"${CCB_TARGET_DEPENDENCY_GRAPH_FILE}\"")
+    set(command "\"${TOOL_ACYCLIC}\" -nv \"${CPF_TARGET_DEPENDENCY_GRAPH_FILE}\"")
     set(acyclicStampFile ${CMAKE_BINARY_DIR}/runAcyclic.stamp )
 
-	ccbAddStandardCustomCommand(
+	cpfAddStandardCustomCommand(
 		OUTPUT ${acyclicStampFile}
-		DEPENDS ${CCB_TARGET_DEPENDENCY_GRAPH_FILE} ${staticAnalysisTargets}
+		DEPENDS ${CPF_TARGET_DEPENDENCY_GRAPH_FILE} ${staticAnalysisTargets}
 		COMMANDS ${command} "cmake -E touch \"${acyclicStampFile}\""
 	)
     
@@ -64,13 +64,13 @@ endfunction()
 # Arguments:
 # BINARY_TARGET The name of the target that shall be analyzed
 #
-function( ccbAddStaticAnalysisTarget )
+function( cpfAddStaticAnalysisTarget )
 
-	if(NOT CCB_ENABLE_STATIC_ANALYSIS_TARGET)
+	if(NOT CPF_ENABLE_STATIC_ANALYSIS_TARGET)
 		return()
 	endif()
 	
-	ccbGetCompiler(compiler)
+	cpfGetCompiler(compiler)
     if( ${compiler} STREQUAL Clang)
     
 		cmake_parse_arguments(ARG "" "BINARY_TARGET" "" ${ARGN} )
@@ -79,7 +79,7 @@ function( ccbAddStaticAnalysisTarget )
 		# Usually uic is automatically run before building, but we want to build
 		# this target without building the binaries so we need an extra target
 		# that runs uic for us.
-		ccbAddRunUicTarget(BINARY_TARGET ${ARG_BINARY_TARGET})
+		cpfAddRunUicTarget(BINARY_TARGET ${ARG_BINARY_TARGET})
 
         set(targetName ${ARG_BINARY_TARGET}_runStaticAnalysis)
 
@@ -101,7 +101,7 @@ function( ccbAddStaticAnalysisTarget )
         
         set(command "\"${TOOL_CLANG_TIDY}\" -checks=${includedChecks}${commaDeliberatelyExcludedChecks} -warnings-as-errors=* -p \"${CMAKE_BINARY_DIR}\"")
 
-        get_property( uicTarget TARGET ${ARG_BINARY_TARGET} PROPERTY CCB_UIC_SUBTARGET )
+        get_property( uicTarget TARGET ${ARG_BINARY_TARGET} PROPERTY CPF_UIC_SUBTARGET )
         if(uicTarget)
             get_property( uicStamp TARGET ${uicTarget} PROPERTY TARGET_STAMP_FILE )
         endif()
@@ -120,14 +120,14 @@ function( ccbAddStaticAnalysisTarget )
 				if(EXISTS ${fullFile}) # do not call clang-tidy for source files that are generated later in the make step
 				
                     set(commandWithFile "${command} \"${fullFile}\"")
-                    ccbSeparateArgumentsForPlatform( commandList ${commandWithFile})
+                    cpfSeparateArgumentsForPlatform( commandList ${commandWithFile})
                     add_custom_command(
                         OUTPUT ${stampFile}
                         DEPENDS "${fullFile}" "${uicStamp}" "${prefixHeader}" ${uicTarget}
                         IMPLICIT_DEPENDS CXX "${fullFile}"
                         COMMAND ${commandList}
                         COMMAND cmake -E touch "${stampFile}"   # without a file as a touch-stone the command will always be re-run.
-                        WORKING_DIRECTORY ${CCB_ROOT_DIR}
+                        WORKING_DIRECTORY ${CPF_ROOT_DIR}
                         COMMENT "${commandWithFile}"
                         VERBATIM
                         )
@@ -142,7 +142,7 @@ function( ccbAddStaticAnalysisTarget )
 			${targetName}
 			DEPENDS ${stampFiles} ${uicTarget}
 		)
-        set_property(TARGET ${ARG_BINARY_TARGET} PROPERTY CCB_STATIC_ANALYSIS_SUBTARGET ${targetName})
+        set_property(TARGET ${ARG_BINARY_TARGET} PROPERTY CPF_STATIC_ANALYSIS_SUBTARGET ${targetName})
 
     endif()
     

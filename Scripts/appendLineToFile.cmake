@@ -5,9 +5,9 @@
 # FILE      - The file to which a line shall be appended.
 # LINE      - The content of the added line.
 
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/ccbBaseUtilities.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
 
-ccbAssertScriptArgumentDefined(FILE)
-ccbAssertScriptArgumentDefined(LINE)
+cpfAssertScriptArgumentDefined(FILE)
+cpfAssertScriptArgumentDefined(LINE)
 
 file( APPEND "${FILE}" "${LINE}\n")
