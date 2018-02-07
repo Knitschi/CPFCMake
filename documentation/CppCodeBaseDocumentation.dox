@@ -1,15 +1,17 @@
 /**
-\defgroup CppCodeBaseGroup CppCodeBase
-\brief A cmake package that implements a standardized c++ CMake project.
+\defgroup CppCodeBaseGroup CppCodeBaseCMake
 
-\todo Improve the documentation of the CppCodeBase project when the functionality is settled.
+\brief A cmake package that implements a standardized c++ CMake project with additional CI functionality.
 
-The module offers the following features:
-- Functions to setup a target in the code-base.
-- The \c config.cmake file which defines the versions of all c++ dependencies. It also defines compile options and the linkage type for the external packages. 
-The hunter package manager uses the file when downloading the dependencies.
-- The \c HunterGate.cmake file is copied from the external <a href="https://github.com/hunter-packages/gate">hunter-gate</a> project and is used to download the
-hunter-package manager when running cmake for the first time.
-- The external cmake-module <a href="https://github.com/sakra/cotire">cotire</a> which automates the creation of precompiled headers across all supported platforms.
-- CMake toolchain files that define the CMake parameters that are used for the implemented tool-chains.
+The CppCodeBaseCMake package is the most basic component of the CppCodeBase framework. It helps with setting
+up a CMake based C++ project with extended functionality. The package tries to solve the following problems:
+
+- Abstraction of common CMake code to a higher level. CppCodeBase projects are set-up by using only
+a handfull of CMake functions. This removes implementation details from the `CMakeLists.txt` files.
+- Providing a standardized directory structure for a C++ project.
+- Providing additional CI tasks like code-analysis or documentation-generation as custom targets.
+- Package-versioning based on version tags provided by the Git repository.
+- Modularisation of the code base into individual CMake packages.
+- Use of cmake configuration files, which contain build configurations that outlive the deletion of the build directory and the `CMakeCache.txt`file.
+
 */
