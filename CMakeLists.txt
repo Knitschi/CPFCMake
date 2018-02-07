@@ -64,7 +64,7 @@ set( SCRIPT_FILES
 
 # Files that do not fit in any other category.
 set( OTHER_FILES
-	documentation/CppCodeBaseDocumentation.dox
+	documentation/CppCodeBaseCMake.dox
 )
 
 # Template files that are used with the configure_file() command.
