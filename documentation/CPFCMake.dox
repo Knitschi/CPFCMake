@@ -1,4 +1,5 @@
 /**
+
 \defgroup CPFCMakeGroup CPFCMake
 
 \brief A cmake package that implements a standardized c++ CMake project with additional CI functionality.

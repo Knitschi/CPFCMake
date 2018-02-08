@@ -13,7 +13,7 @@ set(DIR_OF_DOCUMENTATION_TARGET_FILE ${CMAKE_CURRENT_LIST_DIR})
 # Adds a target that runs doxygen on the whole Source directory of the CPF project.
 #
 # This function should be removed when the problems with the cpfAddGlobalDocumentationTarget() generation get fixed.
-function( cpfAddGlobalMonolithicDocumentationTarget packages)
+function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages)
 
 	if(NOT CPF_ENABLE_DOXYGEN_TARGET)
 		return()
@@ -60,16 +60,23 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages)
 	cpfAddCustomCommandCopyFile(${CPF_TARGET_DEPENDENCY_GRAPH_FILE} ${copiedDependencyGraphFile} )
 
 	# The config file must contain the names of the depended on xml tag files of other doxygen sub-targets.
+	list(APPEND appendedLines "PROJECT_NAME  = ${PROJECT_NAME}")
 	list(APPEND appendedLines "DOTFILE_DIRS = \"${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
 	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}\"")
 	list(APPEND appendedLines "INPUT = \"${CMAKE_SOURCE_DIR}\"")
 	list(APPEND appendedLines "INPUT += \"${CMAKE_BINARY_DIR}/${CPF_GENERATED_DOCS_DIR}\"")
-	
+	foreach( externalPackage ${externalPackages})
+		list(APPEND appendedLines "EXCLUDE += \"${CMAKE_SOURCE_DIR}/${externalPackage}\"")
+	endforeach()
+
 	# TODO get plantuml.jar with hunter
 	if(CPF_PLANT_UML_JAR)
 		message( STATUS "Enable UML diagrams in doxygen comments.")
 		list(APPEND appendedLines "PLANTUML_JAR_PATH = \"${CPF_PLANT_UML_JAR}\"")
 	endif()
+
+	# Test custom stylesheet
+	#list(APPEND appendedLines "HTML_EXTRA_STYLESHEET = \"${CMAKE_SOURCE_DIR}/${CPF_CMAKE_DIR}/Templates/customdoxygen.css\"")
 
 	cpfAddAppendLinesToFileCommands( 
 		INPUT ${doxygenConfigFile}

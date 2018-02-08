@@ -74,7 +74,7 @@ function( cpfSetPolicies )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAddPackages packages globalFiles )
+function( cpfAddPackages packages externalPackages globalFiles )
 
 	# set various flags non binary relevant flats like warnings as errors and higher warning levels.
 	cpfSetDynamicAndCosmeticCompilerOptions()
@@ -93,7 +93,7 @@ function( cpfAddPackages packages globalFiles )
 		endif()
 	endforeach()
 
-	foreach( package ${packages})
+	foreach( package ${packages} ${externalPackages})
 		add_subdirectory (${package})
 	endforeach()
 
@@ -124,7 +124,7 @@ function( cpfAddPackages packages globalFiles )
 
 
 	# documentation
-	cpfAddGlobalMonolithicDocumentationTarget("${packages}")
+	cpfAddGlobalMonolithicDocumentationTarget( "${packages}" "${externalPackages}")
 	# staticAnalysis
 	cpfAddGlobalStaticAnalysisTarget("${packages}")
 	# runUnitTests
