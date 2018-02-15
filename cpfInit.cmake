@@ -20,6 +20,8 @@ include(cpfAddPipelineTarget)
 include(cpfAddRunTestsTarget)
 include(cpfAddInstallPackageTarget)
 include(cpfAddCompatibilityCheckTarget)
+include(cpfAddDistributionPackageTarget)
+
 
 # cotire must be included on the global scope or we get errors thta target xyz already has a custom rule
 include("${CMAKE_SOURCE_DIR}/cotire/CMake/cotire.cmake")
@@ -74,18 +76,31 @@ function( cpfSetPolicies )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAddPackages packages externalPackages globalFiles )
+# Note that the packages that are owned by the CPF CI-Project must be added via the
+# cpfOwnedPackages.cmake file.
+function( cpfAddPackages externalPackages globalFiles )
 
 	# set various flags non binary relevant flats like warnings as errors and higher warning levels.
 	cpfSetDynamicAndCosmeticCompilerOptions()
 
+	# Read owned packages from the file
+	if(NOT EXISTS ${CPF_OWNED_PACKAGES_FILE})
+		message(FATAL_ERROR "The CI-Project is missing file \"${CPF_OWNED_PACKAGES_FILE}\" which defines the packages owned by the project.")
+	endif()
+	include(${CPF_OWNED_PACKAGES_FILE})
+
+	if(NOT DEFINED CPF_OWNED_PACKAGES)
+		message(FATAL_ERROR "Not defined")
+	endif()
+
+	if("${CPF_OWNED_PACKAGES}" STREQUAL "")
+		message(FATAL_ERROR "The file \"${CPF_OWNED_PACKAGES_FILE}\" does not seem to define cache variable CPF_OWNED_PACKAGES.")
+	endif()
+	set(packages ${CPF_OWNED_PACKAGES})
+
 	# Add optional CMakeProjectFramework packages.
 	set( cpfPackageDirs
-		${CPF_CMAKE_DIR}
 		${CPF_PROJECT_CONFIGURATIONS_DIR}
-		${CPF_BUILDSCRIPTS_DIR}
-		${CPF_JENKINSFILE_DIR}
-		${CPF_MACHINES_DIR}
 	)
 	foreach( dir ${cpfPackageDirs})
 		if(EXISTS ${CMAKE_SOURCE_DIR}/${dir} )
@@ -94,7 +109,7 @@ function( cpfAddPackages packages externalPackages globalFiles )
 	endforeach()
 
 	foreach( package ${packages} ${externalPackages})
-		add_subdirectory (${package})
+		add_subdirectory(${package})
 	endforeach()
 
 	# GlobalFiles
@@ -105,6 +120,8 @@ function( cpfAddPackages packages externalPackages globalFiles )
 		CMakeLists.txt
 		"${CPF_CONFIG_FILE}"
 		"${CMAKE_BINARY_DIR}/CMakeCache.txt"
+		"${CPF_CIBUILDCONFIGS_FILE}"
+		"${CPF_OWNED_PACKAGES_FILE}"
 	)
 	
 	if(CPF_ENABLE_DOXYGEN_TARGET)

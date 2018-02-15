@@ -28,6 +28,10 @@ set( CPF_PACKAGE_CONFIG_TEMPLATE ${CMAKE_SOURCE_DIR}/${CPF_CMAKE_DIR}/Templates/
 set( CPF_DEFAULT_CONFIGS_DIR DefaultConfigurations)
 set( CPF_CONFIG_FILE_ENDING ".config.cmake")
 
+# other ci-project files
+set( CPF_CIBUILDCONFIGS_FILE "${CMAKE_SOURCE_DIR}/cpfCIBuildConfigurations.json")
+set( CPF_OWNED_PACKAGES_FILE "${CMAKE_SOURCE_DIR}/cpfOwnedPackages.cmake")
+
 ###### Parameterized locations ######
 
 # returns the root directory of a package in a CPF project
