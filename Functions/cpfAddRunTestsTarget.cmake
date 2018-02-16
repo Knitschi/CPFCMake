@@ -103,7 +103,13 @@ function( cpfAddRunPython3TestTarget package testScript sourceFiles )
 		set(runTargetName ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${PACKAGE_NAME})
 		getRunTestStampFile( stampFile ${runTargetName} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX})
 
-		set( runTestsCommand "\"${TOOL_PYTHON3}\" \"${CMAKE_CURRENT_SOURCE_DIR}/${testScript}\"")
+		# derive the python module path from the script path
+		file( RELATIVE_PATH pathToTestScript ${CPF_ROOT_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/${testScript}")
+		string(REPLACE "/" "." pythonModulePath "${pathToTestScript}" )
+		# remove the .py ending
+		cpfStringRemoveRight( pythonModulePath ${pythonModulePath} 3)
+
+		set( runTestsCommand "\"${TOOL_PYTHON3}\" -m ${pythonModulePath}")
 		set( touchCommand "cmake -E touch \"${stampFile}\"" )
 
 		cpfAddStandardCustomCommand(
