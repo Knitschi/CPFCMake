@@ -3,10 +3,9 @@
 include(cpfLocations)
 include(cpfAddPackage)
 
-set( PACKAGE_NAMESPACE CPFBS )
 cpfInitPackageProject(
 	PACKAGE_NAME
-	${PACKAGE_NAMESPACE}
+	CPFCM
 )
 
 # The files that contain functions that are called by the users of the CMakeProjectFramework
@@ -88,5 +87,5 @@ source_group( Templates FILES ${TEMPLATE_FILES} )
 # Finally add the target.
 set(allCMakeFiles ${PUBLIC_FILES} ${VARIABLES_FILES} ${FUNCTION_FILES} ${TEST_FILES} ${CONFIGURATION_FILES} ${SCRIPT_FILES} ${OTHER_FILES} ${TEMPLATE_FILES}  )
 
-add_custom_target( ${PACKAGE_NAME} SOURCES ${allCMakeFiles} )
-set_property( TARGET ${PACKAGE_NAME} PROPERTY FOLDER ${PACKAGE_NAME} )
+cpfAddFilePackage(${PACKAGE_NAME} "${allCMakeFiles}")
+

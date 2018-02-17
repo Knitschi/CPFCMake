@@ -22,21 +22,21 @@ set(DIR_OF_ADD_PACKAGE_FILE ${CMAKE_CURRENT_LIST_DIR})
 macro( cpfInitPackageProject packageNameOut packageNameSpace )
 
 	# The package name is defined by the sub-directory name
-	cpfGetParentFolder( PACKAGE_NAME ${CMAKE_CURRENT_LIST_FILE})
+	cpfGetParentFolder( packageName ${CMAKE_CURRENT_LIST_FILE})
 
-	cpfConfigurePackageVersionFile( ${PACKAGE_NAME} )
+	cpfConfigurePackageVersionFile( ${packageName} )
 
 	# get the version number of the packages version file
-	cpfGetPackageVersionFromFile( packageVersion ${PACKAGE_NAME} ${CMAKE_CURRENT_LIST_DIR})
-	message(STATUS "Package ${PACKAGE_NAME} is now at version ${packageVersion}")
+	cpfGetPackageVersionFromFile( packageVersion ${packageName} ${CMAKE_CURRENT_LIST_DIR})
+	message(STATUS "Package ${packageName} is now at version ${packageVersion}")
 	# Configure the c++ header file with the version.
-	cpfConfigurePackageVersionHeader( ${PACKAGE_NAME} ${packageVersion} ${packageNameSpace})
+	cpfConfigurePackageVersionHeader( ${packageName} ${packageVersion} ${packageNameSpace})
 
 	cpfSplitVersion( major minor patch commitId ${packageVersion})
 
 	# create a sub-project for the package
 	project( 
-		${PACKAGE_NAME} 
+		${packageName} 
 		VERSION ${major}.${minor}.${patch}
 		LANGUAGES CXX C
 	)
@@ -46,7 +46,7 @@ macro( cpfInitPackageProject packageNameOut packageNameSpace )
 	set(PROJECT_VERSION_PATCH ${patch})
 	set(PROJECT_VERSION_TWEAK ${commitId})
 
-	set(${packageName} ${PACKAGE_NAME} PARENT_SCOPE)
+	set(${packageNameOut} ${packageName}) # this is a macro, so no PARENT_SCOPE
 
 endmacro()
 
@@ -66,8 +66,9 @@ function( cpfConfigurePackageVersionFile package )
 	cpfIsGitRepositoryDir( isRepoDirOut "${CMAKE_CURRENT_SOURCE_DIR}")
 	if(isRepoDirOut)
 	
+		set(PACKAGE_NAME ${package})
 		cpfGetCurrentVersionFromGitRepository( CPF_PACKAGE_VERSION "${CMAKE_CURRENT_SOURCE_DIR}")
-		cpfConfigureFileWithVariables( "${DIR_OF_ADD_PACKAGE_FILE}/Templates/packageVersion.cmake.in" "${absPathCmakeVersionFile}" CPF_PACKAGE_VERSION package  )
+		cpfConfigureFileWithVariables( "${DIR_OF_ADD_PACKAGE_FILE}/Templates/packageVersion.cmake.in" "${absPathCmakeVersionFile}" PACKAGE_NAME CPF_PACKAGE_VERSION )
 	
 	else()
 		if(NOT EXISTS "${absPathCmakeVersionFile}" )
@@ -80,13 +81,14 @@ endfunction()
 #-----------------------------------------------------------
 function( cpfConfigurePackageVersionHeader package version packageNamespace)
 
+	set( PACKAGE_NAME ${package})
 	set( PACKAGE_NAMESPACE ${packageNamespace})
 	set( CPF_PACKAGE_VERSION ${version} )
 
 	cpfGetPackageVersionCppHeaderFileName( versionHeaderFile ${package})
 	set( absPathVersionHeader "${CMAKE_CURRENT_BINARY_DIR}/${versionHeaderFile}")
 
-	cpfConfigureFileWithVariables( "${DIR_OF_ADD_PACKAGE_FILE}/Templates/packageVersion.h.in" "${absPathVersionHeader}" CPF_PACKAGE_VERSION PACKAGE_NAMESPACE ) 
+	cpfConfigureFileWithVariables( "${DIR_OF_ADD_PACKAGE_FILE}/Templates/packageVersion.h.in" "${absPathVersionHeader}" PACKAGE_NAME CPF_PACKAGE_VERSION PACKAGE_NAMESPACE ) 
 
 endfunction()
 
@@ -823,5 +825,16 @@ function( cpfAddPlugins package pluginOptionLists )
 			endif()
 		endif()
 	endforeach()
+
+endfunction()
+
+
+#---------------------------------------------------------------------------------------------
+# This function can be used to add a custom target that does nothing and is only good for
+# holding files in a Visual Studio solution.
+function( cpfAddFilePackage packageName files)
+
+	add_custom_target( ${packageName} SOURCES ${files} )
+	set_property( TARGET ${packageName} PROPERTY FOLDER ${packageName} )
 
 endfunction()

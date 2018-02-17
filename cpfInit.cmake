@@ -120,7 +120,6 @@ function( cpfAddPackages externalPackages globalFiles )
 		CMakeLists.txt
 		"${CPF_CONFIG_FILE}"
 		"${CMAKE_BINARY_DIR}/CMakeCache.txt"
-		"${CPF_CIBUILDCONFIGS_FILE}"
 		"${CPF_OWNED_PACKAGES_FILE}"
 	)
 	
