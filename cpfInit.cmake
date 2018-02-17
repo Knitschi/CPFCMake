@@ -108,7 +108,9 @@ function( cpfAddPackages externalPackages globalFiles )
 		endif()
 	endforeach()
 
-	foreach( package ${packages} ${externalPackages})
+	# We assume that the external packages are of lower level then the owned ones.
+	# Is that always true? If not, we must provide a way to add them sorted by level.
+	foreach( package ${externalPackages} ${packages} ) 
 		add_subdirectory(${package})
 	endforeach()
 
