@@ -3,7 +3,7 @@
 #
 # Arguments:
 # ROOT_DIR						: The CPF root directory.
-# INCREMENT_VERSION_OPTION		: Can be internal, incrementPatch, incrementMinor, incrementMayor
+# INCREMENT_VERSION_OPTION		: Can be internal, incrementPatch, incrementMinor, incrementMajor
 # PACKAGE						: This option is used when setting a release version. It must be set to
 #								  The name of a package or to an empty string when incrementing the host-project version. 
 
@@ -19,9 +19,9 @@ cpfAssertScriptArgumentDefined(ROOT_DIR)
 cpfAssertScriptArgumentDefined(INCREMENT_VERSION_OPTION)
 cpfAssertScriptArgumentDefined(PACKAGE)
 
-cpfContains(isAllowedValue "internal;incrementPatch;incrementMinor;incrementMayor" ${INCREMENT_VERSION_OPTION})
+cpfContains(isAllowedValue "internal;incrementPatch;incrementMinor;incrementMajor" ${INCREMENT_VERSION_OPTION})
 if(NOT isAllowedValue)
-	message("Invalid value \"${INCREMENT_VERSION_OPTION}\" for script argument INCREMENT_VERSION_OPTION.")
+	message(FATAL_ERROR "Invalid value \"${INCREMENT_VERSION_OPTION}\" for script argument INCREMENT_VERSION_OPTION.")
 endif()
 
 
