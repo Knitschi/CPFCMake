@@ -1,4 +1,3 @@
-
 # This script is supposed to be run by the build server after a succsefull build.
 # It adds a leightweight tag with the current version to mark a commit as a succesfull build.
 #
@@ -8,12 +7,12 @@
 # PACKAGE						: This option is used when setting a release version. It must be set to
 #								  The name of a package or to an empty string when incrementing the host-project version. 
 
-
 include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfConstants.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfGitUtilities.cmake)
+
 
 # check arguments
 cpfAssertScriptArgumentDefined(ROOT_DIR)
