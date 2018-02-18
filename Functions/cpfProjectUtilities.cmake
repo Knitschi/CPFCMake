@@ -1004,7 +1004,7 @@ endfunction()
 # 
 function( cpfGetOwnedPackages ownedPackagesOut rootDir )
 	
-	set(fullOwnedPackagesFile "${rootDir}/${CPF_OWNED_PACKAGES_FILE}")
+	set(fullOwnedPackagesFile "${rootDir}/${CPF_SOURCE_DIR}/${CPF_OWNED_PACKAGES_FILE}")
 	cpfGetCacheVariablesDefinedInFile( variableNames variableValues variableTypes variableDescriptions ${fullOwnedPackagesFile})
 
 	set(index 0)
