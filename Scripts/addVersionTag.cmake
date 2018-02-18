@@ -80,7 +80,7 @@ foreach( repoDir ${ownedRepoDirs} )
 			message("-- The repository \"${repoDir}\" is already tagged. Skip tagging.")
 			continue()
 		endif()
-		set(newVersion ${internalVersionHead})
+		set(newVersion ${versionHead})
 
 	endif()
 
