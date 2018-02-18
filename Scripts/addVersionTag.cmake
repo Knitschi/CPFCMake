@@ -12,32 +12,83 @@ include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfGitUtilities.cmake)
 
+# check arguments
 cpfAssertScriptArgumentDefined(ROOT_DIR)
 cpfAssertScriptArgumentDefined(INCREMENT_VERSION_OPTION)
+cpfContains(isAllowedValue "internal;incrementPatch;incrementMinor;incrementMayor" ${INCREMENT_VERSION_OPTION})
+if(NOT isAllowedValue)
+	message("Invalid value \"${INCREMENT_VERSION_OPTION}\" for script argument INCREMENT_VERSION_OPTION.")
+endif()
 
 
 ################### SCRIPT ######################
 
-# do it for owned packages and host repos
-cpfGetOwnedPackages( ownedPackages ${ROOT_DIR} )
-set( repositoryDirectories ${ROOT_DIR} )
-foreach(package ${ownedPackages})
-	cpfGetAbsPackageDirectory( packageDirOut ${package} ${ROOT_DIR})
-endforeach()
+# Get the directories of the individual owned repositories
+cpfGetOwnedRepositoryDirectories( ownedRepoDirs ${ROOT_DIR} )
+foreach( repoDir ${ownedRepoDirs} )
+	
+	cpfGetCurrentVersionFromGitRepository( versionHead "${repoDir}")
+	cpfGetTagsOfHEAD( tagsAtHead ${ROOT_DIR})
+	cpfContains(headIsAlreadyTagged "${tagsAtHead}" ${versionHead})
 
-foreach( repoDir ${repositoryDirectories} )
-	# Add a new Tag
-	cpfGetCurrentVersionFromGitRepository( version "${repoDir}")
-	cpfGitRepoHasTag( alreadyHasBuildVersion ${version} "" "${repoDir}")
-	if(alreadyHasBuildVersion)
-		message("-- The version tag ${version} in branch ${tempBranch} already exists. Skip tagging.")
-	else()
-		message("-- Set new version tag ${version}.")
-		cpfExecuteProcess( d "git tag ${version}" "${repoDir}")
+	# Make sure we do not tag a repository with local changes
+	cpfWorkingDirectoryIsDirty( isDirty "${repoDir}")
+	if(isDirty)
+		message(FATAL_ERROR "Error! Tagging failed. The repository \"${repoDir}\" is dirty.")
+	endif()
+	
+	if(NOT (${INCREMENT_VERSION_OPTION} STREQUAL internal )) # Handle tagging a release version
+		
+		# Get the new release version.
+		cpfSplitVersion( major minor patch commitId ${versionHead})
+		if( "${DIGIT_OPTION}" STREQUAL incrementMajor )
+			cpfIncrement(major)
+			set(minor 0)
+			set(patch 0)
+		elseif("${DIGIT_OPTION}" STREQUAL incrementMinor)
+			cpfIncrement(minor)
+			set(patch 0)
+		elseif("${DIGIT_OPTION}" STREQUAL incrementPatch)
+			cpfIncrement(patch)
+		else()
+			message( FATAL_ERROR "Error! Unrecognized value \"${DIGIT_OPTION}\" for parameter \"DIGIT_OPTION\"")
+		endif()
+		set( newVersion ${major}.${minor}.${patch} )
+
+		# Make sure this version does not yet exist
+		cpfGetReleaseVersionTags( releaseVersions ${CMAKE_CURRENT_SOURCE_DIR})
+		cpfContains(alreadyExists "${releaseVersions}" ${newVersion})
+		if(alreadyExists)
+			message(FATAL_ERROR "Error! Incrementing the version number failed. A release with version ${newVersion} already exists.")
+		endif()
+
+		# Make sure that we do not overwrite a release tag.
+		cpfIsReleaseVersion( isRelease ${versionHead})
+		if(isRelease)
+			message(FATAL_ERROR "Error! The current commit is already at release version ${lastVersionTag}. Overwriting existing releases is not allowed.")
+		endif()
+
+		# Delete possibly existing internal version tags at this commit.
+		if(headIsAlreadyTagged)
+			cpfExecuteProcess( d "git tag -d ${versionHead}" ${ROOT_DIR})
+			cpfExecuteProcess( d "git push origin :refs/tags/${versionHead}" ${ROOT_DIR})
+		endif()
+
+	else() # Set an internal version
+		
+		if(headIsAlreadyTagged)
+			message("-- The repository \"${repoDir}\" is already tagged. Skip tagging.")
+			continue()
+		endif()
+		set(newVersion ${internalVersionHead})
+
 	endif()
 
-	# Push the commit and tag
-	cpfExecuteProcess( d "git push origin" "${repoDir}")
+	# Add the new Tag
+	message("-- Set new version tag ${newVersion} for repository \"${repoDir}\".")
+	cpfExecuteProcess( d "git tag ${newVersion}" "${repoDir}")
+
+	# Push the tag
 	cpfExecuteProcess( d "git push --tags origin" "${repoDir}")
 
 endforeach()

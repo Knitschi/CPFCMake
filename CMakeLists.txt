@@ -51,13 +51,12 @@ set( CONFIGURATION_FILES
 
 # Files that are supposed to be used with cmake script mode (-P).
 set( SCRIPT_FILES 
+	Scripts/addVersionTag.cmake
 	Scripts/clearDirExcept.cmake
 	Scripts/createConfigFile.cmake
 	Scripts/executeCommandForConfig.cmake
-	Scripts/addVersionTag.cmake
 	Scripts/runAbiComplianceChecker.cmake
 	Scripts/updateExistingWebPage.cmake
-	Scripts/incrementVersionNumber.cmake
 )
 
 # Files that do not fit in any other category.

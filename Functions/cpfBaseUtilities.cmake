@@ -70,6 +70,21 @@ function( cpfSplitList outLeft outRight list splitIndex )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Returns a list of indexes in the list that contain the given value
+#
+function( cpfFindAllInList indexesOut list value)
+	set(indexes)
+	set(index 0)
+	foreach(element ${list})
+		if("${element}" STREQUAL "${value}" )
+			list(APPEND indexes ${index})
+		endif()
+		cpfIncrement(index)
+	endforeach()
+	set(${indexesOut} "${indexes}" PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # The given var is only printed when the global CPF_VERBOSE option is set to ON.
 # The function will prepend "-- [CPF] " to the given text so it can be identified
 # as output from the CPFCMake code.
