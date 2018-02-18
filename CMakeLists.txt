@@ -54,8 +54,7 @@ set( SCRIPT_FILES
 	Scripts/clearDirExcept.cmake
 	Scripts/createConfigFile.cmake
 	Scripts/executeCommandForConfig.cmake
-	Scripts/integrateTmpBranch.cmake
-	Scripts/prepareTmpBranch.cmake
+	Scripts/addVersionTag.cmake
 	Scripts/runAbiComplianceChecker.cmake
 	Scripts/updateExistingWebPage.cmake
 	Scripts/incrementVersionNumber.cmake

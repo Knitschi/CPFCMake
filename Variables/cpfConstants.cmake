@@ -14,10 +14,5 @@ set( CPF_RUN_ALL_TESTS_TARGET_PREFIX runAllTests_)
 
 ###### functions to define combined strings ######
 
-# This function defines the nameing convention of the <developer>-int-<mainbranch>
-# and <developer>-tmp-<mainbranch> branches.
-function( cpfGetIntegrationBrancheNames devBranchOut tmpBranchOut developer mainbranch )
-	set( ${devBranchOut} ${developer}-int-${mainbranch} PARENT_SCOPE)
-	set( ${tmpBranchOut} ${developer}-tmp-${mainbranch} PARENT_SCOPE)
-endfunction()
+
 
