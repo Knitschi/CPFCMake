@@ -56,7 +56,7 @@ foreach( repoDir ${ownedRepoDirs} )
 		set( newVersion ${major}.${minor}.${patch} )
 
 		# Make sure this version does not yet exist
-		cpfGetReleaseVersionTags( releaseVersions ${CMAKE_CURRENT_SOURCE_DIR})
+		cpfGetReleaseVersionTags( releaseVersions "${repoDir}")
 		cpfContains(alreadyExists "${releaseVersions}" ${newVersion})
 		if(alreadyExists)
 			message(FATAL_ERROR "Error! Incrementing the version number failed. A release with version ${newVersion} already exists.")
