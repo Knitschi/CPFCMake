@@ -28,7 +28,7 @@ cpfGetOwnedRepositoryDirectories( ownedRepoDirs ${ROOT_DIR} )
 foreach( repoDir ${ownedRepoDirs} )
 	
 	cpfGetCurrentVersionFromGitRepository( versionHead "${repoDir}")
-	cpfGetTagsOfHEAD( tagsAtHead ${ROOT_DIR})
+	cpfGetTagsOfHEAD( tagsAtHead "${repoDir}")
 	devMessage("${tagsAtHead}")
 	cpfContains(headIsAlreadyTagged "${tagsAtHead}" ${versionHead})
 
@@ -71,8 +71,8 @@ foreach( repoDir ${ownedRepoDirs} )
 
 		# Delete possibly existing internal version tags at this commit.
 		if(headIsAlreadyTagged)
-			cpfExecuteProcess( d "git tag -d ${versionHead}" ${ROOT_DIR})
-			cpfExecuteProcess( d "git push origin :refs/tags/${versionHead}" ${ROOT_DIR})
+			cpfExecuteProcess( d "git tag -d ${versionHead}" "${repoDir}")
+			cpfExecuteProcess( d "git push origin :refs/tags/${versionHead}" "${repoDir}")
 		endif()
 
 	else() # Set an internal version
