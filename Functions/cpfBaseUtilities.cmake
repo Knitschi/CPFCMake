@@ -1,7 +1,5 @@
 
 
-
-
 #----------------------------------------------------------------------------------------
 # call the correct version of separate_arguments depending on the current platform
 macro ( cpfSeparateArgumentsForPlatform listArg command)
@@ -300,7 +298,7 @@ function( cpfCreateIndexdStringList list baseString length )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# returns true if the given string cpfContains a generator expression
+# returns true if the given string contains a generator expression
 #
 function( cpfContainsGeneratorExpressions output string )
 
@@ -314,7 +312,7 @@ function( cpfContainsGeneratorExpressions output string )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Causes a fatal error if the string cpfContains a generator expression
+# Causes a fatal error if the string contains a generator expression
 #
 function( cpfAssertContainsNoGeneratorExpressions string message )
 

@@ -923,7 +923,7 @@ endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Returns the names, values, types and descriptions of the currently defined cache variabls.
-#
+# For variable values that are lists, the function escapes the separation ; with on \
 function( cpfReadCurrentCacheVariables variableNamesOut variableValuesOut variableTypesOut variableDescriptionsOut )
 
 	get_cmake_property( cacheVariables CACHE_VARIABLES)
@@ -932,9 +932,22 @@ function( cpfReadCurrentCacheVariables variableNamesOut variableValuesOut variab
 	set(cacheDescriptions)
 
 	foreach(variable ${cacheVariables})
-		list(APPEND cacheValues "${${variable}}")
+
+		# values
+		set(value ${${variable}})
+		cpfListLength(valueLength "${value}") 
+		if( ${valueLength} GREATER 1) 
+			# for lists one escape level is needed to get a list of lists
+			cpfJoinString( escapedList "${value}" "\\\\;")
+			cpfListLength( length "${escapedList}") 
+			list(APPEND cacheValues "${escapedList}")
+		else()
+			list(APPEND cacheValues "${value}")
+		endif()
+		# type		
 		get_property( type CACHE ${variable} PROPERTY TYPE )
 		list(APPEND cacheTypes ${type})
+		# description
 		get_property( helpString CACHE ${variable} PROPERTY HELPSTRING )
 		list(APPEND cacheDescriptions "${helpString}")
 	endforeach()
@@ -945,6 +958,10 @@ function( cpfReadCurrentCacheVariables variableNamesOut variableValuesOut variab
 	cpfListLength(typesLength "${cacheTypes}" )
 	cpfListLength(descriptionsLength "${cacheDescriptions}" )
 	if(NOT ( (${namesLength} EQUAL ${valuesLength}) AND (${namesLength} EQUAL ${typesLength}) AND(${namesLength} EQUAL ${descriptionsLength}) ))
+		message("Length names: ${namesLength}")
+		message("Length values: ${valuesLength}")
+		message("Length types: ${typesLength}")
+		message("Length descriptions: ${descriptionsLength}")
 		message(FATAL_ERROR "Not all cache variables have all properties defined in function readCurrentCacheVariables().")
 	endif()
 
@@ -980,6 +997,32 @@ function( cpfGetExecutableTargets exeTargetsOut package )
 	endif()
 
 	set(${exeTargetsOut} "${exeTargets}" PARENT_SCOPE)
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Reads the value of the CPF_OWNED_PACKAGES variable frwom the ci-projects owned packages file.
+# 
+function( cpfGetOwnedPackages ownedPackagesOut rootDir )
+	
+	cpfGetCacheVariablesDefinedInFile( variableNames variableValues variableTypes variableDescriptions ${CPF_OWNED_PACKAGES_FILE})
+
+	set(index 0)
+	foreach( variable ${variableNames} )
+
+		if( ${variable} STREQUAL CPF_OWNED_PACKAGES)
+			list(GET variableValues ${index} ownedPackages )
+			if("${ownedPackages}" STREQUAL "")
+				message(FATAL_ERROR "No owned packages defined in file \"${CPF_OWNED_PACKAGES_FILE}\".")
+			endif()
+			set(${ownedPackagesOut} ${ownedPackages} PARENT_SCOPE)
+			return()
+		endif()
+		cpfIncrement(index)
+
+	endforeach()
+
+	message(FATAL_ERROR "File \"${CPF_OWNED_PACKAGES_FILE}\" is missing a definition for cache variable CPF_OWNED_PACKAGES")
+
 endfunction()
 
 
