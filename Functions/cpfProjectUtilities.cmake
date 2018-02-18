@@ -1004,7 +1004,8 @@ endfunction()
 # 
 function( cpfGetOwnedPackages ownedPackagesOut rootDir )
 	
-	cpfGetCacheVariablesDefinedInFile( variableNames variableValues variableTypes variableDescriptions ${CPF_OWNED_PACKAGES_FILE})
+	set(fullOwnedPackagesFile "${rootDir}/${CPF_OWNED_PACKAGES_FILE}")
+	cpfGetCacheVariablesDefinedInFile( variableNames variableValues variableTypes variableDescriptions ${fullOwnedPackagesFile})
 
 	set(index 0)
 	foreach( variable ${variableNames} )
@@ -1012,7 +1013,7 @@ function( cpfGetOwnedPackages ownedPackagesOut rootDir )
 		if( ${variable} STREQUAL CPF_OWNED_PACKAGES)
 			list(GET variableValues ${index} ownedPackages )
 			if("${ownedPackages}" STREQUAL "")
-				message(FATAL_ERROR "No owned packages defined in file \"${CPF_OWNED_PACKAGES_FILE}\".")
+				message(FATAL_ERROR "No owned packages defined in file \"${fullOwnedPackagesFile}\".")
 			endif()
 			set(${ownedPackagesOut} ${ownedPackages} PARENT_SCOPE)
 			return()
@@ -1021,7 +1022,7 @@ function( cpfGetOwnedPackages ownedPackagesOut rootDir )
 
 	endforeach()
 
-	message(FATAL_ERROR "File \"${CPF_OWNED_PACKAGES_FILE}\" is missing a definition for cache variable CPF_OWNED_PACKAGES")
+	message(FATAL_ERROR "File \"${fullOwnedPackagesFile}\" is missing a definition for cache variable CPF_OWNED_PACKAGES")
 
 endfunction()
 
