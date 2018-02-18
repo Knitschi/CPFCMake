@@ -29,6 +29,7 @@ foreach( repoDir ${ownedRepoDirs} )
 	
 	cpfGetCurrentVersionFromGitRepository( versionHead "${repoDir}")
 	cpfGetTagsOfHEAD( tagsAtHead ${ROOT_DIR})
+	devMessage("${tagsAtHead}")
 	cpfContains(headIsAlreadyTagged "${tagsAtHead}" ${versionHead})
 
 	# Make sure we do not tag a repository with local changes
