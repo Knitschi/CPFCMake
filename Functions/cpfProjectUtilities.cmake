@@ -1035,7 +1035,7 @@ function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)
 	cpfGetOwnedPackages( ownedPackages ${rootDir})
 	set( possibleRepoDirectories ${rootDir} )
 	foreach(package ${ownedPackages})
-		cpfGetAbsPackageDirectory( packageDirOut ${package} ${ROOT_DIR})
+		cpfGetAbsPackageDirectory( packageDirOut ${package} ${rootDir})
 		list(APPEND possibleRepoDirectories ${packageDirOut})
 	endforeach()
 
@@ -1068,6 +1068,29 @@ function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)
 	endforeach()
 
 	set(${dirsOut} "${uniqueRepoDirs}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns true if the given package in the cpf-project rooted at rootDir belongs to the repository
+# at repoDir.
+# If package is set to host-project, then the function returns true if the repoDir and the rootDir
+# repositories are the same.
+function( cpfRepoDirBelongsToPackage isPackageRepoDirOut repoDir package rootDir )
+
+	if("${package}" STREQUAL "")
+		set(packageDir ${rootDir})
+	else()
+		cpfGetAbsPackageDirectory( packageDir ${package} ${rootDir})
+	endif()
+
+	cpfGetHashOfTag( packageHash HEAD "${packageDir}")
+	cpfGetHashOfTag( repoHash HEAD "${repoDir}")
+	if( ${packageHash} STREQUAL ${repoHash} )
+		set(${isPackageRepoDirOut} TRUE PARENT_SCOPE)
+	else()
+		set(${isPackageRepoDirOut} FALSE PARENT_SCOPE)
+	endif()
 
 endfunction()
 

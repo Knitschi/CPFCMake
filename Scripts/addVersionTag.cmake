@@ -5,6 +5,9 @@
 # Arguments:
 # ROOT_DIR						: The CPF root directory.
 # INCREMENT_VERSION_OPTION		: Can be internal, incrementPatch, incrementMinor, incrementMayor
+# PACKAGE						: This option is used when setting a release version. It must be set to
+#								  The name of a package or to an empty string when incrementing the host-project version. 
+
 
 include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfConstants.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake)
@@ -15,6 +18,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfGitUtilities.cmake)
 # check arguments
 cpfAssertScriptArgumentDefined(ROOT_DIR)
 cpfAssertScriptArgumentDefined(INCREMENT_VERSION_OPTION)
+cpfAssertScriptArgumentDefined(PACKAGE)
+
 cpfContains(isAllowedValue "internal;incrementPatch;incrementMinor;incrementMayor" ${INCREMENT_VERSION_OPTION})
 if(NOT isAllowedValue)
 	message("Invalid value \"${INCREMENT_VERSION_OPTION}\" for script argument INCREMENT_VERSION_OPTION.")
@@ -24,7 +29,7 @@ endif()
 ################### SCRIPT ######################
 
 # Get the directories of the individual owned repositories
-cpfGetOwnedRepositoryDirectories( ownedRepoDirs ${ROOT_DIR} )
+cpfGetOwnedRepositoryDirectories( ownedRepoDirs "${ROOT_DIR}" )
 foreach( repoDir ${ownedRepoDirs} )
 	
 	cpfGetCurrentVersionFromGitRepository( versionHead "${repoDir}")
@@ -37,7 +42,8 @@ foreach( repoDir ${ownedRepoDirs} )
 		message(FATAL_ERROR "Error! Tagging failed. The repository \"${repoDir}\" is dirty.")
 	endif()
 	
-	if(NOT (${INCREMENT_VERSION_OPTION} STREQUAL internal )) # Handle tagging a release version
+	cpfRepoDirBelongsToPackage( isPackageRepoDir "${repoDir}" ${PACKAGE} "${ROOT_DIR}")
+	if(NOT (${INCREMENT_VERSION_OPTION} STREQUAL internal ) AND isPackageRepoDir ) # Handle tagging a release version for a selected package
 		
 		# Get the new release version.
 		cpfSplitVersion( major minor patch commitId ${versionHead})
