@@ -41,7 +41,7 @@ foreach( repoDir ${ownedRepoDirs} )
 		message(FATAL_ERROR "Error! Tagging failed. The repository \"${repoDir}\" is dirty.")
 	endif()
 	
-	cpfRepoDirBelongsToPackage( isPackageRepoDir "${repoDir}" ${PACKAGE} "${ROOT_DIR}")
+	cpfRepoDirBelongsToPackage( isPackageRepoDir "${repoDir}" "${PACKAGE}" "${ROOT_DIR}")
 	if(NOT (${INCREMENT_VERSION_OPTION} STREQUAL internal ) AND isPackageRepoDir ) # Handle tagging a release version for a selected package
 		
 		# Get the new release version.
