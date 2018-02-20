@@ -28,6 +28,9 @@ if(headIsAlreadyTagged)
     return()
 endif()
 
+# checkout the CI-repository
+cpfExecuteProcess( unused "git checkout ${BRANCH}" ${ROOT_DIR})
+
 # Update the owned packages
 cpfGetOwnedRepositoryDirectories( ownedRepoDirs "${ROOT_DIR}" )
 foreach( repoDir ${ownedRepoDirs} )
@@ -43,8 +46,11 @@ endforeach()
 # After that we would have to commit and push all owned packages with the dontTrigger note.
 
 
-# Commit the update 
-cpfExecuteProcess( unused "git commit . -m\"Update owned packages.\"" ${ROOT_DIR})
-cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" ${ROOT_DIR})
-cpfExecuteProcess( unused "git push origin refs/notes/*" ${ROOT_DIR})
+# Commit the update
+cpfWorkingDirectoryIsDirty( isDirty "${ROOT_DIR}")
+if(isDirty) 
+    cpfExecuteProcess( unused "git commit . -m\"Update owned packages.\"" ${ROOT_DIR})
+    cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" ${ROOT_DIR})
+    cpfExecuteProcess( unused "git push origin refs/notes/*" ${ROOT_DIR})
+endif()
 
