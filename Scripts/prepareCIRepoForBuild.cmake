@@ -17,12 +17,12 @@ include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake)
 cpfAssertScriptArgumentDefined(ROOT_DIR)
 cpfAssertScriptArgumentDefined(BRANCH)
 
-# Do nothing if the current commit already has a build tag.
-cpfGetCurrentVersionFromGitRepository( versionHead "${ROOT_DIR}")
-cpfGetTagsOfHEAD( tagsAtHead "${ROOT_DIR}")
-cpfContains(headIsAlreadyTagged "${tagsAtHead}" ${versionHead})
-if(headIsAlreadyTagged)
-    message( STATUS "The current commit of CI-Repository at \"${ROOT_DIR}\" has already been tagged. Packages are not updated." )
+
+# Do nothing if the the current commit is in detached head state.
+# In this case we simply rebuild the repository "as is".
+cpfRepoIsOnDetachedHead( isDetached "${ROOT_DIR}")
+if(isDetached)
+    message( STATUS "The current commit of CI-Repository at \"${ROOT_DIR}\" is not the end of a branch. The repository will not be changed." )
     return()
 endif()
 

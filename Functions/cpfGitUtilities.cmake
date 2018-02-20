@@ -346,3 +346,21 @@ function( cpfTryPushCommitsAndNotes pushConfirmedOut remote repoDir )
 
 	set(${pushConfirmedOut} FALSE PARENT_SCOPE)
 endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns true if the repository is checked out to a specific commit that is not the end
+# of a branch.
+function( cpfRepoIsOnDetachedHead isDetached repoDir)
+	# the command fails if the HEAD is detached, otherwise returns the branch name
+	execute_process(
+		COMMAND git;symbolic-ref;HEAD
+		WORKING_DIRECTORY "${repoDir}"
+		RESULT_VARIABLE result
+	)
+	if(${result EQUAL} 0)
+		set(${isDetached} FALSE PARENT_SCOPE)
+	else()
+		set(${isDetached} TRUE PARENT_SCOPE)
+	endif()
+endfunction()
+
