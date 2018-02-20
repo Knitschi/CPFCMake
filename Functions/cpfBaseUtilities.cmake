@@ -1,7 +1,5 @@
 
 
-
-
 #----------------------------------------------------------------------------------------
 # call the correct version of separate_arguments depending on the current platform
 macro ( cpfSeparateArgumentsForPlatform listArg command)
@@ -69,6 +67,21 @@ function( cpfSplitList outLeft outRight list splitIndex )
 	set( ${outLeft} ${outLeftLocal} PARENT_SCOPE)
 	set( ${outRight} ${outRightLocal} PARENT_SCOPE)
 
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns a list of indexes in the list that contain the given value
+#
+function( cpfFindAllInList indexesOut list value)
+	set(indexes)
+	set(index 0)
+	foreach(element ${list})
+		if("${element}" STREQUAL "${value}" )
+			list(APPEND indexes ${index})
+		endif()
+		cpfIncrement(index)
+	endforeach()
+	set(${indexesOut} "${indexes}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -300,7 +313,7 @@ function( cpfCreateIndexdStringList list baseString length )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# returns true if the given string cpfContains a generator expression
+# returns true if the given string contains a generator expression
 #
 function( cpfContainsGeneratorExpressions output string )
 
@@ -314,7 +327,7 @@ function( cpfContainsGeneratorExpressions output string )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Causes a fatal error if the string cpfContains a generator expression
+# Causes a fatal error if the string contains a generator expression
 #
 function( cpfAssertContainsNoGeneratorExpressions string message )
 

@@ -1,5 +1,6 @@
 
 include("${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfConstants.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/cpfBaseUtilities.cmake")
 
 set(DIR_OF_PROJECT_UTILITIES ${CMAKE_CURRENT_LIST_DIR})
@@ -923,7 +924,7 @@ endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Returns the names, values, types and descriptions of the currently defined cache variabls.
-#
+# For variable values that are lists, the function escapes the separation ; with on \
 function( cpfReadCurrentCacheVariables variableNamesOut variableValuesOut variableTypesOut variableDescriptionsOut )
 
 	get_cmake_property( cacheVariables CACHE_VARIABLES)
@@ -932,9 +933,22 @@ function( cpfReadCurrentCacheVariables variableNamesOut variableValuesOut variab
 	set(cacheDescriptions)
 
 	foreach(variable ${cacheVariables})
-		list(APPEND cacheValues "${${variable}}")
+
+		# values
+		set(value ${${variable}})
+		cpfListLength(valueLength "${value}") 
+		if( ${valueLength} GREATER 1) 
+			# for lists one escape level is needed to get a list of lists
+			cpfJoinString( escapedList "${value}" "\\\\;")
+			cpfListLength( length "${escapedList}") 
+			list(APPEND cacheValues "${escapedList}")
+		else()
+			list(APPEND cacheValues "${value}")
+		endif()
+		# type		
 		get_property( type CACHE ${variable} PROPERTY TYPE )
 		list(APPEND cacheTypes ${type})
+		# description
 		get_property( helpString CACHE ${variable} PROPERTY HELPSTRING )
 		list(APPEND cacheDescriptions "${helpString}")
 	endforeach()
@@ -945,6 +959,10 @@ function( cpfReadCurrentCacheVariables variableNamesOut variableValuesOut variab
 	cpfListLength(typesLength "${cacheTypes}" )
 	cpfListLength(descriptionsLength "${cacheDescriptions}" )
 	if(NOT ( (${namesLength} EQUAL ${valuesLength}) AND (${namesLength} EQUAL ${typesLength}) AND(${namesLength} EQUAL ${descriptionsLength}) ))
+		message("Length names: ${namesLength}")
+		message("Length values: ${valuesLength}")
+		message("Length types: ${typesLength}")
+		message("Length descriptions: ${descriptionsLength}")
 		message(FATAL_ERROR "Not all cache variables have all properties defined in function readCurrentCacheVariables().")
 	endif()
 
@@ -980,6 +998,101 @@ function( cpfGetExecutableTargets exeTargetsOut package )
 	endif()
 
 	set(${exeTargetsOut} "${exeTargets}" PARENT_SCOPE)
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Reads the value of the CPF_OWNED_PACKAGES variable frwom the ci-projects owned packages file.
+# 
+function( cpfGetOwnedPackages ownedPackagesOut rootDir )
+	
+	set(fullOwnedPackagesFile "${rootDir}/${CPF_SOURCE_DIR}/${CPF_OWNED_PACKAGES_FILE}")
+	cpfGetCacheVariablesDefinedInFile( variableNames variableValues variableTypes variableDescriptions ${fullOwnedPackagesFile})
+
+	set(index 0)
+	foreach( variable ${variableNames} )
+
+		if( ${variable} STREQUAL CPF_OWNED_PACKAGES)
+			list(GET variableValues ${index} ownedPackages )
+			if("${ownedPackages}" STREQUAL "")
+				message(FATAL_ERROR "No owned packages defined in file \"${fullOwnedPackagesFile}\".")
+			endif()
+			set(${ownedPackagesOut} ${ownedPackages} PARENT_SCOPE)
+			return()
+		endif()
+		cpfIncrement(index)
+
+	endforeach()
+
+	message(FATAL_ERROR "File \"${fullOwnedPackagesFile}\" is missing a definition for cache variable CPF_OWNED_PACKAGES")
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# returns the absolute paths to the repository directories that are owned by the CPF project located at rootDir
+#
+function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)
+
+	# Get all directories that may belong to different owned repositories
+	cpfGetOwnedPackages( ownedPackages ${rootDir})
+	set( possibleRepoDirectories ${rootDir} )
+	foreach(package ${ownedPackages})
+		cpfGetAbsPackageDirectory( packageDirOut ${package} ${rootDir})
+		list(APPEND possibleRepoDirectories ${packageDirOut})
+	endforeach()
+
+	# Check which of these repositories belong together (have the same hash of the HEAD).
+	# Get list of all current hashes
+	set(hashes)
+	foreach(repoDir ${possibleRepoDirectories})
+		cpfGetHashOfTag( hashHEAD HEAD "${repoDir}")
+		list(APPEND hashes ${hashHEAD})
+	endforeach()
+
+	# Get indexes of duplicated elements in list
+	set(duplicatedIndexes)
+	foreach(hash ${hashes})
+		cpfFindAllInList( indexes "${hashes}" ${hash})
+		cpfSplitList( unused duplIndexes "${indexes}" 1)
+		list(APPEND duplicatedIndexes ${duplIndexes})
+	endforeach()
+
+	# Get directories of non duplicated hashes
+	set(uniqueRepoDirs)
+	set(index 0)
+	foreach(hash ${hashes})
+		cpfContains(isDuplicated "${duplicatedIndexes}" ${index})
+		if(NOT isDuplicated)
+			list(GET possibleRepoDirectories ${index} repoDir)
+			list(APPEND uniqueRepoDirs ${repoDir})
+		endif()
+		cpfIncrement(index)
+	endforeach()
+
+	set(${dirsOut} "${uniqueRepoDirs}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns true if the given package in the cpf-project rooted at rootDir belongs to the repository
+# at repoDir.
+# If package is set to host-project, then the function returns true if the repoDir and the rootDir
+# repositories are the same.
+function( cpfRepoDirBelongsToPackage isPackageRepoDirOut repoDir package rootDir )
+
+	if("${package}" STREQUAL "")
+		set(packageDir ${rootDir})
+	else()
+		cpfGetAbsPackageDirectory( packageDir ${package} ${rootDir})
+	endif()
+
+	cpfGetHashOfTag( packageHash HEAD "${packageDir}")
+	cpfGetHashOfTag( repoHash HEAD "${repoDir}")
+	if( ${packageHash} STREQUAL ${repoHash} )
+		set(${isPackageRepoDirOut} TRUE PARENT_SCOPE)
+	else()
+		set(${isPackageRepoDirOut} FALSE PARENT_SCOPE)
+	endif()
+
 endfunction()
 
 

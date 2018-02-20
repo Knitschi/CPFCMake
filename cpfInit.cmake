@@ -84,19 +84,8 @@ function( cpfAddPackages externalPackages globalFiles )
 	cpfSetDynamicAndCosmeticCompilerOptions()
 
 	# Read owned packages from the file
-	if(NOT EXISTS ${CPF_OWNED_PACKAGES_FILE})
-		message(FATAL_ERROR "The CI-Project is missing file \"${CPF_OWNED_PACKAGES_FILE}\" which defines the packages owned by the project.")
-	endif()
-	include(${CPF_OWNED_PACKAGES_FILE})
-
-	if(NOT DEFINED CPF_OWNED_PACKAGES)
-		message(FATAL_ERROR "Not defined")
-	endif()
-
-	if("${CPF_OWNED_PACKAGES}" STREQUAL "")
-		message(FATAL_ERROR "The file \"${CPF_OWNED_PACKAGES_FILE}\" does not seem to define cache variable CPF_OWNED_PACKAGES.")
-	endif()
-	set(packages ${CPF_OWNED_PACKAGES})
+	cpfGetOwnedPackages( ownedPackages ${CPF_ROOT_DIR})
+	set(packages ${ownedPackages})
 
 	# Add optional CMakeProjectFramework packages.
 	set( cpfPackageDirs
@@ -108,7 +97,9 @@ function( cpfAddPackages externalPackages globalFiles )
 		endif()
 	endforeach()
 
-	foreach( package ${packages} ${externalPackages})
+	# We assume that the external packages are of lower level then the owned ones.
+	# Is that always true? If not, we must provide a way to add them sorted by level.
+	foreach( package ${externalPackages} ${packages} ) 
 		add_subdirectory(${package})
 	endforeach()
 
