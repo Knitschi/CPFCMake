@@ -320,3 +320,29 @@ function( cpfGetHashOfTag hashOut tag repositoryDir )
 	cpfExecuteProcess( hash "git rev-list -1 ${tag}" "${repositoryDir}")
 	set(${hashOut} ${hash} PARENT_SCOPE)
 endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns true if the current branch of the given repository can be pushed to a remote.
+# 
+function( cpfTryPushCommitsAndNotes pushConfirmedOut remote repoDir )
+	# try push commits
+	execute_process(
+		COMMAND git;push;${remote}
+		WORKING_DIRECTORY "${repoDir}"
+		RESULT_VARIABLE result
+	)
+	if(${result} EQUAL 0)
+		# try push notes
+		execute_process(
+			COMMAND git;push;${remote};refs/notes/*
+			WORKING_DIRECTORY "${repoDir}"
+			RESULT_VARIABLE result
+		)
+		if(${result} EQUAL 0)
+			set(${pushConfirmedOut} TRUE PARENT_SCOPE)
+			return()
+		endif()
+	endif()
+
+	set(${pushConfirmedOut} FALSE PARENT_SCOPE)
+endfunction()

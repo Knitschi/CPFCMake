@@ -5,6 +5,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/cpfBaseUtilities.cmake")
 
 set(DIR_OF_PROJECT_UTILITIES ${CMAKE_CURRENT_LIST_DIR})
 
+cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 
 #---------------------------------------------------------------------------------------------
 # Sets the warning level to high and forces the global include of the SwitchOffWarningsMacro file.
