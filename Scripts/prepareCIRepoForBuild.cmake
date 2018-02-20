@@ -64,4 +64,4 @@ while(NOT pushedChanges)
     cpfTryPushCommitsAndNotes( pushedChanges origin ${ROOT_DIR})
     # Repeat the update procedure if somebody pushed changes to the remote in the meantime.
 
-endif()
+endwhile()
