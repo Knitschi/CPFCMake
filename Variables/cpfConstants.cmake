@@ -11,8 +11,8 @@ set( CPF_TESTS_TARGET_ENDING _tests)
 
 set( CPF_RUN_ALL_TESTS_TARGET_PREFIX runAllTests_)
 
+#### misc ####
+set( CPF_DONT_TRIGGER_NOTE "dontTr1gger" ) # we use the 1 as i to minimize risc of clashing with a random use of the word in a commit message.
 
 ###### functions to define combined strings ######
-
-
 

@@ -57,6 +57,7 @@ set( SCRIPT_FILES
 	Scripts/executeCommandForConfig.cmake
 	Scripts/runAbiComplianceChecker.cmake
 	Scripts/updateExistingWebPage.cmake
+	Scripts/prepareCIRepoForBuild.cmake
 )
 
 # Files that do not fit in any other category.

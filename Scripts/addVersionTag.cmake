@@ -13,6 +13,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfGitUtilities.cmake)
 
+cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
+
 
 # check arguments
 cpfAssertScriptArgumentDefined(ROOT_DIR)
