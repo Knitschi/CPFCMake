@@ -357,7 +357,7 @@ function( cpfRepoIsOnDetachedHead isDetached repoDir)
 		WORKING_DIRECTORY "${repoDir}"
 		RESULT_VARIABLE result
 	)
-	if(${result EQUAL} 0)
+	if(${result} EQUAL 0)
 		set(${isDetached} FALSE PARENT_SCOPE)
 	else()
 		set(${isDetached} TRUE PARENT_SCOPE)
