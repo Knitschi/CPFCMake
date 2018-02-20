@@ -87,4 +87,3 @@ source_group( Templates FILES ${TEMPLATE_FILES} )
 set(allCMakeFiles ${PUBLIC_FILES} ${VARIABLES_FILES} ${FUNCTION_FILES} ${TEST_FILES} ${CONFIGURATION_FILES} ${SCRIPT_FILES} ${OTHER_FILES} ${TEMPLATE_FILES}  )
 
 cpfAddFilePackage(${PACKAGE_NAME} "${allCMakeFiles}")
-
