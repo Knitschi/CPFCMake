@@ -103,7 +103,7 @@ function( cpfAddPackages externalPackages globalFiles )
 		${CPF_PROJECT_CONFIGURATIONS_DIR}
 	)
 	foreach( dir ${cpfPackageDirs})
-		if(EXISTS ${CMAKE_SOURCE_DIR}/${dir} )
+		if(EXISTS ${CMAKE_SOURCE_DIR}/${dir})
 			list(APPEND packages ${dir})
 		endif()
 	endforeach()
