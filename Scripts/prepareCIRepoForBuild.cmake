@@ -37,7 +37,7 @@ while(NOT pushedChanges)
 
     # Make sure we are up to date. This is only needed after the first
     # iteration of the loop.
-    cpfExecuteProcess( unused "git pull ${BRANCH}" ${ROOT_DIR})
+    cpfExecuteProcess( unused "git pull" ${ROOT_DIR})
 
     # Update the owned packages
     cpfGetOwnedRepositoryDirectories( ownedRepoDirs "${ROOT_DIR}" )
