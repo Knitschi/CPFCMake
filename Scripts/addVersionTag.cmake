@@ -33,6 +33,9 @@ endif()
 cpfGetOwnedRepositoryDirectories( ownedRepoDirs "${ROOT_DIR}" )
 foreach( repoDir ${ownedRepoDirs} )
 	
+	# Make sure our version tags are up to date
+	cpfExecuteProcess( d "git pull --tags" "${repoDir}")
+
 	cpfGetCurrentVersionFromGitRepository( versionHead "${repoDir}")
 	cpfGetTagsOfHEAD( tagsAtHead "${repoDir}")
 	cpfContains(headIsAlreadyTagged "${tagsAtHead}" ${versionHead})

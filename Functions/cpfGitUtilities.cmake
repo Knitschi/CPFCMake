@@ -327,14 +327,14 @@ endfunction()
 function( cpfTryPushCommitsAndNotes pushConfirmedOut remote repoDir )
 	# try push commits
 	execute_process(
-		COMMAND git;push;${remote}
+		COMMAND git;push;${remote};refs/notes/*
 		WORKING_DIRECTORY "${repoDir}"
 		RESULT_VARIABLE result
 	)
 	if(${result} EQUAL 0)
 		# try push notes
 		execute_process(
-			COMMAND git;push;${remote};refs/notes/*
+			COMMAND git;push;${remote}
 			WORKING_DIRECTORY "${repoDir}"
 			RESULT_VARIABLE result
 		)
