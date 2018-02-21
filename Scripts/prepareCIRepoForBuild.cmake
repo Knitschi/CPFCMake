@@ -27,15 +27,6 @@ cpfAssertScriptArgumentDefined(RELEASED_PACKAGE)
 set( releaseTagOptions incrementMajor incrementMinor incrementPatch)
 cpfContains( doReleaseTag "${releaseTagOptions}" ${TAGGING_OPTION} )
 
-
-# Do nothing if the the current commit is in detached head state.
-# In this case we simply rebuild the repository "as is".
-cpfRepoIsOnDetachedHead( isDetached ${ROOT_DIR})
-if(isDetached)
-    message( STATUS "The current commit of CI-Repository at \"${ROOT_DIR}\" is not the end of a branch. The repository will not be changed." )
-    return()
-endif()
-
 # Commits that already have been stamped with a version should not be changed.
 cpfHeadHasVersionTag( headHasVersionTag ${ROOT_DIR})
 if(headHasVersionTag AND NOT doReleaseTag)
@@ -114,6 +105,15 @@ if(doReleaseTag)
     cpfExecuteProcess( d "git push --tags origin" "${repoDir}")
 
 else()
+
+    
+    # Do nothing if the the current commit is in detached head state.
+    # In this case we simply rebuild the repository "as is".
+    cpfRepoIsOnDetachedHead( isDetached ${ROOT_DIR})
+    if(isDetached)
+        message( STATUS "The current commit of CI-Repository at \"${ROOT_DIR}\" is not the end of a branch. The repository will not be changed." )
+        return()
+    endif()
 
     # If we are at the tip of a branch we can now update all owned
     # packages to their latest version.
