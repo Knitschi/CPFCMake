@@ -100,7 +100,7 @@ if(doReleaseTag)
     cpfHeadHasVersionTag( packageHasTag ${repoDir})
     if(packageHasTag)
         cpfExecuteProcess( d "git tag -d ${currentPackageVersion}" ${repoDir})
-        cpfExecuteProcess( d "git push origin refs/tags/${currentPackageVersion}" ${repoDir})
+        cpfExecuteProcess( d "git push origin :refs/tags/${currentPackageVersion}" ${repoDir})
     endif()
 
     # Add the tag and push it
