@@ -341,12 +341,12 @@ function( cpfTryPushCommitsNotesAndTags pushConfirmedOut remote repoDir )
 		WORKING_DIRECTORY "${repoDir}"
 		RESULT_VARIABLE result
 	)
-	devMessage("${result}")
 	if(${result} EQUAL 0)
 		set(${pushConfirmedOut} TRUE PARENT_SCOPE)
 	else()
 		set(${pushConfirmedOut} FALSE PARENT_SCOPE)
 	endif()
+
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -364,6 +364,7 @@ function( cpfRepoIsOnDetachedHead isDetached repoDir)
 	else()
 		set(${isDetached} TRUE PARENT_SCOPE)
 	endif()
+	
 endfunction()
 
 #----------------------------------------------------------------------------------------
