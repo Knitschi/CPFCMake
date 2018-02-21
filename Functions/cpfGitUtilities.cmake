@@ -344,9 +344,9 @@ function( cpfTryPushCommitsNotesAndTags pushConfirmedOut remote repoDir )
 	devMessage("${result}")
 	if(${result} EQUAL 0)
 		set(${pushConfirmedOut} TRUE PARENT_SCOPE)
+	else()
+		set(${pushConfirmedOut} FALSE PARENT_SCOPE)
 	endif()
-
-	set(${pushConfirmedOut} FALSE PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
