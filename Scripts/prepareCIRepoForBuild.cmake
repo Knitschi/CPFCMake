@@ -23,6 +23,8 @@ cpfAssertScriptArgumentDefined(BRANCH)
 cpfAssertScriptArgumentDefined(TAGGING_OPTION)
 cpfAssertScriptArgumentDefined(RELEASED_PACKAGE)
 
+devMessage("${BRANCH}")
+
 # check if the call is is used to tag a release version
 set( releaseTagOptions incrementMajor incrementMinor incrementPatch)
 cpfContains( doReleaseTag "${releaseTagOptions}" ${TAGGING_OPTION} )
