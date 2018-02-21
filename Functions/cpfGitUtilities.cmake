@@ -139,9 +139,14 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns the name of the currently checked out branch.
+# The function returns an empty string if the repository is in detached HEAD mode.
 function( cpfGetCurrentBranch currentBranchOut repositoryDir)
 	cpfExecuteProcess( branch "git rev-parse --abbrev-ref HEAD" "${repositoryDir}")
-	set(${currentBranchOut} ${branch} PARENT_SCOPE)
+	if( "${branch}" STREQAL HEAD )
+		set(${currentBranchOut} "" PARENT_SCOPE)
+	elseif()
+		set(${currentBranchOut} ${branch} PARENT_SCOPE)
+	endif()
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -324,24 +329,17 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns true if the current branch of the given repository can be pushed to a remote.
 # 
-function( cpfTryPushCommitsAndNotes pushConfirmedOut remote repoDir )
+function( cpfTryPushCommitsNotesAndTags pushConfirmedOut remote repoDir )
+	
+	cpfGetCurrentBranch( branch ${repoDir})
 	# try push commits
 	execute_process(
-		COMMAND git;push;${remote};refs/notes/*
+		COMMAND git;push;${remote};refs/notes/*;refs/heads/${branch};refs/tags/*
 		WORKING_DIRECTORY "${repoDir}"
 		RESULT_VARIABLE result
 	)
 	if(${result} EQUAL 0)
-		# try push notes
-		execute_process(
-			COMMAND git;push;${remote}
-			WORKING_DIRECTORY "${repoDir}"
-			RESULT_VARIABLE result
-		)
-		if(${result} EQUAL 0)
-			set(${pushConfirmedOut} TRUE PARENT_SCOPE)
-			return()
-		endif()
+		set(${pushConfirmedOut} TRUE PARENT_SCOPE)
 	endif()
 
 	set(${pushConfirmedOut} FALSE PARENT_SCOPE)
@@ -363,4 +361,16 @@ function( cpfRepoIsOnDetachedHead isDetached repoDir)
 		set(${isDetached} TRUE PARENT_SCOPE)
 	endif()
 endfunction()
+
+#----------------------------------------------------------------------------------------
+# The function returns true if the currently checkout out commit already has a version tag.
+function( cpfHeadHasVersionTag hasTagOut repoDir)
+
+	cpfGetCurrentVersionFromGitRepository( versionHead ${repoDir})
+	cpfGetTagsOfHEAD( tagsAtHead ${repoDir})
+	cpfContains(headHasVersionTag "${tagsAtHead}" ${versionHead})
+	set(${hasTagOut} ${headHasVersionTag} PARENT_SCOPE)
+	
+endfunction()
+
 
