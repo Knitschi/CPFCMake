@@ -6,7 +6,7 @@
 #
 # Arguments:
 # ROOT_DIR:         The CPF root directory.
-# BRANCH:           The branch of the package repositories from which updates are pulled.
+# GIT_REF:          The branch, commit id or tag of the CI-repo that is build.
 # TAGGING_OPTION:   This must be given if a commit should be tagges as a release. 
 #                   It must be one of incrementMajor, incrementMinor, incrementPatch. Other values are ignored.
 # RELEASED_PACKAGE: This option must hold the name of a package or be empty. It is only used when a release version
@@ -19,11 +19,13 @@ include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake)
 
 
 cpfAssertScriptArgumentDefined(ROOT_DIR)
-cpfAssertScriptArgumentDefined(BRANCH)
+cpfAssertScriptArgumentDefined(GIT_REF)
 cpfAssertScriptArgumentDefined(TAGGING_OPTION)
 cpfAssertScriptArgumentDefined(RELEASED_PACKAGE)
 
-devMessage("${BRANCH}")
+# Checkout the requested reference of the CI-repository
+# This is necessary because the GitSCM step always
+cpfExecuteProcess( unused "git checkout ${GIT_REF}" ${ROOT_DIR})
 
 # check if the call is is used to tag a release version
 set( releaseTagOptions incrementMajor incrementMinor incrementPatch)
@@ -120,9 +122,6 @@ else()
     # If we are at the tip of a branch we can now update all owned
     # packages to their latest version.
 
-    # checkout the CI-repository
-    cpfExecuteProcess( unused "git checkout ${BRANCH}" ${ROOT_DIR})
-
     # try updateing the remote repo with changes
     # The loop is used to check wether somene else pushed to the remote while we were
     # changing the repository here.
@@ -138,9 +137,10 @@ else()
         foreach( repoDir ${ownedRepoDirs} )
             if(NOT (${repoDir} STREQUAL ${ROOT_DIR}))
                 # checkout the branch
-                cpfExecuteProcess( unused "git checkout ${BRANCH}" ${repoDir})
+                # We should rather checkout the tracked branch here. But how can we get it?
+                cpfExecuteProcess( unused "git checkout ${GIT_REF}" ${repoDir}) 
                 # pull new commits
-                cpfExecuteProcess( unused "git pull origin ${BRANCH}" ${repoDir})
+                cpfExecuteProcess( unused "git pull" ${repoDir})
             endif()
         endforeach()
 
