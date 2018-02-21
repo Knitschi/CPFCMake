@@ -118,7 +118,7 @@ endfunction()
 # This will not return a tag of HEAD, but only older tags.
 function( cpfGetLastReleaseVersionTagOfBranch lastVersionTagOut branch repositoryDir allowTagsAtHEAD )
 
-	cpfGetPrecedingTagsLatestFirst( tags ${branch} ${repositoryDir} ${allowTagsAtHEAD} )
+	cpfGetPrecedingTagsLatestFirst( tags "${branch}" ${repositoryDir} ${allowTagsAtHEAD} )
 
 	# The regex should only match release versions that only contain three numbers with single dots in between them like 1.23.45
 	cpfGetReleaseVersionRegExp(regexp)
@@ -286,7 +286,7 @@ endfunction()
 function( cpfGetCurrentVersionFromGitRepository versionOut repoDir  )
 
 	cpfGetCurrentBranch( currentBranch "${repoDir}")
-	cpfGetLastReleaseVersionTagOfBranch( lastReleaseTagVersion ${currentBranch} "${repoDir}" TRUE)
+	cpfGetLastReleaseVersionTagOfBranch( lastReleaseTagVersion "${currentBranch}" "${repoDir}" TRUE)
 	if(NOT lastReleaseTagVersion)
 		message( FATAL_ERROR "Branch ${currentBranch} of the repository at ${repoDir} has no release version tag. Make sure to tag the first commit of the repository with \"0.0.0\"" )
 	endif()
@@ -327,11 +327,14 @@ function( cpfGetHashOfTag hashOut tag repositoryDir )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Returns true if the current branch of the given repository can be pushed to a remote.
-# 
+# Returns true if the current branch of the given repository was pushed to a remote.
+# The function will fail if the repository is in detached HEAD state.
 function( cpfTryPushCommitsNotesAndTags pushConfirmedOut remote repoDir )
 	
 	cpfGetCurrentBranch( branch ${repoDir})
+	if(NOT branch)
+		message(FATAL_ERROR "Function cpfTryPushCommitsNotesAndTags() requires the repository not to be in detached HEAD mode.")
+	endif()
 	# try push commits
 	execute_process(
 		COMMAND git;push;${remote};refs/notes/*;refs/heads/${branch};refs/tags/*
