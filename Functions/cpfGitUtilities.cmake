@@ -68,7 +68,7 @@ endfunction()
 # This may return a tag to HEAD or the given branch ref
 function( cpfGetLastVersionTagOfBranch lastVersionTagOut branch repositoryDir allowTagsAtHEAD )
 
-	cpfGetPrecedingTagsLatestFirst( tags ${branch} ${repositoryDir} ${allowTagsAtHEAD} )
+	cpfGetPrecedingTagsLatestFirst( tags "${branch}" ${repositoryDir} ${allowTagsAtHEAD} )
 
 	# The regex should match the following strings
 	# "1.2.3"							release version
