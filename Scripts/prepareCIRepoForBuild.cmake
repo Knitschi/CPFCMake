@@ -119,8 +119,10 @@ else()
         return()
     endif()
 
+
     # If we are at the tip of a branch we can now update all owned
     # packages to their latest version.
+    message( STATUS "Update owned packages." )
 
     # try updateing the remote repo with changes
     # The loop is used to check wether somene else pushed to the remote while we were
