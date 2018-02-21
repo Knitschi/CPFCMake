@@ -66,8 +66,10 @@ if(doReleaseTag)
 
     # Make sure no release version is overwritten.
     # Make sure that we do not overwrite a release tag.
-    cpfGetCurrentVersionFromGitRepository( currentPackageVersion ${ROOT_DIR})
+    cpfGetCurrentVersionFromGitRepository( currentPackageVersion ${repoDir})
+    devMessage("Repo ${repoDir} at version")
     cpfIsReleaseVersion( isRelease ${currentPackageVersion})
+    devMessage("isRelease ${isRelease}")
     if(isRelease)
         message(FATAL_ERROR "Error! The current commit is already at release version ${lastVersionTag}. Overwriting existing releases is not allowed.")
     endif()
