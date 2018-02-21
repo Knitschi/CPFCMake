@@ -65,10 +65,11 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Get the previous version tag of the checked out branch.
-# This may return a tag to HEAD or the given branch ref
+# Argument branch can either be set a branch name or to HEAD if the repository is in detached mode.
+# 
 function( cpfGetLastVersionTagOfBranch lastVersionTagOut branch repositoryDir allowTagsAtHEAD )
 
-	cpfGetPrecedingTagsLatestFirst( tags "${branch}" ${repositoryDir} ${allowTagsAtHEAD} )
+	cpfGetPrecedingTagsLatestFirst( tags ${branch} ${repositoryDir} ${allowTagsAtHEAD} )
 
 	# The regex should match the following strings
 	# "1.2.3"							release version
@@ -101,7 +102,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfGetPrecedingTagsLatestFirst tagsOut branch repositoryDir allowTagsAtHEAD )
 
-	cpfGetTags( tags "${branch}" "${repositoryDir}")
+	cpfGetTags( tags ${branch} "${repositoryDir}")
 	if(NOT allowTagsAtHEAD)
 		cpfGetTagsOfHEAD( headTags ${repositoryDir} )
 		if(headTags)
@@ -139,14 +140,10 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns the name of the currently checked out branch.
-# The function returns an empty string if the repository is in detached HEAD mode.
+# The function returns HEAD if the repository is in detached HEAD mode.
 function( cpfGetCurrentBranch currentBranchOut repositoryDir)
 	cpfExecuteProcess( branch "git rev-parse --abbrev-ref HEAD" "${repositoryDir}")
-	if( "${branch}" STREQUAL HEAD )
-		set(${currentBranchOut} "" PARENT_SCOPE)
-	else()
-		set(${currentBranchOut} ${branch} PARENT_SCOPE)
-	endif()
+	set(${currentBranchOut} ${branch} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -286,7 +283,7 @@ endfunction()
 function( cpfGetCurrentVersionFromGitRepository versionOut repoDir  )
 
 	cpfGetCurrentBranch( currentBranch "${repoDir}")
-	cpfGetLastReleaseVersionTagOfBranch( lastReleaseTagVersion "${currentBranch}" "${repoDir}" TRUE)
+	cpfGetLastReleaseVersionTagOfBranch( lastReleaseTagVersion ${currentBranch} "${repoDir}" TRUE)
 	if(NOT lastReleaseTagVersion)
 		message( FATAL_ERROR "Branch ${currentBranch} of the repository at ${repoDir} has no release version tag. Make sure to tag the first commit of the repository with \"0.0.0\"" )
 	endif()
@@ -332,7 +329,7 @@ endfunction()
 function( cpfTryPushCommitsNotesAndTags pushConfirmedOut remote repoDir )
 	
 	cpfGetCurrentBranch( branch ${repoDir})
-	if(NOT branch)
+	if(${branch} STREQUAL HEAD)
 		message(FATAL_ERROR "Function cpfTryPushCommitsNotesAndTags() requires the repository not to be in detached HEAD mode.")
 	endif()
 	# try push commits
@@ -354,7 +351,7 @@ endfunction()
 # of a branch.
 function( cpfRepoIsOnDetachedHead isDetached repoDir)
 	# the command fails if the HEAD is detached, otherwise returns the branch name
-	cpfExecuteProcess( branch "git rev-parse --abbrev-ref HEAD" "${repositoryDir}")
+	cpfGetCurrentBranch( branch ${repoDir})
 	if("${branch}" STREQUAL HEAD)
 		set(${isDetached} TRUE PARENT_SCOPE)
 	else()
