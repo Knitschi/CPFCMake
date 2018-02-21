@@ -354,17 +354,13 @@ endfunction()
 # of a branch.
 function( cpfRepoIsOnDetachedHead isDetached repoDir)
 	# the command fails if the HEAD is detached, otherwise returns the branch name
-	execute_process(
-		COMMAND git;symbolic-ref;HEAD
-		WORKING_DIRECTORY "${repoDir}"
-		RESULT_VARIABLE result
-	)
-	if(${result} EQUAL 0)
-		set(${isDetached} FALSE PARENT_SCOPE)
-	else()
+	cpfExecuteProcess( branch "git rev-parse --abbrev-ref HEAD" "${repositoryDir}")
+	if("${branch}" STREQUAL HEAD)
 		set(${isDetached} TRUE PARENT_SCOPE)
+	else()
+		set(${isDetached} FALSE PARENT_SCOPE)
 	endif()
-	
+
 endfunction()
 
 #----------------------------------------------------------------------------------------
