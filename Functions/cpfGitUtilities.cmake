@@ -352,6 +352,7 @@ endfunction()
 function( cpfRepoIsOnDetachedHead isDetached repoDir)
 	# the command fails if the HEAD is detached, otherwise returns the branch name
 	cpfGetCurrentBranch( branch ${repoDir})
+	devMessage("${branch}")
 	if("${branch}" STREQUAL HEAD)
 		set(${isDetached} TRUE PARENT_SCOPE)
 	else()
