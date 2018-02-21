@@ -142,7 +142,7 @@ endfunction()
 # The function returns an empty string if the repository is in detached HEAD mode.
 function( cpfGetCurrentBranch currentBranchOut repositoryDir)
 	cpfExecuteProcess( branch "git rev-parse --abbrev-ref HEAD" "${repositoryDir}")
-	if( "${branch}" STREQAL HEAD )
+	if( "${branch}" STREQUAL HEAD )
 		set(${currentBranchOut} "" PARENT_SCOPE)
 	elseif()
 		set(${currentBranchOut} ${branch} PARENT_SCOPE)
@@ -370,7 +370,7 @@ function( cpfHeadHasVersionTag hasTagOut repoDir)
 	cpfGetTagsOfHEAD( tagsAtHead ${repoDir})
 	cpfContains(headHasVersionTag "${tagsAtHead}" ${versionHead})
 	set(${hasTagOut} ${headHasVersionTag} PARENT_SCOPE)
-	
+
 endfunction()
 
 
