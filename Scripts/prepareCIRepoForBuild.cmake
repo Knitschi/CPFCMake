@@ -29,7 +29,7 @@ cpfContains( doReleaseTag "${releaseTagOptions}" ${TAGGING_OPTION} )
 
 # Commits that already have been stamped with a version should not be changed.
 cpfHeadHasVersionTag( headHasVersionTag ${ROOT_DIR})
-if(headHasVersionTag AND NOT doReleaseTag)
+if(headHasVersionTag AND (NOT doReleaseTag)
     message( STATUS "The current commit has alredy been version tagged. The repository will not be changed." )
     return()
 endif()
