@@ -156,10 +156,10 @@ else()
             cpfExecuteProcess( unused "git commit . -m\"Update packages ${updatedPackages}.\"" ${ROOT_DIR})
             cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" ${ROOT_DIR})
             cpfTryPushCommitsNotesAndTags( pushedChanges origin ${ROOT_DIR})
-            message( STATUS "Updated packages ${updatedPackages}.")
+            message( STATUS "Updated packages: ${updatedPackages}.")
         else() 
             # no package updates were done. We do not need to wait for a successful push
-            message( STATUS "No packages needed an update.")
+            message( STATUS "No package needed an update.")
             return()
         endif()
 
