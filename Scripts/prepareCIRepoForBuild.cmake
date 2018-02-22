@@ -40,9 +40,11 @@ endif()
 
 if(doReleaseTag)
 
+    devMessage("root ${ROOT_DIR} has version tag ${rootHasVersionTag}")
+
     # Make sure only commits are upgraded to release that have already been successfully build.
     if( NOT rootHasVersionTag)
-        message( FATAL_ERROR "Error! Release tag builds can only be run on commits that have already been taged with an internal version." )
+        message( FATAL_ERROR "Error! Release tag builds can only be run on commits that have already been tagged with an internal version." )
     endif()
 
     # Get the directory of the repository that shall be release tagged.
