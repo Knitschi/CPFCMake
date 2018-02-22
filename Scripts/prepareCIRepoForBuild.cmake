@@ -31,16 +31,10 @@ cpfExecuteProcess( unused "git checkout ${GIT_REF}" ${ROOT_DIR})
 set( releaseTagOptions incrementMajor incrementMinor incrementPatch)
 cpfContains( doReleaseTag "${releaseTagOptions}" ${TAGGING_OPTION} )
 
-# Commits that already have been stamped with a version should not be changed.
-cpfHeadHasVersionTag( rootHasVersionTag ${ROOT_DIR})
-if(rootHasVersionTag AND (NOT doReleaseTag))
-    message( STATUS "The current commit has alredy been version tagged. The repository will not be changed." )
-    return()
-endif()
-
 if(doReleaseTag)
 
     # Make sure only commits are upgraded to release that have already been successfully build.
+    cpfHeadHasVersionTag( rootHasVersionTag ${ROOT_DIR})
     if( NOT rootHasVersionTag)
         message( FATAL_ERROR "Error! Release tag builds can only be run on commits that have already been tagged with an internal version." )
     endif()
@@ -143,7 +137,7 @@ else()
             # pull new commits of the tracked branch
             # cpfExecuteProcess( unused "git pull" ${packageRepoDir})
             cpfExecuteProcess( unused "git submodule update --remote ${CPF_SOURCE_DIR}/${package}" ${ROOT_DIR})
-            devMessage("update package ${package}. output ${unused}")
+            message( STATUS "Update package ${package}")
         endforeach()
 
         # At this point we could execute a formatting script on all owned packages.
@@ -152,12 +146,14 @@ else()
 
         # Commit the update
         cpfWorkingDirectoryIsDirty( isDirty ${ROOT_DIR})
-        if(isDirty) 
+        if(isDirty) # we actually updated a package
             cpfExecuteProcess( unused "git commit . -m\"Update owned packages.\"" ${ROOT_DIR})
             cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" ${ROOT_DIR})
+            cpfTryPushCommitsNotesAndTags( pushedChanges origin ${ROOT_DIR})
+        else() # no package updates were done
+            set(pushedChanges TRUE) # finish the loop and return
         endif()
 
-        cpfTryPushCommitsNotesAndTags( pushedChanges origin ${ROOT_DIR})
         # Repeat the update procedure if somebody pushed changes to the remote in the meantime.
 
     endwhile()
