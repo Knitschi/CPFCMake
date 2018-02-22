@@ -151,7 +151,10 @@ else()
 
 
         # Commit the update
-        if(updatedPackages) # we actually updated a package
+        # We need to explicitly check if we need to make commmits because it is possible that we
+        # update the packages to the revision that is stored in the host repo.
+        cpfWorkingDirectoryIsDirty(isDirty "${ROOT_DIR}")
+        if(isDirty) # we actually updated a package
             # Explicitly fetch the notes. Normal pull does not do it.
             cpfExecuteProcess( unused "git fetch origin refs/notes/*:refs/notes/*" ${ROOT_DIR})
             cpfExecuteProcess( unused "git commit . -m\"Update package(s): ${updatedPackages}\"" ${ROOT_DIR})
