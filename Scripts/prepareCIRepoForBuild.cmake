@@ -154,6 +154,7 @@ else()
         if(updatedPackages) # we actually updated a package
             cpfExecuteProcess( unused "git commit . -m\"Update packages ${updatedPackages}.\"" ${ROOT_DIR})
             cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" ${ROOT_DIR})
+            cpfTryPushCommitsNotesAndTags( pushedChanges origin ${ROOT_DIR})
             message( STATUS "Updated packages ${updatedPackages}.")
         else() 
             # no package updates were done. We do not need to wait for a successful push
@@ -161,9 +162,7 @@ else()
             return()
         endif()
 
-        cpfTryPushCommitsNotesAndTags( pushedChanges origin ${ROOT_DIR})
-
-        # Repeat the update procedure if somebody pushed changes to the remote in the meantime.
+        # Repeat the update procedure in case somebody pushed changes to the remote in the meantime.
 
     endwhile()
 
