@@ -135,16 +135,15 @@ else()
         cpfExecuteProcess( unused "git pull" ${ROOT_DIR})
 
         # Update the owned packages
-        cpfGetOwnedRepositoryDirectories( ownedRepoDirs ${ROOT_DIR} )
-        foreach( packageRepoDir ${ownedRepoDirs} )
-            if(NOT (${packageRepoDir} STREQUAL ${ROOT_DIR}))
-                # checkout the branch
-                # We should rather checkout the tracked branch here. But how can we get it?
-                #cpfExecuteProcess( unused "git submodule update --remote ${CPF_SOURCE_DIR}/" ${ROOT_DIR}) 
-                # pull new commits of the tracked branch
-                cpfExecuteProcess( unused "git pull" ${packageRepoDir})
-                devMessage("update repo ${packageRepoDir}. output ${unused}")
-            endif()
+        cpfGetOwnedPackages( ownedPackages ${ROOT_DIR})
+        foreach( package ${ownedPackages} )
+            # checkout the branch
+            # We should rather checkout the tracked branch here. But how can we get it?
+            #cpfExecuteProcess( unused "git submodule update --remote ${CPF_SOURCE_DIR}/" ${ROOT_DIR}) 
+            # pull new commits of the tracked branch
+            # cpfExecuteProcess( unused "git pull" ${packageRepoDir})
+            cpfExecuteProcess( unused "git submodule update ${CPF_SOURCE_DIR}/${package}" ${ROOT_DIR})
+            devMessage("update package ${package}. output ${unused}")
         endforeach()
 
         # At this point we could execute a formatting script on all owned packages.
