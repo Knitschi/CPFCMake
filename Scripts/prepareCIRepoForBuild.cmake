@@ -160,13 +160,14 @@ else()
             cpfExecuteProcess( showResult "git show -s HEAD" ${ROOT_DIR})
             devMessage("${showResult}")
 
-            cpfTryPushCommitsAndNotes( pushedChanges origin ${ROOT_DIR})
             message( STATUS "Updated package(s): ${updatedPackages}.")
         else() 
             # no package updates were done. We do not need to wait for a successful push
             message( STATUS "No package needed an update.")
             return()
         endif()
+
+        cpfTryPushCommitsAndNotes( pushedChanges origin ${ROOT_DIR})
 
         # Repeat the update procedure in case somebody pushed changes to the remote in the meantime.
 
