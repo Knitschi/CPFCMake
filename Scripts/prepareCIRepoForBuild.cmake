@@ -136,7 +136,7 @@ else()
             cpfGetAbsPackageDirectory( packageDir ${package} ${ROOT_DIR})
 
             # Checkout the tracked branch
-            cpfGetPackagesTrackedBranch( packageBranch package ${ROOT_DIR})
+            cpfGetPackagesTrackedBranch( packageBranch ${package} ${ROOT_DIR})
             cpfExecuteProcess( b "git checkout ${packageBranch}" ${packageDir})
             # Pull changes if available
             cpfCurrentBranchIsBehindOrigin( updatesAvailable ${packageDir})
