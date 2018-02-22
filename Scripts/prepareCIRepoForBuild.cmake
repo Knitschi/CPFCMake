@@ -142,6 +142,7 @@ else()
             cpfCurrentBranchIsBehindOrigin( updatesAvailable ${packageDir})
             if(updatesAvailable)
                 cpfExecuteProcess( unused "git pull" ${packageDir})
+                devMessage("Pulled package ${package} with result: ${unused}")
                 list(APPEND updatedPackages ${package})
             endif()
         endforeach()
@@ -152,14 +153,15 @@ else()
 
         # Commit the update
         if(updatedPackages) # we actually updated a package
-            cpfExecuteProcess( unused "git commit . -m\"Update packages: ${updatedPackages}\"" ${ROOT_DIR})
+            cpfExecuteProcess( unused "git pull" ${ROOT_DIR})
+            cpfExecuteProcess( unused "git commit . -m\"Update package(s): ${updatedPackages}\"" ${ROOT_DIR})
             cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" ${ROOT_DIR})
 
             cpfExecuteProcess( showResult "git show -s HEAD" ${ROOT_DIR})
             devMessage("${showResult}")
 
-            cpfTryPushCommitsNotesAndTags( pushedChanges origin ${ROOT_DIR})
-            message( STATUS "Updated packages: ${updatedPackages}.")
+            cpfTryPushCommitsAndNotes( pushedChanges origin ${ROOT_DIR})
+            message( STATUS "Updated package(s): ${updatedPackages}.")
         else() 
             # no package updates were done. We do not need to wait for a successful push
             message( STATUS "No package needed an update.")

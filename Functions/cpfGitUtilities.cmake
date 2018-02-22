@@ -326,20 +326,21 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns true if the current branch of the given repository was pushed to a remote.
 # The function will fail if the repository is in detached HEAD state.
-function( cpfTryPushCommitsNotesAndTags pushConfirmedOut remote repoDir )
+function( cpfTryPushCommitsAndNotes pushConfirmedOut remote repoDir )
 	
 	cpfGetCurrentBranch( branch ${repoDir})
 	if(${branch} STREQUAL HEAD)
-		message(FATAL_ERROR "Function cpfTryPushCommitsNotesAndTags() requires the repository not to be in detached HEAD mode.")
+		message(FATAL_ERROR "Function cpfTryPushCommitsAndNotes() requires the repository not to be in detached HEAD mode.")
 	endif()
 	# try push commits
+	devMessage("push command git;push;${remote};refs/notes/*;refs/heads/${branch}")
 	execute_process(
-		COMMAND git;push;${remote};refs/notes/*;refs/heads/${branch};refs/tags/*
+		COMMAND git;push;${remote};refs/notes/*;refs/heads/${branch}
 		WORKING_DIRECTORY "${repoDir}"
 		RESULT_VARIABLE result
 	)
+	devMessage("push returned ${result}")
 	if(${result} EQUAL 0)
-		devMessage("push returned 0")
 		set(${pushConfirmedOut} TRUE PARENT_SCOPE)
 	else()
 		set(${pushConfirmedOut} FALSE PARENT_SCOPE)
