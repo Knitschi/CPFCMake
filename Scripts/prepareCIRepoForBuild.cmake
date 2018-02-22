@@ -32,8 +32,8 @@ set( releaseTagOptions incrementMajor incrementMinor incrementPatch)
 cpfContains( doReleaseTag "${releaseTagOptions}" ${TAGGING_OPTION} )
 
 # Commits that already have been stamped with a version should not be changed.
-cpfHeadHasVersionTag( headHasVersionTag ${ROOT_DIR})
-if(headHasVersionTag AND (NOT doReleaseTag))
+cpfHeadHasVersionTag( rootHasVersionTag ${ROOT_DIR})
+if(rootHasVersionTag AND (NOT doReleaseTag))
     message( STATUS "The current commit has alredy been version tagged. The repository will not be changed." )
     return()
 endif()
@@ -41,13 +41,13 @@ endif()
 if(doReleaseTag)
 
     # Make sure only commits are upgraded to release that have already been successfully build.
-    if( NOT headHasVersionTag)
+    if( NOT rootHasVersionTag)
         message( FATAL_ERROR "Error! Release tag builds can only be run on commits that have already been taged with an internal version." )
     endif()
 
     # Get the directory of the repository that shall be release tagged.
     if(NOT RELEASED_PACKAGE)
-        set(repoDir ${ROOT_DIR})
+        set(packageRepoDir ${ROOT_DIR})
     else()
         # Check the package directory exists
         cpfGetAbsPackageDirectory( packageDir ${RELEASED_PACKAGE} ${ROOT_DIR})
@@ -61,12 +61,12 @@ if(doReleaseTag)
             message( FATAL_ERROR "Error! The CI-project does not own the given package \"${RELEASED_PACKAGE}\". It can only set release tags for owned packages.")
         endif()
 
-        set(repoDir ${packageDir})
+        set(packageRepoDir ${packageDir})
     endif()
 
     # Make sure no release version is overwritten.
     # Make sure that we do not overwrite a release tag.
-    cpfGetCurrentVersionFromGitRepository( currentPackageVersion ${repoDir})
+    cpfGetCurrentVersionFromGitRepository( currentPackageVersion ${packageRepoDir})
     cpfIsReleaseVersion( isRelease ${currentPackageVersion})
     if(isRelease)
         message(FATAL_ERROR "Error! The current commit is already at release version ${lastVersionTag}. Overwriting existing releases is not allowed.")
@@ -90,23 +90,23 @@ if(doReleaseTag)
     set( newVersion ${major}.${minor}.${patch} )
 
     # Make sure this version does not exist yet
-    cpfGetReleaseVersionTags( releaseVersions ${repoDir})
+    cpfGetReleaseVersionTags( releaseVersions ${packageRepoDir})
     cpfContains(alreadyExists "${releaseVersions}" ${newVersion})
     if(alreadyExists)
         message(FATAL_ERROR "Error! Incrementing the version number failed. A release with the new version ${newVersion} already exists.")
     endif()
 
     # Delete possibly existing internal version tags at this commit.
-    cpfHeadHasVersionTag( packageHasTag ${repoDir})
+    cpfHeadHasVersionTag( packageHasTag ${packageRepoDir})
     if(packageHasTag)
-        cpfExecuteProcess( d "git tag -d ${currentPackageVersion}" ${repoDir})
-        cpfExecuteProcess( d "git push origin :refs/tags/${currentPackageVersion}" ${repoDir})
+        cpfExecuteProcess( d "git tag -d ${currentPackageVersion}" ${packageRepoDir})
+        cpfExecuteProcess( d "git push origin :refs/tags/${currentPackageVersion}" ${packageRepoDir})
     endif()
 
     # Add the tag and push it
-    message("-- Set new release version tag ${newVersion} for repository \"${repoDir}\".")
-    cpfExecuteProcess( d "git tag ${newVersion}" "${repoDir}")
-    cpfExecuteProcess( d "git push --tags origin" "${repoDir}")
+    message("-- Set new release version tag ${newVersion} for repository \"${packageRepoDir}\".")
+    cpfExecuteProcess( d "git tag ${newVersion}" "${packageRepoDir}")
+    cpfExecuteProcess( d "git push --tags origin" "${packageRepoDir}")
 
 else()
 
@@ -136,13 +136,13 @@ else()
 
         # Update the owned packages
         cpfGetOwnedRepositoryDirectories( ownedRepoDirs ${ROOT_DIR} )
-        foreach( repoDir ${ownedRepoDirs} )
-            if(NOT (${repoDir} STREQUAL ${ROOT_DIR}))
+        foreach( packageRepoDir ${ownedRepoDirs} )
+            if(NOT (${packageRepoDir} STREQUAL ${ROOT_DIR}))
                 # checkout the branch
                 # We should rather checkout the tracked branch here. But how can we get it?
-                cpfExecuteProcess( unused "git checkout ${GIT_REF}" ${repoDir}) 
+                cpfExecuteProcess( unused "git checkout ${GIT_REF}" ${packageRepoDir}) 
                 # pull new commits
-                cpfExecuteProcess( unused "git pull" ${repoDir})
+                cpfExecuteProcess( unused "git pull" ${packageRepoDir})
             endif()
         endforeach()
 
