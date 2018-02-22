@@ -143,6 +143,7 @@ else()
                 #cpfExecuteProcess( unused "git submodule update --remote ${CPF_SOURCE_DIR}/" ${ROOT_DIR}) 
                 # pull new commits of the tracked branch
                 cpfExecuteProcess( unused "git pull" ${packageRepoDir})
+                devMessage("update repo ${packageRepoDir}. output ${unused}")
             endif()
         endforeach()
 
