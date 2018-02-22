@@ -141,6 +141,7 @@ else()
             # Pull changes if available
             cpfCurrentBranchIsBehindOrigin( updatesAvailable ${packageDir})
             if(updatesAvailable)
+                devMessage("pull branch ${packageBranch} from ${packageDir}")
                 cpfExecuteProcess( unused "git pull" ${packageDir})
                 list(APPEND updatedPackages ${package})
             endif()
