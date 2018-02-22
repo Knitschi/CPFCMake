@@ -153,19 +153,23 @@ else()
 
         # Commit the update
         if(updatedPackages) # we actually updated a package
-            cpfExecuteProcess( unused "git pull" ${ROOT_DIR})
+            # Explicitly fetch the notes. Normal pull does not do it.
+            cpfExecuteProcess( unused "git fetch origin refs/notes/*:refs/notes/*" ${ROOT_DIR})
             cpfExecuteProcess( unused "git commit . -m\"Update package(s): ${updatedPackages}\"" ${ROOT_DIR})
             cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" ${ROOT_DIR})
 
             cpfExecuteProcess( showResult "git show -s HEAD" ${ROOT_DIR})
             devMessage("${showResult}")
 
-            cpfTryPushCommitsAndNotes( pushedChanges origin ${ROOT_DIR})
-            message( STATUS "Updated package(s): ${updatedPackages}.")
         else() 
             # no package updates were done. We do not need to wait for a successful push
             message( STATUS "No package needed an update.")
             return()
+        endif()
+
+        cpfTryPushCommitsAndNotes( pushedChanges origin ${ROOT_DIR})
+        if(pushedChanges)
+            message( STATUS "Updated package(s): ${updatedPackages}.")
         endif()
 
         # Repeat the update procedure in case somebody pushed changes to the remote in the meantime.

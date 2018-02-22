@@ -332,14 +332,14 @@ function( cpfTryPushCommitsAndNotes pushConfirmedOut remote repoDir )
 	if(${branch} STREQUAL HEAD)
 		message(FATAL_ERROR "Function cpfTryPushCommitsAndNotes() requires the repository not to be in detached HEAD mode.")
 	endif()
-	# try push commits
-	devMessage("push command git;push;${remote};refs/notes/*;refs/heads/${branch}")
+
 	execute_process(
-		COMMAND git;push;${remote};refs/notes/*;refs/heads/${branch}
+		COMMAND git;push;${remote};refs/notes/*;refs/heads/${branch};
 		WORKING_DIRECTORY "${repoDir}"
 		RESULT_VARIABLE result
 	)
 	devMessage("push returned ${result}")
+	
 	if(${result} EQUAL 0)
 		set(${pushConfirmedOut} TRUE PARENT_SCOPE)
 	else()
