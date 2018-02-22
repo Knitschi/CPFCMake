@@ -141,7 +141,6 @@ else()
             # Pull changes if available
             cpfCurrentBranchIsBehindOrigin( updatesAvailable ${packageDir})
             if(updatesAvailable)
-                devMessage("pull branch ${packageBranch} from ${packageDir}")
                 cpfExecuteProcess( unused "git pull" ${packageDir})
                 list(APPEND updatedPackages ${package})
             endif()
@@ -155,6 +154,10 @@ else()
         if(updatedPackages) # we actually updated a package
             cpfExecuteProcess( unused "git commit . -m\"Update packages: ${updatedPackages}\"" ${ROOT_DIR})
             cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" ${ROOT_DIR})
+
+            cpfExecuteProcess( showResult "git show -s HEAD" ${ROOT_DIR})
+            devMessage("${showResult}")
+
             cpfTryPushCommitsNotesAndTags( pushedChanges origin ${ROOT_DIR})
             message( STATUS "Updated packages: ${updatedPackages}.")
         else() 
