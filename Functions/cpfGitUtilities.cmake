@@ -337,9 +337,8 @@ function( cpfTryPushCommitsAndNotes pushConfirmedOut remote repoDir )
 		COMMAND git;push;${remote};refs/notes/*;refs/heads/${branch};
 		WORKING_DIRECTORY "${repoDir}"
 		RESULT_VARIABLE result
+		OUTPUT_VARIABLE unused	# suppress the output of the command
 	)
-	devMessage("push returned ${result}")
-	
 	if(${result} EQUAL 0)
 		set(${pushConfirmedOut} TRUE PARENT_SCOPE)
 	else()
