@@ -129,15 +129,22 @@ else()
         cpfExecuteProcess( unused "git pull" ${ROOT_DIR})
 
         # Update the owned packages
+        set(updatedPackages)
         cpfGetOwnedPackages( ownedPackages ${ROOT_DIR})
         foreach( package ${ownedPackages} )
+
+            cpfGetAbsPackageDirectory( packageDir ${package} ${ROOT_DIR})
+
             # checkout the branch
             # We should rather checkout the tracked branch here. But how can we get it?
             #cpfExecuteProcess( unused "git submodule update --remote ${CPF_SOURCE_DIR}/" ${ROOT_DIR}) 
             # pull new commits of the tracked branch
             # cpfExecuteProcess( unused "git pull" ${packageRepoDir})
-            cpfExecuteProcess( unused "git submodule update --remote ${CPF_SOURCE_DIR}/${package}" ${ROOT_DIR})
-            message( STATUS "Update package ${package}")
+            cpfCurrentBranchIsBehindOrigin( updatesAvailable ${packageDir})
+            if(updatesAvailable)
+                cpfExecuteProcess( unused "git submodule update --remote ${CPF_SOURCE_DIR}/${package}" ${ROOT_DIR})
+                list(APPEND updatedPackages ${package})
+            endif()
         endforeach()
 
         # At this point we could execute a formatting script on all owned packages.
@@ -145,14 +152,17 @@ else()
 
 
         # Commit the update
-        cpfWorkingDirectoryIsDirty( isDirty ${ROOT_DIR})
-        if(isDirty) # we actually updated a package
-            cpfExecuteProcess( unused "git commit . -m\"Update owned packages.\"" ${ROOT_DIR})
+        if(updatedPackages) # we actually updated a package
+            cpfExecuteProcess( unused "git commit . -m\"Update packages ${updatedPackages}.\"" ${ROOT_DIR})
             cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" ${ROOT_DIR})
-            cpfTryPushCommitsNotesAndTags( pushedChanges origin ${ROOT_DIR})
-        else() # no package updates were done
-            set(pushedChanges TRUE) # finish the loop and return
+            message( STATUS "Updated packages ${updatedPackages}.")
+        else() 
+            # no package updates were done. We do not need to wait for a successful push
+            message( STATUS "No packages were updated.")
+            return()
         endif()
+
+        cpfTryPushCommitsNotesAndTags( pushedChanges origin ${ROOT_DIR})
 
         # Repeat the update procedure if somebody pushed changes to the remote in the meantime.
 

@@ -371,4 +371,24 @@ function( cpfHeadHasVersionTag hasTagOut repoDir)
 
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# The function returns TRUE if a git pull command would actually pull new commits from
+# remote origin on the current branch.
+function( cpfCurrentBranchIsBehindOrigin isBehindOut repoDir )
+
+	cpfGetCurrentBranch( branch ${repoDir})
+	if(${branch} STREQUAL HEAD)
+		message(FATAL_ERROR "Calling function cpfCurrentBranchIsBehindOrigin() does not make sense when the repository is in detached HEAD mode.")
+	endif()
+	cpfExecuteProcess( d "git remote update" ${repoDir})
+	cpfExecuteProcess( nrCommitsBehindOrigin "git rev-list HEAD...origin/${branch} --count" ${repoDir})
+	if( ${nrCommitsBehindOrigin} EQUAL 0)
+		set(${isBehindOut} FALSE PARENT_SCOPE)
+	else()
+		set(${isBehindOut} TRUE PARENT_SCOPE)
+	endif()
+
+endfunction()
+
+
 
