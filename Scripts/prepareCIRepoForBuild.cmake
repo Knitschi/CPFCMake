@@ -140,8 +140,8 @@ else()
             if(NOT (${packageRepoDir} STREQUAL ${ROOT_DIR}))
                 # checkout the branch
                 # We should rather checkout the tracked branch here. But how can we get it?
-                cpfExecuteProcess( unused "git checkout ${GIT_REF}" ${packageRepoDir}) 
-                # pull new commits
+                #cpfExecuteProcess( unused "git submodule update --remote ${CPF_SOURCE_DIR}/" ${ROOT_DIR}) 
+                # pull new commits of the tracked branch
                 cpfExecuteProcess( unused "git pull" ${packageRepoDir})
             endif()
         endforeach()
