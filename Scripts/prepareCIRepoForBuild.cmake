@@ -130,19 +130,18 @@ else()
 
         # Update the owned packages
         set(updatedPackages)
-        cpfGetOwnedPackages( ownedPackages ${ROOT_DIR})
+        cpfGetOwnedLoosePackages( ownedPackages ${ROOT_DIR})
         foreach( package ${ownedPackages} )
 
             cpfGetAbsPackageDirectory( packageDir ${package} ${ROOT_DIR})
 
-            # checkout the branch
-            # We should rather checkout the tracked branch here. But how can we get it?
-            #cpfExecuteProcess( unused "git submodule update --remote ${CPF_SOURCE_DIR}/" ${ROOT_DIR}) 
-            # pull new commits of the tracked branch
-            # cpfExecuteProcess( unused "git pull" ${packageRepoDir})
+            # Checkout the tracked branch
+            cpfGetPackagesTrackedBranch( packageBranch package ${ROOT_DIR})
+            cpfExecuteProcess( b "git checkout ${packageBranch}" ${packageDir})
+            # Pull changes if available
             cpfCurrentBranchIsBehindOrigin( updatesAvailable ${packageDir})
             if(updatesAvailable)
-                cpfExecuteProcess( unused "git submodule update --remote ${CPF_SOURCE_DIR}/${package}" ${ROOT_DIR})
+                cpfExecuteProcess( unused "git pull" ${packageDir})
                 list(APPEND updatedPackages ${package})
             endif()
         endforeach()
@@ -158,7 +157,7 @@ else()
             message( STATUS "Updated packages ${updatedPackages}.")
         else() 
             # no package updates were done. We do not need to wait for a successful push
-            message( STATUS "No packages were updated.")
+            message( STATUS "No packages needed an update.")
             return()
         endif()
 

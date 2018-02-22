@@ -390,5 +390,12 @@ function( cpfCurrentBranchIsBehindOrigin isBehindOut repoDir )
 
 endfunction()
 
-
+#----------------------------------------------------------------------------------------
+function( cpfGetPackagesTrackedBranch packageBranchOut package rootDir)
+	cpfExecuteProcess( branch "git config --file .gitmodules --get submodule.Sources/${package}.branch" ${rootDir})
+	if(NOT branch)
+		message(FATAL_ERROR "Error! Function cpfGetPackagesTrackedBranch() expects the package ${package} to be a git-submodule with a tracked branch in the .gitmodules file.")
+	endif()
+	set(${packageBranchOut} ${branch} PARENT_SCOPE)
+endfunction()
 
