@@ -126,7 +126,7 @@ else()
 
         # Make sure we are up to date. This is only needed after the first
         # iteration of the loop.
-        cpfExecuteProcess( unused "git pull" ${ROOT_DIR})
+        cpfExecuteProcess( unused "git pull --all" ${ROOT_DIR})
 
         # Update the owned packages
         set(updatedPackages)
@@ -140,7 +140,7 @@ else()
             cpfGetPackagesTrackedBranch( packageBranch ${package} ${ROOT_DIR})
             cpfExecuteProcess( b "git checkout ${packageBranch}" ${packageDir})
             message( STATUS "Package tracks branch ${packageBranch}")
-            
+
             # Pull changes if available
             cpfCurrentBranchIsBehindOrigin( updatesAvailable ${packageDir})
             if(updatesAvailable)
