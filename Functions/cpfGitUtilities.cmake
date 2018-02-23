@@ -400,8 +400,8 @@ function( cpfGetPackagesTrackedBranch packageBranchOut package rootDir)
 		OUTPUT_VARIABLE branch
 	)
 	string(STRIP "${branch}" branch)
-	
-	if(NOT (${result} EQUAL 0) OR (NOT branch)
+
+	if(NOT (${result} EQUAL 0) OR (NOT branch))
 		message(FATAL_ERROR "Error! Function cpfGetPackagesTrackedBranch() expects the git-submodule ${package} to have a \"branch = <tracked branch>\" entry in the .gitmodules file.")
 	endif()
 	set(${packageBranchOut} ${branch} PARENT_SCOPE)
