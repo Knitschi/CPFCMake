@@ -132,12 +132,15 @@ else()
         set(updatedPackages)
         cpfGetOwnedLoosePackages( ownedPackages ${ROOT_DIR})
         foreach( package ${ownedPackages} )
+            message( STATUS "Check package ${package}")
 
             cpfGetAbsPackageDirectory( packageDir ${package} ${ROOT_DIR})
 
             # Checkout the tracked branch
             cpfGetPackagesTrackedBranch( packageBranch ${package} ${ROOT_DIR})
             cpfExecuteProcess( b "git checkout ${packageBranch}" ${packageDir})
+            message( STATUS "Package tracks branch ${packageBranch}")
+            
             # Pull changes if available
             cpfCurrentBranchIsBehindOrigin( updatesAvailable ${packageDir})
             if(updatesAvailable)
