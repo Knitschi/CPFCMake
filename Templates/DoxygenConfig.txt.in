@@ -1639,7 +1639,7 @@ EXTERNAL_SEARCH        = YES
 # Searching" for details.
 # This tag requires that the tag SEARCHENGINE is set to YES.
 
-SEARCHENGINE_URL       = ../../cgi-bin/doxysearch.cgi
+SEARCHENGINE_URL       = ../../../cgi-bin/doxysearch.cgi
 
 # When SERVER_BASED_SEARCH and EXTERNAL_SEARCH are both enabled the unindexed
 # search data is written to a file for indexing by an external tool. With the
