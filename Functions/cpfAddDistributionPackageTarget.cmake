@@ -90,13 +90,13 @@ function( cpfGetCollectPackageContentTargetNameAnId targetNameOut contentIdOut p
 
 	cpfGetDistributionPackageContentId( contentIdLocal ${contentType} "${excludedTargets}")
 	set(${contentIdOut} ${contentIdLocal} PARENT_SCOPE)
-	set(${targetNameOut} gatherPkgContent_${contentIdLocal}_${package} PARENT_SCOPE )
+	set(${targetNameOut} pkgContent_${contentIdLocal}_${package} PARENT_SCOPE )
 
 endfunction()
 
 #----------------------------------------------------------------------------------------
 function( cpfGetDistributionPackageTargetName targetNameOut package contentId contentType packageFormat )
-	set( ${targetNameOut} distPackage_${contentId}_${packageFormat}_${package} PARENT_SCOPE)
+	set( ${targetNameOut} distPckg_${contentId}_${packageFormat}_${package} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------

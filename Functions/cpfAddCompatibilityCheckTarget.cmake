@@ -317,7 +317,7 @@ function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTa
 			string(SUBSTRING ${excludedTargetsHash} 0 8 excludedTargetsHash)
 			string(APPEND contentIdLocal -${excludedTargetsHash})
 		else()
-			string(APPEND contentIdLocal -portable)
+			string(APPEND contentIdLocal -port)
 		endif()
 	else()
 		message(FATAL_ERROR "Content type \"${contentType}\" is not supported by function contentTypeOutputNameIdentifier().")
