@@ -9,7 +9,7 @@ include(cpfBaseUtilities)
 #
 function( cpfAddGlobalDynamicAnalysisTarget packages)
 	
-	if(NOT CPF_ENABLE_RUN_TESTS_TARGET)
+	if(NOT CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET)
 		return()
 	endif()
 		
@@ -77,7 +77,7 @@ endfunction()
 #
 function( cpfAddDynamicAnalysisTarget package)
 
-	if(NOT CPF_ENABLE_RUN_TESTS_TARGET)
+	if(NOT CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET)
 		return()
 	endif()
 
