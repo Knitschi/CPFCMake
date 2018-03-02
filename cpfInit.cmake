@@ -37,7 +37,7 @@ function( cpfInit )
 
 	# generate the file with the graphviz options
 	configure_file( "${DIR_OF_INIT_FILE}/Templates/${CPF_GRAPHVIZ_OPTIONS_FILE}.in" "${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}" COPYONLY )
-	
+
 	cpfDebugMessage("Using toolchain file: \"${CMAKE_TOOLCHAIN_FILE}\"")
 	cpfPrintToolchainVariables()
 
@@ -67,6 +67,7 @@ function( cpfInit )
 	endif()
 
 endfunction()
+
 
 #----------------------------------------------------------------------------------------
 # Set policies to silence the warnings about changed cmake behavior.

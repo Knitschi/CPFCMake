@@ -5,8 +5,6 @@ include("${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake")
 
 # LOCATIONS
-cpfNormalizeAbsPath(installPrefix "${CMAKE_CURRENT_LIST_DIR}/../../../${CPF_GENERATED_DIR}/${CPF_CONFIG}/${CPF_INSTALL_STAGE}")
-set( CMAKE_INSTALL_PREFIX "${installPrefix}" CACHE PATH "The base directory to which the install target will copy all the installed files." )
 set( CPF_WEBPAGE_URL "" CACHE STRING "The url to the webpage that is created with the updateExistingWebPage.cmake script." )
 set( CPF_PLANT_UML_JAR "" CACHE FILEPATH "Setting a path to the plantuml.jar file enables defining UML diagrams in Doxygen comments.")
 

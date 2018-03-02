@@ -25,18 +25,21 @@ cpfAssertScriptArgumentDefined(PARENT_CONFIG)
 cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}")
 
 # CREATE CONFIG-FILE CONTENT 
-set(fileContent)
+cpfNormalizeAbsPath( fullProjectUtilities "${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake" )
+cpfNormalizeAbsPath( configFilename "${CMAKE_CURRENT_LIST_DIR}/../../../Configuration/${CPF_CONFIG}${CPF_CONFIG_FILE_ENDING}")
 
 # Add standard lines.
+set(fileContent)
 list(APPEND fileContent "# This file cpfContains cmake project configuration parameters." )
 list(APPEND fileContent "" )
-cpfNormalizeAbsPath( fullProjectUtilities "${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake" )
 list(APPEND fileContent "include(\"${fullProjectUtilities}\")" )
-list(APPEND fileContent "set( CPF_CONFIG_FILE \"${CMAKE_CURRENT_LIST_FILE}\" CACHE FILEPATH \"The path to the used .config.cmake file.\")" )
-list(APPEND fileContent "set( CPF_CONFIG \"${CPF_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE )" )
-list(APPEND fileContent "" )
 list(APPEND fileContent "# Inherit configuration parameters." )
 list(APPEND fileContent "include( \"${fullInheritedConfigFile}\" )" )
+list(APPEND fileContent "" )
+list(APPEND fileContent "# internal variables" )
+list(APPEND fileContent "set( CPF_CONFIG_FILE \"${configFilename}\" CACHE FILEPATH \"The path to the used .config.cmake file.\" FORCE)" )
+list(APPEND fileContent "set( CPF_CONFIG \"${CPF_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE)" )
+list(APPEND fileContent "set( CMAKE_INSTALL_PREFIX \"\${CPF_ROOT_DIR}/\${CPF_GENERATED_DIR}/\${CPF_CONFIG}/\${CPF_INSTALL_STAGE}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE)" )
 list(APPEND fileContent "" )
 
 # Add lines with commented inherited definitions.
@@ -75,7 +78,6 @@ endforeach()
 
 
 # Write the lines in fileContent to the config file.
-set(configFilename "${CMAKE_CURRENT_LIST_DIR}/../../../Configuration/${CPF_CONFIG}${CPF_CONFIG_FILE_ENDING}")
 file(REMOVE "${configFilename}")
 
 set(commandList)
