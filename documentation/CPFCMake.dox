@@ -109,9 +109,18 @@ the python script \c 7_GenerateDocumentation.py
 docker cp /var/lib/jenkins/www/html docserver:/var/www
 \endcode
 
+
 ### The Dependency Graph ###
 
-The documentation ccbContains an automatically updated \ref DependencyGraph. The graph is generated from a \c graphviz dot-file which is generated when
-\c CMake is run. The \c 7_GenerateDocumentation.py script searches for the dot-file and copies it to the DoxygenOutput folder.
+Building the documentation target will also create two graphviz .dot files for the dependency graph of the build C++ packages.
+These graphs can be added to the projects documentation by adding the lines.
+
+\code
+\dotfile CPFDependencies.dot The projects dependency graph
+\dotfile CPFDependenciesTransitiveReduced.dot The projects transitive reduced target dependency graph
+\endcode
+
+To the doxygen documentation. The transitive reduced graph does not show direct dependencies when an
+indirect dependency exists. This resulst in a cleaner graph, which may sometimes be favoured to the complete graph.
 
 */
