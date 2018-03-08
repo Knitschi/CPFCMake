@@ -524,12 +524,6 @@ function( cpfGetPossiblyAvailableCompatibilityReports reportsOut titlesOut packa
 			cpfGetReportBaseNamesAndOutputDirs( reportDir reportBaseName ${package} ${binaryTarget} ${youngerVersion} ${version} )
 			set( relReportPath "${reportDir}/${reportBaseName}.html" )
 			set( reportWebUrl "${CPF_WEBPAGE_URL}/${relReportPath}")
-			
-			#cpfUrlExists( reportExists ${reportWebUrl} )
-			#if(reportExists)
-			#	list(APPEND reports "${relReportPath}")
-			#	list(APPEND titles "${version} to ${youngerVersion}" )
-			#endif()
 				
 		endif()
 		set(youngerVersion ${version})
@@ -538,37 +532,4 @@ function( cpfGetPossiblyAvailableCompatibilityReports reportsOut titlesOut packa
 	set( ${reportsOut} ${reports} PARENT_SCOPE )
 	set( ${titlesOut} ${titles} PARENT_SCOPE)
 
-endfunction()
-
-
-#-------------------------------------------------------------------------
-function( cpfUrlExists boolOut url )
-	
-	set( exists TRUE )
-
-	if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Linux )
-		# With curl we do not have to download the file for checking if it exists.
-		execute_process(
-			COMMAND curl;--output;/dev/null;--silent;--head;--fail;--connect-timeout 0.1;${url}
-			RESULT_VARIABLE result
-		)
-		if( NOT result EQUAL 0)
-			set( exists FALSE )
-		endif()
-
-	else()
-		# For windows we try to download the file.
-		set( downloadedFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/downloadTest.html")
-		file(DOWNLOAD ${url} ${downloadedFile} INACTIVITY_TIMEOUT 1 STATUS status)
-		list(GET status 0 result)
-		if( NOT result EQUAL 0)
-			set( exists FALSE )
-		else()
-			# clean up the file
-			file( REMOVE ${downloadedFile})
-		endif()
-	endif()
-
-	set(${boolOut} ${exists} PARENT_SCOPE)
-	
 endfunction()
