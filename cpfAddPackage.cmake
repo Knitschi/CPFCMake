@@ -184,8 +184,15 @@ function( cpfAddPackage )
 		set( ${ARG_PACKAGE_NAME}_BUILD_TESTS ON)
 	endif()
 
+	# ASERT ARGUMENTS
+
+	# Make sure that linked targets have already been created.
 	cpfDebugAssertLinkedLibrariesExists( linkedLibraries ${ARG_PACKAGE_NAME} "${ARG_LINKED_LIBRARIES}")
 	cpfDebugAssertLinkedLibrariesExists( linkedTestLibraries ${ARG_PACKAGE_NAME} "${ARG_LINKED_TEST_LIBRARIES}")
+	# If a library does not have a public header, it must be a user mistake
+	if( (${ARG_TYPE} STREQUAL LIB) AND (NOT ARG_PUBLIC_HEADER) )
+		message(FATAL_ERROR "Library package ${ARG_PACKAGE_NAME} has no public headers. The library can not be used without public headers, so please add the PUBLIC_HEADER argument to the cpfAddPackage() call.")
+	endif()
 
 	# make sure that the properties of the imported targets follow our assumptions
 	cpfNormalizeImportedTargetProperties( "${linkedLibraries};${linkedTestLibraries}" )
@@ -492,11 +499,6 @@ function( cpfAddBinaryTarget	)
 		
 		# Remove the lib prefix on Linux. We expect that to be part of the package name.
 		set_property(TARGET ${ARG_NAME} PROPERTY PREFIX "")
-
-		# If a library does not have a public header, it must be a user mistake
-		if(NOT ${ARG_PUBLIC_HEADER})
-			message(FATAL_ERROR "Library package ${ARG_PACKAGE_NAME} has no public headers. The library can not be used without public headers, so please add the PUBLIC_HEADER argument to the cpfAddPackage() call.")
-		endif()
     endif()
 
     # Set target properties
