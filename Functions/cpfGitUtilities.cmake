@@ -368,6 +368,8 @@ function( cpfHeadHasVersionTag hasTagOut repoDir)
 	cpfGetCurrentVersionFromGitRepository( versionHead ${repoDir})
 	cpfGetTagsOfHEAD( tagsAtHead ${repoDir})
 	cpfContains(headHasVersionTag "${tagsAtHead}" ${versionHead})
+	devMessage("Tags at head ${tagsAtHead}")
+	devMessage("Current version ${versionHead}")
 	set(${hasTagOut} ${headHasVersionTag} PARENT_SCOPE)
 
 endfunction()

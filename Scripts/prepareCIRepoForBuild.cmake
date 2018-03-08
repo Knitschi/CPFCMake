@@ -25,7 +25,7 @@ cpfAssertScriptArgumentDefined(RELEASED_PACKAGE)
 
 # Checkout the requested reference of the CI-repository
 # This is necessary because the GitSCM step always
-cpfExecuteProcess( unused "git checkout ${GIT_REF}" ${ROOT_DIR})
+cpfExecuteProcess( unused "git checkout ${GIT_REF}" "${ROOT_DIR}")
 
 # check if the call is is used to tag a release version
 set( releaseTagOptions incrementMajor incrementMinor incrementPatch)
@@ -34,7 +34,7 @@ cpfContains( doReleaseTag "${releaseTagOptions}" ${TAGGING_OPTION} )
 if(doReleaseTag)
 
     # Make sure only commits are upgraded to release that have already been successfully build.
-    cpfHeadHasVersionTag( rootHasVersionTag ${ROOT_DIR})
+    cpfHeadHasVersionTag( rootHasVersionTag "${ROOT_DIR}")
     if( NOT rootHasVersionTag)
         message( FATAL_ERROR "Error! Release tag builds can only be run on commits that have already been tagged with an internal version." )
     endif()
@@ -44,12 +44,12 @@ if(doReleaseTag)
         set(packageRepoDir ${ROOT_DIR})
     else()
         # Check the package directory exists
-        cpfGetAbsPackageDirectory( packageDir ${RELEASED_PACKAGE} ${ROOT_DIR})
+        cpfGetAbsPackageDirectory( packageDir ${RELEASED_PACKAGE} "${ROOT_DIR}")
         if(NOT EXISTS ${packageDir})
             message( FATAL_ERROR "Error! The CI-project does not contain a directory for the given package \"${RELEASED_PACKAGE}\".")
         endif()
         # Check the package is owned by this CI-project.
-        cpfGetOwnedPackages( ownedPackages ${ROOT_DIR})
+        cpfGetOwnedPackages( ownedPackages "${ROOT_DIR}")
         cpfContains(isOwnedPackage "${ownedPackages}" ${RELEASED_PACKAGE})
         if(NOT isOwnedPackage)
             message( FATAL_ERROR "Error! The CI-project does not own the given package \"${RELEASED_PACKAGE}\". It can only set release tags for owned packages.")
