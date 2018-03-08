@@ -380,14 +380,8 @@ function( cpfAddPackageDocsTarget fileOut package packageNamespace briefDescript
 
 	cpfGetPackageDoxFilesTargetName( targetName ${package} )
 
-	# Generate the OpenCppCoverageReport output only when compiling the configuration that generates it.
-	cpfAddOpenCppCoverageLinksPageCommands( stampFile openCppCoverageLinksDoxFile openCppCoverageLinksHtmlFile ${targetName} ${package} )
-
-	# Optionally add commands for creating the page with the links to the abi compatibility reports.
-	cpfAddCompatiblityReportsLinksPageCommands( compatibilityReportLinksDoxFile compatibilityReportsLinkHtmlFile ${package} )
-
 	# Always create the basic package documentation page.	
-	cpfAddPackageDocumentationDoxFileCommands( documentationFile ${package} ${openCppCoverageLinksHtmlFile} ${compatibilityReportsLinkHtmlFile} )
+	cpfAddPackageDocumentationDoxFileCommands( documentationFile ${package})
 
 	add_custom_target(
 		${targetName}
@@ -410,7 +404,7 @@ function( cpfGetGeneratedDocumentationDirectory dirOut )
 endfunction()
 
 #-------------------------------------------------------------------------
-function( cpfAddPackageDocumentationDoxFileCommands fileOut package openCppCoverageLinksPage compatibilityReportsLinkPage )
+function( cpfAddPackageDocumentationDoxFileCommands fileOut package )
 
 	set( fileContent "
 /// The namespace of the ${package} package.
@@ -424,15 +418,20 @@ namespace ${packageNamespace} {
 ${longDescription}
 
 ### Links ###
-- <a href=\"../Downloads/${package}\">Downloads</a>
-- <a href=\"${openCppCoverageLinksPage}\">OpenCppCoverage Reports</a>
+
+\\note The links can be broken if no project configuration creates the linked pages.
+
+- <a href=\"../${CPF_DOWNLOADS_DIR}/${package}\">Downloads</a>
+- <a href=\"../${CPF_OPENCPPCOVERAGE_DIR}/index.html\">OpenCppCoverage Reports</a>
+
 "
 )
-	
+
 	# executable packages do never have compatibility reports.
 	get_property( type TARGET ${package} PROPERTY TYPE)
 	if(NOT ${type} STREQUAL EXECUTABLE)
-		string(APPEND fileContent "- <a href=\"${compatibilityReportsLinkPage}\">ABI/API Compatibility Reports</a>\n" )
+		cpfGetCompatiblityReportLinks(linksOut ${package})
+		string(APPEND fileContent ${linksOut})
 	endif()
 
 	string(APPEND fileContent "\n*/}\n")
@@ -456,150 +455,40 @@ function( cpfGetPackageDocumentationFileName fileOut package )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# stamp file is only set when the config is not the config that generates the coverage report
-# doxFileOut is only set when the config is the config that generates the coverage report
-function( cpfAddOpenCppCoverageLinksPageCommands stampFileOut doxFileOut htmlFileOut target package )
-
-	string(TOLOWER ${package} lowerPackage) # doxygen html pages only use lower case with spaces.
-	set(htmlFileBaseName open_cpp_coverage_reports_${lowerPackage})
-
-	# Add links to OpenCppCoverage reports
-	cpfGetFirstMSVCDebugConfig( msvcDebugConfig )
-	if( msvcDebugConfig AND CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET )
+function( cpfGetCompatiblityReportLinks linksOut package )
 		
-		cpfGetGeneratedDocumentationDirectory(documentationDir)
-		set(doxFile "${documentationDir}/${package}OpenCppCoverageReportLinks.dox" )
+	cpfGetGeneratedDocumentationDirectory(documentationDir)
+	set(doxFile "${documentationDir}/${package}CompatibilityReportLinks.dox" )
 
-		# Assemble file content.
-		set(fileContent)
-		list(APPEND fileContent "/**")
-		list(APPEND fileContent "\\page ${htmlFileBaseName} ${package} OpenCppCoverage Reports")
-		list(APPEND fileContent "")
-		list(APPEND fileContent "\note The links can be broken if no project configuration builds the dynamic analysis target on windows.")
-		list(APPEND fileContent "")
+	set(linkLines)
+
+	cpfGetSharedLibrarySubTargets( libraryTargets ${package})
+	if(libraryTargets)
+		list(REVERSE libraryTargets) # put main-lib first
+	endif()
+	foreach( libraryTarget ${libraryTargets})
+	
+		string(APPEND linkLines "\n")
+		string(APPEND linkLines "#### ABI/API Compatibility Reports ${libraryTarget} ####\n")
+		string(APPEND linkLines "\n")
+
+		cpfGetPossiblyAvailableCompatibilityReports( reports titles ${package} ${libraryTarget} )
+
 		set(index 0)
-		cpfGetOpenCppCoverageReportFiles( reports titles ${package} )
-		foreach( report ${reports} )
+		foreach(report ${reports})
 			list(GET titles ${index} title )
-			list(APPEND fileContent "- <a href=\"../${report}\">${title}</a>")
+			string(APPEND linkLines "- <a href=\"../${report}\">${title}</a>\n")
 			cpfIncrement(index)
 		endforeach()
-		list(APPEND fileContent "*/")
-
-		# Add custom command that generates the file for the fitting configuration.
-		set( stampFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${target}/generateOpenCppCoverageLinkFile.stamp")
-		
-		set(deleteFileCommand "cmake -E remove -f \"${doxFile}\"")
-
-		set( writeFileCommands )
-		foreach( line IN LISTS fileContent )
-			list(APPEND writeFileCommands "cmake -DFILE=\"${doxFile}\" -DLINE=\"${line}\" -P \"${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Scripts/appendLineToFile.cmake\"" )
-		endforeach()
-
-		#set(touchCommand "cmake -E touch \"${stampFile}\"")
-		set(touchCommand "cmake -E touch \"${doxFile}\"")
-
-		cpfAddConfigurationDependendCommand(
-			TARGET ${target}
-			COMMENT "Generate \"${doxFile}\""
-			CONFIG ${msvcDebugConfig}
-			OUTPUT ${doxFile} #${stampFile}
-			COMMANDS_CONFIG ${deleteFileCommand} ${writeFileCommands} #${touchCommand}
-			COMMANDS_NOT_CONFIG	${touchCommand}
-		)
-
-	endif()
-
-	set(${htmlFileOut} ${htmlFileBaseName}.html PARENT_SCOPE)
-	set(${doxFileOut} ${doxFile} PARENT_SCOPE)
-	set(${stampFileOut} ${stampFile} PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetOpenCppCoverageReportFiles relReportPathsOut titlesOut package )
 	
-	set(reports)
-	set(titles)
-
-	cpfGetFirstMSVCDebugConfig( msvcDebugConfig )
-	
-	get_property( prodLib TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET )
-	get_property( fixtureLib TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET)
-	get_property( testExe TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET)
-	set(targets ${prodLib} ${fixtureLib} ${testExe})
-	
-	foreach( target ${targets})
-		cpfToConfigSuffix( configSuffix ${msvcDebugConfig} )
-		get_property( pdbOutput TARGET ${target} PROPERTY PDB_NAME${configSuffix}) # reports are generated for all targets that have linker generated .pdb files.
-		if(pdbOutput)
-			cpfGetTargetOutputBaseName( baseName ${target} ${msvcDebugConfig})
-			list( APPEND reports "${CPF_OPENCPPCOVERAGE_DIR}/Modules/${baseName}.html" )
-			list( APPEND titles "${baseName}" )
-		endif()
 	endforeach()
 
-	set(${relReportPathsOut} ${reports} PARENT_SCOPE)
-	set(${titlesOut} ${titles} PARENT_SCOPE)
-	
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfAddCompatiblityReportsLinksPageCommands doxFileOut htmlFileOut package )
-	
-	string(TOLOWER ${package} lowerPackage) # doxygen html pages only use lower case with spaces.
-	set(htmlFileBaseName compatibilitiy_reports_${lowerPackage})
-	set(doxFile)
-
-	# Add links to available abi reports
-	if(CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS)
-		
-		cpfGetGeneratedDocumentationDirectory(documentationDir)
-		set(doxFile "${documentationDir}/${package}CompatibilityReportLinks.dox" )
-
-		set(fileContent)
-		string(APPEND fileContent "/**")
-		string(APPEND fileContent "\n")
-		string(APPEND fileContent "\\page ${htmlFileBaseName} ${package} ABI/API Compatibility Reports\n")
-	
-		cpfGetSharedLibrarySubTargets( libraryTargets ${package})
-		if(libraryTargets)
-			list(REVERSE libraryTargets) # put main-lib first
-		endif()
-		foreach( libraryTarget ${libraryTargets})
-		
-			string(APPEND fileContent "\n")
-			string(APPEND fileContent "### ${libraryTarget} ###\n")
-
-			cpfGetAvailableCompatibilityReports( reports titles ${package} ${libraryTarget} )
-
-			set(index 0)
-			foreach(report ${reports})
-				list(GET titles ${index} title )
-				string(APPEND fileContent "- <a href=\"../${report}\">${title}</a>\n")
-				cpfIncrement(index)
-			endforeach()
-		
-		endforeach()
-
-		string(APPEND fileContent "*/\n")
-
-		cpfGetWriteFileCommands( commands ${doxFile} ${fileContent} )
-		add_custom_command(
-			OUTPUT "${doxFile}"
-			${commands}
-			VERBATIM
-		)
-
-	endif()
-
-	set(${htmlFileOut} ${htmlFileBaseName}.html PARENT_SCOPE)
-	set(${doxFileOut} ${doxFile} PARENT_SCOPE)
+	set(${linksOut} ${linkLines} PARENT_SCOPE)
 
 endfunction()
 
 #-------------------------------------------------------------------------
-function( cpfGetAvailableCompatibilityReports reportsOut titlesOut package binaryTarget)
+function( cpfGetPossiblyAvailableCompatibilityReports reportsOut titlesOut package binaryTarget)
 
 	set(reports)
 	set(titles)
@@ -636,11 +525,11 @@ function( cpfGetAvailableCompatibilityReports reportsOut titlesOut package binar
 			set( relReportPath "${reportDir}/${reportBaseName}.html" )
 			set( reportWebUrl "${CPF_WEBPAGE_URL}/${relReportPath}")
 			
-			cpfUrlExists( reportExists ${reportWebUrl} )
-			if(reportExists)
-				list(APPEND reports "${relReportPath}")
-				list(APPEND titles "${version} to ${youngerVersion}" )
-			endif()
+			#cpfUrlExists( reportExists ${reportWebUrl} )
+			#if(reportExists)
+			#	list(APPEND reports "${relReportPath}")
+			#	list(APPEND titles "${version} to ${youngerVersion}" )
+			#endif()
 				
 		endif()
 		set(youngerVersion ${version})
