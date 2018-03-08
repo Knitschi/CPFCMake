@@ -79,9 +79,6 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages)
 		list(APPEND appendedLines "PLANTUML_JAR_PATH = \"${CPF_PLANT_UML_JAR}\"")
 	endif()
 
-	# Test custom stylesheet
-	#list(APPEND appendedLines "HTML_EXTRA_STYLESHEET = \"${CMAKE_SOURCE_DIR}/${CPF_CMAKE_DIR}/Templates/customdoxygen.css\"")
-
 	cpfAddAppendLinesToFileCommands( 
 		INPUT ${doxygenConfigFile}
 		OUTPUT ${tempDoxygenConfigFile}
@@ -427,9 +424,6 @@ namespace ${packageNamespace} {
 ${longDescription}
 
 ### Links ###
-
-\\note The links can be broken if no project configuration generates the linked pages.
-
 - <a href=\"../Downloads/${package}\">Downloads</a>
 - <a href=\"${openCppCoverageLinksPage}\">OpenCppCoverage Reports</a>
 "
@@ -480,6 +474,9 @@ function( cpfAddOpenCppCoverageLinksPageCommands stampFileOut doxFileOut htmlFil
 		set(fileContent)
 		list(APPEND fileContent "/**")
 		list(APPEND fileContent "\\page ${htmlFileBaseName} ${package} OpenCppCoverage Reports")
+		list(APPEND fileContent "")
+		list(APPEND fileContent "\note The links can be broken if no project configuration builds the dynamic analysis target on windows.")
+		list(APPEND fileContent "")
 		set(index 0)
 		cpfGetOpenCppCoverageReportFiles( reports titles ${package} )
 		foreach( report ${reports} )
