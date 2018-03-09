@@ -421,8 +421,8 @@ ${longDescription}
 
 \\note The links can be broken if no project configuration creates the linked pages.
 
-- <a href=\"../${CPF_DOWNLOADS_DIR}/${package}\">Downloads</a> (requires the creation of distribution packages)
-- <a href=\"../${CPF_OPENCPPCOVERAGE_DIR}/index.html\">OpenCppCoverage Reports</a> (requires at least one test target and the CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET option on a windows build)
+- <a href=\"../${CPF_DOWNLOADS_DIR}/${package}\">Downloads</a> (Will work if distribution packages are created.)
+- <a href=\"../${CPF_OPENCPPCOVERAGE_DIR}/index.html\">OpenCppCoverage Reports</a> (Will work if at least one test target and the CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET option is enabled for a windows build)
 
 "
 )
@@ -467,7 +467,7 @@ function( cpfGetCompatiblityReportLinks linksOut package )
 	
 		string(APPEND linkLines "\n")
 		string(APPEND linkLines "#### ABI/API Compatibility Reports ${libraryTarget} ####\n")
-		string(APPEND linkLines "(requires a test target for the package and the CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS option)\n")
+		string(APPEND linkLines "The links will work if the package has a test target and the CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS option is set for a Linux debug configuration.\n")
 		string(APPEND linkLines "\n")
 
 		cpfGetPossiblyAvailableCompatibilityReports( reports titles ${package} ${libraryTarget} )
