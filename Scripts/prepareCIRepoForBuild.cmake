@@ -23,7 +23,6 @@ cpfAssertScriptArgumentDefined(GIT_REF)
 cpfAssertScriptArgumentDefined(TAGGING_OPTION)
 cpfAssertScriptArgumentDefined(RELEASED_PACKAGE)
 
-cpfHeadHasVersionTag( rootHasVersionTag "${ROOT_DIR}")
 
 # Checkout the requested reference of the CI-repository
 # This is necessary because the GitSCM step always
