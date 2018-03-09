@@ -462,10 +462,7 @@ function( cpfGetCompatiblityReportLinks linksOut package )
 
 	set(linkLines)
 
-	cpfGetSharedLibrarySubTargets( libraryTargets ${package})
-	if(libraryTargets)
-		list(REVERSE libraryTargets) # put main-lib first
-	endif()
+	cpfGetPossiblySharedLibrarySubTargets( libraryTargets ${package})
 	foreach( libraryTarget ${libraryTargets})
 	
 		string(APPEND linkLines "\n")

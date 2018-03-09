@@ -737,6 +737,27 @@ function( cpfGetTargetLocations absolutePathes targets config )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Returns a list with the binary sub-targets that will be shared libraries if
+# the BUILD_SHARED_LIBS option is set to ON.
+function( cpfGetPossiblySharedLibrarySubTargets librarySubTargetsOut package)
+
+	set(libraryTargets)
+
+	get_property(type TARGET ${package} PROPERTY TYPE)
+	if( NOT (${type} STREQUAL EXECUTABLE))
+		list(APPEND libraryTargets ${package})
+	endif()
+
+	get_property( fixtureTarget TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET)
+	if(TARGET ${fixtureTarget})
+		list(APPEND libraryTargets ${fixtureTarget})
+	endif()
+
+	set( ${librarySubTargetsOut} "${libraryTargets}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # Returns a list with the binary sub-targets that are of type SHARED_LIBRARY or MODULE_LIBRARY.
 function( cpfGetSharedLibrarySubTargets librarySubTargetsOut package)
 
