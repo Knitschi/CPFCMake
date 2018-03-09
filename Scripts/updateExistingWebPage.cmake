@@ -24,7 +24,7 @@ file(REMOVE_RECURSE "${EXISTING_HTML_DIR}/${CPF_OPENCPPCOVERAGE_DIR}")
 cpfGetSourcesSubdirectories( packages "${ROOT_DIR}" )
 foreach( package ${packages})
 	
-	# distribution packages
+	# downloads lastbuild
 	cpfGetRelLastBuildPackagesDir( dir ${package})
 	file(REMOVE_RECURSE "${EXISTING_HTML_DIR}/${dir}")
 
