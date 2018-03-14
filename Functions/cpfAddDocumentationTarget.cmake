@@ -445,7 +445,7 @@ ${longDescription}
 		string(APPEND fileContent ${linksOut})
 	endif()
 
-	string(APPEND fileContent "\n*/}\n")
+	string(APPEND fileContent "\n*/}\n") # close the doxygen comment and the namespace
 	
 	cpfGetPackageDocumentationFileName( fileName ${package} )
 	cpfGetWriteFileCommands( commands ${fileName} ${fileContent} )
