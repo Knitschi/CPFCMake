@@ -30,15 +30,15 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages)
 	set(htmlCgiBinDir "${CPF_PROJECT_HTML_ABS_DIR}/${CPF_CGI_BIN_DIR}" )
 
 	# Generate the DoxygenConfig.txt file if it does not exist.
-	if(NOT EXISTS ${doxygenConfigFile} )
-		# we use the manual check and copy instead of configure_file() to prevent overwriting the file when the template changes.
-		file( COPY "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenConfig.txt.in" DESTINATION ${doxygenConfigFile} )
+	if(NOT (EXISTS ${doxygenConfigFile}) )
+		# we use the manual existance check to prevent overwriting the file when the template changes.
+		configure_file( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenConfig.txt.in" ${doxygenConfigFile} COPYONLY )
 	endif()
 
 	# Generate the DoxygenLayout.xml file if it does not exist.
 	if(NOT EXISTS ${doxygenLayoutFile} )
-		# we use the manual check and copy instead of configure_file() to prevent overwriting the file when the template changes.
-		file( COPY "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenLayout.xml.in" DESTINATION ${doxygenLayoutFile} )
+		# we use the manual existance check to prevent overwriting the file when the template changes.
+		configure_file( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenLayout.xml.in" ${doxygenLayoutFile} COPYONLY )
 	endif()
 
 	# Get dependencies

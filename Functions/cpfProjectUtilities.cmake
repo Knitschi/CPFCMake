@@ -1009,7 +1009,8 @@ function( cpfGetOwnedPackages ownedPackagesOut rootDir )
 	set(fullOwnedPackagesFile "${rootDir}/${CPF_SOURCE_DIR}/${CPF_OWNED_PACKAGES_FILE}")
 	# create an owned packages file if none exists
 	if(NOT EXISTS ${fullOwnedPackagesFile} )
-		file(COPY "${DIR_OF_PROJECT_UTILITIES}/../Templates/${CPF_OWNED_PACKAGES_FILE}.in" DESTINATION ${fullOwnedPackagesFile} )
+		# we use the manual existance check to prevent overwriting the file when the template changes.
+		configure_file("${DIR_OF_PROJECT_UTILITIES}/../Templates/${CPF_OWNED_PACKAGES_FILE}.in" ${fullOwnedPackagesFile} COPYONLY )
 	endif()
 	cpfGetCacheVariablesDefinedInFile( variableNames variableValues variableTypes variableDescriptions ${fullOwnedPackagesFile})
 
