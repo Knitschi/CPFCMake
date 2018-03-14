@@ -23,24 +23,19 @@ cpfAssertScriptArgumentDefined(GIT_REF)
 cpfAssertScriptArgumentDefined(TAGGING_OPTION)
 cpfAssertScriptArgumentDefined(RELEASED_PACKAGE)
 
+
 # Checkout the requested reference of the CI-repository
 # This is necessary because the GitSCM step always
-cpfExecuteProcess( unused "git checkout ${GIT_REF}" ${ROOT_DIR})
+cpfExecuteProcess( unused "git checkout ${GIT_REF}" "${ROOT_DIR}")
 
 # check if the call is is used to tag a release version
 set( releaseTagOptions incrementMajor incrementMinor incrementPatch)
 cpfContains( doReleaseTag "${releaseTagOptions}" ${TAGGING_OPTION} )
 
-# Commits that already have been stamped with a version should not be changed.
-cpfHeadHasVersionTag( rootHasVersionTag ${ROOT_DIR})
-if(rootHasVersionTag AND (NOT doReleaseTag))
-    message( STATUS "The current commit has alredy been version tagged. The repository will not be changed." )
-    return()
-endif()
-
 if(doReleaseTag)
 
     # Make sure only commits are upgraded to release that have already been successfully build.
+    cpfHeadHasVersionTag( rootHasVersionTag "${ROOT_DIR}")
     if( NOT rootHasVersionTag)
         message( FATAL_ERROR "Error! Release tag builds can only be run on commits that have already been tagged with an internal version." )
     endif()
@@ -50,12 +45,12 @@ if(doReleaseTag)
         set(packageRepoDir ${ROOT_DIR})
     else()
         # Check the package directory exists
-        cpfGetAbsPackageDirectory( packageDir ${RELEASED_PACKAGE} ${ROOT_DIR})
+        cpfGetAbsPackageDirectory( packageDir ${RELEASED_PACKAGE} "${ROOT_DIR}")
         if(NOT EXISTS ${packageDir})
             message( FATAL_ERROR "Error! The CI-project does not contain a directory for the given package \"${RELEASED_PACKAGE}\".")
         endif()
         # Check the package is owned by this CI-project.
-        cpfGetOwnedPackages( ownedPackages ${ROOT_DIR})
+        cpfGetOwnedPackages( ownedPackages "${ROOT_DIR}")
         cpfContains(isOwnedPackage "${ownedPackages}" ${RELEASED_PACKAGE})
         if(NOT isOwnedPackage)
             message( FATAL_ERROR "Error! The CI-project does not own the given package \"${RELEASED_PACKAGE}\". It can only set release tags for owned packages.")
@@ -132,17 +127,26 @@ else()
 
         # Make sure we are up to date. This is only needed after the first
         # iteration of the loop.
-        cpfExecuteProcess( unused "git pull" ${ROOT_DIR})
+        cpfExecuteProcess( unused "git pull --all" ${ROOT_DIR})
 
         # Update the owned packages
-        cpfGetOwnedRepositoryDirectories( ownedRepoDirs ${ROOT_DIR} )
-        foreach( packageRepoDir ${ownedRepoDirs} )
-            if(NOT (${packageRepoDir} STREQUAL ${ROOT_DIR}))
-                # checkout the branch
-                # We should rather checkout the tracked branch here. But how can we get it?
-                cpfExecuteProcess( unused "git checkout ${GIT_REF}" ${packageRepoDir}) 
-                # pull new commits
-                cpfExecuteProcess( unused "git pull" ${packageRepoDir})
+        set(updatedPackages)
+        cpfGetOwnedLoosePackages( ownedPackages ${ROOT_DIR})
+        foreach( package ${ownedPackages} )
+            message( STATUS "Check package ${package}")
+
+            cpfGetAbsPackageDirectory( packageDir ${package} ${ROOT_DIR})
+
+            # Checkout the tracked branch
+            cpfGetPackagesTrackedBranch( packageBranch ${package} ${ROOT_DIR})
+            cpfExecuteProcess( b "git checkout ${packageBranch}" ${packageDir})
+            message( STATUS "Package tracks branch ${packageBranch}")
+
+            # Pull changes if available
+            cpfCurrentBranchIsBehindOrigin( updatesAvailable ${packageDir})
+            if(updatesAvailable)
+                cpfExecuteProcess( unused "git pull" ${packageDir})
+                list(APPEND updatedPackages ${package})
             endif()
         endforeach()
 
@@ -151,14 +155,26 @@ else()
 
 
         # Commit the update
-        cpfWorkingDirectoryIsDirty( isDirty ${ROOT_DIR})
-        if(isDirty) 
-            cpfExecuteProcess( unused "git commit . -m\"Update owned packages.\"" ${ROOT_DIR})
+        # We need to explicitly check if we need to make commmits because it is possible that we
+        # update the packages to the revision that is stored in the host repo.
+        cpfWorkingDirectoryIsDirty(isDirty "${ROOT_DIR}")
+        if(isDirty) # we actually updated a package
+            # Explicitly fetch the notes. Normal pull does not do it.
+            cpfExecuteProcess( unused "git fetch origin refs/notes/*:refs/notes/*" ${ROOT_DIR})
+            cpfExecuteProcess( unused "git commit . -m\"Update package(s): ${updatedPackages}\"" ${ROOT_DIR})
             cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" ${ROOT_DIR})
+        else() 
+            # no package updates were done. We do not need to wait for a successful push
+            message( STATUS "No package needed an update.")
+            return()
         endif()
 
-        cpfTryPushCommitsNotesAndTags( pushedChanges origin ${ROOT_DIR})
-        # Repeat the update procedure if somebody pushed changes to the remote in the meantime.
+        cpfTryPushCommitsAndNotes( pushedChanges origin ${ROOT_DIR})
+        if(pushedChanges)
+            message( STATUS "Updated package(s): ${updatedPackages}.")
+        endif()
+
+        # Repeat the update procedure in case somebody pushed changes to the remote in the meantime.
 
     endwhile()
 

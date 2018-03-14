@@ -85,7 +85,8 @@ This option can only be enabled when using \"g++ -g -Og\" or \"clang -g -O0\" co
 		# check the tools are available
 		cpfFindRequiredProgram( TOOL_ABI_DUMPER abi-dumper "A tool that creates abi dump files from shared libraries." )
 		cpfFindRequiredProgram( TOOL_ABI_COMPLIANCE_CHECKER abi-compliance-checker "A tool that compares two abi dump files and checks whether the ABIs are compliant." )
-		
+		cpfFindRequiredProgram( TOOL_VTABLE_DUMPER vtable-dumper "A tool required by the abi-dumper tool")
+
 		# check that previous builds have been made available through the webpage
 		if( NOT CPF_WEBPAGE_URL )
 			set(errorMessage "\
@@ -316,7 +317,7 @@ function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTa
 			string(SUBSTRING ${excludedTargetsHash} 0 8 excludedTargetsHash)
 			string(APPEND contentIdLocal -${excludedTargetsHash})
 		else()
-			string(APPEND contentIdLocal -portable)
+			string(APPEND contentIdLocal -port)
 		endif()
 	else()
 		message(FATAL_ERROR "Content type \"${contentType}\" is not supported by function contentTypeOutputNameIdentifier().")

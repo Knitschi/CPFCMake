@@ -326,17 +326,18 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns true if the current branch of the given repository was pushed to a remote.
 # The function will fail if the repository is in detached HEAD state.
-function( cpfTryPushCommitsNotesAndTags pushConfirmedOut remote repoDir )
+function( cpfTryPushCommitsAndNotes pushConfirmedOut remote repoDir )
 	
 	cpfGetCurrentBranch( branch ${repoDir})
 	if(${branch} STREQUAL HEAD)
-		message(FATAL_ERROR "Function cpfTryPushCommitsNotesAndTags() requires the repository not to be in detached HEAD mode.")
+		message(FATAL_ERROR "Function cpfTryPushCommitsAndNotes() requires the repository not to be in detached HEAD mode.")
 	endif()
-	# try push commits
+
 	execute_process(
-		COMMAND git;push;${remote};refs/notes/*;refs/heads/${branch};refs/tags/*
+		COMMAND git;push;${remote};refs/notes/*;refs/heads/${branch};
 		WORKING_DIRECTORY "${repoDir}"
 		RESULT_VARIABLE result
+		OUTPUT_VARIABLE unused	# suppress the output of the command
 	)
 	if(${result} EQUAL 0)
 		set(${pushConfirmedOut} TRUE PARENT_SCOPE)
@@ -371,4 +372,38 @@ function( cpfHeadHasVersionTag hasTagOut repoDir)
 
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# The function returns TRUE if a git pull command would actually pull new commits from
+# remote origin on the current branch.
+function( cpfCurrentBranchIsBehindOrigin isBehindOut repoDir )
+
+	cpfGetCurrentBranch( branch ${repoDir})
+	if(${branch} STREQUAL HEAD)
+		message(FATAL_ERROR "Calling function cpfCurrentBranchIsBehindOrigin() does not make sense when the repository is in detached HEAD mode.")
+	endif()
+	cpfExecuteProcess( d "git remote update" ${repoDir})
+	cpfExecuteProcess( nrCommitsBehindOrigin "git rev-list HEAD...origin/${branch} --count" ${repoDir})
+	if( ${nrCommitsBehindOrigin} EQUAL 0)
+		set(${isBehindOut} FALSE PARENT_SCOPE)
+	else()
+		set(${isBehindOut} TRUE PARENT_SCOPE)
+	endif()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetPackagesTrackedBranch packageBranchOut package rootDir)
+	execute_process(
+		COMMAND git;config;--file;.gitmodules;--get;submodule.Sources/${package}.branch
+		WORKING_DIRECTORY "${rootDir}"
+		RESULT_VARIABLE result
+		OUTPUT_VARIABLE branch
+	)
+	string(STRIP "${branch}" branch)
+
+	if(NOT (${result} EQUAL 0) OR (NOT branch))
+		message(FATAL_ERROR "Error! Function cpfGetPackagesTrackedBranch() expects the git-submodule ${package} to have a \"branch = <tracked branch>\" entry in the .gitmodules file.")
+	endif()
+	set(${packageBranchOut} ${branch} PARENT_SCOPE)
+endfunction()
 

@@ -737,6 +737,27 @@ function( cpfGetTargetLocations absolutePathes targets config )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Returns a list with the binary sub-targets that will be shared libraries if
+# the BUILD_SHARED_LIBS option is set to ON.
+function( cpfGetPossiblySharedLibrarySubTargets librarySubTargetsOut package)
+
+	set(libraryTargets)
+
+	get_property(type TARGET ${package} PROPERTY TYPE)
+	if( NOT (${type} STREQUAL EXECUTABLE))
+		list(APPEND libraryTargets ${package})
+	endif()
+
+	get_property( fixtureTarget TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET)
+	if(TARGET ${fixtureTarget})
+		list(APPEND libraryTargets ${fixtureTarget})
+	endif()
+
+	set( ${librarySubTargetsOut} "${libraryTargets}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # Returns a list with the binary sub-targets that are of type SHARED_LIBRARY or MODULE_LIBRARY.
 function( cpfGetSharedLibrarySubTargets librarySubTargetsOut package)
 
@@ -1034,6 +1055,39 @@ function( cpfGetOwnedPackages ownedPackagesOut rootDir )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
+# Returns the owned packages that are not in the same repository as the CI-project.
+#  
+function( cpfGetOwnedLoosePackages loosePackagesOut rootDir )
+
+	set(loosePackages)
+	cpfGetOwnedPackages( ownedPackages ${rootDir})
+	foreach(package ${ownedPackages})
+		cpfIsLoosePackage( isLoose ${package} ${rootDir})
+		if(isLoose)
+			list(APPEND loosePackages ${package})
+		endif()
+	endforeach()
+	set(${loosePackagesOut} ${loosePackages} PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns true if the package is not in the same repository as the ci-project.
+function( cpfIsLoosePackage isLooseOut package rootDir)
+
+	cpfGetAbsPackageDirectory( packageDir ${package} ${rootDir})
+	cpfGetHashOfTag( packageHash HEAD "${packageDir}")
+	cpfGetHashOfTag( rootHash HEAD "${rootDir}")
+	if( ${packageHash} STREQUAL ${rootHash} )
+		set(${isLooseOut} FALSE PARENT_SCOPE)
+	else()
+		set(${isLooseOut} TRUE PARENT_SCOPE)
+	endif()
+
+endfunction()
+
+
+#---------------------------------------------------------------------------------------------
 # returns the absolute paths to the repository directories that are owned by the CPF project located at rootDir
 #
 function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)
@@ -1078,28 +1132,7 @@ function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)
 
 endfunction()
 
-#---------------------------------------------------------------------------------------------
-# Returns true if the given package in the cpf-project rooted at rootDir belongs to the repository
-# at repoDir.
-# If package is set to host-project, then the function returns true if the repoDir and the rootDir
-# repositories are the same.
-function( cpfRepoDirBelongsToPackage isPackageRepoDirOut repoDir package rootDir )
 
-	if("${package}" STREQUAL "")
-		set(packageDir ${rootDir})
-	else()
-		cpfGetAbsPackageDirectory( packageDir ${package} ${rootDir})
-	endif()
-
-	cpfGetHashOfTag( packageHash HEAD "${packageDir}")
-	cpfGetHashOfTag( repoHash HEAD "${repoDir}")
-	if( ${packageHash} STREQUAL ${repoHash} )
-		set(${isPackageRepoDirOut} TRUE PARENT_SCOPE)
-	else()
-		set(${isPackageRepoDirOut} FALSE PARENT_SCOPE)
-	endif()
-
-endfunction()
 
 
 

@@ -9,7 +9,7 @@ include(cpfBaseUtilities)
 #
 function( cpfAddGlobalDynamicAnalysisTarget packages)
 	
-	if(NOT CPF_ENABLE_RUN_TESTS_TARGET)
+	if(NOT CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET)
 		return()
 	endif()
 		
@@ -77,12 +77,12 @@ endfunction()
 #
 function( cpfAddDynamicAnalysisTarget package)
 
-	if(NOT CPF_ENABLE_RUN_TESTS_TARGET)
+	if(NOT CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET)
 		return()
 	endif()
 
 	set(targetName dynamicAnalysis_${package})
-	set(analysisTargetBinaryDir ${CMAKE_CURRENT_BINARY_DIR}/${targetName})
+	set(analysisTargetBinaryDir ${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName})
 	file(MAKE_DIRECTORY ${analysisTargetBinaryDir})
 		
 	# check preconditions
@@ -105,7 +105,7 @@ function( cpfAddDynamicAnalysisTarget package)
 				
 			set(suppressionsFile "${CMAKE_CURRENT_SOURCE_DIR}/Other/${package}ValgrindSuppressions.supp")
 				
-			set(valgrindCommand "\"${TOOL_VALGRIND}\" --leak-check=full --track-origins=yes --smc-check=all --error-exitcode=1 --gen-suppressions=all --suppressions=\"${suppressionsFile}\" \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/dynmicAnalysis_${testTarget}\"")
+			set(valgrindCommand "\"${TOOL_VALGRIND}\" --leak-check=full --track-origins=yes --smc-check=all --error-exitcode=1 --gen-suppressions=all --suppressions=\"${suppressionsFile}\" \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")
 				
 			cpfAddStandardCustomCommand(
 				OUTPUT ${stampFile}
@@ -127,7 +127,7 @@ function( cpfAddDynamicAnalysisTarget package)
 			list(APPEND coverageOutputFiles ${coverageOutput})
 
 			set(removeTempCovFileComand "cmake -E remove -f \"${coverageOutputTemp}\"") # we need to try to remove this to cover cases where the OpenCppCoverage command fails and the temp file does not get renamed.
-			set(openCppCoverageCommand "\"${TOOL_OPENCPPCOVERAGE}\" --export_type=binary:\"${coverageOutputTemp}\" --sources=\"**\\${CPF_SOURCE_DIR}\\${package}\" --quiet -- \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/dynmicAnalysis_${testTarget}\"")
+			set(openCppCoverageCommand "\"${TOOL_OPENCPPCOVERAGE}\" --export_type=binary:\"${coverageOutputTemp}\" --sources=\"**\\${CPF_SOURCE_DIR}\\${package}\" --quiet -- \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")
 			set(cmakeRenameCommand "cmake -E rename \"${coverageOutputTemp}\" \"${coverageOutput}\"")
 			# we use an extra stampfile to make sure that marking the target done works even if the commands are only the echos for non debug configs.
 			set(stampFile ${analysisTargetBinaryDir}/OpenCppCoverage_${testTarget}.stamp )

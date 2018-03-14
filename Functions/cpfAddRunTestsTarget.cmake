@@ -67,7 +67,7 @@ function( cpfAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix te
 		cpfAddStandardCustomCommand(
 			DEPENDS "$<TARGET_FILE:${testTarget}>" "$<TARGET_FILE:${productionLib}>" ${productionLib} ${testTarget}
 			OUTPUT "${stampFile}" 
-			COMMANDS "$<TARGET_FILE:${testTarget}> -TestFilesDir \"${CPF_TEST_FILES_DIR}/${runTargetName}\" --gtest_filter=${testFilter}" "cmake -E touch \"${stampFile}\""
+			COMMANDS "$<TARGET_FILE:${testTarget}> -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/${runTargetName}\" --gtest_filter=${testFilter}" "cmake -E touch \"${stampFile}\""
 		)
 
 		add_custom_target(
