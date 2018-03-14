@@ -1,0 +1,11 @@
+#[[
+set( CPF_OWNED_PACKAGES
+"\
+MyPackage;\
+"
+CACHE STRING "\
+The packages that are owned by this CI-project. \
+Packages must be sorted by their level in the dependency graph. \
+Lower level packages must come first.\
+" FORCE )
+]]

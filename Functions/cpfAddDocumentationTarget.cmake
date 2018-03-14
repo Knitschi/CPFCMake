@@ -26,10 +26,20 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages)
 	set(tempDoxygenConfigFile "${targetBinaryDir}/tempDoxygenConfig.txt" )
 	set(reducedGraphFile "${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/CPFDependenciesTransitiveReduced.dot")
 	set(doxygenConfigFile "${CMAKE_SOURCE_DIR}/DoxygenConfig.txt")
+	set(doxygenLayoutFile "${CMAKE_SOURCE_DIR}/DoxygenLayout.xml")
 	set(htmlCgiBinDir "${CPF_PROJECT_HTML_ABS_DIR}/${CPF_CGI_BIN_DIR}" )
 
 	# Generate the DoxygenConfig.txt file if it does not exist.
-	configure_file( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenConfig.txt.in" ${doxygenConfigFile} COPYONLY )
+	if(NOT EXISTS ${doxygenConfigFile} )
+		# we use the manual check and copy instead of configure_file() to prevent overwriting the file when the template changes.
+		file( COPY "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenConfig.txt.in" DESTINATION ${doxygenConfigFile} )
+	endif()
+
+	# Generate the DoxygenLayout.xml file if it does not exist.
+	if(NOT EXISTS ${doxygenLayoutFile} )
+		# we use the manual check and copy instead of configure_file() to prevent overwriting the file when the template changes.
+		file( COPY "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenLayout.xml.in" DESTINATION ${doxygenLayoutFile} )
+	endif()
 
 	# Get dependencies
 	set(fileDependencies)
