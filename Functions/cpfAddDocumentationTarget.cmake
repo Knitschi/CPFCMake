@@ -67,7 +67,8 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages)
 	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}\"")
 	list(APPEND appendedLines "INPUT = \"${CMAKE_SOURCE_DIR}\"")
 	if(hasGeneratedDocumentation)
-		list(APPEND appendedLines "INPUT += \"${CMAKE_BINARY_DIR}/${CPF_GENERATED_DOCS_DIR}\"")
+		cpfGetGeneratedDocumentationDirectory(docsDir)
+		list(APPEND appendedLines "INPUT += \"${docsDir}\"")
 	endif()
 	foreach( externalPackage ${externalPackages})
 		list(APPEND appendedLines "EXCLUDE += \"${CMAKE_SOURCE_DIR}/${externalPackage}\"")
@@ -400,7 +401,7 @@ endfunction()
 
 #-------------------------------------------------------------------------
 function( cpfGetGeneratedDocumentationDirectory dirOut )
-	set(${dirOut} "${CMAKE_BINARY_DIR}/${CPF_GENERATED_DOCS_DIR}" PARENT_SCOPE)
+	set(${dirOut} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${CPF_GENERATED_DOCS_DIR}" PARENT_SCOPE)
 endfunction()
 
 #-------------------------------------------------------------------------

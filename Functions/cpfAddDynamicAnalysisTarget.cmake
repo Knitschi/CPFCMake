@@ -82,7 +82,7 @@ function( cpfAddDynamicAnalysisTarget package)
 	endif()
 
 	set(targetName dynamicAnalysis_${package})
-	set(analysisTargetBinaryDir ${CMAKE_CURRENT_BINARY_DIR}/${targetName})
+	set(analysisTargetBinaryDir ${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName})
 	file(MAKE_DIRECTORY ${analysisTargetBinaryDir})
 		
 	# check preconditions
