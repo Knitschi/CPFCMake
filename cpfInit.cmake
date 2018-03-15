@@ -93,7 +93,7 @@ function( cpfAddPackages externalPackages globalFiles )
 		${CPF_PROJECT_CONFIGURATIONS_DIR}
 	)
 	foreach( dir ${cpfPackageDirs})
-		if(EXISTS ${CMAKE_SOURCE_DIR}/${dir})
+		if((EXISTS ${CMAKE_SOURCE_DIR}/${dir}) AND (EXISTS ${CMAKE_SOURCE_DIR}/${dir}/CMakeLists.txt))
 			list(APPEND packages ${dir})
 		endif()
 	endforeach()
@@ -108,7 +108,6 @@ function( cpfAddPackages externalPackages globalFiles )
 	# A target that holds some project wide files
 	set( SOLUTION_FILES 
 		${globalFiles}
-		${CPF_SWITCH_WARNINGS_OFF_MACRO_FILE}
 		CMakeLists.txt
 		"${CPF_CONFIG_FILE}"
 		"${CMAKE_BINARY_DIR}/CMakeCache.txt"
