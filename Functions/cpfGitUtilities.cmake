@@ -82,10 +82,13 @@ function( cpfGetLastVersionTagOfBranch lastVersionTagOut branch repositoryDir al
 	# "abc12.43.5"						Should not match unclean release version
 
 	cpfGetFirstMatch( latestVersionTag "${tags}" "^[0-9]+[.][0-9]+[.][0-9]+([.]([0-9]+[\\-])?[0-9a-z]+([\\-][0-9a-zA-Z\\-\\_]*)?)?$")
-	# make sure we do not have a release tag at the same version
-	cpfGetTagsAtCommit( siblingTags ${latestVersionTag} ${repositoryDir})
-	cpfGetReleaseVersionRegExp( regexp)
-	cpfGetFirstMatch( releaseVersionTag "${siblingTags}" ${regexp})
+	set(releaseVersionTag)
+	if(latestVersionTag)
+		# make sure we do not have a release tag at the same version
+		cpfGetTagsAtCommit( siblingTags ${latestVersionTag} ${repositoryDir})
+		cpfGetReleaseVersionRegExp( regexp)
+		cpfGetFirstMatch( releaseVersionTag "${siblingTags}" ${regexp})
+	endif()
 	if(releaseVersionTag)
 		set(${lastVersionTagOut} ${releaseVersionTag} PARENT_SCOPE)
 	else()

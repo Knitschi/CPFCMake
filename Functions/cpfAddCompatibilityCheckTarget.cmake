@@ -267,8 +267,8 @@ function( cpfGetLastBuildAndLastReleaseVersion lastBuildVersionOut lastReleaseVe
 	cpfGetLastVersionTagOfBranch( lastVersion ${branch} "${CMAKE_CURRENT_SOURCE_DIR}" FALSE)
 	cpfGetLastReleaseVersionTagOfBranch( lastReleaseVersion ${branch} "${CMAKE_CURRENT_SOURCE_DIR}" FALSE)
 	
-	set(${lastBuildVersionOut} ${lastVersion} PARENT_SCOPE)
-	set(${lastReleaseVersionOut} ${lastReleaseVersion} PARENT_SCOPE)
+	set(${lastBuildVersionOut} "${lastVersion}" PARENT_SCOPE)
+	set(${lastReleaseVersionOut} "${lastReleaseVersion}" PARENT_SCOPE)
 	
 endfunction()
 
