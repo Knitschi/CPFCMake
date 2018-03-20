@@ -23,8 +23,9 @@ function( cpfAddPipelineTarget packages)
 	# A set package properties that contain custom targets that should be
 	# included in the pipeline.
 	set( pipelineSubTargetProperties
-		CPF_ABI_CHECK_SUBTARGETS
+		CPF_BINARY_SUBTARGETS
 		CPF_RUN_TESTS_SUBTARGET
+		CPF_ABI_CHECK_SUBTARGETS
 	)
 
 	# When we know that the dynamic analysis target exists,
