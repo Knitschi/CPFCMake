@@ -96,12 +96,9 @@ endfunction()
 
 
 #----------------------------------------------------------------------------------------
+# Adds a run-tests target that runs a pyhton script
 function( cpfAddRunPython3TestTarget package testScript sourceFiles )
-
 	if(TOOL_PYTHON3)
-
-		set(runTargetName ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${PACKAGE_NAME})
-		getRunTestStampFile( stampFile ${runTargetName} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX})
 
 		# derive the python module path from the script path
 		file( RELATIVE_PATH pathToTestScript ${CPF_ROOT_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/${testScript}")
@@ -110,22 +107,41 @@ function( cpfAddRunPython3TestTarget package testScript sourceFiles )
 		cpfStringRemoveRight( pythonModulePath ${pythonModulePath} 3)
 
 		set( runTestsCommand "\"${TOOL_PYTHON3}\" -m ${pythonModulePath}")
-		set( touchCommand "cmake -E touch \"${stampFile}\"" )
-
-		cpfAddStandardCustomCommand(
-			DEPENDS "${sourceFiles}"
-			OUTPUT "${stampFile}"
-			COMMANDS ${runTestsCommand} ${touchCommand}
-		)
-
-		add_custom_target(
-			${runTargetName}
-			DEPENDS "${stampFile}"
-		)
-
-		set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/pipeline")
-		set_property( TARGET ${PACKAGE_NAME} PROPERTY CPF_RUN_TESTS_SUBTARGET ${runTargetName})
+		cpfAddCustomTestTarget(${package} ${runTestsCommand} "${sourceFiles}" )
 
 	endif()
+endfunction()
+
+
+#----------------------------------------------------------------------------------------
+function( cpfAddCustomTestTarget package runTestsCommand sourceFiles )
+
+	set(runTargetName ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${PACKAGE_NAME})
+	getRunTestStampFile( stampFile ${runTargetName} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX})
+	set( touchCommand "cmake -E touch \"${stampFile}\"" )
+
+	cpfAddStandardCustomCommand(
+		DEPENDS "${sourceFiles}"
+		OUTPUT "${stampFile}"
+		COMMANDS ${runTestsCommand} ${touchCommand}
+	)
+
+	add_custom_target(
+		${runTargetName}
+		DEPENDS "${stampFile}"
+	)
+
+	set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/pipeline")
+	set_property( TARGET ${package} PROPERTY CPF_RUN_TESTS_SUBTARGET ${runTargetName})
 
 endfunction()
+
+
+#----------------------------------------------------------------------------------------
+# Adds a run-tests target that runs a cmake script
+function( cpfAddRunCMakeTestScriptTarget package testScript sourceFiles )
+	set( runTestsCommand "cmake -P \"${CMAKE_CURRENT_SOURCE_DIR}/${testScript}\"")
+	cpfAddCustomTestTarget(${package} ${runTestsCommand} "${sourceFiles}" )
+endfunction()
+
+

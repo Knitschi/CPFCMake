@@ -1,7 +1,7 @@
 
 
 #----------------------------------------------------------------------------------------
-# call the correct version of separate_arguments depending on the current platform
+# call the correct version of separate_arguments depending on the current platform.
 macro ( cpfSeparateArgumentsForPlatform listArg command)
 	if(CMAKE_HOST_UNIX)
 		separate_arguments(list UNIX_COMMAND "${command}")
@@ -42,11 +42,11 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Removes the last element from the list and sets it to VAR
-function( cpfPopBack VAR list)
-	list(GET ${list} "-1" blib)
-	set(${VAR} ${blib} PARENT_SCOPE)
-	list(REMOVE_AT ${list} "-1")
-	set(${list} ${${list}} PARENT_SCOPE)
+function( cpfPopBack lastElementOut listOut list)
+	list(GET list "-1" lastElement)
+	set(${lastElementOut} ${lastElement} PARENT_SCOPE)
+	list(REMOVE_AT list "-1")
+	set(${listOut} "${list}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -55,17 +55,17 @@ endfunction()
 function( cpfSplitList outLeft outRight list splitIndex )
 	
 	set(index 0)
-	foreach(element ${list})
+	foreach(element IN LISTS list)
 		if(${index} LESS ${splitIndex})
-			list(APPEND outLeftLocal ${element})
+			list(APPEND outLeftLocal "${element}")
 		else()
-			list(APPEND outRightLocal ${element})
+			list(APPEND outRightLocal "${element}")
 		endif()
 		cpfIncrement(index)
 	endforeach()
 
-	set( ${outLeft} ${outLeftLocal} PARENT_SCOPE)
-	set( ${outRight} ${outRightLocal} PARENT_SCOPE)
+	set( ${outLeft} "${outLeftLocal}" PARENT_SCOPE)
+	set( ${outRight} "${outRightLocal}" PARENT_SCOPE)
 
 endfunction()
 
@@ -75,7 +75,7 @@ endfunction()
 function( cpfFindAllInList indexesOut list value)
 	set(indexes)
 	set(index 0)
-	foreach(element ${list})
+	foreach(element IN LISTS list)
 		if("${element}" STREQUAL "${value}" )
 			list(APPEND indexes ${index})
 		endif()
@@ -110,20 +110,14 @@ function( devMessageList list)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Writes the name of the immediate parent folder to VAR
-function ( cpfGetParentFolder output fileName )
+# Writes the name of the immediate parent directory to parantDirOut
+function ( cpfGetParentDirectory parantDirOut absDirOrFilePath )
 	
-	get_source_file_property( fullFilename ${fileName} LOCATION)
-	get_filename_component( dir ${fullFilename} DIRECTORY)
-	string(FIND ${dir} "/" dirSeparatorIndex REVERSE)	# get the index of the last directory separator
-	# compute the length of the last directory name
-	string(LENGTH ${dir} fullDirLength)
-	math(EXPR folderNameStartIndex "${dirSeparatorIndex} + 1")
-	math(EXPR lastNameLength "${fullDirLength} - ${folderNameStartIndex}")
-	# get the substring of the last folder
-	string(SUBSTRING ${dir} ${folderNameStartIndex} ${lastNameLength} folderName)
-	# set the output variable
-	set( ${output} ${folderName}  PARENT_SCOPE)
+	get_filename_component( dir ${absDirOrFilePath} DIRECTORY)
+	string(FIND ${dir} "/" index REVERSE)			# get the index of the last directory separator
+	cpfIncrement(index)
+	cpfRightSideOfString(dirName ${dir} ${index})
+	set( ${parantDirOut} ${dirName}  PARENT_SCOPE)
 
 endfunction()
 
@@ -146,14 +140,15 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Checks if subdir is a subdirectory of dir.
-# e.g.: subPath = C:/bla/blub/blib path = C:/bla  -> returns TRUE
-#		subPath = C:/bla/blub/blib path = C:/bleb -> returns FALSE
+# e.g.: subPath = C:/bla/blub/blib, path = C:/bla  -> returns TRUE
+#		subPath = C:/bla/blub/blib, path = C:/bleb -> returns FALSE
 #
 # Note that pathes must use / as a separator.
 function( cpfIsSubPath VAR subPath path)
 	
 	set(${VAR} FALSE PARENT_SCOPE )
-	if("${subPath}" MATCHES "^${path}(.*)")
+	string(FIND ${path} ${subPath} index)
+	if(${index} EQUAL 0)
 		set(${VAR} TRUE PARENT_SCOPE )
 	endif()
 

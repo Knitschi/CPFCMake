@@ -22,7 +22,7 @@ set(DIR_OF_ADD_PACKAGE_FILE ${CMAKE_CURRENT_LIST_DIR})
 macro( cpfInitPackageProject packageNameOut packageNameSpace )
 
 	# The package name is defined by the sub-directory name
-	cpfGetParentFolder( packageName ${CMAKE_CURRENT_LIST_FILE})
+	cpfGetParentDirectory( packageName ${CMAKE_CURRENT_LIST_FILE})
 
 	cpfConfigurePackageVersionFile( ${packageName} )
 

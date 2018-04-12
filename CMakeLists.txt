@@ -75,6 +75,13 @@ set( TEMPLATE_FILES
 	Templates/DoxygenConfig.txt.in
 )
 
+# File that contain tests
+set( TEST_FILES
+	Tests/cpfBaseUtilities_tests.cmake
+	Tests/cpfTestUtilities.cmake
+	Tests/run_tests.cmake
+)
+
 # Put the files in directories in visual studio.
 source_group( Variables FILES ${VARIABLES_FILES} )
 source_group( Functions FILES ${FUNCTION_FILES} )
@@ -82,8 +89,12 @@ source_group( DefaultConfigurations FILES ${CONFIGURATION_FILES} )
 source_group( Scripts FILES ${SCRIPT_FILES} )
 source_group( Other FILES ${OTHER_FILES} )
 source_group( Templates FILES ${TEMPLATE_FILES} )
+source_group( Tests FILES ${TEST_FILES} )
 
 # Finally add the target.
-set(allCMakeFiles ${PUBLIC_FILES} ${VARIABLES_FILES} ${FUNCTION_FILES} ${TEST_FILES} ${CONFIGURATION_FILES} ${SCRIPT_FILES} ${OTHER_FILES} ${TEMPLATE_FILES}  )
+set(allCMakeFiles ${PUBLIC_FILES} ${VARIABLES_FILES} ${FUNCTION_FILES} ${TEST_FILES} ${CONFIGURATION_FILES} ${SCRIPT_FILES} ${OTHER_FILES} ${TEMPLATE_FILES} ${TEST_FILES} )
 
 cpfAddFilePackage(${PACKAGE_NAME} "${allCMakeFiles}")
+
+# Add a test target
+cpfAddRunCMakeTestScriptTarget( ${PACKAGE_NAME} "Tests/run_tests.cmake" "${TEST_FILES}")

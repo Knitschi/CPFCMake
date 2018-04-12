@@ -78,7 +78,7 @@ function( cpfAddAppendLinesToFileCommands)
 	)
 	
 	# now add one command for each appended line except the last one
-	cpfPopBack(lastLine ARG_ADDED_LINES)
+	cpfPopBack(lastLine ARG_ADDED_LINES "${ARG_ADDED_LINES}")
 	set(lineIndex 0)
 	set(dependency ${stampFile})
 	foreach( line ${ARG_ADDED_LINES})
