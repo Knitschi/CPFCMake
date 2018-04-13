@@ -25,10 +25,14 @@ cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}")
 
 # CREATE CONFIG-FILE CONTENT 
 cpfNormalizeAbsPath( configFilename "${CMAKE_CURRENT_LIST_DIR}/../../../Configuration/${CPF_CONFIG}${CPF_CONFIG_FILE_ENDING}")
+cpfNormalizeAbsPath( pathToVariables "${CMAKE_CURRENT_LIST_DIR}/../Variables")
 
 # Add standard lines.
 set(fileContent)
 list(APPEND fileContent "# This file cpfContains cmake project configuration parameters." )
+list(APPEND fileContent "" )
+list(APPEND fileContent "list( APPEND CMAKE_MODULE_PATH ${pathToVariables})" )
+list(APPEND fileContent "include(cpfLocations)")
 list(APPEND fileContent "" )
 list(APPEND fileContent "# Inherit configuration parameters." )
 list(APPEND fileContent "include( \"${fullInheritedConfigFile}\" )" )
