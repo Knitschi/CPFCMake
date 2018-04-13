@@ -3,6 +3,7 @@ include(cpfLocations)
 include(cpfConstants)
 include(cpfListUtilities)
 include(cpfStringUtilities)
+include(cpfPathUtilities)
 
 set(DIR_OF_PROJECT_UTILITIES ${CMAKE_CURRENT_LIST_DIR})
 
