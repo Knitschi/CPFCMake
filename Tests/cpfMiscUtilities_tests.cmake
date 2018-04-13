@@ -73,7 +73,7 @@ function( test_cpfSplitVersion )
     cpfAssertStrEQ(${majorOut} 1)
     cpfAssertStrEQ(${minorOut} 02)
     cpfAssertStrEQ(${patchOut} 33)
-    cpfAssertStrEQ(${commitIdOut} "")
+    cpfAssertStrEQ("${commitIdOut}" "")
 
 endfunction()
 
@@ -100,13 +100,12 @@ function( test_cpfGetKeywordValueLists )
     set(otherKeywords BLUB BLEB )
     cpfGetKeywordValueLists( valueListsOut "${valueListsKeyword}" "${otherKeywords}" "${arguments}" "multikeyArgs")
     
-    list(GET ${valueListsOut} 0 listName0 )
-    cpfAssertStrEQ(${listName0} "multikeyArgs_0")
+    list(GET valueListsOut 0 listName0 )
+    cpfAssertStrEQ(${listName0} "multikeyArgs0")
     cpfAssertListsEqual( "${${listName0}}" "bli;bla;blab" )
 
-
-    list(GET ${valueListsOut} 1 listName1 )
-    cpfAssertStrEQ(${listName1} "multikeyArgs_1")
+    list(GET valueListsOut 1 listName1 )
+    cpfAssertStrEQ(${listName1} "multikeyArgs1")
     cpfAssertListsEqual( "${${listName1}}" "bar;;booze" )
 
 endfunction()

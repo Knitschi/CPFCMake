@@ -334,7 +334,7 @@ function( cpfGetKeywordValueLists valueListsOut valueListsKeyword otherKeywords 
 
 	set(currentBelongsToSublist FALSE)
 	set(listNameIndex 0)
-	foreach( arg ${argumentList} )
+	foreach( arg IN LISTS argumentList )
 
 		if( "${arg}" STREQUAL ${valueListsKeyword} )
 			set( currentBelongsToSublist TRUE)
