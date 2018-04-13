@@ -249,7 +249,7 @@ endfunction()
 function( cpfPrependMulti outputList prefix inputList )
 
 	set(outLocal)
-	foreach( string ${inputList} )
+	foreach( string IN LISTS inputList )
 		list(APPEND outLocal "${prefix}${string}")
 	endforeach()
 	set(${outputList} ${outLocal} PARENT_SCOPE)
