@@ -16,7 +16,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../Variables)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../Functions)
 
 include(cpfConstants)
-include(cpfBaseUtilities)
 include(cpfGitUtilities)
 include(cpfProjectUtilities)
 
