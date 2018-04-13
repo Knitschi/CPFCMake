@@ -24,14 +24,12 @@ cpfAssertScriptArgumentDefined(PARENT_CONFIG)
 cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}")
 
 # CREATE CONFIG-FILE CONTENT 
-cpfNormalizeAbsPath( fullProjectUtilities "${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake" )
 cpfNormalizeAbsPath( configFilename "${CMAKE_CURRENT_LIST_DIR}/../../../Configuration/${CPF_CONFIG}${CPF_CONFIG_FILE_ENDING}")
 
 # Add standard lines.
 set(fileContent)
 list(APPEND fileContent "# This file cpfContains cmake project configuration parameters." )
 list(APPEND fileContent "" )
-list(APPEND fileContent "include(\"${fullProjectUtilities}\")" )
 list(APPEND fileContent "# Inherit configuration parameters." )
 list(APPEND fileContent "include( \"${fullInheritedConfigFile}\" )" )
 list(APPEND fileContent "" )
