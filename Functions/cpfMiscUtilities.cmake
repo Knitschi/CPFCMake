@@ -84,8 +84,9 @@ function( cpfAssertScriptArgumentDefined variableName )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# A version of the configure_file() function that asserts if the given variables
-# contain no values when the function is called.
+# A version of the configure_file() function that asserts that all given variables have
+# values when the function is called. This is supposed to prevent errors where configure_file()
+# is broken because variables that are used in the configured file are renamed.
 #
 function( cpfConfigureFileWithVariables input output variables )
 	foreach( variable ${variables})
@@ -154,14 +155,13 @@ function( cpfGetConfigVariableSuffixes suffixes)
 			cpfToConfigSuffix( suffix ${config})
 			list(APPEND endings ${suffix})
 		endforeach()
+	elseif(CMAKE_BUILD_TYPE)
+		cpfToConfigSuffix( suffix ${CMAKE_BUILD_TYPE})
+		list(APPEND endings ${suffix})
 	else()
-		if(CMAKE_BUILD_TYPE)
-			cpfToConfigSuffix( suffix ${CMAKE_BUILD_TYPE})
-			list(APPEND endings ${suffix})
-		else()
-			list(APPEND endings " ")
-		endif()
+		message(FATAL_ERROR "Config file error! The CMakeProjectFramework expects either CMAKE_CONFIGURATION_TYPES or CMAKE_BUILD_TYPE to be set.")
 	endif()
+
 	set(${suffixes} "${endings}" PARENT_SCOPE)
 
 endfunction()
@@ -183,7 +183,7 @@ function( cpfGetConfigurations configs )
 	elseif(CMAKE_BUILD_TYPE)
 		set( ${configs} ${CMAKE_BUILD_TYPE} PARENT_SCOPE)
 	else()
-		message(FATAL_ERROR "Either CMAKE_CONFIGURATION_TYPES or CMAKE_BUILD_TYPE should be set.")
+		message(FATAL_ERROR "Config file error! The CMakeProjectFramework expects either CMAKE_CONFIGURATION_TYPES or CMAKE_BUILD_TYPE to be set.")
 	endif()
 
 endfunction()
@@ -232,8 +232,9 @@ function( cpfExecuteProcess stdOut commandString workingDir)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# assumes that version and has the form 123.12.123 and returns the first number as major version,
-# the second number as minor version and the last number as numberOfCommits
+# The function assumes that version and has the form 123.12.123.12-acdf and returns the 
+# first number as major version, the second number as minor version  and the last part
+# as commitIdOut if it exists.
 # 
 function( cpfSplitVersion majorOut minorOut patchOut commitIdOut versionString)
 	
