@@ -10,6 +10,11 @@ function( cpfRunListUtilitiesTests )
     test_cpfPopBack()
     test_cpfSplitList()
     test_cpfFindAllInList()
+    test_cpfListLength()
+    test_cpfContains()
+    test_cpfContainsOneOf()
+    test_cpfGetFirstMatch()
+    test_cpfGetList1WithoutList2()
 
 endfunction()
 
@@ -79,8 +84,75 @@ function( test_cpfFindAllInList )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( test_ )
+function( test_cpfListLength )
 
+    set( list bli "" bla blub)
+    cpfListLength(length "${list}")
+    cpfAssertStrEQ(${length} 4)
 
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( test_cpfContains )
+
+    # contains element
+    set(list bli bla "" blub)
+    cpfContains( contains "${list}" "")
+    cpfAssertTrue(contains)
+
+    # does not contain element
+    set(list bli bla blub)
+    cpfContains( contains "${list}" bleb)
+    cpfAssertFalse(contains)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( test_cpfContainsOneOf )
+
+    # contains element
+    set(listSearchedIn bli "" bla blub)
+    set(listSearchedFor bleb blob "")
+    cpfContainsOneOf( contains "${listSearchedIn}" "${listSearchedFor}")
+    cpfAssertTrue(contains)
+
+    # does not contain element
+    set(listSearchedIn bli bla blub)
+    set(listSearchedFor bleb blob blab)
+    cpfContainsOneOf( contains "${listSearchedIn}" "${listSearchedFor}")
+    cpfAssertFalse(contains)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( test_cpfGetFirstMatch )
+
+    # element is matched
+    set(list bli bla "" blub )
+    set(regex "^bla$")   # matches bla
+    cpfGetFirstMatch( matchedElement "${list}" ${regex})
+    cpfAssertStrEQ(${matchedElement} "bla")
+
+    # empty element is matched
+    set(list bli bla "" blub )
+    set(regex "^$")   # matches only empty string
+    cpfGetFirstMatch( matchedElement "${list}" ${regex})
+    cpfAssertStrEQ("${matchedElement}" "")
+
+    # no element is matched
+    set(list bli bla blub )
+    set(regex "^$")   # matches only empty string
+    cpfGetFirstMatch( matchedElement "${list}" ${regex})
+    cpfAssertStrEQ("${matchedElement}" NOTFOUND)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( test_cpfGetList1WithoutList2 )
+
+    set(list1 bli bla "" blub)
+    set(list2 blub bli)
+    cpfGetList1WithoutList2( difference "${list1}" "${list2}")
+    cpfAssertListsEqual( "${difference}" "bla;" )
 
 endfunction()
