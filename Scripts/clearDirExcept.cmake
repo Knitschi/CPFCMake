@@ -11,6 +11,7 @@ list( APPEND CMAKE_MODULE_PATH
 )
 
 include(cpfMiscUtilities)
+include(cpfListUtilities)
 
 cpfAssertScriptArgumentDefined(ARGUMENT_FILE)
 
