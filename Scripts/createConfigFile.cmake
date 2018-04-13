@@ -13,6 +13,7 @@ include(cpfMiscUtilities)
 include(cpfProjectUtilities)
 include(cpfLocations)
 include(cpfConstants)
+include(cpfPathUtilities)
 
 cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 
