@@ -12,8 +12,8 @@ cpfAssertScriptArgumentDefined(ARGUMENT_FILE)
 
 include("${ARGUMENT_FILE}")
 
-cpfAssertDefined(DIRECTORY)
-cpfAssertDefined(ENTRIES)
+cpfAssertScriptArgumentDefined(DIRECTORY)
+cpfAssertScriptArgumentDefined(ENTRIES)
 
 file(GLOB existingDirEntriesFull "${DIRECTORY}/*")
 set(existingDirEntries)

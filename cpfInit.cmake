@@ -6,6 +6,7 @@ list( APPEND
 	CMAKE_MODULE_PATH 
 	"${DIR_OF_INIT_FILE}/Functions"
 	"${DIR_OF_INIT_FILE}/Variables"
+	"${DIR_OF_INIT_FILE}/Tests"
 	"${DIR_OF_INIT_FILE}"
 )
 

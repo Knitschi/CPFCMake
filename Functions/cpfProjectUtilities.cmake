@@ -1,7 +1,9 @@
 
-include("${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfConstants.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/cpfBaseUtilities.cmake")
+include(cpfLocations)
+include(cpfConstants)
+include(cpfBaseUtilities)
+include(cpfListUtilities)
+include(cpfStringUtilities)
 
 set(DIR_OF_PROJECT_UTILITIES ${CMAKE_CURRENT_LIST_DIR})
 

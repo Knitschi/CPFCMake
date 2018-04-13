@@ -1,4 +1,5 @@
 
+include(cpfTestUtilities)
 
 set(DIR_OF_TARGET_UTILITIES_FILE ${CMAKE_CURRENT_LIST_DIR})
 

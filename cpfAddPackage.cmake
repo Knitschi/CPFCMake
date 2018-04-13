@@ -5,6 +5,7 @@ include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
 include(cpfProjectUtilities)
 include(cpfGitUtilities)
+include(cpfPathUtilities)
 
 include(cpfAddStaticAnalysisTarget)
 include(cpfAddDynamicAnalysisTarget)
