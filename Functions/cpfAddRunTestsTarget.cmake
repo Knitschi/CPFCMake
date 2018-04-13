@@ -1,7 +1,6 @@
 
 include(cpfCustomTargetUtilities)
 include(cpfLocations)
-include(cpfBaseUtilities)
 
 #----------------------------------------------------------------------------------------
 # Creates a custom target that executes all unit and expensive tests of the given packages

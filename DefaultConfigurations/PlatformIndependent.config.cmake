@@ -1,9 +1,6 @@
 
 # This file contains basic CMakeProjectFramework default configuration settings that are common for all platforms. 
 
-include("${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake")
-
 # LOCATIONS
 set( CPF_WEBPAGE_URL "" CACHE STRING "The url to the webpage that is created with the updateExistingWebPage.cmake script." )
 set( CPF_PLANT_UML_JAR "" CACHE FILEPATH "Setting a path to the plantuml.jar file enables defining UML diagrams in Doxygen comments.")

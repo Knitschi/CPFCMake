@@ -1,6 +1,5 @@
 # This file contains functions that can be used to interact with a git repository
 
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
 
 
 #----------------------------------------------------------------------------------------

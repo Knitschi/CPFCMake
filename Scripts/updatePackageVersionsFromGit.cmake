@@ -10,11 +10,17 @@
 # ROOT_DIR		The absolute path to the root directory of the CPF project. It is the one that contains the Sources directory.
 # MAIN_BRANCH	The branch that contains the last version tag that is relevant for the next version.
 
-include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfConstants.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfGitUtilities.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake)
+list( APPEND CMAKE_MODULE_PATH
+	${CMAKE_CURRENT_LIST_DIR}/../Functions
+	${CMAKE_CURRENT_LIST_DIR}/../Variables
+)
+
+include(cpfMiscUtilities)
+include(cpfLocations)
+include(cpfConstants)
+include(cpfGitUtilities)
+include(cpfProjectUtilities)
+
 set(DIR_OF_THIS_FILE ${CMAKE_CURRENT_LIST_DIR})
 
 # check arguments where set

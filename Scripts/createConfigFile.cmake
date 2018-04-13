@@ -4,17 +4,15 @@
 # CPF_CONFIG			- The base name of the generated file.
 # PARENT_CONFIG			- The base name of an inherited config file.
 
-#[[
-get_cmake_property(_variableNames VARIABLES)
-foreach (_variableName ${_variableNames})
-    message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
-]]
+list( APPEND CMAKE_MODULE_PATH
+	${CMAKE_CURRENT_LIST_DIR}/../Functions
+	${CMAKE_CURRENT_LIST_DIR}/../Variables
+)
 
-include("${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfConstants.cmake")
+include(cpfMiscUtilities)
+include(cpfProjectUtilities)
+include(cpfLocations)
+include(cpfConstants)
 
 cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 

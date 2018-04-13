@@ -1,6 +1,6 @@
 # This module contains functions that help with testing
 
-include(cpfBaseUtilities)
+include(cpfMiscUtilities)
 
 #----------------------------------------------------------------------------------------
 # Fails if var1 and var2 are not equal

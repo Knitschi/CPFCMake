@@ -8,9 +8,15 @@
 # FRESH_HTML_DIR		- The html directory that was created by the last build.
 # ROOT_DIR: 		- The root directory of a CPF project.
 
-include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake)
+
+list( APPEND CMAKE_MODULE_PATH
+	${CMAKE_CURRENT_LIST_DIR}/../Functions
+	${CMAKE_CURRENT_LIST_DIR}/../Variables
+)
+
+include(cpfMiscUtilities)
+include(cpfLocations)
+include(cpfProjectUtilities)
 
 cpfAssertScriptArgumentDefined(EXISTING_HTML_DIR)
 cpfAssertScriptArgumentDefined(FRESH_HTML_DIR)

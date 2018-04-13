@@ -1,7 +1,6 @@
 
 include(cpfCustomTargetUtilities)
 include(cpfLocations)
-include(cpfBaseUtilities)
 include(cpfProjectUtilities)
 
 set(DIR_OF_THIS_FILE ${CMAKE_CURRENT_LIST_DIR})

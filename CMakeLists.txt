@@ -33,10 +33,14 @@ set( FUNCTION_FILES
 	Functions/cpfAddRunTestsTarget.cmake
 	Functions/cpfAddRunUicTarget.cmake
 	Functions/cpfAddStaticAnalysisTarget.cmake
-	Functions/cpfBaseUtilities.cmake
 	Functions/cpfCustomTargetUtilities.cmake
 	Functions/cpfGitUtilities.cmake
 	Functions/cpfProjectUtilities.cmake
+	Functions/cpfListUtilities.cmake
+	Functions/cpfMiscUtilities.cmake
+	Functions/cpfNumericUtilities.cmake
+	Functions/cpfPathUtilities.cmake
+	Functions/cpfStringUtilities.cmake
 )
 
 # Files that provide default configurations of cmake variables.
@@ -77,7 +81,11 @@ set( TEMPLATE_FILES
 
 # File that contain tests
 set( TEST_FILES
-	Tests/cpfBaseUtilities_tests.cmake
+	Tests/cpfListUtilities_tests.cmake
+	Tests/cpfMiscUtilities_tests.cmake
+	Tests/cpfNumericUtilities_tests.cmake
+	Tests/cpfPathUtilities_tests.cmake
+	Tests/cpfStringUtilities_tests.cmake
 	Tests/cpfTestUtilities.cmake
 	Tests/run_tests.cmake
 )

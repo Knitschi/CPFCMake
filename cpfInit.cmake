@@ -13,7 +13,6 @@ list( APPEND
 include(cpfLocations)
 include(cpfProperties)
 include(cpfProjectUtilities)
-include(cpfBaseUtilities)
 	
 include(cpfAddDocumentationTarget)
 include(cpfAddStaticAnalysisTarget)

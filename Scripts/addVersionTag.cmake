@@ -5,12 +5,15 @@
 # Arguments:
 # ROOT_DIR						: The CPF root directory.
 
+list(APPEND CMAKE_MODULE_PATH 
+	${CMAKE_CURRENT_LIST_DIR}/../Variables
+	${CMAKE_CURRENT_LIST_DIR}/../Functions
+)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfConstants.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Variables/cpfLocations.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfBaseUtilities.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfProjectUtilities.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../Functions/cpfGitUtilities.cmake)
+include(cpfConstants)
+include(cpfLocations)
+include(cpfProjectUtilities)
+include(cpfGitUtilities)
 
 cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 
