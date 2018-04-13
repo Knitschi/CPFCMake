@@ -75,8 +75,8 @@ endfunction()
 # Returns true if listLoockedIn cpfContains one of the elements of listSearchStrings
 function( cpfContainsOneOf ret listLookedIn listSearchStrings)
 	
-	foreach( searchString ${listSearchStrings} )
-		cpfContains( hasString "${listLookedIn}" ${searchString})
+	foreach( searchString IN LISTS listSearchStrings )
+		cpfContains( hasString "${listLookedIn}" "${searchString}")
 		if(hasString)
 			set(${ret} TRUE PARENT_SCOPE)
 			return()
@@ -87,16 +87,17 @@ function( cpfContainsOneOf ret listLookedIn listSearchStrings)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Returns the first element in the list that matches the regular expression regex
+# Returns the value of the first element in the list that matches the regular expression regex.
+# If no element is matched it returns NOTFOUND
 function( cpfGetFirstMatch matchedElementOut list regex)
 	
-	foreach( element ${list} )
+	foreach( element IN LISTS list )
 		if( "${element}" MATCHES "${regex}" )
 			set(${matchedElementOut} "${element}" PARENT_SCOPE)
 			return()
 		endif()
 	endforeach()
-	set(${matchedElementOut} "" PARENT_SCOPE)
+	set(${matchedElementOut} "NOTFOUND" PARENT_SCOPE)
 
 endfunction()
 
@@ -104,11 +105,11 @@ endfunction()
 # Returns a list with the elements in list1 that can not be found in list2
 function( cpfGetList1WithoutList2 differenceOut list1 list2)
 	set(difference)
-	foreach( element ${list1})
-		cpfContains( isInList2 "${list2}" ${element})
+	foreach( element IN LISTS list1)
+		cpfContains( isInList2 "${list2}" "${element}")
 		if(NOT isInList2)
-			list(APPEND difference ${element})
+			list(APPEND difference "${element}")
 		endif()
 	endforeach()
-	set( ${differenceOut} ${difference} PARENT_SCOPE)
+	set( ${differenceOut} "${difference}" PARENT_SCOPE)
 endfunction()

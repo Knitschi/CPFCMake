@@ -81,14 +81,17 @@ function( cpfGetLastVersionTagOfBranch lastVersionTagOut branch repositoryDir al
 	# "abc12.43.5"						Should not match unclean release version
 
 	cpfGetFirstMatch( latestVersionTag "${tags}" "^[0-9]+[.][0-9]+[.][0-9]+([.]([0-9]+[\\-])?[0-9a-z]+([\\-][0-9a-zA-Z\\-\\_]*)?)?$")
-	set(releaseVersionTag)
-	if(latestVersionTag)
+	set(releaseVersionTag NOTFOUND)
+	if(${latestVersionTag} STREQUAL NOTFOUND)
+		message( FATAL_ERROR "Error in cpfGetLastVersionTagOfBranch(). Branch does not seem to have any version tags. Make sure to add an initial version tag 0.0.0 to the first commit of the repository.")
+	else()
 		# make sure we do not have a release tag at the same version
 		cpfGetTagsAtCommit( siblingTags ${latestVersionTag} ${repositoryDir})
 		cpfGetReleaseVersionRegExp( regexp)
 		cpfGetFirstMatch( releaseVersionTag "${siblingTags}" ${regexp})
 	endif()
-	if(releaseVersionTag)
+
+	if(NOT ${releaseVersionTag} STREQUAL NOTFOUND)
 		set(${lastVersionTagOut} ${releaseVersionTag} PARENT_SCOPE)
 	else()
 		set(${lastVersionTagOut} ${latestVersionTag} PARENT_SCOPE)
@@ -118,7 +121,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns the last version tag that is a release version.
-# This will not return a tag of HEAD, but only older tags.
+# The allowTagsAtHEAD option can be used to exclude tags from the latest commit from the search.
 function( cpfGetLastReleaseVersionTagOfBranch lastVersionTagOut branch repositoryDir allowTagsAtHEAD )
 
 	cpfGetPrecedingTagsLatestFirst( tags "${branch}" ${repositoryDir} ${allowTagsAtHEAD} )
@@ -126,6 +129,10 @@ function( cpfGetLastReleaseVersionTagOfBranch lastVersionTagOut branch repositor
 	# The regex should only match release versions that only contain three numbers with single dots in between them like 1.23.45
 	cpfGetReleaseVersionRegExp(regexp)
 	cpfGetFirstMatch( latestVersionTag "${tags}" ${regexp} )
+	if(${latestVersionTag} STREQUAL NOTFOUND)
+		message( FATAL_ERROR "Error in cpfGetLastReleaseVersionTagOfBranch(). Branch does not seem to have any version tags. Make sure to add an initial version tag 0.0.0 to the first commit of the repository.")
+	endif()
+
 	set(${lastVersionTagOut} ${latestVersionTag} PARENT_SCOPE)
 
 endfunction()
