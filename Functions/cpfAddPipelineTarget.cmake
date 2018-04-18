@@ -29,7 +29,7 @@ function( cpfAddPipelineTarget packages)
 	)
 
 	# When we know that the dynamic analysis target exists,
-	# we can omit the extra test run. Note that with multi-config-generators we can only tell
+	# we can ommit the extra test run. Note that with multi-config-generators we can only tell
 	# at compile time if the dynamic analysis is run, so for simplicity we
 	# add the runTest targets always.
 	cpfIsGccClangDebug(gccClangDebug)

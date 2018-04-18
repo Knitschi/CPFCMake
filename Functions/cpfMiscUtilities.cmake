@@ -98,6 +98,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfIsSingleConfigGenerator var )
 
+	# consider using global property GENERATOR_IS_MULTI_CONFIG instead
 	if(CMAKE_CONFIGURATION_TYPES)
 		set( ${var} FALSE PARENT_SCOPE)
 	else()
