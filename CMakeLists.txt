@@ -75,7 +75,7 @@ set( TEMPLATE_FILES
 	Templates/packageVersion.h.in
 	Templates/packageVersion.cmake.in
 	Templates/.gitignore.in
-	Templates/${CPF_GRAPHVIZ_OPTIONS_FILE}
+	Templates/${CPF_GRAPHVIZ_OPTIONS_FILE}.in
 	Templates/DoxygenConfig.txt.in
 )
 

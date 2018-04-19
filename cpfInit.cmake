@@ -124,7 +124,7 @@ function( cpfAddPackages externalPackages globalFiles )
 
 	if(CPF_ENABLE_STATIC_ANALYSIS_TARGET)
 		list(APPEND SOLUTION_FILES 
-			"${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}" # CMake looks for the file in the source directory, so it can not be put in the cmake directory.
+			"${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}"
 		)
 	endif()
 
