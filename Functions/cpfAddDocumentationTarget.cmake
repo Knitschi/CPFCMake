@@ -24,21 +24,18 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages )
 	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}" )
 	set(tempDoxygenConfigFile "${targetBinaryDir}/tempDoxygenConfig.txt" )
 	set(reducedGraphFile "${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/CPFDependenciesTransitiveReduced.dot")
-	set(doxygenConfigFile "${CMAKE_SOURCE_DIR}/DoxygenConfig.txt")
-	set(doxygenLayoutFile "${CMAKE_SOURCE_DIR}/DoxygenLayout.xml")
+	set(doxygenConfigFile "${CMAKE_SOURCE_DIR}/${CPF_DOCUMENTATION_DIR}/DoxygenConfig.txt")
+	set(doxygenLayoutFile "${CMAKE_SOURCE_DIR}/${CPF_DOCUMENTATION_DIR}/DoxygenLayout.xml")
+	set(doxygenStylesheetFile "${CMAKE_SOURCE_DIR}/${CPF_DOCUMENTATION_DIR}/DoxygenStylesheet.css")
 	set(htmlCgiBinDir "${CPF_PROJECT_HTML_ABS_DIR}/${CPF_CGI_BIN_DIR}" )
 
-	# Generate the DoxygenConfig.txt file if it does not exist.
-	if(NOT (EXISTS ${doxygenConfigFile}) )
-		# we use the manual existance check to prevent overwriting the file when the template changes.
-		configure_file( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenConfig.txt.in" ${doxygenConfigFile} COPYONLY )
-	endif()
-
-	# Generate the DoxygenLayout.xml file if it does not exist.
-	if(NOT EXISTS ${doxygenLayoutFile} )
-		# we use the manual existance check to prevent overwriting the file when the template changes.
-		configure_file( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenLayout.xml.in" ${doxygenLayoutFile} COPYONLY )
-	endif()
+	# Generate some doxygen config files on the first run.
+	# DoxygenConfig.txt
+	configureFileIfNotExists( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenConfig.txt.in" ${doxygenConfigFile})
+	# DoxygenLayout.xml
+	configureFileIfNotExists("${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenLayout.xml.in" ${doxygenLayoutFile})
+	# DoxygenStylesheet.css
+	configureFileIfNotExists( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenStylesheet.css.in" ${doxygenStylesheetFile})
 
 	# Get dependencies
 	set(fileDependencies)
@@ -72,8 +69,11 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages )
 
 	# The config file must contain the names of the depended on xml tag files of other doxygen sub-targets.
 	list(APPEND appendedLines "PROJECT_NAME  = ${PROJECT_NAME}")
-	list(APPEND appendedLines "DOTFILE_DIRS = \"${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
 	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}\"")
+	list(APPEND appendedLines "DOTFILE_DIRS = \"${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
+	list(APPEND appendedLines "LAYOUT_FILE = \"${doxygenLayoutFile}\"")
+	list(APPEND appendedLines "HTML_STYLESHEET = \"${doxygenStylesheetFile}\"")
+	# input files
 	list(APPEND appendedLines "INPUT = \"${CMAKE_SOURCE_DIR}\"")
 	if(hasGeneratedDocumentation)
 		cpfGetGeneratedDocumentationDirectory(docsDir)
@@ -100,7 +100,7 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages )
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
 	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/searchdata.xml)
 	cpfGetAllNonGeneratedPackageSources(sourceFiles "${packages}")
-	set( allDependedOnFiles ${tempDoxygenConfigFile} ${copiedDependencyGraphFile} ${reducedGraphFile} ${sourceFiles} ${fileDependencies} ${globalFiles} )
+	set( allDependedOnFiles ${tempDoxygenConfigFile} ${doxygenLayoutFile} ${doxygenStylesheetFile} ${copiedDependencyGraphFile} ${reducedGraphFile} ${sourceFiles} ${fileDependencies} ${globalFiles} )
 	cpfAddStandardCustomCommand(
 		OUTPUT ${searchDataXmlFile}
 		DEPENDS ${allDependedOnFiles}
@@ -124,6 +124,17 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages )
 		DEPENDS ${doxyIndexerStampFile} ${targetDependencies}
 	)
 
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# This function does a COPY_ONLY file configure if the target file does not exist yet.
+# This function can be used when the created file should not be overwritten when
+# the template file changes.
+function( configureFileIfNotExists templateFile targetFile )
+	if(NOT EXISTS ${targetFile} )
+		# we use the manual existance check to prevent overwriting the file when the template changes.
+		configure_file( ${templateFile} ${targetFile} COPYONLY )
+	endif()
 endfunction()
 
 #----------------------------------------------------------------------------------------

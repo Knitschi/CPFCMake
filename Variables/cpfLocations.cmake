@@ -88,6 +88,7 @@ endfunction()
 set( CPF_DOXYGEN_DIR doxygen )
 set( CPF_DOXYGEN_EXTERNAL_DIR external)
 set( CPF_GENERATED_DOCS_DIR documentation)						# A subdirectory in the CMAKE_BINARY_DIR that contains generated files that are used by doxygen.
+set( CPF_DOCUMENTATION_DIR documentation)						# A subdirectroy in the sources tree that contains global documentation files.
 set( CPF_DOWNLOADS_DIR Downloads )
 set( CPF_LAST_BUILD_DIR LastBuild)
 set( CPF_CGI_BIN_DIR cgi-bin )
