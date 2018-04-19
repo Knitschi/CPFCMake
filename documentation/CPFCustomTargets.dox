@@ -1,0 +1,180 @@
+/**
+
+\page CPFCustomTargets Custom targets
+
+\section CPFCustomTargetsSection Custom targets in the CPF
+
+The lists do not contain some private targets of the CPF that are only created as sub-steps of the
+targets that are of interest to the user.
+
+\subsection GlobalTargets Global targets
+
+A CPF project contains some targets that operate on the global level.
+They either execute operations that can not be done for each package
+in separation or *bundle* up a certain kind of per-package targets.
+In this case building the bundle target will simply build all
+per-package targets of that kind.
+
+Here is a list of targets that can exist once per CPF project.
+
+- \ref documentation
+- \ref distributionPackages
+- \ref dynamicAnalysis
+- \ref globalFiles
+- \ref pipeline
+- \ref runAllTests
+- \ref runFastTests
+- \ref staticAnalysis
+- \ref versionCompatibilityChecks
+- \ref INSTALL
+- \ref ALL_BUILD
+- \ref ZERO_CHECK
+
+
+\subsection PackageTargets Package targets
+
+Here is a list of targets that can exist once per CPF package.
+
+- \ref package
+- \ref package_tests
+- \ref package_fixtures
+- \ref distributionPackages_package
+- \ref dynamicAnalysis_package
+- \ref install_package
+- \ref runAllTests_package
+- \ref runFastTests_package
+- \ref staticAnalysis_package
+- \ref checkAbiCompatibility_binary_target
+
+
+\subsection TargetAnnotations Target annotations
+
+\subsubsection documentation documentation
+
+This target runs doxygen to generate the documentation for all owned packages.
+It can be disabled with the \c CPF_ENABLE_DOXYGEN_TARGET variable.
+
+\subsubsection distributionPackages distributionPackages
+
+This target bundles the \ref distributionPackages_package targets.
+
+\subsubsection dynamicAnalysis dynamicAnalysis
+
+This target bundles the \ref dynamicAnalysis_package targets.
+
+\subsubsection globalFiles globalFiles
+
+This is only a file container target that does not execute any commands.
+It holds all source files that are of global scope like tool configuration
+files, global documentation, etc..
+
+\subsubsection pipeline pipeline
+
+The top-level bundle target that will make sure that all other targets are built.
+
+\subsubsection runAllTests runAllTests
+
+This target bundles the \ref runAllTests_package targets.
+
+\subsubsection runFastTests runFastTests
+
+This target bundles the \ref runFastTests_package targets. This target is not
+contained in the \ref pipeline target which always builds the \ref runAllTests target.
+
+\subsubsection staticAnalysis staticAnalysis
+
+This target bundles the \ref runFastTests_package targets. It also
+checks that the dependency graph of the projects binary targets is acyclic.
+
+\subsubsection versionCompatibilityChecks versionCompatibilityChecks
+
+This target bundles the \ref checkAbiCompatibility_binary_target targets.
+
+\subsubsection INSTALL INSTALL
+
+This target bundles the \ref install_package targets.
+
+\subsubsection ALL_BUILD ALL_BUILD
+
+This target builds all binary targets.
+
+\subsubsection ZERO_CHECK ZERO_CHECK
+
+This target re-runs the CMake generate step.
+
+\subsubsection package \&lt;package\&gt;
+
+The main binary target of the package.
+
+\subsubsection package_tests \&lt;package\&gt;_tests
+
+The test executable that belongs to the package. This target is only created
+if the \c addPackage() function has the \c TEST_FILES argument set. The executable
+should run automated tests when executed.
+
+\subsubsection package_fixtures \&lt;package\&gt;_fixtures
+
+An additional library that can be used to share test utility code between packages.
+It is only created if the \c addPackage() function has the \c FIXTURE_FILES and \c PUBLIC_FIXTURE_HEADER arguments set.
+
+\subsubsection distributionPackages_package distributionPackages_\&lt;package\&gt;
+
+Creates all *distribution packages* of the package. A *distribution package* is a file that is
+distributed to users of the package. This can be a zip file that contains the binaries or sources or 
+an installer. The target is only created if the \c addPackage() function has the \c DISTRIBUTION_PACKAGES
+argument set.
+
+\subsubsection dynamicAnalysis_package dynamicAnalysis_\&lt;package\&gt;
+
+This target runs the test executable with OpenCppCoverage tool on Windows.
+This adds a test coverage report to the html output.
+On Linux it runs the test executable with the Valgrind tool. This can detect
+memory leaks and undefined behavior.
+
+The target can be disabled with the \c CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET config variable.
+
+\subsubsection install_package install_\&lt;package\&gt;
+
+This target copies the packages binary files and public headers to the
+\c ${CMAKE_INSTALL_PREFIX}/\<package\> directory.
+
+\todo Check if this can still be used like the Linux \c {make install} step without breaking the
+creation of the distribution packages.
+
+\subsubsection runAllTests_package runAllTests_\&lt;package\&gt;
+
+This target runs all the tests in the \ref package_tests executable.
+
+The target can be disabled with the \c CPF_ENABLE_RUN_TESTS_TARGET config variable.
+
+\subsubsection runFastTests_package runFastTests_\&lt;package\&gt;
+
+This target runs all the tests in the \ref package_tests executable that have either
+the word *FastFixture* or *FastTests* included in their name. It is the the users
+responsibility to make sure that the tests with those names are really fast tests.
+
+The purpose of the target is to provide a way of executing only tests that are run quickly
+an which are therefor useful when working in a tight test-driven development cycle.
+
+The target can be disabled with the \c CPF_ENABLE_RUN_TESTS_TARGET config variable.
+
+\subsubsection staticAnalysis_package staticAnalysis_\&lt;package\&gt;
+
+This target only exists when compiling on Linux with the clang compiler.
+It runs the \c clang-tidy tool on the packages source files.
+
+The target can be disabled with the \c CPF_ENABLE_STATIC_ANALYSIS_TARGET config variable.
+
+\subsubsection checkAbiCompatibility_binary_target checkAbiCompatibility_\&lt;binary_target\&gt;
+
+The target only exists when compiling on Linux with Gcc and with debug output. It runs the
+Abi-Compliance-Checker tool on abi-dump files that are contained in the packages distribution targets.
+The tool will add ABI/API compatibility reports to the html output directory.
+
+This target is somewhat fragile, because it requires the abi-dump files of the last internal and release
+version of the package. These must be provided by the web-server that is setup by the CPFMachines infrastructure.
+
+The target can be disabled with the \c CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS config variable.
+
+
+*/

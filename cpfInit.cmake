@@ -131,7 +131,7 @@ function( cpfAddPackages externalPackages globalFiles )
 
 
 	# documentation
-	cpfAddGlobalMonolithicDocumentationTarget( "${packages}" "${externalPackages}")
+	cpfAddGlobalMonolithicDocumentationTarget( "${packages}" "${externalPackages}" )
 	# staticAnalysis
 	cpfAddGlobalStaticAnalysisTarget("${packages}")
 	# runUnitTests

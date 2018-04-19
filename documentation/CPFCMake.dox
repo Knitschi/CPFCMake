@@ -1,6 +1,6 @@
 /**
 
-\defgroup CPFCMakeGroup CPFCMake
+\page CPFCMake
 
 \brief A cmake package that implements a standardized c++ CMake project with additional CI functionality.
 
@@ -14,5 +14,16 @@ a handfull of CMake functions. This removes implementation details from the `CMa
 - Package-versioning based on version tags provided by the Git repository.
 - Modularisation of the code base into individual CMake packages.
 - Use of cmake configuration files, which contain build configurations that outlive the deletion of the build directory and the `CMakeCache.txt`file.
+
+<HR>
+
+# Index #
+
+- \subpage CPFConfiguration
+- \subpage CPFCustomTargets
+- \subpage CPFCMakeTestTargets
+- \subpage CPFDistributionPackages
+- \subpage CPFDocumentationGeneration
+- \subpage CPFVersioning
 
 */

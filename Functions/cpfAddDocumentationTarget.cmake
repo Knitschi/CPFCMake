@@ -12,7 +12,7 @@ set(DIR_OF_DOCUMENTATION_TARGET_FILE ${CMAKE_CURRENT_LIST_DIR})
 # Adds a target that runs doxygen on the whole Source directory of the CPF project.
 #
 # This function should be removed when the problems with the cpfAddGlobalDocumentationTarget() generation get fixed.
-function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages)
+function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages )
 
 	if(NOT CPF_ENABLE_DOXYGEN_TARGET)
 		return()
@@ -79,6 +79,7 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages)
 		cpfGetGeneratedDocumentationDirectory(docsDir)
 		list(APPEND appendedLines "INPUT += \"${docsDir}\"")
 	endif()
+	# Exclude external packges
 	foreach( externalPackage ${externalPackages})
 		list(APPEND appendedLines "EXCLUDE += \"${CMAKE_SOURCE_DIR}/${externalPackage}\"")
 	endforeach()
@@ -99,9 +100,10 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages)
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
 	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/searchdata.xml)
 	cpfGetAllNonGeneratedPackageSources(sourceFiles "${packages}")
+	set( allDependedOnFiles ${tempDoxygenConfigFile} ${copiedDependencyGraphFile} ${reducedGraphFile} ${sourceFiles} ${fileDependencies} ${globalFiles} )
 	cpfAddStandardCustomCommand(
 		OUTPUT ${searchDataXmlFile}
-		DEPENDS ${tempDoxygenConfigFile} ${copiedDependencyGraphFile} ${reducedGraphFile} ${sourceFiles} ${linkFiles} ${fileDependencies}
+		DEPENDS ${allDependedOnFiles}
 		COMMANDS ${doxygenCommand}
 	)
 
@@ -128,26 +130,40 @@ endfunction()
 # read all sources from all binary targets of the given packages
 function( cpfGetAllNonGeneratedPackageSources sourceFiles packages )
 
-	foreach( package ${packages})
+	foreach( package ${packages} globalFiles) # we also get the global files from the globalFiles target
 		if(TARGET ${package}) # non-cpf packages may not have targets set to them
 			get_property(binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
-			foreach( target ${binaryTargets} globalFiles)
-				get_property(files TARGET ${target} PROPERTY SOURCES)
-				get_property(dir TARGET ${target} PROPERTY SOURCE_DIR)
-				foreach(file ${files})
-					cpfGetPathRoot(root ${file})
-					# Some source files have absolute paths and most not.
-					# We ignore files that have absolute pathes for which we assume that they are the ones in the Generated directory.
-					# Only the files in the Sources directory are used by doxygen.
-					if(${root} STREQUAL NOTFOUND) 
-						list(APPEND allFiles "${dir}/${file}")
-					endif()
-				endforeach()
+			# explicitly include the package itself, because it may not be a binary target.
+			set(targets ${binaryTargets} ${package})
+			list(REMOVE_DUPLICATES targets)
+			foreach( target ${targets} )
+				getRelativeSourceFilesPaths( files ${target})
+				list(APPEND allFiles ${files})
 			endforeach()
 		endif()
 	endforeach()
-	
 	set(${sourceFiles} ${allFiles} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns a list with all files from target property SOURCES that do not have an absolute
+# path.
+function( getRelativeSourceFilesPaths filePathsOut target)
+
+	set(allFiles)
+	get_property(files TARGET ${target} PROPERTY SOURCES)
+	get_property(dir TARGET ${target} PROPERTY SOURCE_DIR)
+	foreach(file ${files})
+		# Some source files have absolute paths and most not.
+		# We ignore files that have absolute pathes for which we assume that they are the ones in the Generated directory.
+		# Only the files in the Sources directory are used by doxygen.
+		cpfIsAbsolutePath( isAbsolute ${file})
+		if(NOT isAbsolute) 
+			list(APPEND relFiles "${dir}/${file}")
+		endif()
+	endforeach()
+	set( ${filePathsOut} ${relFiles} PARENT_SCOPE)
 
 endfunction()
 
