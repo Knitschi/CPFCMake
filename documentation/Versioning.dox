@@ -3,8 +3,6 @@
 
 This page is about version numbers and automatic versioning in a CPF project.
 
-\section VersionDetermination Determination of package versions
-
-
+\todo release vs. internal version, how are versions read from git, manual tagging vs. buildjob tagging.
 
 */
