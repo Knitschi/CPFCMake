@@ -72,7 +72,7 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages )
 	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}\"")
 	list(APPEND appendedLines "DOTFILE_DIRS = \"${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
 	list(APPEND appendedLines "LAYOUT_FILE = \"${doxygenLayoutFile}\"")
-	list(APPEND appendedLines "HTML_STYLESHEET = \"${doxygenStylesheetFile}\"")
+	list(APPEND appendedLines "HTML_EXTRA_STYLESHEET = \"${doxygenStylesheetFile}\"")
 	# input files
 	list(APPEND appendedLines "INPUT = \"${CMAKE_SOURCE_DIR}\"")
 	if(hasGeneratedDocumentation)
