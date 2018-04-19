@@ -91,9 +91,11 @@ set( TEST_FILES
 )
 
 set( DOCUMENTATION_FILES 
+	documentation/Configuration.dox
 	documentation/CPFCMake.dox
-	documentation/CPFConfiguration.dox
+	documentation/CustomTargets.dox
 	documentation/DistributionPackages.dox
+	documentation/DocumentationTargets.dox
 	documentation/TestTargets.dox
 	documentation/Versioning.dox
 )
