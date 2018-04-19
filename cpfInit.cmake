@@ -115,9 +115,10 @@ function( cpfAddPackages externalPackages globalFiles )
 	)
 	
 	if(CPF_ENABLE_DOXYGEN_TARGET)
-		list(APPEND SOLUTION_FILES 
-			DoxygenConfig.txt 
-			DoxygenLayout.xml
+		list(APPEND SOLUTION_FILES
+			${CPF_DOCUMENTATION_DIR}/DoxygenConfig.txt
+			${CPF_DOCUMENTATION_DIR}/DoxygenLayout.xml
+			${CPF_DOCUMENTATION_DIR}/DoxygenStylesheet.css
 		)
 	endif()
 
