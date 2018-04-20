@@ -5,7 +5,7 @@
 # Set the name of the graph
 set(GRAPHVIZ_GRAPH_NAME "CPFTargetDependencyGraph")
 # Increase the font size of the target names.
-set(GRAPHVIZ_GRAPH_HEADER "node [\n fontsize = \"14\", fontname=\"helvetica\"\n];")
+set(GRAPHVIZ_GRAPH_HEADER "node [\n fontsize = \"10\", fontname=\"helvetica\"\n];")
 
 
 # set(GRAPHVIZ_EXECUTABLES TRUE)
