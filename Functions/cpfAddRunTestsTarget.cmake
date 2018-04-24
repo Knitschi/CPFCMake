@@ -96,8 +96,27 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Adds a run-tests target that runs a pyhton script
-function( cpfAddRunPython3TestTarget package testScript sourceFiles )
+# dependedOnPackages -> This argument is used to outdate the test target if the sources of some
+# other package/target change. This is usefull if the tests internally use functionality from
+# an external package.
+function( cpfAddRunPython3TestTarget package testScript args sourceFiles dependedOnPackages)
 	if(TOOL_PYTHON3)
+
+		# Get the sources from the depended on packages.
+		set(allSourceFiles)
+		foreach( package ${dependedOnPackages})
+			get_property(packageSourceDir TARGET ${package} PROPERTY SOURCE_DIR )
+			get_property(externalSources TARGET ${package} PROPERTY SOURCES )
+			# sources can have relative or absolute pathes
+			foreach( file ${externalSources})
+				cpfIsAbsolutePath( isAbsPath ${file})
+				if(isAbsPath)
+					list(APPEND sourceFiles ${file})
+				else()
+					list(APPEND sourceFiles "${packageSourceDir}/${file}")
+				endif()
+			endforeach()
+		endforeach()
 
 		# derive the python module path from the script path
 		file( RELATIVE_PATH pathToTestScript ${CPF_ROOT_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/${testScript}")
@@ -105,7 +124,7 @@ function( cpfAddRunPython3TestTarget package testScript sourceFiles )
 		# remove the .py ending
 		cpfStringRemoveRight( pythonModulePath ${pythonModulePath} 3)
 
-		set( runTestsCommand "\"${TOOL_PYTHON3}\" -m ${pythonModulePath}")
+		set( runTestsCommand "\"${TOOL_PYTHON3}\" -u -m ${pythonModulePath} ${args}")
 		cpfAddCustomTestTarget(${package} ${runTestsCommand} "${sourceFiles}" )
 
 	endif()
@@ -138,9 +157,9 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Adds a run-tests target that runs a cmake script
-function( cpfAddRunCMakeTestScriptTarget package testScript sourceFiles )
+function( cpfAddRunCMakeTestScriptTarget package testScript sourceFiles)
 	set( runTestsCommand "cmake -P \"${CMAKE_CURRENT_SOURCE_DIR}/${testScript}\"")
-	cpfAddCustomTestTarget(${package} ${runTestsCommand} "${sourceFiles}" )
+	cpfAddCustomTestTarget(${package} ${runTestsCommand} "${sourceFiles}")
 endfunction()
 
 

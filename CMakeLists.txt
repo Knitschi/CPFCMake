@@ -116,4 +116,4 @@ set(allCMakeFiles ${PUBLIC_FILES} ${VARIABLES_FILES} ${FUNCTION_FILES} ${TEST_FI
 cpfAddFilePackage(${PACKAGE_NAME} "${allCMakeFiles}")
 
 # Add a test target
-cpfAddRunCMakeTestScriptTarget( ${PACKAGE_NAME} "Tests/run_tests.cmake" "${TEST_FILES}")
+cpfAddRunCMakeTestScriptTarget( ${PACKAGE_NAME} "Tests/run_tests.cmake" "${TEST_FILES}" )
