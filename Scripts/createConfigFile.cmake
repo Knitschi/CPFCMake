@@ -21,10 +21,10 @@ cpfAssertScriptArgumentDefined(CPF_CONFIG)
 cpfAssertScriptArgumentDefined(PARENT_CONFIG)
 
 # Find the location of the inherited configuration
+cpfNormalizeAbsPath( CPF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../..")
 cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}")
 
 # CREATE CONFIG-FILE CONTENT 
-cpfNormalizeAbsPath( configFilename "${CMAKE_CURRENT_LIST_DIR}/../../../Configuration/${CPF_CONFIG}${CPF_CONFIG_FILE_ENDING}")
 cpfNormalizeAbsPath( pathToVariables "${CMAKE_CURRENT_LIST_DIR}/../Variables")
 
 # Add standard lines.
@@ -39,9 +39,9 @@ list(APPEND fileContent "include( \"${fullInheritedConfigFile}\" )" )
 list(APPEND fileContent "set( CPF_PARENT_CONFIG \"${PARENT_CONFIG}\" CACHE STRING \"The CI-configuration from which this config derives.\" FORCE)" )
 list(APPEND fileContent "" )
 list(APPEND fileContent "# internal variables" )
-list(APPEND fileContent "set( CPF_CONFIG_FILE \"${configFilename}\" CACHE FILEPATH \"The path to the used .config.cmake file.\" FORCE)" )
+list(APPEND fileContent "set( CPF_ROOT_DIR \"${rootDir}\" CACHE FILEPATH \"The path to the root directory of this CPF CI-project.\" FORCE)" )
 list(APPEND fileContent "set( CPF_CONFIG \"${CPF_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE)" )
-list(APPEND fileContent "set( CMAKE_INSTALL_PREFIX \"\${CPF_ROOT_DIR}/\${CPF_GENERATED_DIR}/\${CPF_CONFIG}/\${CPF_INSTALL_STAGE}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE)" )
+list(APPEND fileContent "set( CMAKE_INSTALL_PREFIX \"\${CPF_ROOT_DIR}/\${CPF_GENERATED_DIR}/\${CPF_CONFIG}/\${CPF_INSTALL_STAGE}\" CACHE STRING \"The directory to which files are copied by the install target.\" FORCE)" )
 list(APPEND fileContent "" )
 
 # Add lines with commented inherited definitions.
@@ -80,6 +80,7 @@ endforeach()
 
 
 # Write the lines in fileContent to the config file.
+cpfGetFullConfigFilePath(configFilename)
 file(REMOVE "${configFilename}")
 
 set(commandList)

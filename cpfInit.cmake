@@ -106,10 +106,11 @@ function( cpfAddPackages externalPackages globalFiles )
 
 	# GlobalFiles
 	# A target that holds some project wide files
+	cpfGetFullConfigFilePath(configFile)
 	set( SOLUTION_FILES 
 		${globalFiles}
 		CMakeLists.txt
-		"${CPF_CONFIG_FILE}"
+		"${configFile}"
 		"${CMAKE_BINARY_DIR}/CMakeCache.txt"
 		"${CPF_OWNED_PACKAGES_FILE}"
 	)

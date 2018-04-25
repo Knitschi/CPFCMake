@@ -4,7 +4,6 @@
 
 ###### 
 # DIRECTORIES
-set(CPF_ROOT_DIR "${CMAKE_SOURCE_DIR}/..")
 set(CPF_GENERATED_DIR Generated)				# The directory that holds all files that are generated.
 set(CPF_SOURCE_DIR Sources)						# The directory that should hold all non generated files that are checked into the repository.
 set(CPF_CONFIG_DIR Configuration)				# The directory that holds files that define cmake variables that are specific to the local project instance, like local paths to dependencies etc.
@@ -55,6 +54,11 @@ endfunction()
 # This function defines the name of a packages c++ header version file. 
 function( cpfGetPackageVersionCppHeaderFileName filenameOut package )
 	set( ${filenameOut} cpfPackageVersion_${package}.h PARENT_SCOPE)
+endfunction()
+
+# This function defines the full path to the currently used config file.
+function( cpfGetFullConfigFilePath filenameOut )
+	set( ${filenameOut} "${CPF_ROOT_DIR}/${CPF_CONFIG_DIR}/${CPF_CONFIG}${CPF_CONFIG_FILE_ENDING}" PARENT_SCOPE)
 endfunction()
 
 # This function defines the relative dir from the html directory to the package release files of the last build
