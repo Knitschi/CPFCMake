@@ -359,12 +359,15 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # This function adds a target that does nothing for it self, but only makes sure that
-# the depended on targets are build.
+# the depended on targets are build. If the list of dependedOnTargets is empty, no
+# bundle target is added.
 function( cpfAddBundleTarget targetName dependedOnTargets )
-	add_custom_target(
-		${targetName}
-		DEPENDS ${dependedOnTargets}
-	)
+	if(dependedOnTargets)
+		add_custom_target(
+			${targetName}
+			DEPENDS ${dependedOnTargets}
+		)
+	endif()
 endfunction()
 
 
