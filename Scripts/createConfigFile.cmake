@@ -39,28 +39,11 @@ list(APPEND fileContent "include( \"${fullInheritedConfigFile}\" )" )
 list(APPEND fileContent "set( CPF_PARENT_CONFIG \"${PARENT_CONFIG}\" CACHE STRING \"The CI-configuration from which this config derives.\" FORCE)" )
 list(APPEND fileContent "" )
 list(APPEND fileContent "# internal variables" )
-list(APPEND fileContent "set( CPF_ROOT_DIR \"${rootDir}\" CACHE FILEPATH \"The path to the root directory of this CPF CI-project.\" FORCE)" )
+list(APPEND fileContent "set( CPF_ROOT_DIR \"${CPF_ROOT_DIR}\" CACHE FILEPATH \"The path to the root directory of this CPF CI-project.\" FORCE)" )
 list(APPEND fileContent "set( CPF_CONFIG \"${CPF_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE)" )
 list(APPEND fileContent "set( CMAKE_INSTALL_PREFIX \"\${CPF_ROOT_DIR}/\${CPF_GENERATED_DIR}/\${CPF_CONFIG}/\${CPF_INSTALL_STAGE}\" CACHE STRING \"The directory to which files are copied by the install target.\" FORCE)" )
 list(APPEND fileContent "" )
 
-# Add lines with commented inherited definitions.
-cpfGetCacheVariablesDefinedInFile( inheritedCacheVariables inheritedCacheValues inheritedCacheTypes inheritedCacheDescriptions "${fullInheritedConfigFile}")
-
-list(APPEND fileContent "# Inherited cache variables." )
-set(index 0)
-foreach( variable ${inheritedCacheVariables} )
-
-	list(GET inheritedCacheValues ${index} value )
-	list(GET inheritedCacheTypes ${index} type )
-	list(GET inheritedCacheDescriptions ${index} description )
-
-	list(APPEND fileContent "# set( ${variable} \"${value}\" CACHE ${type} \"${description}\" FORCE )" )
-	cpfIncrement(index)
-
-endforeach()
-list(APPEND fileContent "" )
-list(APPEND fileContent "" )
 
 # Add definitions for the variables that were set by using the "-D"-options.
 list(APPEND fileContent "# Overridden or new cache variables." )
@@ -77,6 +60,21 @@ foreach( variable ${dVariables})
 		list(APPEND fileContent "set( ${variable} \"${${variable}}\" CACHE STRING \"\" FORCE )" )
 	endif()
 endforeach()
+list(APPEND fileContent "" )
+
+# Add lines with commented inherited definitions.
+cpfGetCacheVariablesDefinedInFile( inheritedCacheVariables inheritedCacheValues inheritedCacheTypes inheritedCacheDescriptions "${fullInheritedConfigFile}")
+list(APPEND fileContent "# Inherited cache variables." )
+set(index 0)
+foreach( variable ${inheritedCacheVariables} )
+	list(GET inheritedCacheValues ${index} value )
+	list(GET inheritedCacheTypes ${index} type )
+	list(GET inheritedCacheDescriptions ${index} description )
+
+	list(APPEND fileContent "# set( ${variable} \"${value}\" CACHE ${type} \"${description}\" FORCE )" )
+	cpfIncrement(index)
+endforeach()
+list(APPEND fileContent "" )
 
 
 # Write the lines in fileContent to the config file.
