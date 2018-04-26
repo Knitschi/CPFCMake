@@ -100,7 +100,6 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages )
 	# Add the command for running doxygen
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
 	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/searchdata.xml)
-	devMessage("${searchDataXmlFile}")
 	cpfGetAllNonGeneratedPackageSources(sourceFiles "${packages}")
 	set( allDependedOnFiles ${tempDoxygenConfigFile} ${doxygenLayoutFile} ${doxygenStylesheetFile} ${copiedDependencyGraphFile} ${reducedGraphFile} ${sourceFiles} ${fileDependencies} ${globalFiles} )
 	cpfAddStandardCustomCommand(
