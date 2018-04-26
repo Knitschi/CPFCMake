@@ -9,13 +9,13 @@ list( APPEND CMAKE_MODULE_PATH
 	${CMAKE_CURRENT_LIST_DIR}/../Variables
 )
 
+include(cpfConstants)
+cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
+
 include(cpfMiscUtilities)
 include(cpfProjectUtilities)
 include(cpfLocations)
-include(cpfConstants)
 include(cpfPathUtilities)
-
-cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 
 cpfAssertScriptArgumentDefined(CPF_CONFIG)
 cpfAssertScriptArgumentDefined(PARENT_CONFIG)

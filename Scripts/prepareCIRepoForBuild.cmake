@@ -15,12 +15,12 @@
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../Variables)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../Functions)
 
-include(cpfMiscUtilities)
 include(cpfConstants)
+cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
+
+include(cpfMiscUtilities)
 include(cpfGitUtilities)
 include(cpfProjectUtilities)
-
-cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 
 cpfAssertScriptArgumentDefined(ROOT_DIR)
 cpfAssertScriptArgumentDefined(GIT_REF)
