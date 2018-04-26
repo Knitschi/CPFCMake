@@ -43,7 +43,7 @@ function( test_cpfIsSubPath )
     cpfAssertTrue(isSubPath)
 
     # works if no subpath
-    cpfIsSubPath( isSubPath ${longPath} ${shortPath})
+    cpfIsSubPath( isSubPath ${noSubPath} ${shortPath})
     cpfAssertFalse(isSubPath)
 
 endfunction()
