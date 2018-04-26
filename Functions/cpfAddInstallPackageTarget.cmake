@@ -1,5 +1,7 @@
 include_guard(GLOBAL)
 
+include(CMakePackageConfigHelpers)
+
 include(cpfCustomTargetUtilities)
 include(cpfLocations)
 include(cpfProjectUtilities)

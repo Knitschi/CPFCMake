@@ -1,9 +1,8 @@
 # This file contains the functionality for adding a cpf package to a project.
 
-include_guard(GLOBAL)
+include(GenerateExportHeader) # this must be put before the include_guard() or it wont work
 
-include(GenerateExportHeader)
-include(CMakePackageConfigHelpers)
+include_guard(GLOBAL)
 
 include(cpfLocations)
 include(cpfConstants)
