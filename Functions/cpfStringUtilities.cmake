@@ -1,5 +1,7 @@
 # This file contains functions that operate on strings
 
+include_guard(GLOBAL)
+
 #----------------------------------------------------------------------------------------
 # Splits the given string into substrings at the location of the separator char
 # The separator will not be contained in the returned substrings

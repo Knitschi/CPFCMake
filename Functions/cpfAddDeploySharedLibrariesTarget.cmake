@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 include(cpfCustomTargetUtilities)
 include(cpfProjectUtilities)
 

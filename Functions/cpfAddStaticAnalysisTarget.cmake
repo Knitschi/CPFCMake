@@ -1,4 +1,4 @@
-
+include_guard(GLOBAL)
 
 include(cpfAddRunUicTarget)
 include(cpfLocations)

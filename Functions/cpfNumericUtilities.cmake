@@ -1,5 +1,7 @@
 # This file contains functions that execute numeric operations
 
+include_guard(GLOBAL)
+
 #----------------------------------------------------------------------------------------
 # returns the maximum of both numbers
 function( cpfMax VAR first second)

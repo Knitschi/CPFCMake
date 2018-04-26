@@ -1,5 +1,6 @@
 # This file contains functions that work on pathes in the filesystem
 
+include_guard(GLOBAL)
 
 #----------------------------------------------------------------------------------------
 # Writes the name of the immediate parent directory to parantDirOut

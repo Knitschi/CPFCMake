@@ -1,11 +1,12 @@
+# This file contains functions that contain project and target related helper functionality.
+
+include_guard(GLOBAL)
 
 include(cpfLocations)
 include(cpfConstants)
 include(cpfListUtilities)
 include(cpfStringUtilities)
 include(cpfPathUtilities)
-
-set(DIR_OF_PROJECT_UTILITIES ${CMAKE_CURRENT_LIST_DIR})
 
 cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 
@@ -887,9 +888,9 @@ function( cpfFindConfigFile absFilePathOut configName )
 	else()
 
 		set( searchLocations
-			"${DIR_OF_PROJECT_UTILITIES}/../../../${CPF_CONFIG_DIR}"				# developer specific configs
-			"${DIR_OF_PROJECT_UTILITIES}/../../${CPF_PROJECT_CONFIGURATIONS_DIR}"	# project default configs
-			"${DIR_OF_PROJECT_UTILITIES}/../${CPF_DEFAULT_CONFIGS_DIR}"				# CPF provided standard configs
+			"${CPF_ROOT_DIR}/${CPF_CONFIG_DIR}"											# developer specific configs
+			"${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/${CPF_PROJECT_CONFIGURATIONS_DIR}"		# project default configs
+			"${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/${CPF_DEFAULT_CONFIGS_DIR}"		# CPF provided standard configs
 		)
 
 		foreach( dir ${searchLocations})
@@ -1033,7 +1034,7 @@ function( cpfGetOwnedPackages ownedPackagesOut rootDir )
 	# create an owned packages file if none exists
 	if(NOT EXISTS ${fullOwnedPackagesFile} )
 		# we use the manual existance check to prevent overwriting the file when the template changes.
-		configure_file("${DIR_OF_PROJECT_UTILITIES}/../Templates/${CPF_OWNED_PACKAGES_FILE}.in" ${fullOwnedPackagesFile} COPYONLY )
+		configure_file("${CPF_ABS_TEMPLATE_DIR}/${CPF_OWNED_PACKAGES_FILE}.in" ${fullOwnedPackagesFile} COPYONLY )
 	endif()
 	cpfGetCacheVariablesDefinedInFile( variableNames variableValues variableTypes variableDescriptions ${fullOwnedPackagesFile})
 

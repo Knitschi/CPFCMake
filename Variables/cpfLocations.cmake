@@ -1,6 +1,7 @@
 
 # This file defines some globally available directories and file pathes.
 
+include_guard(GLOBAL)
 
 ###### 
 # DIRECTORIES
@@ -103,7 +104,9 @@ set( CPF_CURRENT_TO_LAST_RELEASE_DIR LastReleaseToCurrent )
 
 
 # absolute dirs
-set( CPF_PROJECT_HTML_ABS_DIR ${CMAKE_BINARY_DIR}/html)																		# The directory that contains the html page of the project
+set( CPF_ABS_TEMPLATE_DIR "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/Templates")							# The directory that holds the file templates of the CPFCMake package.
+set( CPF_ABS_SCRIPT_DIR "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/Scripts")								# The directory that holds the scripts of the CPFCMake package.
+set( CPF_PROJECT_HTML_ABS_DIR ${CMAKE_BINARY_DIR}/html)														# The directory that contains the html page of the project
 set( CPF_DOXYGEN_OUTPUT_ABS_DIR ${CPF_PROJECT_HTML_ABS_DIR}/${CPF_DOXYGEN_DIR})								# The part of the project page that contains the doxygen output.
 set( CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR  ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/${CPF_DOXYGEN_EXTERNAL_DIR} )	# The directory within the doxygen documentation where the dependency graph files are put.
-set( CPF_PREVIOUS_PACKAGES_ABS_DIR ${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/PreviousPackages )						# The directory where the abi-compliance-checker targets download the previous packages to.
+set( CPF_PREVIOUS_PACKAGES_ABS_DIR ${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/PreviousPackages )				# The directory where the abi-compliance-checker targets download the previous packages to.

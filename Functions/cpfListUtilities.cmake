@@ -1,4 +1,5 @@
 # This file contains functions that operate on lists
+include_guard(GLOBAL)
 
 include(cpfNumericUtilities)
 

@@ -1,5 +1,7 @@
 # This file contains small helper functions that do not fit in any other category
 
+include_guard(GLOBAL)
+
 #----------------------------------------------------------------------------------------
 # call the correct version of separate_arguments depending on the current platform.
 macro ( cpfSeparateArgumentsForPlatform listArg command)

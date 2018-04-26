@@ -1,10 +1,11 @@
+include_guard(GLOBAL)
 
 include(cpfCustomTargetUtilities)
 include(cpfLocations)
 include(cpfAddCompatibilityCheckTarget)
 #include(CPack) # adding this creates the global package target
 
-set(DIR_OF_THIS_FILE ${CMAKE_CURRENT_LIST_DIR})
+
 
 #----------------------------------------------------------------------------------------
 # Adds a global target that makes sure that all the per package createArchivePackage targets are build.

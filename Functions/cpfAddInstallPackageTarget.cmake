@@ -1,9 +1,10 @@
+include_guard(GLOBAL)
 
 include(cpfCustomTargetUtilities)
 include(cpfLocations)
 include(cpfProjectUtilities)
 
-set(DIR_OF_THIS_FILE ${CMAKE_CURRENT_LIST_DIR})
+
 
 #----------------------------------------------------------------------------------------
 # This function adds per package install targets and packaging targets.

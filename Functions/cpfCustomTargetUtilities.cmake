@@ -1,7 +1,7 @@
+include_guard(GLOBAL)
 
 include(cpfTestUtilities)
 
-set(DIR_OF_TARGET_UTILITIES_FILE ${CMAKE_CURRENT_LIST_DIR})
 
 #----------------------------------------------------------------------------------------
 # This function binds some commonly used arguments for the add_custom_command function
@@ -171,7 +171,7 @@ function( cpfAddConfigurationDependendCommand )
 		OUTPUT ${ARG_OUTPUT}
 		DEPENDS "${argumentFile}" ${ARG_DEPENDS}
 		COMMENT ${ARG_COMMENT}
-		COMMANDS "cmake -DCMAKE_HOST_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME} -DCURRENT_CONFIG=$<CONFIG> -DSTATIC_CONFIG=${ARG_CONFIG} -DARGUMENT_FILE=${relPathArgFile} -DPRINT_SKIPPED_INSTEAD_OF_NON_CONFIG_OUTPUT=TRUE -P \"${DIR_OF_TARGET_UTILITIES_FILE}/../Scripts/executeCommandForConfig.cmake\""
+		COMMANDS "cmake -DCMAKE_HOST_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME} -DCURRENT_CONFIG=$<CONFIG> -DSTATIC_CONFIG=${ARG_CONFIG} -DARGUMENT_FILE=${relPathArgFile} -DPRINT_SKIPPED_INSTEAD_OF_NON_CONFIG_OUTPUT=TRUE -P \"${CPF_ABS_SCRIPT_DIR}/executeCommandForConfig.cmake\""
 	)
 
 endfunction()
@@ -339,7 +339,7 @@ function( cpfAddClearDirExceptCommand stampFileOut directory notDeletedEntries t
 		OUTPUT ${stampFile}
 		DEPENDS ${argumentFile} # ${notDeletedEntriesFull}
 		COMMENT "Clear directory \"${directory}\""
-		COMMANDS "cmake -DARGUMENT_FILE=\"${argumentFile}\" -P \"${DIR_OF_TARGET_UTILITIES_FILE}/../Scripts/clearDirExcept.cmake\"" "cmake -E touch \"${stampFile}\""
+		COMMANDS "cmake -DARGUMENT_FILE=\"${argumentFile}\" -P \"${CPF_ABS_SCRIPT_DIR}/clearDirExcept.cmake\"" "cmake -E touch \"${stampFile}\""
 	)
 
 	set(${stampFileOut} ${stampFile} PARENT_SCOPE)

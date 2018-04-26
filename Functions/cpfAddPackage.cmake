@@ -1,8 +1,12 @@
+# This file contains the functionality for adding a cpf package to a project.
+
+include_guard(GLOBAL)
+
+include(GenerateExportHeader)
+include(CMakePackageConfigHelpers)
 
 include(cpfLocations)
 include(cpfConstants)
-include(GenerateExportHeader)
-include(CMakePackageConfigHelpers)
 include(cpfProjectUtilities)
 include(cpfGitUtilities)
 include(cpfPathUtilities)
@@ -15,8 +19,6 @@ include(cpfAddInstallPackageTarget)
 include(cpfAddDistributionPackageTarget)
 include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDocumentationTarget)
-
-set(DIR_OF_ADD_PACKAGE_FILE ${CMAKE_CURRENT_LIST_DIR})
 
 
 #-------------------------------------------------------------------------
@@ -69,7 +71,7 @@ function( cpfConfigurePackageVersionFile package )
 	
 		set(PACKAGE_NAME ${package})
 		cpfGetCurrentVersionFromGitRepository( CPF_PACKAGE_VERSION "${CMAKE_CURRENT_SOURCE_DIR}")
-		cpfConfigureFileWithVariables( "${DIR_OF_ADD_PACKAGE_FILE}/Templates/packageVersion.cmake.in" "${absPathCmakeVersionFile}" PACKAGE_NAME CPF_PACKAGE_VERSION )
+		cpfConfigureFileWithVariables( "${CPF_ABS_TEMPLATE_DIR}/packageVersion.cmake.in" "${absPathCmakeVersionFile}" PACKAGE_NAME CPF_PACKAGE_VERSION )
 	
 	else()
 		if(NOT EXISTS "${absPathCmakeVersionFile}" )
@@ -89,7 +91,7 @@ function( cpfConfigurePackageVersionHeader package version packageNamespace)
 	cpfGetPackageVersionCppHeaderFileName( versionHeaderFile ${package})
 	set( absPathVersionHeader "${CMAKE_CURRENT_BINARY_DIR}/${versionHeaderFile}")
 
-	cpfConfigureFileWithVariables( "${DIR_OF_ADD_PACKAGE_FILE}/Templates/packageVersion.h.in" "${absPathVersionHeader}" PACKAGE_NAME CPF_PACKAGE_VERSION PACKAGE_NAMESPACE ) 
+	cpfConfigureFileWithVariables( "${CPF_ABS_TEMPLATE_DIR}/packageVersion.h.in" "${absPathVersionHeader}" PACKAGE_NAME CPF_PACKAGE_VERSION PACKAGE_NAMESPACE ) 
 
 endfunction()
 

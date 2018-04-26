@@ -1,6 +1,8 @@
 
 # This file holds cmake constants of the package.
 
+include_guard(GLOBAL)
+
 set( CPF_MINIMUM_CMAKE_VERSION 3.10.0)
 
 # Get definitions of test target appendices for in code macros (todo move this somewhere in the lower parts)

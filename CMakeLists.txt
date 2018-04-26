@@ -8,12 +8,6 @@ cpfInitPackageProject(
 	CPFCM
 )
 
-# The files that contain functions that are called by the users of the CMakeProjectFramework
-set( PUBLIC_FILES 
-    cpfAddPackage.cmake
-    cpfInit.cmake
-)
-
 # Files that define variables.
 set( VARIABLES_FILES
 	Variables/cpfConstants.cmake
@@ -41,6 +35,8 @@ set( FUNCTION_FILES
 	Functions/cpfNumericUtilities.cmake
 	Functions/cpfPathUtilities.cmake
 	Functions/cpfStringUtilities.cmake
+	Functions/cpfAddPackage.cmake
+	Functions/cpfInit.cmake
 )
 
 # Files that provide default configurations of cmake variables.
@@ -111,7 +107,7 @@ source_group( Tests FILES ${TEST_FILES} )
 source_group( documentation FILES ${DOCUMENTATION_FILES} )
 
 # Finally add the target.
-set(allCMakeFiles ${PUBLIC_FILES} ${VARIABLES_FILES} ${FUNCTION_FILES} ${TEST_FILES} ${CONFIGURATION_FILES} ${SCRIPT_FILES} ${OTHER_FILES} ${TEMPLATE_FILES} ${TEST_FILES} ${DOCUMENTATION_FILES})
+set(allCMakeFiles ${VARIABLES_FILES} ${FUNCTION_FILES} ${TEST_FILES} ${CONFIGURATION_FILES} ${SCRIPT_FILES} ${OTHER_FILES} ${TEMPLATE_FILES} ${TEST_FILES} ${DOCUMENTATION_FILES})
 
 cpfAddFilePackage(${PACKAGE_NAME} "${allCMakeFiles}")
 

@@ -1,16 +1,13 @@
 # This file cpfContains the main functions of the CMakeProjectFramework cmake module.
+include_guard(GLOBAL)
 
-set(DIR_OF_INIT_FILE ${CMAKE_CURRENT_LIST_DIR})
-
-list( APPEND 
-	CMAKE_MODULE_PATH 
-	"${DIR_OF_INIT_FILE}/Functions"
-	"${DIR_OF_INIT_FILE}/Variables"
-	"${DIR_OF_INIT_FILE}/Tests"
-	"${DIR_OF_INIT_FILE}"
+set( cpfCmakeDir "${CPF_ROOT_DIR}/Sources/CPFCMake" )
+list( APPEND CMAKE_MODULE_PATH 
+	"${cpfCmakeDir}/Functions"
+	"${cpfCmakeDir}/Variables"
+	"${cpfCmakeDir}/Tests"
 )
 
-include(cpfLocations)
 include(cpfProperties)
 include(cpfProjectUtilities)
 	
@@ -33,10 +30,10 @@ cmake_minimum_required (VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 function( cpfInit )
 
 	# generate a .gitignore file that contains the generated files of a CPFCMake project
-	configure_file( "${DIR_OF_INIT_FILE}/Templates/.gitignore.in" "${CPF_ROOT_DIR}/.gitignore" COPYONLY )
+	configure_file( "${CPF_ABS_TEMPLATE_DIR}/.gitignore.in" "${CPF_ROOT_DIR}/.gitignore" COPYONLY )
 
 	# generate the file with the graphviz options
-	configure_file( "${DIR_OF_INIT_FILE}/Templates/${CPF_GRAPHVIZ_OPTIONS_FILE}.in" "${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}" COPYONLY )
+	configure_file( "${CPF_ABS_TEMPLATE_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}.in" "${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}" COPYONLY )
 
 	cpfDebugMessage("Using toolchain file: \"${CMAKE_TOOLCHAIN_FILE}\"")
 	cpfPrintToolchainVariables()

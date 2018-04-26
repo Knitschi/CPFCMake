@@ -1,12 +1,10 @@
- 
+include_guard(GLOBAL)
+
 include(cpfCustomTargetUtilities)
 include(cpfProjectUtilities)
 include(cpfGitUtilities)
 include(cpfLocations)
 
-
-set(DIR_OF_ADD_COMPATIBILITY_FILE ${CMAKE_CURRENT_LIST_DIR})
- 
  
 # This file cpfContains functions that the targets that are used to implement the ABI and API compatibility checks.
 
@@ -561,7 +559,7 @@ to ensure that abi dump files become available for following builds." )
  -DNEW_DUMP_FILE=\"${abiDumpFile}\"\
  -DREPORT_PATH=\"${reportFile}\"\
  -DENFORCE_COMPATIBILITY=${enforceOption}\
- -P \"${DIR_OF_ADD_COMPATIBILITY_FILE}/../Scripts/runAbiComplianceChecker.cmake\"")
+ -P \"${CPF_ABS_SCRIPT_DIR}/runAbiComplianceChecker.cmake\"")
 
 	cpfAddStandardCustomCommand(
 		DEPENDS ${abiDumpFile} ${oldVersionDumpFile}

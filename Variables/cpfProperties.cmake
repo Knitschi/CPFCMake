@@ -1,4 +1,6 @@
 
+include_guard(GLOBAL)
+
 include(cpfMiscUtilities)
 include(cpfConstants)
 

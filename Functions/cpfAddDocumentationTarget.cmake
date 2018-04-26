@@ -1,3 +1,4 @@
+include_guard(GLOBAL)
 
 include(cpfLocations)
 include(cpfProjectUtilities)
@@ -6,7 +7,7 @@ include(cpfCustomTargetUtilities)
 include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDynamicAnalysisTarget)
 
-set(DIR_OF_DOCUMENTATION_TARGET_FILE ${CMAKE_CURRENT_LIST_DIR})
+
 
 #----------------------------------------------------------------------------------------
 # Adds a target that runs doxygen on the whole Source directory of the CPF project.
@@ -31,11 +32,11 @@ function( cpfAddGlobalMonolithicDocumentationTarget packages externalPackages )
 
 	# Generate some doxygen config files on the first run.
 	# DoxygenConfig.txt
-	configureFileIfNotExists( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenConfig.txt.in" ${doxygenConfigFile})
+	configureFileIfNotExists( "${CPF_ABS_TEMPLATE_DIR}/DoxygenConfig.txt.in" ${doxygenConfigFile})
 	# DoxygenLayout.xml
-	configureFileIfNotExists("${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenLayout.xml.in" ${doxygenLayoutFile})
+	configureFileIfNotExists("${CPF_ABS_TEMPLATE_DIR}/DoxygenLayout.xml.in" ${doxygenLayoutFile})
 	# DoxygenStylesheet.css
-	configureFileIfNotExists( "${DIR_OF_DOCUMENTATION_TARGET_FILE}/../Templates/DoxygenStylesheet.css.in" ${doxygenStylesheetFile})
+	configureFileIfNotExists( "${CPF_ABS_TEMPLATE_DIR}/DoxygenStylesheet.css.in" ${doxygenStylesheetFile})
 
 	# Get dependencies
 	set(fileDependencies)

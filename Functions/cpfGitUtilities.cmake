@@ -1,5 +1,6 @@
 # This file contains functions that can be used to interact with a git repository
 
+include_guard(GLOBAL)
 
 
 #----------------------------------------------------------------------------------------
