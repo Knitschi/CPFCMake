@@ -20,6 +20,8 @@ include(cpfConstants)
 include(cpfGitUtilities)
 include(cpfProjectUtilities)
 
+cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
+
 cpfAssertScriptArgumentDefined(ROOT_DIR)
 cpfAssertScriptArgumentDefined(GIT_REF)
 cpfAssertScriptArgumentDefined(TAGGING_OPTION)
