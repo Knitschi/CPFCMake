@@ -389,12 +389,11 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns a list with all files from target property SOURCES that are below the given
 # directory, relative to the given directory.
-function( getRelativePathesForSourceFilesInDir relfilePathsOut target dir)
+function( getAbsPathesForSourceFilesInDir absfilePathsOut target dir)
 
 	getAbsPathsOfTargetSources( absSources ${target})
 	# get only files that are in the sources directory
 	cpfGetSubPaths( subPaths ${dir} "${absSources}")
-	cpfGetRelativePaths( relPaths ${dir} "${subPaths}")
-	set( ${relfilePathsOut} "${relPaths}" PARENT_SCOPE)
+	set( ${absfilePathsOut} "${subPaths}" PARENT_SCOPE)
 
 endfunction()
