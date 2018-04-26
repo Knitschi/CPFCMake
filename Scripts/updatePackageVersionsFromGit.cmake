@@ -21,6 +21,8 @@ include(cpfConstants)
 include(cpfGitUtilities)
 include(cpfProjectUtilities)
 
+cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
+
 set(DIR_OF_THIS_FILE ${CMAKE_CURRENT_LIST_DIR})
 
 # check arguments where set

@@ -8,8 +8,6 @@ include(cpfListUtilities)
 include(cpfStringUtilities)
 include(cpfPathUtilities)
 
-cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
-
 #---------------------------------------------------------------------------------------------
 # Sets the warning level to high and forces the global include of the SwitchOffWarningsMacro file.
 #

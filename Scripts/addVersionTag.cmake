@@ -10,13 +10,14 @@ list(APPEND CMAKE_MODULE_PATH
 	${CMAKE_CURRENT_LIST_DIR}/../Functions
 )
 
-include(cpfMiscUtilities)
 include(cpfConstants)
+cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
+
+include(cpfMiscUtilities)
 include(cpfLocations)
 include(cpfProjectUtilities)
 include(cpfGitUtilities)
 
-cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 
 # check arguments
 cpfAssertScriptArgumentDefined(ROOT_DIR)

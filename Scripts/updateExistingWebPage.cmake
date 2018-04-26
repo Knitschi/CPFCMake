@@ -17,6 +17,9 @@ list( APPEND CMAKE_MODULE_PATH
 include(cpfMiscUtilities)
 include(cpfLocations)
 include(cpfProjectUtilities)
+include(cpfConstants)
+
+cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 
 cpfAssertScriptArgumentDefined(EXISTING_HTML_DIR)
 cpfAssertScriptArgumentDefined(FRESH_HTML_DIR)
