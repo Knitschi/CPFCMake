@@ -665,8 +665,6 @@ function( cpfSetIDEDirectoriesForTargetSources targetName )
 	source_group(Generated FILES ${generatedFiles})
 	
 	# set the file groups of the files in the Source directory to follow the directory structure
-	#cpfPrependMulti( sourcesFiles "${sourceDir}/" "${sourcesFiles}")
-	#source_group(TREE ${sourceDir} FILES ${sourcesFiles})
 	cpfSourceGroupTree("${sourcesFiles}")
 
 endfunction()
@@ -814,5 +812,6 @@ function( cpfAddFilePackage packageName files)
 
 	add_custom_target( ${packageName} SOURCES ${files} )
 	set_property( TARGET ${packageName} PROPERTY FOLDER ${packageName} )
+	cpfSetIDEDirectoriesForTargetSources(${packageName})
 
 endfunction()

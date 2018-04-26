@@ -10,7 +10,6 @@ list( APPEND CMAKE_MODULE_PATH
 
 include(cpfProperties)
 include(cpfProjectUtilities)
-	
 include(cpfAddDocumentationTarget)
 include(cpfAddStaticAnalysisTarget)
 include(cpfAddPipelineTarget)
@@ -23,7 +22,7 @@ include(cpfAddDistributionPackageTarget)
 # cotire must be included on the global scope or we get errors thta target xyz already has a custom rule
 include("${CMAKE_SOURCE_DIR}/cotire/CMake/cotire.cmake")
 
-cmake_minimum_required (VERSION ${CPF_MINIMUM_CMAKE_VERSION})
+
 
 
 #----------------------------------------------------------------------------------------
