@@ -34,16 +34,16 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( test_cpfIsSubPath )
     
-    set(path C:/bli/bla/blub )
-    set(subPath C:/bli/bla )
+    set(longPath C:/bli/bla/blub )
+    set(shortPath C:/bli/bla )
     set(noSubPath D:/blob )
 
     # works for subpath
-    cpfIsSubPath( isSubPath ${subPath} ${path})
+    cpfIsSubPath( isSubPath ${longPath} ${shortPath})
     cpfAssertTrue(isSubPath)
 
     # works if no subpath
-    cpfIsSubPath( isSubPath ${noSubPath} ${path})
+    cpfIsSubPath( isSubPath ${longPath} ${shortPath})
     cpfAssertFalse(isSubPath)
 
 endfunction()

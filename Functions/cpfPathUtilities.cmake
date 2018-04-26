@@ -33,18 +33,31 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Checks if subdir is a subdirectory of dir.
-# e.g.: subPath = C:/bla/blub/blib, path = C:/bla  -> returns TRUE
-#		subPath = C:/bla/blub/blib, path = C:/bleb -> returns FALSE
+# e.g.: longPath = C:/bla/blub/blib, shortPath = C:/bla  -> returns TRUE
+#		longPath = C:/bla/blub/blib, shortPath = C:/bleb -> returns FALSE
 #
 # Note that pathes must use / as a separator.
-function( cpfIsSubPath VAR subPath path)
+function( cpfIsSubPath VAR longPath shortPath)
 	
 	set(${VAR} FALSE PARENT_SCOPE )
-	string(FIND ${path} ${subPath} index)
+	string(FIND ${longPath} ${shortPath} index)
 	if(${index} EQUAL 0)
 		set(${VAR} TRUE PARENT_SCOPE )
 	endif()
 
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# returns only the pathes in longPaths that are subpaths of the given shortPath
+function( cpfGetSubPaths subPathsOut shortPath longPaths)
+	set(subPaths)
+	foreach( path ${longPaths})
+		cpfIsSubPath( isSubPath ${path} ${shortPath})
+		if(isSubPath)
+			list(APPEND subPaths ${path})
+		endif()
+	endforeach()
+	set(${subPathsOut} "${subPaths}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -105,5 +118,8 @@ function( cpfGetRelativePaths relPathsOut fromPath toPaths )
 		file(RELATIVE_PATH relPath ${fromPath} ${toPath})
 		list(APPEND relPaths ${relPath})
 	endforeach()
-	set(${relPathsOut} ${relPaths} PARENT_SCOPE)
+	set(${relPathsOut} "${relPaths}" PARENT_SCOPE)
 endfunction()
+
+
+

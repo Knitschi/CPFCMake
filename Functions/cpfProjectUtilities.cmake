@@ -1136,6 +1136,19 @@ function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)
 endfunction()
 
 
+#---------------------------------------------------------------------------------------------
+# Similar to the cmake function source_group( TREE ), but also sorts .c .cpp .h and .hpp files
+# in directories.
+function( cpfSourceGroupTree relfiles)
+
+	foreach(file ${relfiles})
+		get_filename_component(dir ${file} DIRECTORY)
+		string(REPLACE "/" "\\" sourceGroup "${dir}")
+		source_group("${sourceGroup}" FILES ${file})
+	endforeach()
+
+endfunction()
+
 
 
 

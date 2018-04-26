@@ -104,19 +104,9 @@ function( cpfAddRunPython3TestTarget package testScript args sourceFiles depende
 	if(TOOL_PYTHON3)
 
 		# Get the sources from the depended on packages.
-		set(allSourceFiles)
 		foreach( package ${dependedOnPackages})
-			get_property(packageSourceDir TARGET ${package} PROPERTY SOURCE_DIR )
-			get_property(externalSources TARGET ${package} PROPERTY SOURCES )
-			# sources can have relative or absolute pathes
-			foreach( file ${externalSources})
-				cpfIsAbsolutePath( isAbsPath ${file})
-				if(isAbsPath)
-					list(APPEND sourceFiles ${file})
-				else()
-					list(APPEND sourceFiles "${packageSourceDir}/${file}")
-				endif()
-			endforeach()
+			getAbsPathsOfTargetSources( absSources ${package})
+			list(APPEND sourceFiles "${absSources}")
 		endforeach()
 
 		# derive the python module path from the script path

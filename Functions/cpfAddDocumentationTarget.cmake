@@ -149,33 +149,13 @@ function( cpfGetAllNonGeneratedPackageSources sourceFiles packages )
 			set(targets ${binaryTargets} ${package})
 			list(REMOVE_DUPLICATES targets)
 			foreach( target ${targets} )
-				getRelativeSourceFilesPaths( files ${target})
+				get_property( sourceDir TARGET ${target} PROPERTY SOURCE_DIR)
+				getRelativePathesForSourceFilesInDir( files ${target} ${sourceDir})
 				list(APPEND allFiles ${files})
 			endforeach()
 		endif()
 	endforeach()
 	set(${sourceFiles} ${allFiles} PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns a list with all files from target property SOURCES that do not have an absolute
-# path.
-function( getRelativeSourceFilesPaths filePathsOut target)
-
-	set(allFiles)
-	get_property(files TARGET ${target} PROPERTY SOURCES)
-	get_property(dir TARGET ${target} PROPERTY SOURCE_DIR)
-	foreach(file ${files})
-		# Some source files have absolute paths and most not.
-		# We ignore files that have absolute pathes for which we assume that they are the ones in the Generated directory.
-		# Only the files in the Sources directory are used by doxygen.
-		cpfIsAbsolutePath( isAbsolute ${file})
-		if(NOT isAbsolute) 
-			list(APPEND relFiles "${dir}/${file}")
-		endif()
-	endforeach()
-	set( ${filePathsOut} ${relFiles} PARENT_SCOPE)
 
 endfunction()
 

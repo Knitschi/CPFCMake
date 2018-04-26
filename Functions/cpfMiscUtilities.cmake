@@ -363,3 +363,38 @@ function( cpfGetKeywordValueLists valueListsOut valueListsKeyword otherKeywords 
 	endforeach()
 
 endfunction()
+
+#----------------------------------------------------------------------------------------
+# Gets all files from the targets SOURCES property, turns them into abs pathes if needed
+# and returns the list.
+function( getAbsPathsOfTargetSources absPathsOut target)
+
+	get_property(sourceDir TARGET ${target} PROPERTY SOURCE_DIR )
+	get_property(sources TARGET ${target} PROPERTY SOURCES )
+	# sources can have relative or absolute pathes
+	set(absPaths)
+	foreach( file ${sources})
+		cpfIsAbsolutePath( isAbsPath ${file})
+		if(isAbsPath)
+			list(APPEND absPaths ${file})
+		else()
+			list(APPEND absPaths "${sourceDir}/${file}")
+		endif()
+	endforeach()
+	
+	set(${absPathsOut} "${absPaths}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns a list with all files from target property SOURCES that are below the given
+# directory, relative to the given directory.
+function( getRelativePathesForSourceFilesInDir relfilePathsOut target dir)
+
+	getAbsPathsOfTargetSources( absSources ${target})
+	# get only files that are in the sources directory
+	cpfGetSubPaths( subPaths ${dir} "${absSources}")
+	cpfGetRelativePaths( relPaths ${dir} "${subPaths}")
+	set( ${relfilePathsOut} "${relPaths}" PARENT_SCOPE)
+
+endfunction()
