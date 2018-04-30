@@ -128,8 +128,11 @@ argument set.
 
 This target runs the test executable with OpenCppCoverage tool on Windows.
 This adds a test coverage report to the html output.
-On Linux it runs the test executable with the Valgrind tool. This can detect
-memory leaks and undefined behavior.
+On Linux it runs the test executable with the *Valgrind* tool. This can detect
+memory leaks and undefined behavior. When running *Valgrind* you also have
+to add the empty file \c Other/MyPackageValgrindSuppressions.supp file
+to the package which can be used to suppress false positives or unfixable
+issues that are found by *Valgrind*.
 
 The target can be disabled with the \c CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET config variable.
 

@@ -19,7 +19,7 @@ function( cpfAddGlobalDynamicAnalysisTarget packages)
 	cpfIsGccClangDebug(gccClangDebug)
 	if(gccClangDebug)
 
-		cpfAddSubTargetBundleTarget( ${targetName} ${packages} CPF_DYNAMIC_ANALYSIS_SUBTARGET "")
+		cpfAddSubTargetBundleTarget( ${targetName} "${packages}" CPF_DYNAMIC_ANALYSIS_SUBTARGET "")
 		
 	elseif(MSVC)
 		# add the OpenCppCoverage command that combines all intermediate outputs.
