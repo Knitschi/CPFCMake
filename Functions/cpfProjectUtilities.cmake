@@ -1135,8 +1135,9 @@ endfunction()
 
 
 #---------------------------------------------------------------------------------------------
-# Similar to the cmake function source_group( TREE ), but also sorts .c .cpp .h and .hpp files
-# in directories.
+# Similar to the cmake function source_group( TREE ), but also sorts .cpp and .h files # in directories.
+# For some unkown reason the cmake function does not work for us, so we have to implement it manually.
+# However, the cmake function worked in a minimalistic test project. wtf!?
 function( cpfSourceGroupTree relfiles)
 
 	foreach(file ${relfiles})
