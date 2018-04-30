@@ -131,8 +131,9 @@ function( cpfIsGccClangDebug var )
 
 		cpfGetCxxFlags( flags ${CMAKE_BUILD_TYPE})
 		cpfContains( hasDebugFlag "${flags}" -g )
-		cpfContainsOneOf( hasLowOptimizationFlag "${flags}" "-O1;-O0" )
-		
+		# When compiling for debugging we usually have low optimization level flags set.
+		cpfContainsOneOf( hasLowOptimizationFlag "${flags}" "-O1;-O0;-Og" )
+
 		if(hasDebugFlag AND hasLowOptimizationFlag )
 			set(${var} TRUE PARENT_SCOPE)
 			return()

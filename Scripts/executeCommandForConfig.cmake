@@ -26,7 +26,7 @@ function( executeCommands commands isConfig)
 
 	foreach( command ${commands} )
 		
-        #cpfDevMessage("String from file: ${command}")
+        #devMessage("String from file: ${command}")
         
         # In order to get the special characters through to the final command
         # we need to re-escape them. The number of escapes was determined empirically.
@@ -35,10 +35,10 @@ function( executeCommands commands isConfig)
         string(REPLACE "\\" "\\\\" commandEscaped ${commandEscaped}) 
         string(REPLACE "\"" "\\\"" commandEscaped ${commandEscaped})
         
-        #cpfDevMessage("Escaped string FINAL: ${commandEscaped}")
+        #devMessage("Escaped string FINAL: ${commandEscaped}")
 
         cpfSeparateArgumentsForPlatform(commandList ${commandEscaped})
-        #cpfDevMessage("Separated String: ${commandList}")
+        #devMessage("Separated String: ${commandList}")
 
         # Print the command in a form that can be copied and executed.
         if(isConfig)

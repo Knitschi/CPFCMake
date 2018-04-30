@@ -381,7 +381,7 @@ function( cpfGetSubtargets subTargetsOut packages subtargetProperty)
 			list(APPEND targets ${subTarget} )
 		endif()
 	endforeach()
-	set(${subTargetsOut} ${targets} PARENT_SCOPE)
+	set(${subTargetsOut} "${targets}" PARENT_SCOPE)
 
 endfunction()
 
