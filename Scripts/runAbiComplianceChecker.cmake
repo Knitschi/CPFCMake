@@ -41,8 +41,7 @@ endif()
 # make report directory if it does not exist.
 #get_filename_component( reportDir "${REPORT_PATH}" DIRECTORY )
 #file(MAKE_DIRECTORY ${reportDir} )
-
-cpfSeparateArgumentsForPlatform( commandList "\"${TOOL_PATH}\" -l ${BINARY_NAME} -old \"${OLD_DUMP_FILE}\" -new \"${NEW_DUMP_FILE}\" -report-path \"${REPORT_PATH}\" ${additionalOptions}")
+separate_arguments(commandList NATIVE_COMMAND "\"${TOOL_PATH}\" -l ${BINARY_NAME} -old \"${OLD_DUMP_FILE}\" -new \"${NEW_DUMP_FILE}\" -report-path \"${REPORT_PATH}\" ${additionalOptions}")
 
 execute_process(
 	COMMAND ${commandList}

@@ -119,7 +119,7 @@ function( cpfAddStaticAnalysisTarget )
 				if(EXISTS ${fullFile}) # do not call clang-tidy for source files that are generated later in the make step
 				
                     set(commandWithFile "${command} \"${fullFile}\"")
-                    cpfSeparateArgumentsForPlatform( commandList ${commandWithFile})
+                    separate_arguments(commandList NATIVE_COMMAND ${commandWithFile})
                     add_custom_command(
                         OUTPUT ${stampFile}
                         DEPENDS "${fullFile}" "${uicStamp}" "${prefixHeader}" ${uicTarget}

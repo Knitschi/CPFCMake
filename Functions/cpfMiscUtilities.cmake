@@ -208,7 +208,7 @@ function( cpfExecuteProcess stdOut commandString workingDir)
 		) 
 	endif()
 
-	cpfSeparateArgumentsForPlatform( commandList ${commandString})
+	separate_arguments(commandList NATIVE_COMMAND ${commandString})
 	execute_process(
 		COMMAND ${commandList}
 		WORKING_DIRECTORY "${workingDir}"

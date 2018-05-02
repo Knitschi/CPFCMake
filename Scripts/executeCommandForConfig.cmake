@@ -31,13 +31,12 @@ function( executeCommands commands isConfig)
         # In order to get the special characters through to the final command
         # we need to re-escape them. The number of escapes was determined empirically.
         # It is not guaranteed that this will work in all cases.
-        string(REPLACE ";" "\\\\\\;" commandEscaped ${command})
-        string(REPLACE "\\" "\\\\" commandEscaped ${commandEscaped}) 
-        string(REPLACE "\"" "\\\"" commandEscaped ${commandEscaped})
+        #string(REPLACE ";" "\\\\\\;" commandEscaped ${command})
+		#string(REPLACE "\\" "\\\\" commandEscaped ${commandEscaped}) 
+        #string(REPLACE "\"" "\\\"" commandEscaped ${commandEscaped})
         
         #devMessage("Escaped string FINAL: ${commandEscaped}")
-
-        cpfSeparateArgumentsForPlatform(commandList ${commandEscaped})
+		separate_arguments(commandList NATIVE_COMMAND ${command})
         #devMessage("Separated String: ${commandList}")
 
         # Print the command in a form that can be copied and executed.
