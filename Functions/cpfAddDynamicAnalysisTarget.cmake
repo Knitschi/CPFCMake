@@ -101,16 +101,18 @@ function( cpfAddValgrindTarget package)
 			
 			# add valgrind commands
 			set(stampFile "${binaryDir}/Valgrind_${testTarget}.stamp")
-			list(APPEND stampFiles ${stampFile})
-				
 			set(suppressionsFile "${CMAKE_CURRENT_SOURCE_DIR}/Other/${package}ValgrindSuppressions.supp")
-				
 			set(valgrindCommand "\"${TOOL_VALGRIND}\" --leak-check=full --track-origins=yes --smc-check=all --error-exitcode=1 --gen-suppressions=all --suppressions=\"${suppressionsFile}\" \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")
 				
 			cpfAddStandardCustomCommand(
 				OUTPUT ${stampFile}
-				DEPENDS "$<TARGET_FILE:${testTarget}>" "$<TARGET_FILE:${productionLib}>" ${testTarget}
+				DEPENDS "$<TARGET_FILE:${testTarget}>" "$<TARGET_FILE:${productionLib}>"
 				COMMANDS "${valgrindCommand}" "cmake -E touch \"${stampFile}\""
+			)
+
+			add_custom_target(
+				${targetName}
+				DEPENDS ${productionLib} ${testTarget} ${stampFile}
 			)
 
 			set_property( TARGET ${package} PROPERTY CPF_VALGRIND_SUBTARGET ${targetName})
@@ -159,13 +161,12 @@ function( cpfAddOpenCppCoverageTarget package)
 			set(cmakeRenameCommand "cmake -E rename \"${coverageOutputTemp}\" \"${coverageOutput}\"")
 			# we use an extra stampfile to make sure that marking the target done works even if the commands are only the echos for non debug configs.
 			set(stampFile ${binaryDir}/OpenCppCoverage_${testTarget}.stamp )
-			list(APPEND stampFiles ${stampFile})
-			set( stampFileCommand "cmake -E touch \"${stampFile}\"")
+			set(stampFileCommand "cmake -E touch \"${stampFile}\"")
 
 			cpfAddConfigurationDependendCommand(
 				TARGET ${targetName}
 				OUTPUT ${stampFile}
-				DEPENDS "$<TARGET_FILE:${testTarget}>" "$<TARGET_FILE:${productionLib}>" ${testTarget}
+				DEPENDS "$<TARGET_FILE:${testTarget}>" "$<TARGET_FILE:${productionLib}>"
 				COMMENT "Run OpenCppCoverage for ${testTarget}."
 				CONFIG ${msvcDebugConfig}
 				COMMANDS_CONFIG ${removeTempCovFileComand} ${openCppCoverageCommand} ${cmakeRenameCommand} ${stampFileCommand}
@@ -175,12 +176,9 @@ function( cpfAddOpenCppCoverageTarget package)
 			# debug: try if sporadic build errors stop if packaging does not happen at the same time.
 			#set( debugDependency distributionPackages_${package} )
 
-		endif()
-			
-		if(msvcDebugConfig OR gccClangDebug)
 			add_custom_target(
 				${targetName}
-				DEPENDS ${productionLib} ${unitTestTarget} ${expensiveTestTarget} ${stampFiles} ${debugDependency}
+				DEPENDS ${productionLib} ${testTarget} ${stampFile}
 			)
 
 			# set properties related to the static analysis target

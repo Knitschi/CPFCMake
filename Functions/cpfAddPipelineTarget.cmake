@@ -24,6 +24,7 @@ function( cpfAddPipelineTarget packages)
 	# included in the pipeline.
 	set( pipelineSubTargetProperties
 		CPF_BINARY_SUBTARGETS
+		CPF_RUN_CPP_TESTS_SUBTARGET
 		CPF_RUN_TESTS_SUBTARGET
 		CPF_ABI_CHECK_SUBTARGETS
 	)
@@ -34,7 +35,7 @@ function( cpfAddPipelineTarget packages)
 	# add the runTest targets always.
 	cpfIsGccClangDebug(gccClangDebug)
 	if(gccClangDebug)
-		list(REMOVE_ITEM pipelineSubTargetProperties CPF_RUN_TESTS_SUBTARGET)
+		list(REMOVE_ITEM pipelineSubTargetProperties CPF_RUN_CPP_TESTS_SUBTARGET)
 	endif()
 	
 	cpfGetTargetsFromProperties( targetsFromProperties "${packages}" "${pipelineSubTargetProperties}" )

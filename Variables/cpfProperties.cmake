@@ -11,14 +11,6 @@ include(cpfConstants)
 # 
 function( cpfDefineProperties )
 
-	# A property that is set on all targets in a CPF project.
-    define_property( 
-        TARGET 
-        PROPERTY PACKAGE
-        BRIEF_DOCS "The name of the package to which the target belongs"
-        FULL_DOCS " "
-	)
-
 	# A property that is set on all package main targets.
     define_property(
         TARGET
@@ -123,7 +115,15 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-    # A property that is set on all package main targets
+    # A property that is set on some package main targets
+    define_property(
+        TARGET
+        PROPERTY CPF_RUN_CPP_TESTS_SUBTARGET
+        BRIEF_DOCS "The name of the sub-target that runs a cpp executable with all automated tests."
+        FULL_DOCS " "
+    )
+
+    # A property that is set on some package main targets
     define_property(
         TARGET
         PROPERTY CPF_RUN_TESTS_SUBTARGET
