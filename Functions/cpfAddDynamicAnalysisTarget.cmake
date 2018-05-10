@@ -113,6 +113,9 @@ function( cpfAddValgrindTarget package)
 				COMMANDS "${valgrindCommand}" "cmake -E touch \"${stampFile}\""
 			)
 
+			set_property( TARGET ${package} PROPERTY CPF_VALGRIND_SUBTARGET ${targetName})
+			set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
+
 		endif()
 	endif()
 	
@@ -181,7 +184,7 @@ function( cpfAddOpenCppCoverageTarget package)
 			)
 
 			# set properties related to the static analysis target
-			set_property( TARGET ${package} PROPERTY CPF_DYNAMIC_ANALYSIS_SUBTARGET ${targetName})
+			set_property( TARGET ${package} PROPERTY OPENCPPCOVERAGE ${targetName})
 			set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
 			set_property( TARGET ${targetName} PROPERTY CPF_CPPCOVERAGE_OUTPUT ${coverageOutputFiles} )
 		endif()
