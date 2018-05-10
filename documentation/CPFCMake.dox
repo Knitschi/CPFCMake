@@ -1,10 +1,9 @@
 /**
-
 \page CPFCMake
+\section CPFCMake
 
-\brief A cmake package that implements a standardized c++ CMake project with additional CI functionality.
-
-The CPFCMake package is the most basic component of the CMakeProjectFramework. It helps with setting
+The CPFCMake package implements a standardized C++ CMake project with additional CI functionality.
+This package is the most basic component of the CMakeProjectFramework. It helps with setting
 up a CMake based C++ project with extended functionality. The package tries to solve the following problems:
 
 - Abstraction of common CMake code to a higher level. CMakeProjectFramework projects are set up by using only
