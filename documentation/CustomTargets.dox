@@ -23,7 +23,7 @@ Here is a list of targets that can exist once per CPF project.
 - \ref doxygen
 - \ref dynamicAnalysis
 - \ref globalFiles
-- \ref INSTALL
+- \ref install
 - \ref pipeline
 - \ref runAllTests
 - \ref runFastTests
@@ -77,11 +77,9 @@ This is only a file container target that does not execute any commands.
 It holds all source files that are of global scope like tool configuration
 files, global documentation, etc..
 
-\subsubsection INSTALL INSTALL/install
+\subsubsection install install
 
-This CMake standard target bundles the \ref install_package targets. For *Visual Studio* generators
-the capitalized name is used. With *make* and *ninja* generators the small letter name
-is generated.
+This CMake standard target bundles the \ref install_package targets.
 
 \subsubsection pipeline pipeline
 
