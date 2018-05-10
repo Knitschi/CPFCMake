@@ -35,7 +35,7 @@ Here is a list of targets that can exist once per CPF project.
 
 Here is a list of targets that can exist once per CPF package.
 
-- \ref abicompliancechecker_binary_target
+- \ref abicompliancechecker_package
 - \ref clangtidy_package
 - \ref distributionPackages_package
 - \ref install_package
@@ -180,7 +180,7 @@ It runs the \c clang-tidy tool on the packages source files.
 
 The target can be disabled with the \c CPF_ENABLE_STATIC_ANALYSIS_TARGET config variable.
 
-\subsubsection abicompliancechecker_binary_target abi-compliance-checker_\&lt;binary_target\&gt;
+\subsubsection abicompliancechecker_package abi-compliance-checker_\&lt;package\&gt;
 
 This is a bundle target that runs the Abi-Compliance-Checker tool. The target only exists for
 project configurations that use *Gcc* with debug flags and for shared library packages.
