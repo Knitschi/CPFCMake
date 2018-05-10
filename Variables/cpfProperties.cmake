@@ -86,7 +86,7 @@ function( cpfDefineProperties )
     # A property that is set on all binary targets when using the clang toolchain.
     define_property(
         TARGET
-        PROPERTY CPF_STATIC_ANALYSIS_SUBTARGET
+        PROPERTY CPF_CLANG_TIDY_SUBTARGET
         BRIEF_DOCS "A target that runs clang-tidy on all .cpp files of the binary target."
         FULL_DOCS " "
     )

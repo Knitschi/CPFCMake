@@ -29,7 +29,7 @@ function( cpfAddGlobalStaticAnalysisTarget packages)
             get_property( binarySubTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
             foreach( binaryTarget ${binarySubTargets})
             
-                get_property( staticAnalysisTarget TARGET ${binaryTarget} PROPERTY CPF_STATIC_ANALYSIS_SUBTARGET)
+                get_property( staticAnalysisTarget TARGET ${binaryTarget} PROPERTY CPF_CLANG_TIDY_SUBTARGET)
 
                 if(staticAnalysisTarget)	# this is currently only available for the LinuxMakeClang toolchain.
                     list(APPEND staticAnalysisTargets ${staticAnalysisTarget})
@@ -63,7 +63,7 @@ endfunction()
 # Arguments:
 # BINARY_TARGET The name of the target that shall be analyzed
 #
-function( cpfAddStaticAnalysisTarget )
+function( cpfAddClangTidyTarget binaryTarget )
 
 	if(NOT CPF_ENABLE_STATIC_ANALYSIS_TARGET)
 		return()
@@ -72,15 +72,13 @@ function( cpfAddStaticAnalysisTarget )
 	cpfGetCompiler(compiler)
     if( ${compiler} STREQUAL Clang)
     
-		cmake_parse_arguments(ARG "" "BINARY_TARGET" "" ${ARGN} )
-
 		# Add an extra target for running uic. 
 		# Usually uic is automatically run before building, but we want to build
 		# this target without building the binaries so we need an extra target
 		# that runs uic for us.
-		cpfAddRunUicTarget(BINARY_TARGET ${ARG_BINARY_TARGET})
+		cpfAddRunUicTarget(BINARY_TARGET ${binaryTarget})
 
-        set(targetName ${ARG_BINARY_TARGET}_runStaticAnalysis)
+        set(targetName clang-tidy_${binaryTarget})
 
 
         # The checks we want to have
@@ -100,14 +98,14 @@ function( cpfAddStaticAnalysisTarget )
         
         set(command "\"${TOOL_CLANG_TIDY}\" -checks=${includedChecks}${commaDeliberatelyExcludedChecks} -warnings-as-errors=* -p \"${CMAKE_BINARY_DIR}\"")
 
-        get_property( uicTarget TARGET ${ARG_BINARY_TARGET} PROPERTY CPF_UIC_SUBTARGET )
+        get_property( uicTarget TARGET ${binaryTarget} PROPERTY CPF_UIC_SUBTARGET )
         if(uicTarget)
             get_property( uicStamp TARGET ${uicTarget} PROPERTY TARGET_STAMP_FILE )
         endif()
         
-        get_property( prefixHeader TARGET ${ARG_BINARY_TARGET} PROPERTY COTIRE_CXX_PREFIX_HEADER)
+        get_property( prefixHeader TARGET ${binaryTarget} PROPERTY COTIRE_CXX_PREFIX_HEADER)
         
-		get_property(files TARGET ${ARG_BINARY_TARGET} PROPERTY SOURCES)
+		get_property(files TARGET ${binaryTarget} PROPERTY SOURCES)
         foreach( file ${files}  )
 
 			get_filename_component( extension ${file} EXT)
@@ -141,7 +139,7 @@ function( cpfAddStaticAnalysisTarget )
 			${targetName}
 			DEPENDS ${stampFiles} ${uicTarget}
 		)
-        set_property(TARGET ${ARG_BINARY_TARGET} PROPERTY CPF_STATIC_ANALYSIS_SUBTARGET ${targetName})
+        set_property(TARGET ${binaryTarget} PROPERTY CPF_CLANG_TIDY_SUBTARGET ${targetName})
 
     endif()
     
