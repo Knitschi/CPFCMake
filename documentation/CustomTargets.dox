@@ -17,17 +17,17 @@ per-package targets of that kind.
 
 Here is a list of targets that can exist once per CPF project.
 
-- \ref documentation
+- \ref abicompliancechecker
+- \ref ALL_BUILD
 - \ref distributionPackages
+- \ref doxygen
 - \ref dynamicAnalysis
 - \ref globalFiles
+- \ref INSTALL
 - \ref pipeline
 - \ref runAllTests
 - \ref runFastTests
 - \ref staticAnalysis
-- \ref versionCompatibilityChecks
-- \ref INSTALL
-- \ref ALL_BUILD
 - \ref ZERO_CHECK
 
 
@@ -35,21 +35,22 @@ Here is a list of targets that can exist once per CPF project.
 
 Here is a list of targets that can exist once per CPF package.
 
-- \ref package
-- \ref package_tests
-- \ref package_fixtures
+- \ref abicompliancechecker_binary_target
+- \ref clangtidy_package
 - \ref distributionPackages_package
-- \ref dynamicAnalysis_package
 - \ref install_package
+- \ref opencppcoverage_package
+- \ref package
+- \ref package_fixtures
+- \ref package_tests
 - \ref runAllTests_package
 - \ref runFastTests_package
-- \ref staticAnalysis_package
-- \ref checkAbiCompatibility_binary_target
+- \ref valgrind_package
 
 
 \subsection TargetAnnotations Target annotations
 
-\subsubsection documentation documentation
+\subsubsection doxygen doxygen
 
 This target runs doxygen to generate the documentation for all owned packages.
 It can be disabled with the \c CPF_ENABLE_DOXYGEN_TARGET variable.
@@ -60,7 +61,7 @@ This target bundles the \ref distributionPackages_package targets.
 
 \subsubsection dynamicAnalysis dynamicAnalysis
 
-This target bundles the \ref dynamicAnalysis_package targets.
+This target bundles the \ref valgrind_package and \ref opencppcoverage_package targets.
 
 \subsubsection globalFiles globalFiles
 
@@ -86,13 +87,15 @@ contained in the \ref pipeline target which always builds the \ref runAllTests t
 This target bundles the \ref runFastTests_package targets. It also
 checks that the dependency graph of the projects binary targets is acyclic.
 
-\subsubsection versionCompatibilityChecks versionCompatibilityChecks
+\subsubsection abicompliancechecker abi-compliance-checker
 
-This target bundles the \ref checkAbiCompatibility_binary_target targets.
+This target bundles the \ref abicompliancechecker_binary_target targets.
 
-\subsubsection INSTALL INSTALL
+\subsubsection INSTALL INSTALL/install
 
-This target bundles the \ref install_package targets.
+This CMake standard target bundles the \ref install_package targets. For *Visual Studio* generators
+the capitalized name is used. With *make* and *ninja* generators the small letter name
+is generated.
 
 \subsubsection ALL_BUILD ALL_BUILD
 
@@ -124,15 +127,24 @@ distributed to users of the package. This can be a zip file that contains the bi
 an installer. The target is only created if the \c addPackage() function has the \c DISTRIBUTION_PACKAGES
 argument set.
 
-\subsubsection dynamicAnalysis_package dynamicAnalysis_\&lt;package\&gt;
+\subsubsection valgrind_package valgrind_\&lt;package\&gt;
 
-This target runs the test executable with OpenCppCoverage tool on Windows.
-This adds a test coverage report to the html output.
-On Linux it runs the test executable with the *Valgrind* tool. This can detect
-memory leaks and undefined behavior. When running *Valgrind* you also have
-to add the empty file \c Other/MyPackageValgrindSuppressions.supp file
-to the package which can be used to suppress false positives or unfixable
+This target runs the test executable with the *Valgrind* tool, which
+can help to detect memory leaks or undifined behavior. The target
+only exists for project configurations that use *Gcc* or *Clang* with
+debug flags. When this target is enabled you must also add the empty file 
+\c Other/MyPackageValgrindSuppressions.supp file to all packages.
+You can use this file to suppress false positives or unfixable
 issues that are found by *Valgrind*.
+
+The target can be disabled with the \c CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET config variable.
+
+\subsubsection opencppcoverage_package opencppcoverage_\&lt;package\&gt;
+
+This target runs the test executable with OpenCppCoverage tool in order to create
+an html report that shows the code lines that are hit while running the tests.
+This target will only exist for project configurations that use *MSVC* and will
+only run the tool when compiling in *Debug* configuration.
 
 The target can be disabled with the \c CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET config variable.
 
@@ -161,23 +173,30 @@ an which are therefor useful when working in a tight test-driven development cyc
 
 The target can be disabled with the \c CPF_ENABLE_RUN_TESTS_TARGET config variable.
 
-\subsubsection staticAnalysis_package staticAnalysis_\&lt;package\&gt;
+\subsubsection clangtidy_package clang-tidy_\&lt;package\&gt;
 
 This target only exists when compiling on Linux with the clang compiler.
 It runs the \c clang-tidy tool on the packages source files.
 
 The target can be disabled with the \c CPF_ENABLE_STATIC_ANALYSIS_TARGET config variable.
 
-\subsubsection checkAbiCompatibility_binary_target checkAbiCompatibility_\&lt;binary_target\&gt;
+\subsubsection abicompliancechecker_binary_target abi-compliance-checker_\&lt;binary_target\&gt;
 
-The target only exists when compiling on Linux with Gcc and with debug output. It runs the
-Abi-Compliance-Checker tool on abi-dump files that are contained in the packages distribution targets.
-The tool will add ABI/API compatibility reports to the html output directory.
+This is a bundle target that runs the Abi-Compliance-Checker tool. The target only exists for
+project configurations that use *Gcc* with debug flags and for shared library packages.
 
-This target is somewhat fragile, because it requires the abi-dump files of the last internal and release
-version of the package. These must be provided by the web-server that is setup by the CPFMachines infrastructure.
+#### Report compatibility ####
+The basic functionality is to create html reports that compare the abi/api-compatibility of
+a previous libray package version with the current one. The reporst are added to the project
+web-page. To enable this, the target must be able to download previously generated distribution 
+packages of that package from the project web-page, which must contain generated abi-dump files. 
+This complex requirement makes the target somewhat fragile. This functionality can be 
+disabled with the \c CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS config variable.
 
-The target can be disabled with the \c CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS config variable.
+#### Enforce compatibility ####
+You can also enable targets that will fail to build if abi or api compatibility is hurt
+by your current changes. This option can be switched on in stable branches. To do so
+use the \c CPF_CHECK_ABI_STABLE and \c CPF_CHECK_API_STABLE config variables.
 
 
 */

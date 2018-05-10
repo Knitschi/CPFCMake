@@ -20,13 +20,20 @@ function( cpfAddGlobalAbiCheckerTarget packages )
 			list(APPEND targets ${target})
 		endif()
 	endforeach()
-	cpfAddBundleTarget( versionCompatibilityChecks "${targets}")
+	cpfGetAbiComplianceCheckerBundleTargetBaseName(targetName)
+	cpfAddBundleTarget( ${targetName} "${targets}")
 	
 endfunction()
 
 #----------------------------------------------------------------------------------------
 function( cpfGetPackageVersionCompatibilityCheckTarget targetNameOut package )
-	set( ${targetNameOut} versionCompatibilityCheck_${package} PARENT_SCOPE)
+	cpfGetAbiComplianceCheckerBundleTargetBaseName(targetName)
+	set( ${targetNameOut} ${targetName}_${package} PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetAbiComplianceCheckerBundleTargetBaseName baseNameOut )
+	set(${baseNameOut} abi-compliance-checker PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
