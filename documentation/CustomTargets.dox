@@ -50,14 +50,22 @@ Here is a list of targets that can exist once per CPF package.
 
 \subsection TargetAnnotations Target annotations
 
-\subsubsection doxygen doxygen
+\subsubsection abicompliancechecker abi-compliance-checker
 
-This target runs doxygen to generate the documentation for all owned packages.
-It can be disabled with the \c CPF_ENABLE_DOXYGEN_TARGET variable.
+This target bundles the \ref abicompliancechecker_package targets.
+
+\subsubsection ALL_BUILD ALL_BUILD
+
+This target builds all binary targets.
 
 \subsubsection distributionPackages distributionPackages
 
 This target bundles the \ref distributionPackages_package targets.
+
+\subsubsection doxygen doxygen
+
+This target runs doxygen to generate the documentation for all owned packages.
+It can be disabled with the \c CPF_ENABLE_DOXYGEN_TARGET variable.
 
 \subsubsection dynamicAnalysis dynamicAnalysis
 
@@ -68,6 +76,12 @@ This target bundles the \ref valgrind_package and \ref opencppcoverage_package t
 This is only a file container target that does not execute any commands.
 It holds all source files that are of global scope like tool configuration
 files, global documentation, etc..
+
+\subsubsection INSTALL INSTALL/install
+
+This CMake standard target bundles the \ref install_package targets. For *Visual Studio* generators
+the capitalized name is used. With *make* and *ninja* generators the small letter name
+is generated.
 
 \subsubsection pipeline pipeline
 
@@ -87,98 +101,9 @@ contained in the \ref pipeline target which always builds the \ref runAllTests t
 This target bundles the \ref runFastTests_package targets. It also
 checks that the dependency graph of the projects binary targets is acyclic.
 
-\subsubsection abicompliancechecker abi-compliance-checker
-
-This target bundles the \ref abicompliancechecker_binary_target targets.
-
-\subsubsection INSTALL INSTALL/install
-
-This CMake standard target bundles the \ref install_package targets. For *Visual Studio* generators
-the capitalized name is used. With *make* and *ninja* generators the small letter name
-is generated.
-
-\subsubsection ALL_BUILD ALL_BUILD
-
-This target builds all binary targets.
-
 \subsubsection ZERO_CHECK ZERO_CHECK
 
-This target re-runs the CMake generate step.
-
-\subsubsection package \&lt;package\&gt;
-
-The main binary target of the package.
-
-\subsubsection package_tests \&lt;package\&gt;_tests
-
-The test executable that belongs to the package. This target is only created
-if the \c addPackage() function has the \c TEST_FILES argument set. The executable
-should run automated tests when executed.
-
-\subsubsection package_fixtures \&lt;package\&gt;_fixtures
-
-An additional library that can be used to share test utility code between packages.
-It is only created if the \c addPackage() function has the \c FIXTURE_FILES and \c PUBLIC_FIXTURE_HEADER arguments set.
-
-\subsubsection distributionPackages_package distributionPackages_\&lt;package\&gt;
-
-Creates all *distribution packages* of the package. A *distribution package* is a file that is
-distributed to users of the package. This can be a zip file that contains the binaries or sources or 
-an installer. The target is only created if the \c addPackage() function has the \c DISTRIBUTION_PACKAGES
-argument set.
-
-\subsubsection valgrind_package valgrind_\&lt;package\&gt;
-
-This target runs the test executable with the *Valgrind* tool, which
-can help to detect memory leaks or undifined behavior. The target
-only exists for project configurations that use *Gcc* or *Clang* with
-debug flags. When this target is enabled you must also add the empty file 
-\c Other/MyPackageValgrindSuppressions.supp file to all packages.
-You can use this file to suppress false positives or unfixable
-issues that are found by *Valgrind*.
-
-The target can be disabled with the \c CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET config variable.
-
-\subsubsection opencppcoverage_package opencppcoverage_\&lt;package\&gt;
-
-This target runs the test executable with OpenCppCoverage tool in order to create
-an html report that shows the code lines that are hit while running the tests.
-This target will only exist for project configurations that use *MSVC* and will
-only run the tool when compiling in *Debug* configuration.
-
-The target can be disabled with the \c CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET config variable.
-
-\subsubsection install_package install_\&lt;package\&gt;
-
-This target copies the packages binary files and public headers to the
-\c ${CMAKE_INSTALL_PREFIX}/\<package\> directory.
-
-\todo Check if this can still be used like the Linux \c {make install} step without breaking the
-creation of the distribution packages.
-
-\subsubsection runAllTests_package runAllTests_\&lt;package\&gt;
-
-This target runs all the tests in the \ref package_tests executable.
-
-The target can be disabled with the \c CPF_ENABLE_RUN_TESTS_TARGET config variable.
-
-\subsubsection runFastTests_package runFastTests_\&lt;package\&gt;
-
-This target runs all the tests in the \ref package_tests executable that have either
-the word *FastFixture* or *FastTests* included in their name. It is the the users
-responsibility to make sure that the tests with those names are really fast tests.
-
-The purpose of the target is to provide a way of executing only tests that are run quickly
-an which are therefor useful when working in a tight test-driven development cycle.
-
-The target can be disabled with the \c CPF_ENABLE_RUN_TESTS_TARGET config variable.
-
-\subsubsection clangtidy_package clang-tidy_\&lt;package\&gt;
-
-This target only exists when compiling on Linux with the clang compiler.
-It runs the \c clang-tidy tool on the packages source files.
-
-The target can be disabled with the \c CPF_ENABLE_STATIC_ANALYSIS_TARGET config variable.
+A CMake default target that runs the CMake generate step.
 
 \subsubsection abicompliancechecker_package abi-compliance-checker_\&lt;package\&gt;
 
@@ -197,6 +122,90 @@ disabled with the \c CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS config varia
 You can also enable targets that will fail to build if abi or api compatibility is hurt
 by your current changes. This option can be switched on in stable branches. To do so
 use the \c CPF_CHECK_ABI_STABLE and \c CPF_CHECK_API_STABLE config variables.
+
+\subsubsection clangtidy_package clang-tidy_\&lt;package\&gt;
+
+This target only exists when compiling on Linux with the clang compiler.
+It runs the \c clang-tidy tool on the packages source files.
+
+The target can be disabled with the \c CPF_ENABLE_STATIC_ANALYSIS_TARGET config variable.
+
+\subsubsection distributionPackages_package distributionPackages_\&lt;package\&gt;
+
+Creates all *distribution packages* of the package. A *distribution package* is a file that is
+distributed to users of the package. This can be a zip file that contains the binaries or sources or 
+an installer. The target is only created if the \c addPackage() function has the \c DISTRIBUTION_PACKAGES
+argument set.
+
+\subsubsection install_package install_\&lt;package\&gt;
+
+This target copies the packages binary files and public headers to the
+\c ${CMAKE_INSTALL_PREFIX}/\<package\> directory.
+
+\todo Check if this can still be used like the Linux \c {make install} step without breaking the
+creation of the distribution packages.
+
+\subsubsection opencppcoverage_package opencppcoverage_\&lt;package\&gt;
+
+This target runs the test executable with OpenCppCoverage tool in order to create
+an html report that shows the code lines that are hit while running the tests.
+This target will only exist for project configurations that use *MSVC* and will
+only run the tool when compiling in *Debug* configuration.
+
+The target can be disabled with the \c CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET config variable.
+
+\subsubsection package \&lt;package\&gt;
+
+The main binary target of the package.
+
+\subsubsection package_fixtures \&lt;package\&gt;_fixtures
+
+An additional library that can be used to share test utility code between packages.
+It is only created if the \c addPackage() function has the \c FIXTURE_FILES and \c PUBLIC_FIXTURE_HEADER arguments set.
+
+\subsubsection package_tests \&lt;package\&gt;_tests
+
+The test executable that belongs to the package. This target is only created
+if the \c addPackage() function has the \c TEST_FILES argument set. The executable
+should run automated tests when executed.
+
+\subsubsection runAllTests_package runAllTests_\&lt;package\&gt;
+
+This target runs all the tests in the \ref package_tests executable.
+
+The target can be disabled with the \c CPF_ENABLE_RUN_TESTS_TARGET config variable.
+
+\subsubsection runFastTests_package runFastTests_\&lt;package\&gt;
+
+This target runs all the tests in the \ref package_tests executable that have either
+the word *FastFixture* or *FastTests* included in their name. It is the the users
+responsibility to make sure that the tests with those names are really fast tests.
+
+The purpose of the target is to provide a way of executing only tests that are run quickly
+an which are therefor useful when working in a tight test-driven development cycle.
+
+The target can be disabled with the \c CPF_ENABLE_RUN_TESTS_TARGET config variable.
+
+\subsubsection valgrind_package valgrind_\&lt;package\&gt;
+
+This target runs the test executable with the *Valgrind* tool, which
+can help to detect memory leaks or undifined behavior. The target
+only exists for project configurations that use *Gcc* or *Clang* with
+debug flags. When this target is enabled you must also add the empty file 
+\c Other/MyPackageValgrindSuppressions.supp file to all packages.
+You can use this file to suppress false positives or unfixable
+issues that are found by *Valgrind*.
+
+The target can be disabled with the \c CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET config variable.
+
+
+
+
+
+
+
+
+
 
 
 */
