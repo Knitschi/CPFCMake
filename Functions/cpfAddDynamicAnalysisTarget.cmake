@@ -184,7 +184,7 @@ function( cpfAddOpenCppCoverageTarget package)
 			)
 
 			# set properties related to the static analysis target
-			set_property( TARGET ${package} PROPERTY OPENCPPCOVERAGE ${targetName})
+			set_property( TARGET ${package} PROPERTY CPF_OPENCPPCOVERAGE_SUBTARGET ${targetName})
 			set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
 			set_property( TARGET ${targetName} PROPERTY CPF_CPPCOVERAGE_OUTPUT ${coverageOutputFiles} )
 		endif()
