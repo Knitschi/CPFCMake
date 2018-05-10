@@ -219,7 +219,8 @@ function( cpfAddPackage )
     # When clang-tidy resolves the problem, static analysis should be executed for all binary targets.
     cpfAddStaticAnalysisTarget( BINARY_TARGET ${productionLibrary})
     cpfAddRunCppTestsTargets( ${ARG_PACKAGE_NAME})
-	cpfAddDynamicAnalysisTarget(${ARG_PACKAGE_NAME})
+	cpfAddValgrindTarget(${ARG_PACKAGE_NAME})
+	cpfAddOpenCppCoverageTarget(${ARG_PACKAGE_NAME})
 
 	# Plugins must be added before the install targets
 	cpfAddPlugins( ${ARG_PACKAGE_NAME} "${pluginOptionLists}" )

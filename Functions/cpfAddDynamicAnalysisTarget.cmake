@@ -19,7 +19,7 @@ function( cpfAddGlobalDynamicAnalysisTarget packages)
 	cpfIsGccClangDebug(gccClangDebug)
 	if(gccClangDebug)
 
-		cpfAddSubTargetBundleTarget( ${targetName} "${packages}" CPF_DYNAMIC_ANALYSIS_SUBTARGET "")
+		cpfAddSubTargetBundleTarget( ${targetName} "${packages}" CPF_VALGRIND_SUBTARGET "")
 		
 	elseif(MSVC)
 		# add the OpenCppCoverage command that combines all intermediate outputs.
@@ -27,7 +27,7 @@ function( cpfAddGlobalDynamicAnalysisTarget packages)
 		#Locations
 		set(htmlReportDir ${CPF_PROJECT_HTML_ABS_DIR}/${CPF_OPENCPPCOVERAGE_DIR})
 
-		cpfGetSubtargets(dynamicAnalysisTargets "${packages}" CPF_DYNAMIC_ANALYSIS_SUBTARGET)
+		cpfGetSubtargets(dynamicAnalysisTargets "${packages}" CPF_OPENCPPCOVERAGE_SUBTARGET)
 		if(dynamicAnalysisTargets)
 
 			foreach( target ${dynamicAnalysisTargets})
@@ -71,20 +71,19 @@ function( cpfAddGlobalDynamicAnalysisTarget packages)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Creates the custom target that does dynamic analysis of the test executables.
+# Creates the custom target that runs the test executable with valgrind.
 # 
-# When compiling with gcc and debug information, this will run the tests with Valgrind.
-# When compiling with mscv and debug information, this will run the tests with OpenCppCoverage
+# This will only be added when the configuration uses gcc and debug flags.
 #
-function( cpfAddDynamicAnalysisTarget package)
+function( cpfAddValgrindTarget package)
 
 	if(NOT CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET)
 		return()
 	endif()
 
-	set(targetName dynamicAnalysis_${package})
-	set(analysisTargetBinaryDir ${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName})
-	file(MAKE_DIRECTORY ${analysisTargetBinaryDir})
+	set(targetName valgrind_${package})
+	set(binaryDir ${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName})
+	file(MAKE_DIRECTORY ${binaryDir})
 		
 	# check preconditions
 	cpfAssertDefined(CPF_TEST_FILES_DIR)
@@ -101,7 +100,7 @@ function( cpfAddDynamicAnalysisTarget package)
 			cpfFindRequiredProgram( TOOL_VALGRIND valgrind "A tool for dynamic analysis.")
 			
 			# add valgrind commands
-			set(stampFile "${analysisTargetBinaryDir}/Valgrind_${testTarget}.stamp")
+			set(stampFile "${binaryDir}/Valgrind_${testTarget}.stamp")
 			list(APPEND stampFiles ${stampFile})
 				
 			set(suppressionsFile "${CMAKE_CURRENT_SOURCE_DIR}/Other/${package}ValgrindSuppressions.supp")
@@ -115,6 +114,31 @@ function( cpfAddDynamicAnalysisTarget package)
 			)
 
 		endif()
+	endif()
+	
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Creates the custom target that runs the test executable with OpenCppCoverage.
+# The configuration must use MSVC enable this. OpenCppCoverage will only be run
+# when compiling with debug flags.
+# 
+function( cpfAddOpenCppCoverageTarget package)
+
+	if(NOT CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET)
+		return()
+	endif()
+	# check preconditions
+	cpfAssertDefined(CPF_TEST_FILES_DIR)
+
+	set(targetName opencppcoverage_${package})
+	set(binaryDir ${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName})
+	file(MAKE_DIRECTORY ${binaryDir})
+
+	# get related targets
+	get_property(productionLib TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET)
+	get_property(testTarget TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET)
+	if(TARGET ${testTarget})
 
 		# add OpenCppCoverage commands if possible
 		cpfGetFirstMSVCDebugConfig( msvcDebugConfig )
@@ -123,15 +147,15 @@ function( cpfAddDynamicAnalysisTarget package)
 			cpfFindRequiredProgram( TOOL_OPENCPPCOVERAGE OpenCppCoverage "A tool that creates coverage reports for C++ binaries.")
 
 			# add OpenCppCoverage commands
-			set(coverageOutputTemp "${analysisTargetBinaryDir}/${testTarget}_temp.cov")
-			set(coverageOutput "${analysisTargetBinaryDir}/${testTarget}.cov")
+			set(coverageOutputTemp "${binaryDir}/${testTarget}_temp.cov")
+			set(coverageOutput "${binaryDir}/${testTarget}.cov")
 			list(APPEND coverageOutputFiles ${coverageOutput})
 
 			set(removeTempCovFileComand "cmake -E remove -f \"${coverageOutputTemp}\"") # we need to try to remove this to cover cases where the OpenCppCoverage command fails and the temp file does not get renamed.
 			set(openCppCoverageCommand "\"${TOOL_OPENCPPCOVERAGE}\" --export_type=binary:\"${coverageOutputTemp}\" --sources=\"**\\${CPF_SOURCE_DIR}\\${package}\" --quiet -- \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")
 			set(cmakeRenameCommand "cmake -E rename \"${coverageOutputTemp}\" \"${coverageOutput}\"")
 			# we use an extra stampfile to make sure that marking the target done works even if the commands are only the echos for non debug configs.
-			set(stampFile ${analysisTargetBinaryDir}/OpenCppCoverage_${testTarget}.stamp )
+			set(stampFile ${binaryDir}/OpenCppCoverage_${testTarget}.stamp )
 			list(APPEND stampFiles ${stampFile})
 			set( stampFileCommand "cmake -E touch \"${stampFile}\"")
 
@@ -163,7 +187,7 @@ function( cpfAddDynamicAnalysisTarget package)
 		endif()
 
 	endif()
-	
+
 endfunction()
 
 #----------------------------------------------------------------------------------------

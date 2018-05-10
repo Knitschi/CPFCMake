@@ -102,7 +102,15 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets.
     define_property(
         TARGET
-        PROPERTY CPF_DYNAMIC_ANALYSIS_SUBTARGET
+        PROPERTY CPF_VALGRIND_SUBTARGET
+        BRIEF_DOCS "Contains the name of a sub-target that runs Valgrind or OpenCppCoverage."
+        FULL_DOCS " "
+    )
+
+    # A property that is set on all package main targets.
+    define_property(
+        TARGET
+        PROPERTY CPF_OPENCPPCOVERAGE_SUBTARGET
         BRIEF_DOCS "Contains the name of a sub-target that runs Valgrind or OpenCppCoverage."
         FULL_DOCS " "
     )
