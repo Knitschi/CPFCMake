@@ -224,6 +224,8 @@ namespace ${packageNamespace} {
 \\defgroup ${package}Group ${package}
 \\brief ${briefDescription}
 
+\\section ${package}
+
 ${longDescription}
 
 ### Links ###
