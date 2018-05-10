@@ -14,7 +14,7 @@ function( cpfAddPipelineTarget packages)
 
 	# A collection of the targets that should be contained in the pipeline.
 	set( targets
-		documentation
+		doxygen
 		distributionPackages 	# Because of the global nature of the clearLastBuild command that is included in this target, we can not depend on the package targets directly.
 		staticAnalysis			# Because of the global check for an acyclic dependency graph, we can not depend on the package targets directly
 		dynamicAnalysis			# Because the global target assembles the OpenCppCoverage report from the individual reports, we can not use properties for this.
