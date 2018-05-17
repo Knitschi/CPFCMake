@@ -229,7 +229,15 @@ function( cpfDefineProperties )
 			PROPERTY CPF_OUTPUT_FILES${configSuffix}
 			BRIEF_DOCS "A list of files that are created when the target is build in the given configuration."
 			FULL_DOCS " "
-		)
+        )
+        
+        # A configuration dependent property that is set on some targets that produce stamp files.
+		define_property(
+			TARGET
+			PROPERTY CPF_STAMP_FILE${configSuffix}
+			BRIEF_DOCS "A list of files that are created when the target is build in the given configuration."
+			FULL_DOCS " "
+        )
 
 	endforeach()
 	

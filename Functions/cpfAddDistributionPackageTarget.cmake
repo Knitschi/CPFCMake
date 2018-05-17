@@ -198,12 +198,12 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 		cpfGetInstallFileCommands( copyFilesCommmands "${sourceFiles}" "${outputFiles${configSuffix}}")
 		
 		# command to touch the target stamp
-		set( stampFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/${config}_copyFiles.stamp")
-        cpfGetTouchFileCommands( touchCommmand "${stampFile}")
+		set( stampFile${configSuffix} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/${config}_copyFiles.stamp")
+        cpfGetTouchFileCommands( touchCommmand "${stampFile${configSuffix}}")
 
 		cpfAddConfigurationDependendCommand(
 			TARGET ${targetName}
-            OUTPUT ${stampFile} 
+            OUTPUT ${stampFile${configSuffix}} 
             DEPENDS ${sourceTargets${configSuffix}} # ${sourceFiles} we can currently not depend on the real output files because they are only generated for the active configuration.
 			COMMENT "Collect ${package} ${contentType} package files for config ${config}"
             CONFIG ${config}
@@ -211,7 +211,7 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 			COMMANDS_NOT_CONFIG ${touchCommmand}
         )
         list(APPEND allOutputFiles ${outputFiles${configSuffix}})
-        list(APPEND allStampFiles ${stampFile} )
+        list(APPEND allStampFiles ${stampFile${configSuffix}} )
 		list(APPEND allSourceTargets ${sourceTargets${configSuffix}})
 
 	endforeach()
@@ -226,6 +226,7 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 	set_property(TARGET ${targetName} PROPERTY FOLDER "${package}/private")
 	foreach( configSuffix ${configSuffixes})
 		set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES${configSuffix} ${outputFiles${configSuffix}})
+		set_property(TARGET ${targetName} PROPERTY CPF_STAMP_FILE${configSuffix} ${stampFile${configSuffix}})
 	endforeach()
 
 endfunction()
@@ -499,11 +500,11 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 		set( stampFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/copyToHtml_${shortPackageFilename}.stamp")
 		set( touchStampCommand "cmake -E touch \"${stampFile}\"")
 
-		get_property( inputFiles TARGET ${contentTarget} PROPERTY CPF_OUTPUT_FILES${configSuffix})
+		get_property( contentStampFile TARGET ${contentTarget} PROPERTY CPF_STAMP_FILE${configSuffix})
 		cpfAddConfigurationDependendCommand(
             TARGET ${targetName}
-			OUTPUT ${stampFile}	# we use a stamp-file here because we do not want to pollute the output directory with empty files. This should work because there are no consumers of the files.
-            DEPENDS ${contentTarget} #${inputFiles} we can ont use the input files because the content targets uses a stamp file
+			OUTPUT ${stampFile}			# we use a stamp-file here because we do not want to pollute the output directory with empty files. This should work because there are no consumers of the files.
+            DEPENDS ${contentTarget} ${contentStampFile}
             COMMENT "Create distribution package ${packageFormat} for ${package}."
             CONFIG ${config}
             COMMANDS_CONFIG ${packagingCommand} ${copyToHtmlLastBuildCommand} ${copyToHtmlReleasesCommand} ${touchStampCommand}
