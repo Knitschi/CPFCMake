@@ -101,7 +101,8 @@ function( cpfGetDistributionPackageTargetName targetNameOut package contentId co
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Add a target that bundles all the individual distribution-package targets of the package together
+# Add a target that bundles all the individual distribution-package targets of the package together.
+# The target also makes sure that old packages in LastBuild are deleted. 
 #
 function( cpfAddDistributionPackagesTarget package )
 	cpfGetSubtargets(createPackagesTargets "${package}" CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS)
@@ -194,8 +195,9 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 		if( NOT "${sourceDir}" STREQUAL "")
 			cpfPrependMulti( sourceFiles "${sourceDir}/" "${sourceFiles}")
 		endif()
-		
 		cpfGetInstallFileCommands( copyFilesCommmands "${sourceFiles}" "${outputFiles${configSuffix}}")
+
+		#devMessageList("${sourceFiles}")
 		
 		# command to touch the target stamp
 		set( stampFile${configSuffix} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/${config}_copyFiles.stamp")
@@ -204,7 +206,7 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 		cpfAddConfigurationDependendCommand(
 			TARGET ${targetName}
             OUTPUT ${stampFile${configSuffix}} 
-            DEPENDS ${sourceTargets${configSuffix}} # ${sourceFiles} we can currently not depend on the real output files because they are only generated for the active configuration.
+            DEPENDS ${sourceTargets${configSuffix}} ${sourceFiles} # we can currently not depend on the real output files because they are only generated for the active configuration.
 			COMMENT "Collect ${package} ${contentType} package files for config ${config}"
             CONFIG ${config}
             COMMANDS_CONFIG ${clearContentStageCommands} ${copyFilesCommmands} ${touchCommmand}
