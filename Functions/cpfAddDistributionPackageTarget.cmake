@@ -206,7 +206,7 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 		cpfAddConfigurationDependendCommand(
 			TARGET ${targetName}
             OUTPUT ${stampFile${configSuffix}} 
-            DEPENDS ${sourceTargets${configSuffix}} ${sourceFiles} # we can currently not depend on the real output files because they are only generated for the active configuration.
+            DEPENDS ${sourceTargets${configSuffix}} ${sourceFiles}
 			COMMENT "Collect ${package} ${contentType} package files for config ${config}"
             CONFIG ${config}
             COMMANDS_CONFIG ${clearContentStageCommands} ${copyFilesCommmands} ${touchCommmand}
