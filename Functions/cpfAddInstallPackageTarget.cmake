@@ -41,7 +41,9 @@ function( cpfAddInstallPackageTarget package )
         get_property(installedFiles TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix})
 		cpfPrependMulti( outputFiles${configSuffix} "${CMAKE_INSTALL_PREFIX}/" "${installedFiles}" )
 
-        # Setup the command that is does the actual installation (file copying)
+		devMessageList("${outputFiles${configSuffix}}")
+
+        # Setup the command that does the actual installation (file copying)
         # We use the cmake generated script here to only install the files for the package.
         set( installCommand "cmake -DCMAKE_INSTALL_CONFIG_NAME=${config} -DCMAKE_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\" -P \"${cmakeInstallScript}\"")
 
@@ -49,14 +51,15 @@ function( cpfAddInstallPackageTarget package )
         # but config specific input files.
         set(stampfile "${CMAKE_CURRENT_BINARY_DIR}/${CPF_PRIVATE_DIR}/installFiles${package}${config}.stamp")
         set(stampFileCommand "cmake -E touch \"${stampfile}\"")
-        cpfGetTouchFileCommands( touchCommmand "${stampfile}")
-
+		cpfGetTouchFileCommands( touchCommmand "${stampfile}")
+		
         get_property(binarySubTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
         cpfGetTargetLocations( targetFiles "${binarySubTargets}" ${config})
 
         cpfAddConfigurationDependendCommand(
 			TARGET ${targetName}
-            OUTPUT ${stampfile}
+			#OUTPUT outputFiles${configSuffix}
+			OUTPUT ${stampfile}
             DEPENDS ${cmakeInstallScript} ${targetFiles} ${binarySubTargets}
             COMMENT "Install files for package ${package} ${config}"
             CONFIG ${config}
@@ -64,9 +67,12 @@ function( cpfAddInstallPackageTarget package )
             # The touched files pollute the install stage, but they are not created on Linux where we might use the content of the  InstallStage directly.
 			COMMANDS_NOT_CONFIG ${touchCommmand}
         )
-        list(APPEND allOutputFiles ${stampfile})
+		#list(APPEND allOutputFiles ${stampfile})
+		list(APPEND allOutputFiles outputFiles${configSuffix})
 
 	endforeach()
+
+	list(REMOVE_DUPLICATES allOutputFiles)
 
 	add_custom_target(
         ${targetName}
