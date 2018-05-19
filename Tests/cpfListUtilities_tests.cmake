@@ -11,6 +11,7 @@ function( cpfRunListUtilitiesTests )
     test_cpfSplitList()
     test_cpfFindAllInList()
     test_cpfListLength()
+    test_appendEmptytoEmpty()
     test_cpfContains()
     test_cpfContainsOneOf()
     test_cpfGetFirstMatch()
@@ -93,6 +94,16 @@ function( test_cpfListLength )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+function( test_appendEmptytoEmpty )
+
+    set(list)
+    list(APPEND list "")
+    cpfListLength(length "${list}")
+    cpfAssertStrEQ(${length} 1)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
 function( test_cpfContains )
 
     # contains element
@@ -156,3 +167,4 @@ function( test_cpfGetList1WithoutList2 )
     cpfAssertListsEqual( "${difference}" "bla;" )
 
 endfunction()
+
