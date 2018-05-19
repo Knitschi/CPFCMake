@@ -8,10 +8,11 @@ include(cpfTestUtilities)
 function( cpfRunListUtilitiesTests )
 
     test_cpfPopBack()
+    test_cpfListAppend()
+    test_cpfListSet()
     test_cpfSplitList()
     test_cpfFindAllInList()
     test_cpfListLength()
-    test_appendEmptytoEmpty()
     test_cpfContains()
     test_cpfContainsOneOf()
     test_cpfGetFirstMatch()
@@ -40,6 +41,34 @@ function( test_cpfPopBack )
     #cpfPopBack( lastElement list "${list}")
 
 endfunction()
+
+#----------------------------------------------------------------------------------------
+function( test_cpfListAppend )
+
+    set(list bli bla "" blub)
+    cpfListAppend(list "")
+    cpfAssertListsEqual("${list}" "bli;bla;;blub;" )
+
+    # we can not test the fail case
+    # cpfListAppend("" "")
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( test_cpfListSet )
+
+    # set empty element at end
+    set(list bli bla "" blub)
+    cpfListSet( listOut "${list}" 3 "")
+    cpfAssertListsEqual("${listOut}" "bli;bla;;" )
+
+    # replace empty element
+    set(list bli bla "" blub)
+    cpfListSet( listOut "${list}" 2 "bleb")
+    cpfAssertListsEqual("${listOut}" "bli;bla;bleb;blub" )
+
+endfunction()
+
 
 #----------------------------------------------------------------------------------------
 function( test_cpfSplitList )
@@ -90,16 +119,6 @@ function( test_cpfListLength )
     set( list bli "" bla blub)
     cpfListLength(length "${list}")
     cpfAssertStrEQ(${length} 4)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( test_appendEmptytoEmpty )
-
-    set(list)
-    list(APPEND list "")
-    cpfListLength(length "${list}")
-    cpfAssertStrEQ(${length} 1)
 
 endfunction()
 
@@ -167,4 +186,5 @@ function( test_cpfGetList1WithoutList2 )
     cpfAssertListsEqual( "${difference}" "bla;" )
 
 endfunction()
+
 

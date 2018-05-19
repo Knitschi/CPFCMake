@@ -13,6 +13,29 @@ function( cpfPopBack lastElementOut listOut list)
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Does the same as cpfListAppend( ...) but fails if an empty value is added to an empty list.
+# This is a problem because cmake currently can not have lists with one empty element.
+# Argument list must be given by variable name (without dereference ${}).
+macro( cpfListAppend list value)
+	
+	set(list2 ${${list}}) # for some reason we have to dereference the list or the check for emptyness in the conditional will not work.
+	if(NOT list2 AND (NOT value))
+		message(FATAL_ERROR "Failed to add an empty element to an empty list. CMake does not support lists with one empty element.")
+	endif()
+	cpfListAppend( ${list} "${value}")
+	set(${list} "${${list}}")
+endmacro()
+
+#----------------------------------------------------------------------------------------
+# Sets the element 
+function( cpfListSet listOut list index value )
+	list(INSERT list ${index} "${value}")
+	cpfIncrement(index)
+	list(REMOVE_AT list ${index})
+	set(${listOut} "${list}" PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # Returns the part left of the given index and the part right and including the given index
 #
 function( cpfSplitList outLeft outRight list splitIndex )
@@ -20,9 +43,9 @@ function( cpfSplitList outLeft outRight list splitIndex )
 	set(index 0)
 	foreach(element IN LISTS list)
 		if(${index} LESS ${splitIndex})
-			list(APPEND outLeftLocal "${element}")
+			cpfListAppend( outLeftLocal "${element}")
 		else()
-			list(APPEND outRightLocal "${element}")
+			cpfListAppend( outRightLocal "${element}")
 		endif()
 		cpfIncrement(index)
 	endforeach()
@@ -40,7 +63,7 @@ function( cpfFindAllInList indexesOut list value)
 	set(index 0)
 	foreach(element IN LISTS list)
 		if("${element}" STREQUAL "${value}" )
-			list(APPEND indexes ${index})
+			cpfListAppend( indexes ${index})
 		endif()
 		cpfIncrement(index)
 	endforeach()
@@ -109,7 +132,7 @@ function( cpfGetList1WithoutList2 differenceOut list1 list2)
 	foreach( element IN LISTS list1)
 		cpfContains( isInList2 "${list2}" "${element}")
 		if(NOT isInList2)
-			list(APPEND difference "${element}")
+			cpfListAppend( difference "${element}")
 		endif()
 	endforeach()
 	set( ${differenceOut} "${difference}" PARENT_SCOPE)

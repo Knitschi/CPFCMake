@@ -8,7 +8,7 @@
 #	COMMANDS_NOT_CONFIG							- the commands that are executed when CURRENT_CONFIG is STATIC_CONFIG
 # PRINT_SKIPPED_INSTEAD_OF_NON_CONFIG_OUTPUT	- If set to true the output of the non-config commands is suppressed and one "... skiped" message is printed instead.
 
-list( APPEND CMAKE_MODULE_PATH
+list(APPEND CMAKE_MODULE_PATH
 	${CMAKE_CURRENT_LIST_DIR}/../Functions
 )
 

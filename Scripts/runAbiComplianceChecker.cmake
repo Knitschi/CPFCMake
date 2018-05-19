@@ -11,7 +11,7 @@
 # REPORT_PATH				The full path to the file which shall hold the report.
 # c		Set to NONE, API, ABI. If set, the script will fail if the compatibility is broken.
 
-list( APPEND CMAKE_MODULE_PATH
+list(APPEND CMAKE_MODULE_PATH
 	${CMAKE_CURRENT_LIST_DIR}/../Functions
 )
 
