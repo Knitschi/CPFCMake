@@ -58,8 +58,8 @@ function( cpfAddInstallPackageTarget package )
 
         cpfAddConfigurationDependendCommand(
 			TARGET ${targetName}
-			#OUTPUT outputFiles${configSuffix}
-			OUTPUT ${stampfile}
+			OUTPUT ${outputFiles${configSuffix}}
+			#OUTPUT ${stampfile}
             DEPENDS ${cmakeInstallScript} ${targetFiles} ${binarySubTargets}
             COMMENT "Install files for package ${package} ${config}"
             CONFIG ${config}
@@ -68,7 +68,7 @@ function( cpfAddInstallPackageTarget package )
 			COMMANDS_NOT_CONFIG ${touchCommmand}
         )
 		#list(APPEND allOutputFiles ${stampfile})
-		list(APPEND allOutputFiles outputFiles${configSuffix})
+		list(APPEND allOutputFiles ${outputFiles${configSuffix}})
 
 	endforeach()
 
