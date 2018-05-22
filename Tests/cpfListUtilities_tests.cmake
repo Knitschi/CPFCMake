@@ -45,12 +45,27 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( test_cpfListAppend )
 
+    # test adding and empty element to full list
     set(list bli bla "" blub)
     cpfListAppend(list "")
     cpfAssertListsEqual("${list}" "bli;bla;;blub;" )
 
-    # we can not test the fail case
-    # cpfListAppend("" "")
+    # test adding non-empty element to empty list
+    set(list)
+    cpfListAppend(list a)
+    cpfAssertListsEqual("${list}" "a" )
+
+    # test adding multiple elements
+    set(list a)
+    set(list2 b "" c)
+    cpfListAppend(list "${list2}")
+    cpfAssertListsEqual("${list}" "a;b;;c" )
+
+    # Test appending nothing works.
+    set(list a)
+    set(list2)
+    cpfListAppend(list ${list2})
+    cpfAssertListsEqual("${list}" "a" )
 
 endfunction()
 
@@ -186,5 +201,4 @@ function( test_cpfGetList1WithoutList2 )
     cpfAssertListsEqual( "${difference}" "bla;" )
 
 endfunction()
-
 

@@ -150,7 +150,7 @@ else()
             cpfCurrentBranchIsBehindOrigin( updatesAvailable ${packageDir})
             if(updatesAvailable)
                 cpfExecuteProcess( unused "git pull" ${packageDir})
-                list(APPEND updatedPackages ${package})
+                cpfListAppend( updatedPackages ${package})
             endif()
         endforeach()
 

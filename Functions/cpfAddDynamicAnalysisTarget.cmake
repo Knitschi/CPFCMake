@@ -32,7 +32,7 @@ function( cpfAddGlobalDynamicAnalysisTarget packages)
 
 			foreach( target ${dynamicAnalysisTargets})
 				get_property( files TARGET ${target} PROPERTY CPF_CPPCOVERAGE_OUTPUT)
-				list(APPEND covFiles ${files})
+				cpfListAppend( covFiles "${files}")
 			endforeach()
 
 			# delete output command
@@ -154,7 +154,7 @@ function( cpfAddOpenCppCoverageTarget package)
 			# add OpenCppCoverage commands
 			set(coverageOutputTemp "${binaryDir}/${testTarget}_temp.cov")
 			set(coverageOutput "${binaryDir}/${testTarget}.cov")
-			list(APPEND coverageOutputFiles ${coverageOutput})
+			cpfListAppend( coverageOutputFiles ${coverageOutput})
 
 			set(removeTempCovFileComand "cmake -E remove -f \"${coverageOutputTemp}\"") # we need to try to remove this to cover cases where the OpenCppCoverage command fails and the temp file does not get renamed.
 			set(openCppCoverageCommand "\"${TOOL_OPENCPPCOVERAGE}\" --export_type=binary:\"${coverageOutputTemp}\" --sources=\"**\\${CPF_SOURCE_DIR}\\${package}\" --quiet -- \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")

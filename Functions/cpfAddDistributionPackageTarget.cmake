@@ -18,7 +18,7 @@ function( cpfAddGlobalCreatePackagesTarget packages)
 	foreach(package ${packages})
 		cpfGetDistributionPackagesTargetName( packageTarget ${package})
 		if(TARGET ${packageTarget}) # not all packages may create distribution packages
-			list(APPEND packageTargets ${packageTarget})
+			cpfListAppend( packageTargets ${packageTarget})
 		endif()
 	endforeach()
 	
@@ -73,8 +73,8 @@ function( cpfGetPluginTargetDirectoryPairLists targetsOut directoriesOut pluginO
 			${${list}}
 		)
 		foreach( pluginTarget ${ARG_PLUGIN_TARGETS})
-			list(APPEND pluginTargets ${pluginTarget})
-			list(APPEND pluginDirectories ${ARG_PLUGIN_DIRECTORY})
+			cpfListAppend( pluginTargets ${pluginTarget})
+			cpfListAppend( pluginDirectories ${ARG_PLUGIN_DIRECTORY})
 		endforeach()
 	endforeach()
 	
@@ -141,7 +141,7 @@ function( cpfAddClearLastBuildDirCommand stampFileOut package distPackagesTarget
 			get_property(files TARGET ${target} PROPERTY CPF_OUTPUT_FILES${configSuffix})
 			foreach(file ${files})
 				get_filename_component( shortName "${file}" NAME)
-				list(APPEND packageFiles ${shortName})
+				cpfListAppend( packageFiles ${shortName})
 			endforeach()
 		endforeach()
 	endforeach()
@@ -172,7 +172,7 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 	cpfGetConfigurations(configs)
     foreach( config ${configs})
 		cpfToConfigSuffix( configSuffix ${config})
-		list(APPEND configSuffixes ${configSuffix})
+		cpfListAppend( configSuffixes ${configSuffix})
 
 		set(sourceFiles)
 		set(relativeDestinationFiles)
@@ -212,9 +212,9 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
             COMMANDS_CONFIG ${clearContentStageCommands} ${copyFilesCommmands} ${touchCommmand}
 			COMMANDS_NOT_CONFIG ${touchCommmand}
         )
-        list(APPEND allOutputFiles ${outputFiles${configSuffix}})
-        list(APPEND allStampFiles ${stampFile${configSuffix}} )
-		list(APPEND allSourceTargets ${sourceTargets${configSuffix}})
+        cpfListAppend( allOutputFiles "${outputFiles${configSuffix}}")
+        cpfListAppend( allStampFiles ${stampFile${configSuffix}} )
+		cpfListAppend( allSourceTargets "${sourceTargets${configSuffix}}")
 
 	endforeach()
 
@@ -274,14 +274,14 @@ function( cpfGetDeveloperPackageFiles sourceTargetsOut sourceDirOut sourceFilesO
 	get_property( installTarget TARGET ${package} PROPERTY CPF_INSTALL_PACKAGE_SUBTARGET )
 	get_property( packageFiles TARGET ${installTarget} PROPERTY CPF_OUTPUT_FILES${configSuffix} )
 	cpfGetRelativePaths( relPaths ${sourceDir} "${packageFiles}")
-	list(APPEND sourceFiles "${relPaths}")
+	cpfListAppend( sourceFiles "${relPaths}")
 
 	# get files from abiDump targets
 	get_property( abiDumpTargets TARGET ${package} PROPERTY CPF_ABI_DUMP_SUBTARGETS )
 	if( abiDumpTargets )
 		cpfGetTargetProperties( abiDumpFiles "${abiDumpTargets}" CPF_OUTPUT_FILES${configSuffix})
 		cpfGetRelativePaths( relPaths ${sourceDir} "${abiDumpFiles}")
-		list(APPEND sourceFiles "${relPaths}")
+		cpfListAppend( sourceFiles "${relPaths}")
 	endif()
 
 	set(${sourceTargetsOut} ${installTarget} ${abiDumpTargets} PARENT_SCOPE)
@@ -308,13 +308,13 @@ function( cpfGetUserPackageFiles sourceTargetsOut sourceDirOut sourceFilesOut de
     foreach(subTarget ${packageTargets})
         get_property( type TARGET ${subTarget} PROPERTY TYPE )
         if( ${type} STREQUAL EXECUTABLE OR ${type} STREQUAL SHARED_LIBRARY )
-            list(APPEND allRelevantTargets ${subTarget})
+            cpfListAppend( allRelevantTargets ${subTarget})
         endif()
     endforeach()
             
     # get depended on shared library targets
 	cpfGetLinkedSharedLibsForPackageExecutables( sharedLibs ${package})
-	list(APPEND allRelevantTargets ${sharedLibs})
+	cpfListAppend( allRelevantTargets "${sharedLibs}")
 	if(NOT "${excludedTargets}" STREQUAL "")
 		list(REMOVE_ITEM allRelevantTargets ${excludedTargets} )
 	endif()
@@ -329,23 +329,23 @@ function( cpfGetUserPackageFiles sourceTargetsOut sourceDirOut sourceFilesOut de
 			# the binary file of the target
 			cpfGetTargetLocation( targetDir shortName ${target} ${config})
 			
-            list(APPEND sourceFiles "${targetDir}/${shortName}" )
-			list(APPEND shortDestinationFiles ${shortName})
+            cpfListAppend( sourceFiles "${targetDir}/${shortName}" )
+			cpfListAppend( shortDestinationFiles ${shortName})
 
 			# symlinks on Linux
 			cpfGetTargetVersionSymlinks( symlinks ${target} ${config})
 
 			cpfPrependMulti( symlinksFull "${targetDir}/" "${symlinks}" )
-			list(APPEND sourceFiles ${symlinksFull} )
-			list(APPEND shortDestinationFiles ${symlinks})
+			cpfListAppend( sourceFiles ${symlinksFull} )
+			cpfListAppend( shortDestinationFiles "${symlinks}")
 			
             cpfGetTargetOutputType( outputType ${target})
             cpfGetTypePartOfOutputDir( typeDir ${package} ${outputType})
             
             cpfPrependMulti( relativeTargetDestinationFiles "${typeDir}/" "${shortDestinationFiles}" )
-            list(APPEND relativeDestinationFiles ${relativeTargetDestinationFiles})
+            cpfListAppend( relativeDestinationFiles "${relativeTargetDestinationFiles}")
 
-            list(APPEND usedTargets ${target})
+            cpfListAppend( usedTargets ${target})
 			
 		endif()
 		
@@ -359,14 +359,14 @@ function( cpfGetUserPackageFiles sourceTargetsOut sourceDirOut sourceFilesOut de
 
 			# source path
 			cpfGetTargetLocation( targetDir shortName ${pluginTarget} ${config})
-			list(APPEND sourceFiles "${targetDir}/${shortName}" )
+			cpfListAppend( sourceFiles "${targetDir}/${shortName}" )
             
 			# destination path
 			cpfGetTypePartOfOutputDir( typeDir ${package} RUNTIME )
 			list(GET filteredPluginDirectories ${index} pluginDir)
-			list(APPEND relativeDestinationFiles "${typeDir}/${pluginDir}/${shortName}")
+			cpfListAppend( relativeDestinationFiles "${typeDir}/${pluginDir}/${shortName}")
 
-			list(APPEND usedTargets ${pluginTarget})
+			cpfListAppend( usedTargets ${pluginTarget})
 
 		endif()
 		cpfIncrement(index)
@@ -397,7 +397,7 @@ function( cpfGetTargetVersionSymlinks symlinksOut target config)
 			# Executable targets should only come from the package we are installing.
 			get_property( soName TARGET ${target} PROPERTY IMPORTED_SONAME${configSuffix})
 			if( soName AND NOT "${shortName}" STREQUAL "${soName}" ) 
-				list(APPEND symlinks ${soName})
+				cpfListAppend( symlinks ${soName})
 			endif()
 
 		else() # internal targets
@@ -407,14 +407,14 @@ function( cpfGetTargetVersionSymlinks symlinksOut target config)
 			if(${targetType} STREQUAL EXECUTABLE)
 
 				get_property( outputName TARGET ${target} PROPERTY RUNTIME_OUTPUT_NAME${configSuffix})
-				list(APPEND symlinks ${outputName})
+				cpfListAppend( symlinks ${outputName})
 								
 			elseif(${targetType} STREQUAL SHARED_LIBRARY OR ${targetType} STREQUAL MODULE_LIBRARY)
 
 				get_property( version TARGET ${target} PROPERTY VERSION)
 				get_property( soVersion TARGET ${target} PROPERTY SOVERSION)
 				string(REPLACE "${version}" "${soVersion}" soName "${shortName}" )
-				list(APPEND symlinks ${soName})
+				cpfListAppend( symlinks ${soName})
 
 			endif()
 		endif()
@@ -436,8 +436,8 @@ function( cpfFilterOutSystemPlugins pluginTargetsOut pluginDirectoriesOut plugin
 		cpfContains( cpfContains "${excludedTargets}" ${plugin})
 		if(NOT ${cpfContains})
 			list(GET pluginDirectoriesIn ${index} directory )
-			list(APPEND pluginTargetsLocal ${plugin} )
-			list(APPEND pluginDirectoriesLocal ${directory})
+			cpfListAppend( pluginTargetsLocal ${plugin} )
+			cpfListAppend( pluginDirectoriesLocal ${directory})
 		endif()
 		cpfIncrement(index)
 	endforeach()
@@ -470,7 +470,7 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 	cpfGetConfigurations(configs)
 	foreach(config ${configs}) #once more we have to add a target for each configuration because OUTPUT of add_custom_command does not support generator expressions.
 		cpfToConfigSuffix( configSuffix ${config})
-		list(APPEND configSuffixes ${configSuffix})
+		cpfListAppend( configSuffixes ${configSuffix})
 
 		# locations / files
 		cpfGetBasePackageFilename( basePackageFileName ${package} ${config} ${version} ${contentId} ${packageFormat})
@@ -513,7 +513,7 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 			COMMANDS_NOT_CONFIG ${touchStampCommand}
         )
 
-		list(APPEND allOutputFiles ${stampFile})
+		cpfListAppend( allOutputFiles ${stampFile})
 
 	endforeach()
 

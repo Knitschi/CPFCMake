@@ -41,8 +41,6 @@ function( cpfAddInstallPackageTarget package )
         get_property(installedFiles TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix})
 		cpfPrependMulti( outputFiles${configSuffix} "${CMAKE_INSTALL_PREFIX}/" "${installedFiles}" )
 
-		devMessageList("${outputFiles${configSuffix}}")
-
         # Setup the command that does the actual installation (file copying)
         # We use the cmake generated script here to only install the files for the package.
         set( installCommand "cmake -DCMAKE_INSTALL_CONFIG_NAME=${config} -DCMAKE_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\" -P \"${cmakeInstallScript}\"")
@@ -67,8 +65,8 @@ function( cpfAddInstallPackageTarget package )
             # The touched files pollute the install stage, but they are not created on Linux where we might use the content of the  InstallStage directly.
 			COMMANDS_NOT_CONFIG ${touchCommmand}
         )
-		#list(APPEND allOutputFiles ${stampfile})
-		list(APPEND allOutputFiles ${outputFiles${configSuffix}})
+		#cpfListAppend( allOutputFiles ${stampfile})
+		cpfListAppend( allOutputFiles ${outputFiles${configSuffix}})
 
 	endforeach()
 
@@ -170,7 +168,7 @@ function( cpfSetInstalledTargetFilesPackageProperty package config targets relDi
 			
 				cpfGetRelativeOutputDir( relDirLibFile ${package} ARCHIVE )
 				cpfGetTargetOutputFileNameForTargetType( libFilename ${target} ${config} STATIC_LIBRARY ARCHIVE)
-				list(APPEND additionalLibFiles "${relDirLibFile}/${libFilename}")
+				cpfListAppend( additionalLibFiles "${relDirLibFile}/${libFilename}")
 				
 			elseif( "${CMAKE_SYSTEM_NAME}" STREQUAL Linux )
 				# on linux, there are also soname links and name links generated for shared libraries and executables
@@ -181,18 +179,18 @@ function( cpfSetInstalledTargetFilesPackageProperty package config targets relDi
 				# the solink with the shorter version
 				if("${targetType}" STREQUAL SHARED_LIBRARY)
 					string(REPLACE ${version} ${soVersion} soName "${targetFile}")
-					list(APPEND additionalLibFiles "${relDir}/${soName}")
+					cpfListAppend( additionalLibFiles "${relDir}/${soName}")
 					
 					# the namelink without the version
 					string(REPLACE .${version} "" nameLink "${targetFile}")
-					list(APPEND additionalLibFiles "${relDir}/${nameLink}")
+					cpfListAppend( additionalLibFiles "${relDir}/${nameLink}")
 					
 				elseif("${targetType}" STREQUAL EXECUTABLE)
 					
 					# the namelink without the version
 					# note that the version is appended with a - instead of a .
 					string(REPLACE -${version} "" nameLink "${targetFile}")
-					list(APPEND additionalLibFiles "${relDir}/${nameLink}")
+					cpfListAppend( additionalLibFiles "${relDir}/${nameLink}")
 					
 				endif()
 				
@@ -201,8 +199,8 @@ function( cpfSetInstalledTargetFilesPackageProperty package config targets relDi
 
 		# add the target files once only
 		get_property( installedFiles TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix} )
-		list(APPEND installedFiles "${relDir}/${targetFile}")
-		list(APPEND installedFiles ${additionalLibFiles})
+		cpfListAppend( installedFiles "${relDir}/${targetFile}")
+		cpfListAppend( installedFiles "${additionalLibFiles}")
 		list(REMOVE_DUPLICATES installedFiles)
 		set_property(TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix} ${installedFiles} )
 

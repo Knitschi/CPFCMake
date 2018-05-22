@@ -17,7 +17,7 @@ function( cpfAddGlobalAbiCheckerTarget packages )
 	foreach( package ${packages})
 		cpfGetPackageVersionCompatibilityCheckTarget( target ${package})
 		if(TARGET ${target})
-			list(APPEND targets ${target})
+			cpfListAppend( targets ${target})
 		endif()
 	endforeach()
 	cpfGetAbiComplianceCheckerBundleTargetBaseName(targetName)
@@ -483,7 +483,7 @@ function( cpfAddCompatibilityReportTargets reportFilesOut package binaryTarget p
 		list(GET reportBaseNames ${index} reportBaseName)
 		cpfIncrement(index)
 		cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${comparedToVersion} ${reportBaseName} "${CPF_PROJECT_HTML_ABS_DIR}/${reportOutputDir}" NONE)
-		list(APPEND reportFiles ${reportFile})
+		cpfListAppend( reportFiles ${reportFile})
 	endforeach()
 	
 	set(${reportFilesOut} ${reportFiles} PARENT_SCOPE)
@@ -508,11 +508,11 @@ function( cpfGetReportBaseNamesAndOutputDirs reportDirsOut reportBaseNamesOut pa
 		else()	# both versions are release versions
 			cpfGetRelVersionToVersionReportDir( reportOutputDir ${package} ${newVersion} ${comparedToVersion} )
 		endif()
-		list(APPEND reportOutputDirs ${reportOutputDir})
+		cpfListAppend( reportOutputDirs ${reportOutputDir})
 		
 		# get the report base name
 		cpfGetCompatibilityReportBaseNameForVersion( baseName ${binaryTarget} ${newVersion} ${comparedToVersion} )
-		list(APPEND reportBaseNames ${baseName})
+		cpfListAppend( reportBaseNames ${baseName})
 		
 	endforeach()
 	
@@ -654,7 +654,7 @@ function( cpfAddCleanOutputDirsCommands cleanStampsOut target reportFiles )
 			# add clear command for all files from the current dir
 			if(currentDir)
 				cpfAddClearDirExceptCommand( stampFile ${currentDir} ${names} ${targetName} ${filesInDir})
-				list(APPEND stampFiles ${stampFile})
+				cpfListAppend( stampFiles ${stampFile})
 			endif()
 			
 			set(currentDir ${dir})
@@ -662,8 +662,8 @@ function( cpfAddCleanOutputDirsCommands cleanStampsOut target reportFiles )
 			set(filesInDir ${file})
 		else()
 			# accumulate the file for the same dir
-			list(APPEND names ${name})
-			list(APPEND filesInDir ${file})
+			cpfListAppend( names ${name})
+			cpfListAppend( filesInDir ${file})
 		endif()
 
 	endforeach()

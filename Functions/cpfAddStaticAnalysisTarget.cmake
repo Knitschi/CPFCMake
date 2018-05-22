@@ -32,7 +32,7 @@ function( cpfAddGlobalStaticAnalysisTarget packages)
                 get_property( staticAnalysisTarget TARGET ${binaryTarget} PROPERTY CPF_CLANG_TIDY_SUBTARGET)
 
                 if(staticAnalysisTarget)	# this is currently only available for the LinuxMakeClang toolchain.
-                    list(APPEND staticAnalysisTargets ${staticAnalysisTarget})
+                    cpfListAppend( staticAnalysisTargets ${staticAnalysisTarget})
                 endif()
                 
             endforeach()
@@ -129,7 +129,7 @@ function( cpfAddClangTidyTarget binaryTarget )
                         VERBATIM
                         )
                     
-                    list(APPEND stampFiles ${stampFile})
+                    cpfListAppend( stampFiles ${stampFile})
 
                 endif()
 			endif()

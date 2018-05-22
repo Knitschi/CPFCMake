@@ -16,15 +16,27 @@ endfunction()
 # Does the same as cpfListAppend( ...) but fails if an empty value is added to an empty list.
 # This is a problem because cmake currently can not have lists with one empty element.
 # Argument list must be given by variable name (without dereference ${}).
-macro( cpfListAppend list value)
-	
-	set(list2 ${${list}}) # for some reason we have to dereference the list or the check for emptyness in the conditional will not work.
-	if(NOT list2 AND (NOT value))
+function( cpfListAppend list_arg )
+
+	# Handle add nothing case
+	if( ${ARGC} EQUAL 1)
+		return()
+	endif()
+
+	# Handle problematic case of adding an empty element to an empty list.
+	# for some reason we have to dereference the arguments for the emptyness check in the conditional. Otherwise it does not work.
+	set(list "${${list_arg}}")
+	set(appendedElements "${ARGN}")
+	if(NOT list AND (NOT appendedElements))
 		message(FATAL_ERROR "Failed to add an empty element to an empty list. CMake does not support lists with one empty element.")
 	endif()
-	cpfListAppend( ${list} "${value}")
-	set(${list} "${${list}}")
-endmacro()
+	
+	# Do the normal append
+	list(APPEND list "${appendedElements}")
+
+	set(${list_arg} "${list}" PARENT_SCOPE)
+
+endfunction()
 
 #----------------------------------------------------------------------------------------
 # Sets the element 
@@ -87,7 +99,7 @@ endfunction()
 function( cpfContains ret list element)
 
 	list(FIND list "${element}" index)
-	if("${index}" STREQUAL -1)
+	if(${index} EQUAL -1)
 		set(${ret} FALSE PARENT_SCOPE)
 	else()
 		set(${ret} TRUE PARENT_SCOPE)

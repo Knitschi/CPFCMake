@@ -106,7 +106,7 @@ function( cpfAddRunPython3TestTarget package testScript args sourceFiles depende
 		# Get the sources from the depended on packages.
 		foreach( package ${dependedOnPackages})
 			getAbsPathsOfTargetSources( absSources ${package})
-			list(APPEND sourceFiles "${absSources}")
+			cpfListAppend( sourceFiles "${absSources}")
 		endforeach()
 
 		# derive the python module path from the script path

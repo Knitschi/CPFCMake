@@ -18,7 +18,7 @@ function( cpfAddStandardCustomCommand )
 	set(comment)
 	foreach(command ${ARG_COMMANDS})
 		separate_arguments(argumentList NATIVE_COMMAND ${command})
-		list(APPEND commandArguments COMMAND ${argumentList} )
+		cpfListAppend( commandArguments COMMAND ${argumentList} )
 		string(APPEND comment "${command} &")
 	endforeach()
 	
@@ -161,8 +161,8 @@ function( cpfAddConfigurationDependendCommand )
 	)
 
 	set(variableDefinitions)
-	list(APPEND variableDefinitions DEFINITION VARIABLE COMMANDS_CONFIG VALUES ${ARG_COMMANDS_CONFIG} )
-	list(APPEND variableDefinitions DEFINITION VARIABLE COMMANDS_NOT_CONFIG VALUES ${ARG_COMMANDS_NOT_CONFIG} )
+	cpfListAppend( variableDefinitions DEFINITION VARIABLE COMMANDS_CONFIG VALUES ${ARG_COMMANDS_CONFIG} )
+	cpfListAppend( variableDefinitions DEFINITION VARIABLE COMMANDS_NOT_CONFIG VALUES ${ARG_COMMANDS_NOT_CONFIG} )
 
     cpfSetupArgumentFile( argumentFile ${ARG_TARGET} "${ARG_DEPENDS}" "${variableDefinitions}")
     file(RELATIVE_PATH relPathArgFile "${CPF_ROOT_DIR}" "${argumentFile}")
@@ -205,7 +205,7 @@ function( cpfSetupArgumentFile filenameOut target depends variableDefinitions )
 			# reset for next definition
 			set(definition)
 		else()
-			list(APPEND definition ${element})
+			cpfListAppend( definition ${element})
 		endif()
 	endforeach()
 
@@ -279,8 +279,8 @@ function( cpfGetInstallFileCommands commandsOut absSourceFilePaths absDestFilePa
 		
 		list(GET absDestFilePaths ${index} destFile)
 		
-		list(APPEND commands "cmake -E copy \"${sourceFile}\" \"${destFile}\" ")
-		list(APPEND commands "cmake -E touch \"${destFile}\" ")
+		cpfListAppend( commands "cmake -E copy \"${sourceFile}\" \"${destFile}\" ")
+		cpfListAppend( commands "cmake -E touch \"${destFile}\" ")
 
 		cpfIncrement(index)
 	endforeach()
@@ -297,18 +297,18 @@ function( cpfGetTouchFileCommands commandsOut absFilePaths )
 	set(outputDirs)
 	foreach( file ${absFilePaths} )
 		get_filename_component(dir "${file}" DIRECTORY)		
-		list(APPEND outputDirs ${dir})
+		cpfListAppend( outputDirs ${dir})
 	endforeach()
 	list(REMOVE_DUPLICATES outputDirs)
 
 	# add commands for creating these directories
 	foreach( dir ${outputDirs} )
-		list(APPEND commands "cmake -E make_directory \"${dir}\"")
+		cpfListAppend( commands "cmake -E make_directory \"${dir}\"")
 	endforeach()
 
 	# add commands for copying the files
 	foreach( file ${absFilePaths})
-		list(APPEND commands "cmake -E touch \"${file}\" ")
+		cpfListAppend( commands "cmake -E touch \"${file}\" ")
 	endforeach()
 
 	set( ${commandsOut} ${commands} PARENT_SCOPE )
@@ -327,8 +327,8 @@ function( cpfAddClearDirExceptCommand stampFileOut directory notDeletedEntries t
 
 	# we use the argument file mechanism to pass the file list to the script, because it can be a long list.
 	set(variableDefinitions)
-	list(APPEND variableDefinitions DEFINITION VARIABLE DIRECTORY VALUES ${directory} )
-	list(APPEND variableDefinitions DEFINITION VARIABLE ENTRIES VALUES ${notDeletedEntries} )
+	cpfListAppend( variableDefinitions DEFINITION VARIABLE DIRECTORY VALUES ${directory} )
+	cpfListAppend( variableDefinitions DEFINITION VARIABLE ENTRIES VALUES ${notDeletedEntries} )
 	
 	cpfPrependMulti(notDeletedEntriesFull "${directory}/" "${notDeletedEntries}")
     cpfSetupArgumentFile( argumentFile ${target} "${dependedOnTargets}" "${variableDefinitions}")
@@ -378,7 +378,7 @@ function( cpfGetSubtargets subTargetsOut packages subtargetProperty)
 	foreach(package ${packages})
 		if(TARGET ${package}) # not all packages have targets
 			get_property(subTarget TARGET ${package} PROPERTY ${subtargetProperty})
-			list(APPEND targets ${subTarget} )
+			cpfListAppend( targets ${subTarget} )
 		endif()
 	endforeach()
 	set(${subTargetsOut} "${targets}" PARENT_SCOPE)

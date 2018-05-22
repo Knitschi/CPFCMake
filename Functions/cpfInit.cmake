@@ -90,7 +90,7 @@ function( cpfAddPackages externalPackages globalFiles )
 	)
 	foreach( dir ${cpfPackageDirs})
 		if((EXISTS ${CMAKE_SOURCE_DIR}/${dir}) AND (EXISTS ${CMAKE_SOURCE_DIR}/${dir}/CMakeLists.txt))
-			list(APPEND packages ${dir})
+			cpfListAppend( packages ${dir})
 		endif()
 	endforeach()
 
@@ -112,7 +112,7 @@ function( cpfAddPackages externalPackages globalFiles )
 	)
 	
 	if(CPF_ENABLE_DOXYGEN_TARGET)
-		list(APPEND SOLUTION_FILES
+		cpfListAppend( SOLUTION_FILES
 			${CPF_DOCUMENTATION_DIR}/DoxygenConfig.txt
 			${CPF_DOCUMENTATION_DIR}/DoxygenLayout.xml
 			${CPF_DOCUMENTATION_DIR}/DoxygenStylesheet.css
@@ -120,7 +120,7 @@ function( cpfAddPackages externalPackages globalFiles )
 	endif()
 
 	if(CPF_ENABLE_STATIC_ANALYSIS_TARGET)
-		list(APPEND SOLUTION_FILES 
+		cpfListAppend( SOLUTION_FILES 
 			"${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}"
 		)
 	endif()

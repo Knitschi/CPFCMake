@@ -2,6 +2,8 @@
 
 include_guard(GLOBAL)
 
+include(cpfListUtilities)
+
 #----------------------------------------------------------------------------------------
 # Splits the given string into substrings at the location of the separator char
 # The separator will not be contained in the returned substrings
@@ -37,7 +39,7 @@ function( cpfPrependMulti outputList prefix inputList )
 
 	set(outLocal)
 	foreach( string IN LISTS inputList )
-		list(APPEND outLocal "${prefix}${string}")
+		cpfListAppend( outLocal "${prefix}${string}")
 	endforeach()
 	set(${outputList} ${outLocal} PARENT_SCOPE)
 	
