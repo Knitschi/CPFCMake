@@ -74,6 +74,7 @@ function( cpfAddInstallPackageTarget package )
 
 	# The abi dump targets put their output directly into the install stage.
 	get_property( abiDumpTargets TARGET ${package} PROPERTY CPF_ABI_DUMP_SUBTARGETS )
+	devMessage("${abiDumpTargets}")
 
 	add_custom_target(
         ${targetName}

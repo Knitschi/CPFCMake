@@ -225,18 +225,18 @@ function( cpfAddPackage )
 	# Plugins must be added before the install targets
 	cpfAddPlugins( ${ARG_PACKAGE_NAME} "${pluginOptionLists}" )
 	 
-	# Adds the install rules and the per package install targets.
-	cpfAddInstallRulesAndTargets( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} )
-
 	# Adds a target the creates abi-dumps when using clang or gcc with debug options.
 	cpfAddAbiCheckerTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" )
 	
-	# Adds the targets that create the distribution packages.
-	cpfAddDistributionPackageTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" "${pluginOptionLists}" )
-
 	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
 	cpfAddPackageDocsTarget( packageLinkFile ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
 	list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
+
+	# Adds the install rules and the per package install targets.
+	cpfAddInstallRulesAndTargets( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} )
+
+	# Adds the targets that create the distribution packages.
+	cpfAddDistributionPackageTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" "${pluginOptionLists}" )
 
 endfunction() 
 
