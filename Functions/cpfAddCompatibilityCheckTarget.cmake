@@ -439,25 +439,16 @@ function( cpfAddAbiDumpTarget package binaryTarget headerListFile )
 	# set target properties
 	cpfToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} )
 	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES${configSuffix} ${abiDumpFile} )
-	set_property(TARGET ${package} APPEND PROPERTY CPF_ABI_DUMP_SUBTARGETS ${targetName} )
+	set_property(TARGET ${binaryTarget} PROPERTY CPF_ABI_DUMP_SUBTARGET ${targetName} )
 
 endfunction()
 
 #----------------------------------------------------------------------------------------
 function( cpfGetCurrentDumpFile dumpFileOut package binaryTarget )
 	get_property( currentVersion TARGET ${package} PROPERTY VERSION )
-	cpfGetDumpFilePathRelativeToInstallPrefix( relDumpFilePath ${package} ${binaryTarget} ${currentVersion} )
-	#set( ${dumpFileOut} ${CMAKE_BINARY_DIR}/${package}/${abiDumpTarget} PARENT_SCOPE)
-	set( ${dumpFileOut} "${CMAKE_INSTALL_PREFIX}/${relDumpFilePath}" PARENT_SCOPE)
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetDumpFilePathRelativeToInstallPrefix pathOut package binaryTarget version )
-	
-	cpfGetAbiDumpFileName( abiDumpFileShort ${binaryTarget} ${version})
-	cpfGetRelativeOutputDir( relDir ${package} PDB) # we put it in the debug directory
-	set( ${pathOut} "${relDir}/${abiDumpFileShort}" PARENT_SCOPE)
-	
+	cpfGetAbiDumpTargetName( abiDumpTarget ${binaryTarget})
+	cpfGetAbiDumpFileName( dumpFile ${binaryTarget} ${currentVersion})
+	set( ${dumpFileOut} "${CMAKE_BINARY_DIR}/${package}/${abiDumpTarget}/${dumpFile}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -467,7 +458,8 @@ function( cpfGetAbiDumpFileName shortNameOut binaryTarget version )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetDumpFilePathRelativeToPackageDir pathOut binaryTarget version)
+function( cpfGetDumpFilePathRelativeToPackageDir pathOut package binaryTarget )
+	get_property( version TARGET ${package} PROPERTY VERSION )
 	cpfGetAbiDumpFileName( dumpFile ${binaryTarget} ${version})
 	cpfGetTypePartOfOutputDir( typeDir "" PDB )
 	set( ${pathOut} ${typeDir}/${dumpFile} PARENT_SCOPE)
@@ -596,7 +588,7 @@ endfunction()
 function( cpfGetLocationOfDownloadedDumpFile dumpFileOut package binaryTarget packageFormat version )
 	
 	# get the path to the dumpfile within the extracted package
-	cpfGetDumpFilePathRelativeToPackageDir( relDumpFilePath ${binaryTarget} ${version})
+	cpfGetDumpFilePathRelativeToPackageDir( relDumpFilePath ${package} ${binaryTarget})
 	
 	# get the name of the directory that is created when the package is extracted (the archive filename without the archive extensions)
 	cpfGetShortDevBinPackageName( archiveFileName ${package} ${CMAKE_BUILD_TYPE} ${version} ${packageFormat} )

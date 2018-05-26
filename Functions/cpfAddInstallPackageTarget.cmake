@@ -63,7 +63,8 @@ function( cpfAddInstallPackageTarget package )
             CONFIG ${config}
             COMMANDS_CONFIG ${installCommand} ${touchCommmand}
 			COMMANDS_NOT_CONFIG ${touchCommmand}
-        )
+		)
+		cpfListAppend( allStampFiles ${stampfile${configSuffix}})
 		cpfListAppend( allOutputFiles ${outputFiles${configSuffix}})
 
 	endforeach()
@@ -72,7 +73,7 @@ function( cpfAddInstallPackageTarget package )
 
 	add_custom_target(
         ${targetName}
-        DEPENDS ${binarySubTargets} ${allOutputFiles}
+        DEPENDS ${binarySubTargets} ${allStampFiles}
     )
 
 	# set some properties
@@ -81,7 +82,6 @@ function( cpfAddInstallPackageTarget package )
 	foreach(config ${configs})
 		cpfToConfigSuffix(configSuffix ${config})
 		set_property( TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES${configSuffix} ${outputFiles${configSuffix}})
-		devMessage("${stampfile${configSuffix}}")
 		set_property( TARGET ${targetName} PROPERTY CPF_STAMP_FILE${configSuffix} ${stampfile${configSuffix}})
 	endforeach()
 

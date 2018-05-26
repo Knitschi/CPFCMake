@@ -278,19 +278,28 @@ function( cpfGetDeveloperPackageFiles sourceTargetsOut sourceDirOut sourceFilesO
 	cpfListAppend( sourceFiles "${relPaths}")
 
 	# get files from abiDump targets
-	get_property( abiDumpTargets TARGET ${package} PROPERTY CPF_ABI_DUMP_SUBTARGETS )
-	if( abiDumpTargets )
-		cpfGetTargetProperties( abiDumpFiles "${abiDumpTargets}" CPF_OUTPUT_FILES${configSuffix})
-		cpfGetRelativePaths( relPaths ${sourceDir} "${abiDumpFiles}")
-		devMessage("${relPaths}")
-		cpfListAppend( sourceFiles "${relPaths}")
-	endif()
+	set(relDumpfileSourcePaths)
+	set(relDumpfileDestPaths)
+	get_property( binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
+	foreach(binaryTarget ${binaryTargets})
+		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY CPF_ABI_DUMP_SUBTARGET )
+		if(abiDumpTarget)
+			list(APPEND abiDumpTargets ${abiDumpTarget})
+			# source path
+			cpfGetCurrentDumpFile( dumpFile ${package} ${binaryTarget})
+			cpfGetRelativePaths( relDumpfileSourcePath ${sourceDir} ${dumpFile})
+			list(APPEND relDumpfileSourcePaths ${relDumpfileSourcePath})
+			# destination path
+			cpfGetDumpFilePathRelativeToPackageDir( destPathDumpFile ${package} ${binaryTarget})
+			list(APPEND relDumpfileDestPaths ${destPathDumpFile})
+		endif()
+	endforeach()
 
 	set(${sourceTargetsOut} ${installTarget} ${abiDumpTargets} PARENT_SCOPE)
 	set(${sourceDirOut} ${sourceDir} PARENT_SCOPE)
-	set(${sourceFilesOut} ${sourceFiles} PARENT_SCOPE)
+	set(${sourceFilesOut} ${sourceFiles} ${relDumpfileSourcePaths} PARENT_SCOPE)
 	# The destination directory structure is already correct here
-	set(${destFilesOut} ${sourceFiles} PARENT_SCOPE)
+	set(${destFilesOut} ${sourceFiles} ${relDumpfileDestPaths} PARENT_SCOPE)
 	set(${installTargetStampFileOut} ${stampFile} PARENT_SCOPE)
 
 endfunction()
