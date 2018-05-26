@@ -419,9 +419,7 @@ function( cpfAddAbiDumpTarget package binaryTarget headerListFile )
 	
 	# Locations
 	cpfGetFullTargetOutputFile( targetBinaryFile ${binaryTarget} ${CMAKE_BUILD_TYPE} )
-	get_property( version TARGET ${binaryTarget} PROPERTY VERSION)
-	cpfGetDumpFilePathRelativeToInstallPrefix( relDumpFilePath ${package} ${binaryTarget} ${version} )
-	set( abiDumpFile "${CMAKE_INSTALL_PREFIX}/${relDumpFilePath}")
+	cpfGetCurrentDumpFile( abiDumpFile ${package} ${binaryTarget})
 	
 	# Setup the command
 	get_property( version TARGET ${binaryTarget} PROPERTY VERSION)
@@ -443,6 +441,14 @@ function( cpfAddAbiDumpTarget package binaryTarget headerListFile )
 	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES${configSuffix} ${abiDumpFile} )
 	set_property(TARGET ${package} APPEND PROPERTY CPF_ABI_DUMP_SUBTARGETS ${targetName} )
 
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetCurrentDumpFile dumpFileOut package binaryTarget )
+	get_property( currentVersion TARGET ${package} PROPERTY VERSION )
+	cpfGetDumpFilePathRelativeToInstallPrefix( relDumpFilePath ${package} ${binaryTarget} ${currentVersion} )
+	#set( ${dumpFileOut} ${CMAKE_BINARY_DIR}/${package}/${abiDumpTarget} PARENT_SCOPE)
+	set( ${dumpFileOut} "${CMAKE_INSTALL_PREFIX}/${relDumpFilePath}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -602,13 +608,6 @@ function( cpfGetLocationOfDownloadedDumpFile dumpFileOut package binaryTarget pa
 
 	set( ${dumpFileOut} "${CPF_PREVIOUS_PACKAGES_ABS_DIR}/${packageDir}/${relDumpFilePath}" PARENT_SCOPE)
 	
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetCurrentDumpFile dumpFileOut package binaryTarget )
-	get_property( currentVersion TARGET ${package} PROPERTY VERSION )
-	cpfGetDumpFilePathRelativeToInstallPrefix( relDumpFilePath ${package} ${binaryTarget} ${currentVersion} )
-	set( ${dumpFileOut} "${CMAKE_INSTALL_PREFIX}/${relDumpFilePath}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------

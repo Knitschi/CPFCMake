@@ -282,6 +282,7 @@ function( cpfGetDeveloperPackageFiles sourceTargetsOut sourceDirOut sourceFilesO
 	if( abiDumpTargets )
 		cpfGetTargetProperties( abiDumpFiles "${abiDumpTargets}" CPF_OUTPUT_FILES${configSuffix})
 		cpfGetRelativePaths( relPaths ${sourceDir} "${abiDumpFiles}")
+		devMessage("${relPaths}")
 		cpfListAppend( sourceFiles "${relPaths}")
 	endif()
 
