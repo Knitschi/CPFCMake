@@ -47,38 +47,32 @@ function( cpfAddInstallPackageTarget package )
 
         # We use a stampfile here instead of the real output files, because we do not have config specific output filenames
         # but config specific input files.
-        set(stampfile "${CMAKE_CURRENT_BINARY_DIR}/${CPF_PRIVATE_DIR}/installFiles${package}${config}.stamp")
-        set(stampFileCommand "cmake -E touch \"${stampfile}\"")
-		cpfGetTouchFileCommands( touchCommmand "${stampfile}")
-		
+        set(stampfile${configSuffix} "${CMAKE_CURRENT_BINARY_DIR}/${CPF_PRIVATE_DIR}/installFiles${package}${config}.stamp")
+		cpfGetTouchFileCommands( touchCommmand "${stampfile${configSuffix}}")
+
         get_property(binarySubTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
         cpfGetTargetLocations( targetFiles "${binarySubTargets}" ${config})
 
         cpfAddConfigurationDependendCommand(
 			TARGET ${targetName}
-			OUTPUT ${outputFiles${configSuffix}}
-			#OUTPUT ${stampfile}
+			# We use a stamp file instead of the real output files because OUTPUT does not support generator expressions (cmake 3.11)
+			#OUTPUT ${outputFiles${configSuffix}}
+			OUTPUT ${stampfile${configSuffix}}
             DEPENDS ${cmakeInstallScript} ${targetFiles} ${binarySubTargets}
             COMMENT "Install files for package ${package} ${config}"
             CONFIG ${config}
             COMMANDS_CONFIG ${installCommand} ${touchCommmand}
-            # The touched files pollute the install stage, but they are not created on Linux where we might use the content of the  InstallStage directly.
 			COMMANDS_NOT_CONFIG ${touchCommmand}
         )
-		#cpfListAppend( allOutputFiles ${stampfile})
 		cpfListAppend( allOutputFiles ${outputFiles${configSuffix}})
 
 	endforeach()
 
 	list(REMOVE_DUPLICATES allOutputFiles)
 
-	# The abi dump targets put their output directly into the install stage.
-	get_property( abiDumpTargets TARGET ${package} PROPERTY CPF_ABI_DUMP_SUBTARGETS )
-	devMessage("${abiDumpTargets}")
-
 	add_custom_target(
         ${targetName}
-        DEPENDS ${binarySubTargets} ${allOutputFiles} ${abiDumpTargets}
+        DEPENDS ${binarySubTargets} ${allOutputFiles}
     )
 
 	# set some properties
@@ -87,6 +81,8 @@ function( cpfAddInstallPackageTarget package )
 	foreach(config ${configs})
 		cpfToConfigSuffix(configSuffix ${config})
 		set_property( TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES${configSuffix} ${outputFiles${configSuffix}})
+		devMessage("${stampfile${configSuffix}}")
+		set_property( TARGET ${targetName} PROPERTY CPF_STAMP_FILE${configSuffix} ${stampfile${configSuffix}})
 	endforeach()
 
 endfunction()

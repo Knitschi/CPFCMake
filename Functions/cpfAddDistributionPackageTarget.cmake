@@ -178,8 +178,9 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 		set(relativeDestinationFiles)
 
 		# get the files that are included in the package
+		set(installTargetStampFile)
 		if( "${contentType}" STREQUAL BINARIES_DEVELOPER )
-			cpfGetDeveloperPackageFiles( sourceTargets${configSuffix} sourceDir sourceFiles relativeDestinationFiles ${package} ${config} )
+			cpfGetDeveloperPackageFiles( sourceTargets${configSuffix} sourceDir sourceFiles relativeDestinationFiles installTargetStampFile ${package} ${config} )
 		elseif( "${contentType}" STREQUAL BINARIES_USER )
 			cpfGetUserPackageFiles( sourceTargets${configSuffix} sourceDir sourceFiles relativeDestinationFiles ${package} ${config} "${excludedTargets}" "${pluginTargets}" "${pluginDirectories}" )
 		else()
@@ -197,16 +198,14 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 		endif()
 		cpfGetInstallFileCommands( copyFilesCommmands "${sourceFiles}" "${outputFiles${configSuffix}}")
 
-		#devMessageList("${sourceFiles}")
-		
 		# command to touch the target stamp
 		set( stampFile${configSuffix} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/${config}_copyFiles.stamp")
         cpfGetTouchFileCommands( touchCommmand "${stampFile${configSuffix}}")
 
 		cpfAddConfigurationDependendCommand(
 			TARGET ${targetName}
-            OUTPUT ${stampFile${configSuffix}} 
-            DEPENDS ${sourceTargets${configSuffix}} ${sourceFiles}
+            OUTPUT ${stampFile${configSuffix}}  
+            DEPENDS ${sourceTargets${configSuffix}} ${installTargetStampFile}
 			COMMENT "Collect ${package} ${contentType} package files for config ${config}"
             CONFIG ${config}
             COMMANDS_CONFIG ${clearContentStageCommands} ${copyFilesCommmands} ${touchCommmand}
@@ -264,7 +263,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # The BINARIES_DEVELOPER package cpfContains the same files as the install directory of the package
 #
-function( cpfGetDeveloperPackageFiles sourceTargetsOut sourceDirOut sourceFilesOut destFilesOut package config )
+function( cpfGetDeveloperPackageFiles sourceTargetsOut sourceDirOut sourceFilesOut destFilesOut installTargetStampFileOut package config )
 		
 	cpfToConfigSuffix( configSuffix ${config})
 	cpfGetPackagePrefixOutputDir( packageDir ${package} )
@@ -273,6 +272,8 @@ function( cpfGetDeveloperPackageFiles sourceTargetsOut sourceDirOut sourceFilesO
 	# get files from install targets
 	get_property( installTarget TARGET ${package} PROPERTY CPF_INSTALL_PACKAGE_SUBTARGET )
 	get_property( packageFiles TARGET ${installTarget} PROPERTY CPF_OUTPUT_FILES${configSuffix} )
+	get_property( stampFile TARGET ${installTarget} PROPERTY CPF_STAMP_FILE${configSuffix} )
+
 	cpfGetRelativePaths( relPaths ${sourceDir} "${packageFiles}")
 	cpfListAppend( sourceFiles "${relPaths}")
 
@@ -289,6 +290,7 @@ function( cpfGetDeveloperPackageFiles sourceTargetsOut sourceDirOut sourceFilesO
 	set(${sourceFilesOut} ${sourceFiles} PARENT_SCOPE)
 	# The destination directory structure is already correct here
 	set(${destFilesOut} ${sourceFiles} PARENT_SCOPE)
+	set(${installTargetStampFileOut} ${stampFile} PARENT_SCOPE)
 
 endfunction()
 
