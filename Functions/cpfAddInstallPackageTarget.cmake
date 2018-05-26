@@ -72,9 +72,12 @@ function( cpfAddInstallPackageTarget package )
 
 	list(REMOVE_DUPLICATES allOutputFiles)
 
+	# The abi dump targets put their output directly into the install stage.
+	get_property( abiDumpTargets TARGET ${package} PROPERTY CPF_ABI_DUMP_SUBTARGETS )
+
 	add_custom_target(
         ${targetName}
-        DEPENDS ${binarySubTargets} ${allOutputFiles}
+        DEPENDS ${binarySubTargets} ${allOutputFiles} ${abiDumpTargets}
     )
 
 	# set some properties
