@@ -67,6 +67,16 @@ function( test_cpfListAppend )
     cpfListAppend(list ${list2})
     cpfAssertListsEqual("${list}" "a" )
 
+    # Test appending an empty element to an empty list causes error.
+    # We issue an error here, because cmake lists can not contain one empty element.
+    # set(list)
+    # cpfListAppend(list "")
+
+    # Test appending a 0 to an empty list causes no error
+    set(list)
+    cpfListAppend(list 0)
+    cpfAssertListsEqual("${list}" "0" )
+
 endfunction()
 
 #----------------------------------------------------------------------------------------

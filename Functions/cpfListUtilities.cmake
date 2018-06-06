@@ -27,7 +27,7 @@ function( cpfListAppend list_arg )
 	# for some reason we have to dereference the arguments for the emptyness check in the conditional. Otherwise it does not work.
 	set(list "${${list_arg}}")
 	set(appendedElements "${ARGN}")
-	if(NOT list AND (NOT appendedElements))
+	if(NOT list AND ("${appendedElements}" STREQUAL ""))
 		message(FATAL_ERROR "Failed to add an empty element to an empty list. CMake does not support lists with one empty element.")
 	endif()
 	
