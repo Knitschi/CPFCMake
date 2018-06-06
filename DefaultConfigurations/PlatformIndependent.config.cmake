@@ -16,10 +16,11 @@ set( CPF_ENABLE_PRECOMPILED_HEADER ON CACHE BOOL "Switch the use of precompiled 
 set( BUILD_SHARED_LIBS OFF CACHE BOOL "Set this to ON to create all production target libraries as shared libries. The fixture libraries and libraries created for executables are always static libraries.")
 
 # PIPELINE TARGETS
-set( CPF_ENABLE_RUN_TESTS_TARGET ON CACHE BOOL "Add targets that will run the test executables when build. The targets can be used to get a quick code, test, code, test cycle." FORCE)
-set( CPF_ENABLE_DOXYGEN_TARGET ON CACHE BOOL "Adds a target that will run doxygen on the entire CPF project." FORCE)
-set( CPF_ENABLE_STATIC_ANALYSIS_TARGET ON CACHE BOOL "Adds a target that mainly runs clang-tidy on the CPF project." FORCE)
-set( CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET ON CACHE BOOL "Adds a target that runs OpenCppCoverage on Windows and Valgrind on Linux." FORCE)
+set( CPF_ENABLE_RUN_TESTS_TARGET ON CACHE BOOL "Activates custom targets that run the test executables." FORCE)
+set( CPF_ENABLE_DOXYGEN_TARGET ON CACHE BOOL "Activates a custom target that runs doxygen on the entire CPF project." FORCE)
+set( CPF_ENABLE_STATIC_ANALYSIS_TARGET ON CACHE BOOL "Activates custom targets that run clang-tidy." FORCE)
+set( CPF_ENABLE_VALGRIND_TARGET ON CACHE BOOL "Activates custom targets that run Valgrind. The targets are only available when compiling with clang or gcc with debug info." FORCE)
+set( CPF_ENABLE_OPENCPPCOVERAGE_TARGET ON CACHE BOOL "Activates custom targets that run OpenCppCoverage. The targets are only available when compiling with msvc in debug configuration." FORCE)
 set( CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS OFF CACHE BOOL "Enables targets that create ABI/API compatibility reports and checking." FORCE)
 set( CPF_CHECK_API_STABLE OFF CACHE BOOL "If this is set to ON, the pipeline will fail if the current build results contain changes that hurt API compatibility." FORCE)
 set( CPF_CHECK_ABI_STABLE OFF CACHE BOOL "If this is set to ON, the pipeline will fail if the current build results contain changes that hurt ABI compatibility." FORCE)

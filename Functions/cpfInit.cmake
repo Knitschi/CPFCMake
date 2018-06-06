@@ -17,6 +17,8 @@ include(cpfAddRunTestsTarget)
 include(cpfAddInstallPackageTarget)
 include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDistributionPackageTarget)
+include(cpfAddValgrindTarget)
+include(cpfAddOpenCppCoverageTarget)
 
 
 # cotire must be included on the global scope or we get errors thta target xyz already has a custom rule
@@ -136,8 +138,10 @@ function( cpfAddPackages externalPackages globalFiles )
 	cpfAddGlobalRunUnitTestsTarget("${packages}")
 	# runAllTests
 	cpfAddGlobalRunAllTestsTarget("${packages}")
-	# dynamicAnalysis
-	cpfAddGlobalDynamicAnalysisTarget("${packages}")
+	# valgrind
+	cpfAddGlobalValgrindTarget("${packages}")
+	# opencppcoverage
+	cpfAddGlobalOpenCppCoverageTarget("${packages}")
 	# distributionPackages
 	cpfAddGlobalCreatePackagesTarget("${packages}")
 	# abiComplianceCheck

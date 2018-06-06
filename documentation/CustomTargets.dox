@@ -21,13 +21,14 @@ Here is a list of targets that can exist once per CPF project.
 - \ref ALL_BUILD
 - \ref distributionPackages
 - \ref doxygen
-- \ref dynamicAnalysis
 - \ref globalFiles
 - \ref install
+- \ref opencppcoverage
 - \ref pipeline
 - \ref runAllTests
 - \ref runFastTests
 - \ref staticAnalysis
+- \ref valgrind
 - \ref ZERO_CHECK
 
 
@@ -67,10 +68,6 @@ This target bundles the \ref distributionPackages_package targets.
 This target runs doxygen to generate the documentation for all owned packages.
 It can be disabled with the \c CPF_ENABLE_DOXYGEN_TARGET variable.
 
-\subsubsection dynamicAnalysis dynamicAnalysis
-
-This target bundles the \ref valgrind_package and \ref opencppcoverage_package targets.
-
 \subsubsection globalFiles globalFiles
 
 This is only a file container target that does not execute any commands.
@@ -80,6 +77,12 @@ files, global documentation, etc..
 \subsubsection install install
 
 This CMake standard target bundles the \ref install_package targets.
+
+\subsubsection opencppcoverage opencppcoverage
+
+This target bundles the \ref opencppcoverage_package targets. It also
+combines the temporary output of the \ref opencppcoverage_package targets
+into the final html report that can be found in the html output directory.
 
 \subsubsection pipeline pipeline
 
@@ -98,6 +101,10 @@ contained in the \ref pipeline target which always builds the \ref runAllTests t
 
 This target bundles the \ref runFastTests_package targets. It also
 checks that the dependency graph of the projects binary targets is acyclic.
+
+\subsubsection valgrind valgrind
+
+This target bundles the \ref valgrind_package targets.
 
 \subsubsection ZERO_CHECK ZERO_CHECK
 
@@ -150,7 +157,7 @@ an html report that shows the code lines that are hit while running the tests.
 This target will only exist for project configurations that use *MSVC* and will
 only run the tool when compiling in *Debug* configuration.
 
-The target can be disabled with the \c CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET config variable.
+The target can be disabled with the \c CPF_ENABLE_OPENCPPCOVERAGE_TARGET config variable.
 
 \subsubsection package \&lt;package\&gt;
 
@@ -194,7 +201,7 @@ debug flags. When this target is enabled you must also add the empty file
 You can use this file to suppress false positives or unfixable
 issues that are found by *Valgrind*.
 
-The target can be disabled with the \c CPF_ENABLE_DYNAMIC_ANALYSIS_TARGET config variable.
+The target can be disabled with the \c CPF_ENABLE_VALGRIND_TARGET config variable.
 
 
 

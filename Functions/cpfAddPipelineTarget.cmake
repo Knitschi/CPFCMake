@@ -17,7 +17,7 @@ function( cpfAddPipelineTarget packages)
 		doxygen
 		distributionPackages 	# Because of the global nature of the clearLastBuild command that is included in this target, we can not depend on the package targets directly.
 		staticAnalysis			# Because of the global check for an acyclic dependency graph, we can not depend on the package targets directly
-		dynamicAnalysis			# Because the global target assembles the OpenCppCoverage report from the individual reports, we can not use properties for this.
+		opencppcoverage			# Because the global target assembles the OpenCppCoverage report from the individual reports, we can not use properties for this.
 	)
 	
 	# A set package properties that contain custom targets that should be
@@ -27,6 +27,7 @@ function( cpfAddPipelineTarget packages)
 		CPF_RUN_CPP_TESTS_SUBTARGET
 		CPF_RUN_TESTS_SUBTARGET
 		CPF_ABI_CHECK_SUBTARGETS
+		CPF_VALGRIND_SUBTARGET
 	)
 
 	# When we know that the dynamic analysis target exists,
