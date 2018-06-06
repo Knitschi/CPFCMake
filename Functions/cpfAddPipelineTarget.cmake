@@ -14,9 +14,9 @@ function( cpfAddPipelineTarget packages)
 
 	# A collection of the targets that should be contained in the pipeline.
 	set( targets
+		acyclic
 		doxygen
 		distributionPackages 	# Because of the global nature of the clearLastBuild command that is included in this target, we can not depend on the package targets directly.
-		staticAnalysis			# Because of the global check for an acyclic dependency graph, we can not depend on the package targets directly
 		opencppcoverage			# Because the global target assembles the OpenCppCoverage report from the individual reports, we can not use properties for this.
 	)
 	
@@ -28,6 +28,7 @@ function( cpfAddPipelineTarget packages)
 		CPF_RUN_TESTS_SUBTARGET
 		CPF_ABI_CHECK_SUBTARGETS
 		CPF_VALGRIND_SUBTARGET
+		CPF_CLANG_TIDY_SUBTARGET
 	)
 
 	# When we know that the dynamic analysis target exists,
@@ -57,10 +58,10 @@ endfunction()
 # Retrieves all sub-targets that are stored in the given subTargetProperties, which must be set
 # on the packages main target.
 function( cpfGetTargetsFromProperties targetsOut packages subTargetProperties )
-set(subTargets)
-foreach( property ${subTargetProperties})
-	cpfGetSubtargets(targets "${packages}" ${property})
-	cpfListAppend(subTargets ${targets})
-endforeach()
-set(${targetsOut} ${subTargets} PARENT_SCOPE)
+	set(subTargets)
+	foreach( property ${subTargetProperties})
+		cpfGetSubtargets(targets "${packages}" ${property})
+		cpfListAppend(subTargets ${targets})
+	endforeach()
+	set(${targetsOut} ${subTargets} PARENT_SCOPE)
 endfunction()

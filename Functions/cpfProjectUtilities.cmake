@@ -554,7 +554,7 @@ function( cpfFindRequiredTools )
 		cpfFindRequiredProgram( TOOL_TRED tred "A tool from the graphviz library that creates a transitive reduced version of a graphviz graph")
 	endif()
 	
-	if(CPF_ENABLE_STATIC_ANALYSIS_TARGET)
+	if(CPF_ENABLE_CLANG_TIDY_TARGET)
 		cpfGetCompiler(compiler)
 		if( ${compiler} STREQUAL Clang)
 			set(CLANG_TIDY clang-tidy-3.9) # We should get this from hunter some day.

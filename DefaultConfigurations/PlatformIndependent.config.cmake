@@ -18,7 +18,8 @@ set( BUILD_SHARED_LIBS OFF CACHE BOOL "Set this to ON to create all production t
 # PIPELINE TARGETS
 set( CPF_ENABLE_RUN_TESTS_TARGET ON CACHE BOOL "Activates custom targets that run the test executables." FORCE)
 set( CPF_ENABLE_DOXYGEN_TARGET ON CACHE BOOL "Activates a custom target that runs doxygen on the entire CPF project." FORCE)
-set( CPF_ENABLE_STATIC_ANALYSIS_TARGET ON CACHE BOOL "Activates custom targets that run clang-tidy." FORCE)
+set( CPF_ENABLE_CLANG_TIDY_TARGET ON CACHE BOOL "Activates custom targets that run clang-tidy." FORCE)
+set( CPF_ENABLE_ACYCLIC_TARGET ON CACHE BOOL "Activates a custom target that checks that the projects target dependency graph is acyclic." FORCE)
 set( CPF_ENABLE_VALGRIND_TARGET ON CACHE BOOL "Activates custom targets that run Valgrind. The targets are only available when compiling with clang or gcc with debug info." FORCE)
 set( CPF_ENABLE_OPENCPPCOVERAGE_TARGET ON CACHE BOOL "Activates custom targets that run OpenCppCoverage. The targets are only available when compiling with msvc in debug configuration." FORCE)
 set( CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS OFF CACHE BOOL "Enables targets that create ABI/API compatibility reports and checking." FORCE)

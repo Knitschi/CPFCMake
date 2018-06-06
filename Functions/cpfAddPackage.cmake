@@ -10,7 +10,7 @@ include(cpfProjectUtilities)
 include(cpfGitUtilities)
 include(cpfPathUtilities)
 
-include(cpfAddStaticAnalysisTarget)
+include(cpfAddClangTidyTarget)
 include(cpfAddRunTestsTarget)
 include(cpfAddDeploySharedLibrariesTarget)
 include(cpfAddInstallPackageTarget)
@@ -216,8 +216,8 @@ function( cpfAddPackage )
 	# Adds target that runs clang-tidy on the given files.
     # Currently this is only added for the production target because clang-tidy does not filter out warnings that come over the GTest macros from external code.
     # When clang-tidy resolves the problem, static analysis should be executed for all binary targets.
-    cpfAddClangTidyTarget( ${productionLibrary})
-    cpfAddRunCppTestsTargets( ${ARG_PACKAGE_NAME})
+    cpfAddClangTidyTarget(${productionLibrary})
+    cpfAddRunCppTestsTargets(${ARG_PACKAGE_NAME})
 	cpfAddValgrindTarget(${ARG_PACKAGE_NAME})
 	cpfAddOpenCppCoverageTarget(${ARG_PACKAGE_NAME})
 

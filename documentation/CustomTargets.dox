@@ -18,7 +18,9 @@ per-package targets of that kind.
 Here is a list of targets that can exist once per CPF project.
 
 - \ref abicompliancechecker
+- \ref acyclic
 - \ref ALL_BUILD
+- \ref clang-tidy
 - \ref distributionPackages
 - \ref doxygen
 - \ref globalFiles
@@ -27,7 +29,6 @@ Here is a list of targets that can exist once per CPF project.
 - \ref pipeline
 - \ref runAllTests
 - \ref runFastTests
-- \ref staticAnalysis
 - \ref valgrind
 - \ref ZERO_CHECK
 
@@ -55,9 +56,18 @@ Here is a list of targets that can exist once per CPF package.
 
 This target bundles the \ref abicompliancechecker_package targets.
 
+\subsubsection acyclic acyclic
+
+The target checks that the projects target dependency graph is acyclic.
+This target can be disabled with the \c CPF_ENABLE_ACYCLIC_TARGET variable.
+
 \subsubsection ALL_BUILD ALL_BUILD
 
 This target builds all binary targets.
+
+\subsubsection clang-tidy clang-tidy
+
+This target bundles the \ref clangtidy_package targets.
 
 \subsubsection distributionPackages distributionPackages
 
@@ -97,11 +107,6 @@ This target bundles the \ref runAllTests_package targets.
 This target bundles the \ref runFastTests_package targets. This target is not
 contained in the \ref pipeline target which always builds the \ref runAllTests target.
 
-\subsubsection staticAnalysis staticAnalysis
-
-This target bundles the \ref runFastTests_package targets. It also
-checks that the dependency graph of the projects binary targets is acyclic.
-
 \subsubsection valgrind valgrind
 
 This target bundles the \ref valgrind_package targets.
@@ -133,7 +138,7 @@ use the \c CPF_CHECK_ABI_STABLE and \c CPF_CHECK_API_STABLE config variables.
 This target only exists when compiling on Linux with the clang compiler.
 It runs the \c clang-tidy tool on the packages source files.
 
-The target can be disabled with the \c CPF_ENABLE_STATIC_ANALYSIS_TARGET config variable.
+The target can be disabled with the \c CPF_ENABLE_CLANG_TIDY_TARGET config variable.
 
 \subsubsection distributionPackages_package distributionPackages_\&lt;package\&gt;
 

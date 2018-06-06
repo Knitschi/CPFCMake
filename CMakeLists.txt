@@ -25,18 +25,19 @@ set( files
 	documentation/DocumentationTargets.dox
 	documentation/TestTargets.dox
 	documentation/Versioning.dox
+	Functions/cpfAddAcyclicTarget.cmake
+	Functions/cpfAddClangTidyTarget.cmake
 	Functions/cpfAddCompatibilityCheckTarget.cmake
 	Functions/cpfAddDeploySharedLibrariesTarget.cmake
 	Functions/cpfAddDistributionPackageTarget.cmake
 	Functions/cpfAddDocumentationTarget.cmake
-	Functions/cpfAddOpenCppCoverageTarget.cmake
-	Functions/cpfAddValgrindTarget.cmake
 	Functions/cpfAddInstallPackageTarget.cmake
+	Functions/cpfAddOpenCppCoverageTarget.cmake
 	Functions/cpfAddPackage.cmake
 	Functions/cpfAddPipelineTarget.cmake
 	Functions/cpfAddRunTestsTarget.cmake
 	Functions/cpfAddRunUicTarget.cmake
-	Functions/cpfAddStaticAnalysisTarget.cmake
+	Functions/cpfAddValgrindTarget.cmake
 	Functions/cpfCustomTargetUtilities.cmake
 	Functions/cpfGitUtilities.cmake
 	Functions/cpfInit.cmake

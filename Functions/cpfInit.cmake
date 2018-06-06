@@ -11,7 +11,8 @@ list( APPEND CMAKE_MODULE_PATH
 include(cpfProperties)
 include(cpfProjectUtilities)
 include(cpfAddDocumentationTarget)
-include(cpfAddStaticAnalysisTarget)
+include(cpfAddClangTidyTarget)
+include(cpfAddAcyclicTarget)
 include(cpfAddPipelineTarget)
 include(cpfAddRunTestsTarget)
 include(cpfAddInstallPackageTarget)
@@ -121,7 +122,7 @@ function( cpfAddPackages externalPackages globalFiles )
 		)
 	endif()
 
-	if(CPF_ENABLE_STATIC_ANALYSIS_TARGET)
+	if(CPF_ENABLE_CLANG_TIDY_TARGET)
 		cpfListAppend( SOLUTION_FILES 
 			"${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}"
 		)
@@ -133,7 +134,9 @@ function( cpfAddPackages externalPackages globalFiles )
 	# documentation
 	cpfAddGlobalMonolithicDocumentationTarget( "${packages}" "${externalPackages}" )
 	# staticAnalysis
-	cpfAddGlobalStaticAnalysisTarget("${packages}")
+	cpfAddGlobalClangTidyTarget("${packages}")
+	# acyclic
+	cpfAddAcyclicTarget()
 	# runUnitTests
 	cpfAddGlobalRunUnitTestsTarget("${packages}")
 	# runAllTests

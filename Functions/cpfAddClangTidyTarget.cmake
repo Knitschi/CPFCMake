@@ -7,13 +7,13 @@ include(cpfLocations)
 # Creates a target that runs all the static analysis targets that are added by the given packages
 # The target will also check that the target dependency graph of all packages is acyclic.
 #
-function( cpfAddGlobalStaticAnalysisTarget packages)
+function( cpfAddGlobalClangTidyTarget packages)
 
-	if(NOT CPF_ENABLE_STATIC_ANALYSIS_TARGET)
+	if(NOT CPF_ENABLE_CLANG_TIDY_TARGET)
 		return()
 	endif()
 
-    set(targetName staticAnalysis)
+    set(targetName clang-tidy)
 
 	# Create the .json compile command file.
 	# This is needed for the clang-tidy calls
@@ -22,38 +22,8 @@ function( cpfAddGlobalStaticAnalysisTarget packages)
 		set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Create a .json file that cpfContains all compiler calls. This is needed for clang-tidy." FORCE)
 	endif()
 
-	# get all static analysis targets from the packages
-    foreach(package ${packages})
-
-        if(TARGET ${package}) # not all packages may have a target
-            get_property( binarySubTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
-            foreach( binaryTarget ${binarySubTargets})
-            
-                get_property( staticAnalysisTarget TARGET ${binaryTarget} PROPERTY CPF_CLANG_TIDY_SUBTARGET)
-
-                if(staticAnalysisTarget)	# this is currently only available for the LinuxMakeClang toolchain.
-                    cpfListAppend( staticAnalysisTargets ${staticAnalysisTarget})
-                endif()
-                
-            endforeach()
-        endif()
-    
-    endforeach()
-    
-    # Add the command for doing the acyclicity check
-    set(command "\"${TOOL_ACYCLIC}\" -nv \"${CPF_TARGET_DEPENDENCY_GRAPH_FILE}\"")
-    set(acyclicStampFile ${CMAKE_BINARY_DIR}/runAcyclic.stamp )
-
-	cpfAddStandardCustomCommand(
-		OUTPUT ${acyclicStampFile}
-		DEPENDS ${CPF_TARGET_DEPENDENCY_GRAPH_FILE} ${staticAnalysisTargets}
-		COMMANDS ${command} "cmake -E touch \"${acyclicStampFile}\""
-	)
-    
-	add_custom_target(
-		${targetName}
-		DEPENDS ${acyclicStampFile} ${staticAnalysisTargets}
-	)
+    # add bundle target
+    cpfAddSubTargetBundleTarget( clang-tidy "${packages}" CPF_CLANG_TIDY_SUBTARGET "")
 
 endfunction()
 
@@ -65,7 +35,7 @@ endfunction()
 #
 function( cpfAddClangTidyTarget binaryTarget )
 
-	if(NOT CPF_ENABLE_STATIC_ANALYSIS_TARGET)
+	if(NOT CPF_ENABLE_CLANG_TIDY_TARGET)
 		return()
 	endif()
 	
