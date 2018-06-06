@@ -29,7 +29,8 @@ set( files
 	Functions/cpfAddDeploySharedLibrariesTarget.cmake
 	Functions/cpfAddDistributionPackageTarget.cmake
 	Functions/cpfAddDocumentationTarget.cmake
-	Functions/cpfAddDynamicAnalysisTarget.cmake
+	Functions/cpfAddOpenCppCoverageTarget.cmake
+	Functions/cpfAddValgrindTarget.cmake
 	Functions/cpfAddInstallPackageTarget.cmake
 	Functions/cpfAddPackage.cmake
 	Functions/cpfAddPipelineTarget.cmake

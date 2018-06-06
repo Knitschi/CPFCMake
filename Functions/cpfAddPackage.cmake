@@ -11,7 +11,6 @@ include(cpfGitUtilities)
 include(cpfPathUtilities)
 
 include(cpfAddStaticAnalysisTarget)
-include(cpfAddDynamicAnalysisTarget)
 include(cpfAddRunTestsTarget)
 include(cpfAddDeploySharedLibrariesTarget)
 include(cpfAddInstallPackageTarget)

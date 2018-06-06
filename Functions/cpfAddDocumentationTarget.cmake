@@ -5,7 +5,6 @@ include(cpfProjectUtilities)
 include(cpfGitUtilities)
 include(cpfCustomTargetUtilities)
 include(cpfAddCompatibilityCheckTarget)
-include(cpfAddDynamicAnalysisTarget)
 
 
 
