@@ -9,7 +9,7 @@ include(cpfLocations)
 #
 function( cpfAddAcyclicTarget )
 
-    if(NOT ENABLE_ACYCLIC_TARGET)
+    if(NOT CPF_ENABLE_ACYCLIC_TARGET)
         return()
     endif()
 
