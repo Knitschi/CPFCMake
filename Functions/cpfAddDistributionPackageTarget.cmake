@@ -196,6 +196,7 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 		if( NOT "${sourceDir}" STREQUAL "")
 			cpfPrependMulti( sourceFiles "${sourceDir}/" "${sourceFiles}")
 		endif()
+
 		cpfGetInstallFileCommands( copyFilesCommmands "${sourceFiles}" "${outputFiles${configSuffix}}")
 
 		# command to touch the target stamp
@@ -349,12 +350,12 @@ function( cpfGetUserPackageFiles sourceTargetsOut sourceDirOut sourceFilesOut de
 
 			cpfPrependMulti( symlinksFull "${targetDir}/" "${symlinks}" )
 			cpfListAppend( sourceFiles ${symlinksFull} )
-			cpfListAppend( shortDestinationFiles "${symlinks}")
+			cpfListAppend( shortDestinationFiles ${symlinks})
 			
             cpfGetTargetOutputType( outputType ${target})
             cpfGetTypePartOfOutputDir( typeDir ${package} ${outputType})
-            
-            cpfPrependMulti( relativeTargetDestinationFiles "${typeDir}/" "${shortDestinationFiles}" )
+			
+			cpfPrependMulti( relativeTargetDestinationFiles "${typeDir}/" "${shortDestinationFiles}" )
             cpfListAppend( relativeDestinationFiles "${relativeTargetDestinationFiles}")
 
             cpfListAppend( usedTargets ${target})
