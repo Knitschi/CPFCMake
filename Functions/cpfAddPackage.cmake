@@ -73,7 +73,7 @@ function( cpfConfigurePackageVersionFile package )
 	
 	else()
 		if(NOT EXISTS "${absPathCmakeVersionFile}" )
-			message(FATAL_ERROR "The package source directory \"${CMAKE_CURRENT_SOURCE_DIR}\" neither belongs to a git repository nor cpfContains a .cmake version file.")
+			message(FATAL_ERROR "The package source directory \"${CMAKE_CURRENT_SOURCE_DIR}\" neither belongs to a git repository nor contains a .cmake version file.")
 		endif()
 	endif()
 
