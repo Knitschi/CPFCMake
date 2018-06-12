@@ -24,7 +24,8 @@ include(cpfAddOpenCppCoverageTarget)
 
 # cotire must be included on the global scope or we get errors thta target xyz already has a custom rule
 include("${CMAKE_SOURCE_DIR}/cotire/CMake/cotire.cmake")
-
+cpfFindConfigFile(configFile "${CPF_CONFIG}")
+include(${configFile})
 
 
 
@@ -45,7 +46,6 @@ function( cpfInit )
 	cpfDefineProperties()
 	cpfSetPolicies()
 
-    
 	# allow project folders
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 	set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER private)
