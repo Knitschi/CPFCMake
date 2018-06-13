@@ -127,7 +127,9 @@ function( cpfInstallTargetsForPackage package targets )
 		RUNTIME DESTINATION "${relRuntimeDir}"
 		LIBRARY DESTINATION "${relLibDir}"
 		ARCHIVE DESTINATION "${relArchiveDir}"
-		INCLUDES DESTINATION "${relIncludeDir}"
+		# This sets the import targets include directories to <package>/include, 
+		# so clients can also include with <package/bla.h>
+		INCLUDES DESTINATION "${relIncludeDir}/.."	
 	)
 
 	# Add the installed files to the target property
@@ -344,7 +346,7 @@ function( cpfInstallPublicHeaders installedFilesOut package target )
 		file(RELATIVE_PATH relPathBinary ${${package}_BINARY_DIR} ${absHeader} )
 		cpfGetShorterString( relFilePath ${relPathSource} ${relPathBinary}) # assume the shorter path is the correct one
 
-		# prepend the includ/<package> directory
+		# prepend the include/<package> directory
 		get_filename_component( relDestDir ${relFilePath} DIRECTORY)
 		if(relDestDir)
 			set(relDestDir ${relIncludeDir}/${relDestDir} )

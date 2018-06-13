@@ -509,7 +509,7 @@ function( cpfAddBinaryTarget	)
 	target_include_directories( ${ARG_NAME} PUBLIC 
 		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
 		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
-		$<INSTALL_INTERFACE:..>
+		#$<INSTALL_INTERFACE:../..>
 	)
 	
 	# Hardcode c++ standard to 14 for now.
