@@ -122,7 +122,6 @@ function( cpfInstallTargetsForPackage package targets )
 
 	install( 
 		TARGETS ${targets}
-		COMPONENT ${package}
 		EXPORT ${targetsExportName}
 		RUNTIME DESTINATION "${relRuntimeDir}"
 		LIBRARY DESTINATION "${relLibDir}"
@@ -268,7 +267,6 @@ function( cpfInstallDebugFiles package )
             if(compilePdbName)
                 install(
                     FILES ${compilePdbDir}/${compilePdbName}.pdb
-                    COMPONENT ${package}
                     DESTINATION "${relPdbCompilerDir}"
                     CONFIGURATIONS ${config}
                 )
@@ -283,7 +281,6 @@ function( cpfInstallDebugFiles package )
             if(linkerPdbName)
                 install(
                     FILES ${linkerPdbDir}/${linkerPdbName}.pdb
-                    COMPONENT ${package}
                     DESTINATION "${relPdbLinkerDir}"
                     CONFIGURATIONS ${config}
                 )
@@ -356,7 +353,6 @@ function( cpfInstallPublicHeaders installedFilesOut package target )
 		
 		install(
 			FILES ${absHeader}
-			COMPONENT ${package}
 			DESTINATION "${relDestDir}"
 		)
 
@@ -395,7 +391,6 @@ function( cpfGenerateAndInstallCmakeConfigFiles package namespace)
 	# This can not be done in the configs loop, so we need a generator expression for the output directory
 	install(
 		EXPORT "${targetsExportName}"
-		COMPONENT ${package}
 		NAMESPACE "${namespace}::"
 		DESTINATION "${relConfigDir}"
 	)
@@ -403,7 +398,6 @@ function( cpfGenerateAndInstallCmakeConfigFiles package namespace)
 	# Install cmake config files
 	install(
 		FILES "${packageConfigFileFull}" "${versionConfigFileFull}"
-		COMPONENT ${package}
 		DESTINATION "${relConfigDir}"
 	)
 
