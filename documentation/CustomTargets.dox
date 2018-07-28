@@ -2,8 +2,22 @@
 
 \page CPFCustomTargets Custom targets
 
-\section CPFCustomTargetsSection Custom targets in the CPF
+\section CustomTargetsInACPFProject The custom targets in a CPF project
 
+The build pipeline of a CPF project is implemented with CMake *custom-targets*. In order to execute
+one of those tasks separately from the whole pipeline, one has to build that *target* with the
+\ref BuildStep "3_Make.py" script. The advantage of the custom-target mechanism is, that the used build-system
+handles dependency issues, rebuilding outdated targets and parallelizing task execution.
+
+The availability of custom-targets in a CPF project depends on the projects configuration and its source files.
+Most custom targets can be disabled via the configuration file. This may be helpful if a custom implementation of the
+task is preferred. Some tasks require a test executable which is only created if the package has
+a source file that defines the main function of a test-executable.
+
+In some IDEs like Visual Studio or KDevelop, targets are visualized and can be directly *build*
+from within the IDE. This may sometimes be preferred to building the targets from the command line.
+
+The following sections contain lists with the names of available custom targets. 
 The lists do not contain some private targets of the CPF that are only created as sub-steps of the
 targets that are of interest to the user.
 

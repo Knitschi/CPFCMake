@@ -189,7 +189,7 @@ function( cpfAddPackageDocsTarget fileOut package packageNamespace briefDescript
 	cpfGetPackageDoxFilesTargetName( targetName ${package} )
 
 	# Always create the basic package documentation page.	
-	cpfAddPackageDocumentationDoxFileCommands( documentationFile ${package})
+	cpfAddPackageDocumentationDoxFileCommands( documentationFile ${package} ${packageNamespace})
 
 	add_custom_target(
 		${targetName}
@@ -212,7 +212,7 @@ function( cpfGetGeneratedDocumentationDirectory dirOut )
 endfunction()
 
 #-------------------------------------------------------------------------
-function( cpfAddPackageDocumentationDoxFileCommands fileOut package )
+function( cpfAddPackageDocumentationDoxFileCommands fileOut package packageNamespace)
 
 	set( fileContent "
 /// The namespace of the ${package} package.

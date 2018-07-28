@@ -20,6 +20,7 @@ include(cpfAddDocumentationTarget)
 
 
 #-------------------------------------------------------------------------
+# Documentation in APIDocs.dox
 macro( cpfInitPackageProject packageNameOut packageNameSpace )
 
 	# The package name is defined by the sub-directory name
@@ -93,73 +94,11 @@ function( cpfConfigurePackageVersionHeader package version packageNamespace)
 
 endfunction()
 
-#-----------------------------------------------------------
-# Adds a c++ package to the CMakeProjectFramework.
-# A package consists of a main binary target that has the same name as the package and some helper binary targets for tests and test utilities.
-# The test fixture library, the unit tests exe and the expensive tests exe will only be created if the file lists contain files.  
-# If the target tye is an executable an extra library is created that should contain the code for the exe. The executable target will only contain the main.cpp file with the main function as small as possible. 
-# This is needed so we can test the code in the test exes without needing to add the source files to the test targets.
-#
-# A package also has a number of custom targets that implement additional functionality like code analysis, packaging etc.
-# TODO: list all targets and what they do.
-# 
-# Arguments:
-# PACKAGE_NAME											The name of the module/target/project
-# TYPE													GUI_APP = executable with switched of console (use for QApplications with ui); 
-#														CONSOLE_APP = console application; 
-#														LIB = library (use to create a static or shared libraries )
-# PUBLIC_HEADER											All header files that are required by clients of the package in order to compile.
-# PRODUCTION_FILES										All files that belong to the production target. If the target is an executable, there should be a main.cpp that is used for the executable.
-# PUBLIC_FIXTURE_HEADER									All header files in the fixture library that are required by clients of the library.
-# FIXTURE_FILES											All files that belong to the test fixtures target.
-# TEST_FILES											All files that belong to the tests executable target.
-# LINKED_LIBRARIES										The names of the libraries that are linked with this target.
-# LINKED_TEST_LIBRARIES									The dependencies of the test target that are not needed in the production code.
-# [PLUGIN_DEPENDENCIES]...								This keyword opens a sublist of arguments that are used to define plugin dependencies of the packgage. 
-#														Multiple PLUGIN_DEPENDENCIES sub-lists can be given to allow having multiple plugin subdirectories.
-#														The plugin targets are shared libraries that are explicitly loaded by the packages executables and on which the
-#														package has no link dependency. If a target in the list does not exist when the function is called,
-#														it will be silently ignored. If a given target is an internal target, an artificial dependency between
-#														the plugin target and the packages executables is created to make sure the plugin is compilation is up-to-date before the
-#														executable is build.
-#
-#														Sub-Options:
-#	PLUGIN_DIRECTORY									A directory relative to the packages executables in which the plugin libraries must be deployed so they are found by the executable.
-#	PLUGIN_TARGETS										The name of the targets that provide the plugin libraries. 
-#
-# [DISTRIBUTION_PACKAGES]...			            	This keyword opens a sub-list of arguments that are used to specify a list of packages that have the same content, but different formats.
-#                                                       The argument can be given multiple times, in order to define a variety of package formats and content types.
-#                                                       The argument takes two lists as sub-arguments. A distribution package is created for each combination of the
-#                                                       elements in the sub-argument lists.
-#                                                       For example: 
-#                                                       argument   DISTRIBUTION_PACKAGES_0 DISTRIBUTION_PACKAGE_CONTENT_TYPES BINARIES_USER_PORTABLE DISTRIBUTION_PACKAGE_FORMATS ZIP;7Z
-#                                                       will cause the creation of a zip and a 7z archive that both contain the packages executables and all depended on shared libraries.
-#                                                       Adding another argument  DISTRIBUTION_PACKAGES_1 DISTRIBUTION_PACKAGE_CONTENT_TYPES BINARIES_USER_NOSYSTEMLIBS DISTRIBUTION_PACKAGE_FORMATS DEB
-#                                                       will cause the additional creation of a debian package, that will not contain the dependencies marked as system libraries.
-#
-#														Sub-Options
-#   DISTRIBUTION_PACKAGE_CONTENT_TYPE                  	possible values:
-#														BINARIES_DEVELOPER              	- The package will include all package binaries, header files and cmake config files for importing the package in another project.
-#                                                                                         	  This content type is supposed to be used for packages that distribute "closed source" libraries.
-#                                                       BINARIES_USER [listExcludedTargets] - The package will include the packages executables and shared libraries and all depended on shared libraries. 
-#																							  This is intended for packages that are delivered to the enduser who will not need header files etc.
-#																							  The BINARIES_USER keyword can be followed by a list of depended on targets that shall not be included in the package.
-#																							  This is usefull when the dependencies are provided by the systems package manager for example.
-#
-#   DISTRIBUTION_PACKAGE_FORMATS						7Z TBZ2 TGZ TXZ TZ ZIP			- Compressed archives. The distributed files are packed into one of the following archive formats: .7z, .tar.bz2, .tar.gz, .tar.xz, tar.Z, .zip
-#														DEB								- A debian package .deb file. This will only be created when the dpkg tool is available.
-#
-#	DISTRIBUTION_PACKAGE_FORMAT_OPTIONS					A list of keyword arguments that contain further options for the creation of the distribution packages.
-#
-#		[SYSTEM_PACKAGES_DEB]							This is only relevant when using the DEB package format. The option must be a string that cpfContains the names and versions of the 
-#														debian packages that provide the excluded shared libraries from the BINARIES_USER option. E.g.
-#														"libc6 (>= 2.3.1-6), libc6 (< 2.4)"
-#
-# [BRIEF_DESCRIPTION]									A short description in one sentence about what the package does.
-# [LONG_DESCRIPTION]									A longer description of the package.
-# [HOMEPAGE]											A web address from where the source-code and/or the documentation of the package can be obtained.
-# [MAINTAINER_EMAIL]									An email address under which the maintainers of the package can be reached.
-#
+
+
+#[[-----------------------------------------------------------
+# Documentation in APIDocs.dox
+]]
 function( cpfAddPackage )
 
 	# parse level 0 keywords

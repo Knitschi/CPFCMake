@@ -17,6 +17,7 @@ set( files
 	${CPF_DEFAULT_CONFIGS_DIR}/PlatformIndependent.config.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Windows.config.cmake
 	${CPF_PACKAGE_CONFIG_TEMPLATE}
+	documentation/APIDoc.dox
 	documentation/Configuration.dox
 	documentation/CPFCMake.dox
 	documentation/CPFCMake.dox

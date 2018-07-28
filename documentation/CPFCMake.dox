@@ -1,6 +1,7 @@
 /**
-\page CPFCMake
-\section CPFCMake
+\page CPFCMake CPFCMake
+
+\section CPFCMakeOverview Abstract
 
 The CPFCMake package implements a standardized C++ CMake project with additional CI functionality.
 This package is the most basic component of the CMakeProjectFramework. It helps with setting
@@ -18,6 +19,7 @@ a handfull of CMake functions. This removes implementation details from the `CMa
 
 # Index #
 
+- \subpage CPFCMakeAPIDocs
 - \subpage CPFConfiguration
 - \subpage CPFCustomTargets
 - \subpage CPFCMakeTestTargets
