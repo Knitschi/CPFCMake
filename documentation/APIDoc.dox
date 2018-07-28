@@ -16,7 +16,10 @@ This module provides the following functions.
 \subsection cpfInitPackageProject cpfInitPackageProject()
 
 \code 
-cpfInitPackageProject( <packageNameOut> <packageNameSpace> ) 
+cpfInitPackageProject(
+    packageNameOut
+    packageNameSpace
+) 
 \endcode
 
 This function is called at the beginning of a packages *CMakeLists.txt* file.
@@ -36,7 +39,7 @@ prepended to all exported classes and functions in a library.
 - The default package documentation page will generate a
 documentation of that namespace.
 
-\see CIProjectAndPackageProjects
+\see \ref CIProjectAndPackageProjects
 
 
 \subsection cpfAddPackage cpfAddPackage()
@@ -63,59 +66,71 @@ cpfAddPackage(
         [PLUGIN_DIRECTORY ...] ...]
     [DISTRIBUTION_PACKAGES
         DISTRIBUTION_PACKAGE_CONTENT_TYPE [BINARIES_DEVELOPER|BINARIES_USER excludedTargets]
-        DISTRIBUTION_PACKAGE_FORMATS format1 [format2 ...]
+        DISTRIBUTION_PACKAGE_FORMATS [7Z|TBZ2|TGZ|TXZ|TZ|ZIP|DEB] [format2 ...]
         [DISTRIBUTION_PACKAGE_FORMAT_OPTIONS 
             [SYSTEM_PACKAGES_DEB packageListString ]]
         [DISTRIBUTION_PACKAGE_CONTENT_TYPE ...] ...]
 )
 \endcode
 
-Adds a c++ package to a CPF project. The function provides a large list of options that allow 
+Adds a C++ package to a CPF project. The function provides a large list of options that allow 
 defining the features that the CPF package should provide. 
 
 A package consists of a main binary target that has the same name as the package and some helper binary targets for tests and test utilities.
-The test fixture library, the unit tests exe and the expensive tests exe will only be created if the file lists contain files.  
-If the target tye is an executable an extra library is created that should contain the code for the exe. The executable target will only contain the main.cpp file with the main function as small as possible. 
-This is needed so we can test the code in the test exes without needing to add the source files to the test targets.
-A package also has a number of \ref CPFCustomTargets "custom targets" that implement additional functionality like code analysis, packaging etc.
+Providing the function with optional arguments will switch on more of CPF's functionality like test-targets, code-analysis, packaging or
+documentation generation.
 
+\see \ref CPFCustomTargets
 
 
 ### Keyword Arguments ###
 
 #### PACKAGE_NAME ####
 
-The name of the module/target/project
+The should be retrieved with the \ref cpfInitPackageProject function to make
+sure that it is the name of the current source directory.
+This will be used as the name of the main binary target of the package.
 
 #### [BRIEF_DESCRIPTION] ####
 
-A short description in one sentence about what the package does.
+A short description in one sentence about what the package does. This is included
+in the generated documentation page of the package and in some distribution package
+types.
 
 #### [LONG_DESCRIPTION] ####
 
-A longer description of the package.
+A longer description of the package. This is included
+in the generated documentation page of the package and in some distribution package
+types.
 
 #### [HOMEPAGE] ####
 
 A web address from where the source-code and/or the documentation of the package can be obtained.
+This is required for Debian packages.
 
 #### [MAINTAINER_EMAIL] ####
 
 An email address under which the maintainers of the package can be reached.
+This is required for Debian packages.
 
 #### PACKAGE_NAMESPACE ####
 
-The cpf assumes that this will be used as the primary namespace for all your C++ files.
+\see cpfInitPackageProject
 
 #### TYPE ####
 
-\c GUI_APP = executable with switched of console (use for QApplications with ui); 
-\c CONSOLE_APP = console application; 
-\c LIB = library (use to create a static or shared libraries )
+The type of the main binary target of the package.
+
+\c GUI_APP = Executable with switched of console. Use this for Qt applications with GUI; 
+\c CONSOLE_APP = Console application; 
+\c LIB = Library
 
 #### PUBLIC_HEADER ####
 
-All header files that are required by clients of the package in order to compile.
+All header files that declare functions or classes that are supposed to be
+used by consumers of a library package. The public headers will automatically
+be put into binary distribution packages, while header files in the \c PRODUCTION_FILES
+are not included.
 
 #### PRODUCTION_FILES ####
 
@@ -124,7 +139,8 @@ there should be a main.cpp that is used for the executable.
 
 #### PUBLIC_FIXTURE_HEADER ####
 
-All header files in the fixture library that are required by clients of the library.
+All header files in the fixture library that are required by external clients of the library.
+If the fixture library is only used by this package, this can be empty.
 
 #### FIXTURE_FILES ####
 
@@ -132,33 +148,42 @@ All files that belong to the test fixtures target.
 
 #### TEST_FILES ####
 
-All files that belong to the tests executable target.
+All files that belong to the test executable target.
 
 #### LINKED_LIBRARIES ####
 
-The names of the libraries that are linked with this target.
+The names of the library targets that are linked to the main binary target.
 
 #### LINKED_TEST_LIBRARIES ####
 
-The dependencies of the test target that are not needed in the production code.
+The names of the library targets that are linked to the test fixture library
+and the test executable. Use this to specify dependencies of the test targets
+that are not needed in the production code, like fixture libraries from other
+packages.
 
 #### [PLUGIN_DEPENDENCIES]...  ####
 
 This keyword opens a sub-list of arguments that are used to define plugin dependencies of the package. 
 Multiple PLUGIN_DEPENDENCIES sub-lists can be given to allow having multiple plugin subdirectories.
+
 The plugin targets are shared libraries that are explicitly loaded by the packages executables and on which the
 package has no link dependency. If a target in the list does not exist when the function is called,
 it will be silently ignored. If a given target is an internal target, an artificial dependency between
 the plugin target and the packages executables is created to make sure the plugin is compilation is up-to-date before the
 executable is build.
 
+Adding this options makes sure that the plugin library is build before the executable and copied besides it
+in the \c PLUGIN_DIRECTORY.
+
 Sub-Options:
 
 \c PLUGIN_DIRECTORY: A directory relative to the packages executables in which the plugin libraries must be deployed so they are found by the executable.
+This if often a \c plugins directory.
+
 \c PLUGIN_TARGETS: The name of the targets that provide the plugin libraries.
 
 
-[DISTRIBUTION_PACKAGES]...
+####  [DISTRIBUTION_PACKAGES]... ####
 
 This keyword opens a sub-list of arguments that are used to specify a list of packages that have the same content, but different formats.
 The argument can be given multiple times, in order to define a variety of package formats and content types.
@@ -172,25 +197,125 @@ will cause the additional creation of a debian package, that will not contain th
 
 Sub-Options:
 
-\c DISTRIBUTION_PACKAGE_CONTENT_TYPE                possible values:
-													BINARIES_DEVELOPER              	- The package will include all package binaries, header files and cmake config files for importing the package in another project.
-                                                                                        	  This content type is supposed to be used for packages that distribute "closed source" libraries.
-                                                      BINARIES_USER [listExcludedTargets] - The package will include the packages executables and shared libraries and all depended on shared libraries. 
-																						  This is intended for packages that are delivered to the enduser who will not need header files etc.
-																						  The BINARIES_USER keyword can be followed by a list of depended on targets that shall not be included in the package.
-																						  This is usefull when the dependencies are provided by the systems package manager for example.
+\c DISTRIBUTION_PACKAGE_CONTENT_TYPE                
+
+- <code>BINARIES_DEVELOPER</code>: The package will include all package binaries, header files and cmake config files for importing the package in another project.
+This content type is supposed to be used for packages that distribute "closed source" libraries.
+- <code>BINARIES_USER listExcludedTargets</code>: The package will include the packages executables and shared libraries and all depended on shared libraries. 
+This is intended for packages that are delivered to the enduser who will not need header files etc.
+The BINARIES_USER keyword can be followed by a list of depended on targets that shall not be included in the package.
+This is usefull when the dependencies are provided by the systems package manager for example.
+
+\c DISTRIBUTION_PACKAGE_FORMATS
+
+- <code>7Z |TBZ2 | TGZ | TXZ | TZ | ZIP</code>: Packs the distributed files into one of the following archive formats: .7z, .tar.bz2, .tar.gz, .tar.xz, tar.Z, .zip
+- <code>DEB</code>: Creates a debian package .deb file. This will only be created when the dpkg tool is available.
+
+\c DISTRIBUTION_PACKAGE_FORMAT_OPTIONS
+
+A list of keyword arguments that contain further options for the creation of the distribution packages.
+
+- <code>[SYSTEM_PACKAGES_DEB]</code>: This is only relevant when using the DEB package format. 
+The option must be a string that contains the names and versions of the debian packages 
+that provide the excluded shared libraries from the BINARIES_USER option. E.g. "libc6 (>= 2.3.1-6), libc6 (< 2.4)"
+on which the package depends.
 
 
-  DISTRIBUTION_PACKAGE_FORMATS						7Z TBZ2 TGZ TXZ TZ ZIP			- Compressed archives. The distributed files are packed into one of the following archive formats: .7z, .tar.bz2, .tar.gz, .tar.xz, tar.Z, .zip
-													DEB								- A debian package .deb file. This will only be created when the dpkg tool is available.
+### Example ###
 
+Here is an example of an \c CMakeLists.txt file for a library package.
 
-DISTRIBUTION_PACKAGE_FORMAT_OPTIONS					A list of keyword arguments that contain further options for the creation of the distribution packages.
-	[SYSTEM_PACKAGES_DEB]							This is only relevant when using the DEB package format. The option must be a string that cpfContains the names and versions of the 
-													debian packages that provide the excluded shared libraries from the BINARIES_USER option. E.g.
-                                                    "libc6 (>= 2.3.1-6), libc6 (< 2.4)"
+\code{.unparsed}
+# MyLib/CMakeLists.txt
 
+include(cpfAddPackage)
+include(cpfConstants)
 
+set( PACKAGE_NAMESPACE myl )
+
+set( briefDescription "My awsome library." )
+
+set( longDescription 
+"Here you can go on in length about how awsome your library is."
+)
+
+cpfInitPackageProject(
+	PACKAGE_NAME
+	${PACKAGE_NAMESPACE}
+)
+
+######################################### Define package files ######################################################
+set( PACKAGE_PUBLIC_HEADERS
+	MyFunction.h
+)
+
+set( PACKAGE_PRODUCTION_FILES
+	MyFunction.cpp
+    MyPrivateFunction.h
+    MyPrivateFunction.cpp
+)
+
+set( PACKAGE_FIXTURE_FILES
+	TestFixtures/MyFunction_fixtures.cpp
+    TestFixtures/MyFunction_fixtures.h
+)
+
+set( PACKAGE_TEST_FILES
+	Tests/MyFunction_tests.cpp
+)
+
+set(PACKAGE_LINKED_LIBRARIES
+    Qt5::Core
+    Qt5::Gui
+)
+
+set(PACKAGE_LINKED_TEST_LIBRARIES
+	GMock::gmock
+)
+
+set( qtPlatformPlugins 
+	PLUGIN_DIRECTORY 	platforms
+	PLUGIN_TARGETS		Qt5::QWindowsIntegrationPlugin Qt5::QXcbIntegrationPlugin
+)
+
+set( archiveDevPackageOptions
+	DISTRIBUTION_PACKAGE_CONTENT_TYPE 	BINARIES_DEVELOPER
+	DISTRIBUTION_PACKAGE_FORMATS 		7Z
+)
+
+set( archiveUserPackageOptions
+	DISTRIBUTION_PACKAGE_CONTENT_TYPE 	BINARIES_USER
+	DISTRIBUTION_PACKAGE_FORMATS 		ZIP
+)
+
+set( debianPackageOptions
+	DISTRIBUTION_PACKAGE_CONTENT_TYPE	BINARIES_USER Qt5::Core Qt5::Test Qt5::Gui_GL Qt5::QXcbIntegrationPlugin
+	DISTRIBUTION_PACKAGE_FORMATS 		DEB
+	DISTRIBUTION_PACKAGE_FORMAT_OPTIONS SYSTEM_PACKAGES_DEB "libqt5core5a, libqt5gui5" 
+)
+
+############################################## Add Package ###################################################
+cpfAddPackage( 
+	PACKAGE_NAME			${PACKAGE_NAME}
+	PACKAGE_NAMESPACE		${PACKAGE_NAMESPACE}
+	HOMEPAGE				"http://www.awsomelib.com/index.html"
+	MAINTAINER_EMAIL		"hans@awsomelib.com"
+	TYPE					LIB
+	BRIEF_DESCRIPTION		${briefDescription}
+	LONG_DESCRIPTION		${longDescription}
+    PUBLIC_HEADER           ${PACKAGE_PUBLIC_HEADERS}
+	PRODUCTION_FILES		${PACKAGE_PRODUCTION_FILES}
+	FIXTURE_FILES			${PACKAGE_FIXTURE_FILES}
+	TEST_FILES				${PACKAGE_TEST_FILES}
+	LINKED_LIBRARIES		${PACKAGE_LINKED_LIBRARIES}
+	LINKED_TEST_LIBRARIES	${PACKAGE_LINKED_TEST_LIBRARIES}
+	PLUGIN_DEPENDENCIES		${qtPlatformPlugins}
+	DISTRIBUTION_PACKAGES 	${archiveDevPackageOptions}
+	DISTRIBUTION_PACKAGES 	${archiveUserPackageOptions}
+	DISTRIBUTION_PACKAGES 	${debianPackageOptions}
+)
+
+\endcode
 
 
 */
