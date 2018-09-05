@@ -268,7 +268,8 @@ function( cpfGetDeveloperPackageFiles sourceTargetsOut sourceDirOut sourceFilesO
 		
 	cpfToConfigSuffix( configSuffix ${config})
 	cpfGetPackagePrefixOutputDir( packageDir ${package} )
-	set( sourceDir "${CMAKE_INSTALL_PREFIX}/${packageDir}")
+	#set( sourceDir "${CMAKE_INSTALL_PREFIX}/${packageDir}")
+	set( sourceDir "${CMAKE_INSTALL_PREFIX}")
 			
 	# get files from install targets
 	get_property( installTarget TARGET ${package} PROPERTY CPF_INSTALL_PACKAGE_SUBTARGET )
