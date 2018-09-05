@@ -599,7 +599,7 @@ function( cpfGetArchivePackageCommand commandOut package config version contentI
 	# Setup the cpack command for creating the package
 	set( command
 "cpack -G \"${packageFormat}\" \
--D CPACK_PACKAGE_NAME=${${package}} \
+-D CPACK_PACKAGE_NAME=${package} \
 -D CPACK_PACKAGE_VERSION=${version} \
 -D CPACK_INSTALLED_DIRECTORIES=\"${packageContentDir}\"$<SEMICOLON>. \
 -D CPACK_PACKAGE_FILE_NAME=\"${baseFileName}\" \
