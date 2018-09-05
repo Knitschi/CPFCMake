@@ -3,7 +3,7 @@
 
 include_guard(GLOBAL)
 
-set( CPF_MINIMUM_CMAKE_VERSION 3.10.0)
+set( CPF_MINIMUM_CMAKE_VERSION 3.12.1)
 
 # Get definitions of test target appendices for in code macros (todo move this somewhere in the lower parts)
 set( CPF_FIXTURE_TARGET_ENDING _fixtures)
