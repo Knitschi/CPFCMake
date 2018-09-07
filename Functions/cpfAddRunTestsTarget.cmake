@@ -103,6 +103,8 @@ endfunction()
 function( cpfAddRunPython3TestTarget package testScript args sourceFiles dependedOnPackages)
 	if(TOOL_PYTHON3)
 
+		cpfPrependMulti( sourceFiles "${CMAKE_CURRENT_SOURCE_DIR}/" "${sourceFiles}")
+
 		# Get the sources from the depended on packages.
 		foreach( package ${dependedOnPackages})
 			getAbsPathsOfTargetSources( absSources ${package})
