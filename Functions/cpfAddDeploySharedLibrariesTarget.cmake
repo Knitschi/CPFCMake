@@ -212,9 +212,9 @@ function( cpfAddDeployExternalSharedLibsToBuildStageTarget package externalLibs 
 	cpfGetIndexedTargetName(targetName deployExternal_${package})
 
 	foreach( lib ${externalLibs})
-		# sadly the add_custom_command() function does currently not take generator expressions for its output
-		# https://cmake.org/pipermail/cmake-developers/2016-April/028195.html
-		# This means we have to add custom command for each configuration library file
+		
+		# Add a copy command for the current version.
+		set(outputs)
 		cpfGetConfigVariableSuffixes(configSuffixes)
 		foreach(suffix ${configSuffixes})
 
