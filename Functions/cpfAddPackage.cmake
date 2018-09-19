@@ -730,13 +730,8 @@ function( cpfAddPlugins package pluginOptionLists )
 		list(GET pluginDirectories ${index} subdirectory)
 		cpfIncrement(index)
 		if(TARGET ${plugin})
-			get_property(isImported TARGET ${plugin} PROPERTY IMPORTED)
-			if(isImported)
-				cpfAddDeployExternalSharedLibsToBuildStageTarget( ${package} ${plugin} ${subdirectory} )
-			else()
-				add_dependencies( ${target} ${plugin}) # adds the artifical dependency
-				cpfAddDeployInternalSharedLibsToBuildStageTargets( ${package} ${plugin} ${subdirectory} ) 
-			endif()
+			add_dependencies( ${target} ${plugin}) # adds the artifical dependency
+			cpfAddDeploySharedLibsToBuildStageTargets( ${package} ${plugin} ${subdirectory} ) 
 		endif()
 	endforeach()
 

@@ -28,12 +28,7 @@ function( cpfAddDeploySharedLibrariesTarget package )
 	endif()
 
 	cpfFilterInTargetsWithProperty( sharedLibraries "${allLinkedLibraries}" TYPE SHARED_LIBRARY )
-	cpfFilterInTargetsWithProperty( externalSharedLibs "${sharedLibraries}" IMPORTED TRUE )
-	cpfFilterInTargetsWithProperty( internalSharedLibs "${sharedLibraries}" IMPORTED "" )
-
-	# Add the targets that copy the dlls
-	cpfAddDeployInternalSharedLibsToBuildStageTarget( ${package} "${internalSharedLibs}" "" ) 
-	cpfAddDeployExternalSharedLibsToBuildStageTarget( ${package} "${externalSharedLibs}" "" ) 
+	cpfAddDeploySharedLibsToBuildStageTarget( ${package} "${sharedLibraries}" "" ) 
 
 endfunction()
 
@@ -202,7 +197,7 @@ function( cpfGetAllTargetsInLinkTree targetsOut targetsIn )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAddDeployInternalSharedLibsToBuildStageTarget package libs outputSubDir )
+function( cpfAddDeploySharedLibsToBuildStageTarget package libs outputSubDir )
 
 	if(NOT libs)
 		return()
@@ -218,7 +213,7 @@ function( cpfAddDeployInternalSharedLibsToBuildStageTarget package libs outputSu
 		cpfGetConfigurations(configs)
 		foreach(config ${configs})
 
-			cpfGetInternalLibFilePath( libFile ${lib} ${config})
+			cpfGetLibFilePath( libFile ${lib} ${config})
 			cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${outputSubDir}" ${lib} ${libFile} "${outputs}")
 
 		endforeach()
@@ -229,49 +224,23 @@ function( cpfAddDeployInternalSharedLibsToBuildStageTarget package libs outputSu
 
 endfunction()
 
-#---------------------------------------------------------------------------------------------
-function( cpfAddDeployExternalSharedLibsToBuildStageTarget package libs outputSubDir )
+#--------------------------------------------------------------------------
+function( cpfGetLibFilePath pathOut libraryTarget config)
 
-	if(NOT libs)
-		return()
+	get_property( isImported TARGET ${libraryTarget} PROPERTY IMPORTED)
+	if(isImported)
+
+		cpfToConfigSuffix( suffix ${config} )
+		cpfGetLibLocation( libPath ${libraryTarget} ${suffix})
+		set(${pathOut} ${libPath} PARENT_SCOPE)
+
+	else()
+
+		cpfGetTargetOutputFileName(libraryFileName ${libraryTarget} ${config})
+		cpfGetTargetOutputDirectory( sourceDir ${libraryTarget} ${config} )
+		set(${pathOut} "${sourceDir}/${libraryFileName}" PARENT_SCOPE)
+
 	endif()
-
-	# Add one custom target to copy all external libs.
-	cpfGetIndexedTargetName(targetName deployExternal_${package})
-
-	set(outputs)
-	foreach( lib ${libs})
-		
-		# Add a copy command for the current version.
-		cpfGetConfigurations(configs)
-		foreach(config ${configs})
-
-			cpfGetExternalLibFilePath( libFile ${lib} ${config})
-			cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${outputSubDir}" ${lib} ${libFile} "${outputs}")
-
-		endforeach()
-
-	endforeach()
-
-	cpfAddDeployTarget( ${targetName} ${package} "${outputs}" "${libs}" )
-
-endfunction()
-
-#--------------------------------------------------------------------------
-function( cpfGetInternalLibFilePath pathOut libraryTarget config)
-
-	cpfGetTargetOutputFileName(libraryFileName ${libraryTarget} ${config})
-	cpfGetTargetOutputDirectory( sourceDir ${libraryTarget} ${config} )
-	set(${pathOut} "${sourceDir}/${libraryFileName}" PARENT_SCOPE)
-
-endfunction()
-
-#--------------------------------------------------------------------------
-function( cpfGetExternalLibFilePath pathOut libraryTarget config)
-
-	cpfToConfigSuffix( suffix ${config} )
-	cpfGetLibLocation( libPath ${libraryTarget} ${suffix})
-	set(${pathOut} ${libPath} PARENT_SCOPE)
 
 endfunction()
 
@@ -293,18 +262,33 @@ function( cpfAddDeployCommand outputsOut targetName package config outputSubDir 
 	cpfContains( alreadyCopied existingOutputs ${output})
 	if(NOT ("${libFile}" STREQUAL "${output}") AND NOT alreadyCopied )  # Do not deploy the library that belongs to the same package or one that has already been copied.
 
-		set(copyCommand "cmake -E copy \"${libFile}\" \"${output}\"")
-		set(touchCommand "cmake -E touch \"${output}\"")
+		get_property( isImported TARGET ${lib} PROPERTY IMPORTED)
+		if(isImported)
 
-		cpfAddConfigurationDependendCommand(
-			TARGET ${targetName}
-			OUTPUT ${output}
-			DEPENDS ${lib} ${libFile}
-			COMMENT "Deploy or touch \"${output}\""
-			CONFIG ${config}
-			COMMANDS_CONFIG ${copyCommand}
-			COMMANDS_NOT_CONFIG ${touchCommand}
-		)
+			# For external libraries we can not use a config dependent
+			# deployment, because touched files are never overwritten by
+			# the real files. So we deploy all libraries for all configurations.
+			cpfAddCustomCommandCopyFile( ${libFile} ${output} )
+
+		else()
+
+			# Internal libraries are updated when the current compiler configuration changes, 
+			# so we can add a configuration only deploy command.
+
+			set(copyCommand "cmake -E copy \"${libFile}\" \"${output}\"")
+			set(touchCommand "cmake -E touch \"${output}\"")
+
+			cpfAddConfigurationDependendCommand(
+				TARGET ${targetName}
+				OUTPUT ${output}
+				DEPENDS ${lib} ${libFile}
+				COMMENT "Copy \"${libFile}\" to \"${output}\""
+				CONFIG ${config}
+				COMMANDS_CONFIG ${copyCommand}
+				COMMANDS_NOT_CONFIG ${touchCommand}
+			)
+
+		endif()
 
 		cpfListAppend(outputs ${output})
 
