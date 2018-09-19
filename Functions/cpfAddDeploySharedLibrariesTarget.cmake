@@ -310,7 +310,8 @@ function( cpfAddDeployCommand outputsOut targetName package config outputSubDir 
 
 	endif()
 
-	set(${outputsOut} "${outputs}" PARENT_SCOPE)
+	cpfListAppend(existingOutputs ${outputs})
+	set(${outputsOut} "${existingOutputs}" PARENT_SCOPE)
 
 endfunction()
 
