@@ -632,7 +632,7 @@ function( cpfSetAllOutputDirectoriesAndNames target package config outputPrefixD
 	cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} LIBRARY)
 	cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} ARCHIVE)
 
-	cpfTargetHasPdbCompileOutput(hasOutput ${target} ${configSuffix})
+	cpfProjectProducesPdbFiles(hasOutput ${config})
 	if(hasOutput)
 		cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} COMPILE_PDB)
 		set_property(TARGET ${target} PROPERTY COMPILE_PDB_NAME${configSuffix} ${target}${CMAKE${configSuffix}_POSTFIX}-compiler) # we overwrite the filename to make it more meaningful
@@ -640,8 +640,10 @@ function( cpfSetAllOutputDirectoriesAndNames target package config outputPrefixD
 
 	cpfTargetHasPdbLinkerOutput(hasOutput ${target} ${configSuffix})
 	if(hasOutput)
+		# Note that we use the same name and path for linker as are used for the dlls files.
+		# When consuming imported targets we guess that the pdb files have these locations. 
 		cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} PDB)
-		set_property(TARGET ${target} PROPERTY PDB_NAME${configSuffix} ${target}${CMAKE${configSuffix}_POSTFIX}-linker)  # we overwrite the filename to make it more meaningful
+		set_property(TARGET ${target} PROPERTY PDB_NAME${configSuffix} ${target}${CMAKE${configSuffix}_POSTFIX})
 	endif()
 
 endfunction()
@@ -659,36 +661,6 @@ function( cpfSetOutputDirAndName target package config prefixDir outputType )
 	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME${configSuffix} ${target}${CMAKE_${uConfig}_POSTFIX} )
 
 endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfTargetHasPdbCompileOutput hasPdbOutput target configSuffix )
-
-	set( hasPdbFlag FALSE )
-	if(MSVC)
-		cpfSplitString( flagsList "${CMAKE_CXX_FLAGS${configSuffix}}" " ")
-		cpfContainsOneOf( hasPdbFlag "${flagsList}" /Zi;/ZI )
-	endif()
-	set( ${hasPdbOutput} ${hasPdbFlag} PARENT_SCOPE )
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfTargetHasPdbLinkerOutput hasPdbOutput target configSuffix )
-
-	cpfTargetHasPdbCompileOutput( hasPdbCompileOutput ${target} ${configSuffix})
-	
-	if( hasPdbCompileOutput )
-		get_property( targetType TARGET ${target} PROPERTY TYPE)
-		if(${targetType} STREQUAL SHARED_LIBRARY OR ${targetType} STREQUAL MODULE_LIBRARY OR ${targetType} STREQUAL EXECUTABLE)
-			set(${hasPdbOutput} TRUE PARENT_SCOPE)
-			return()
-		endif()
-	endif()
-
-	set(${hasPdbOutput} FALSE PARENT_SCOPE)
-
-endfunction()
-
 
 #---------------------------------------------------------------------
 # generate a header file that cpfContains the EXPORT macros

@@ -149,3 +149,17 @@ function( cpfGetList1WithoutList2 differenceOut list1 list2)
 	endforeach()
 	set( ${differenceOut} "${difference}" PARENT_SCOPE)
 endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetElementsMatching listOut list regexp )
+
+	set(matchingElements)
+	foreach(element ${list})
+		if("${element}" MATCHES "${regexp}")
+			cpfListAppend(matchingElements ${element})
+		endif()
+	endforeach()
+
+	set(${listOut} "${matchingElements}" PARENT_SCOPE)
+
+endfunction()

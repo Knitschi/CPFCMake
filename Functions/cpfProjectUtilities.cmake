@@ -108,7 +108,7 @@ function( cpfGetCxxFlags flagsOut config)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( isMSVCDebugConfig bOut config )
+function( cpfIsMSVCDebugConfig bOut config )
 	
 	set(isMSVCDebug FALSE)
 
@@ -118,6 +118,36 @@ function( isMSVCDebugConfig bOut config )
 	endif()
 
 	set( ${bOut} ${isMSVCDebug} PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfProjectProducesPdbFiles hasPdbOutput config )
+
+	set( hasPdbFlag FALSE )
+	if(MSVC)
+		cpfToConfigSuffix(configSuffix ${config})
+		cpfSplitString( flagsList "${CMAKE_CXX_FLAGS${configSuffix}}" " ")
+		cpfContainsOneOf( hasPdbFlag "${flagsList}" /Zi;/ZI )
+	endif()
+	set( ${hasPdbOutput} ${hasPdbFlag} PARENT_SCOPE )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfTargetHasPdbLinkerOutput hasPdbOutput target configSuffix )
+
+	cpfProjectProducesPdbFiles( hasPdbCompileOutput ${config})
+	
+	if( hasPdbCompileOutput )
+		get_property( targetType TARGET ${target} PROPERTY TYPE)
+		if(${targetType} STREQUAL SHARED_LIBRARY OR ${targetType} STREQUAL MODULE_LIBRARY OR ${targetType} STREQUAL EXECUTABLE)
+			set(${hasPdbOutput} TRUE PARENT_SCOPE)
+			return()
+		endif()
+	endif()
+
+	set(${hasPdbOutput} FALSE PARENT_SCOPE)
 
 endfunction()
 
@@ -682,14 +712,20 @@ function( cpfGetTypePartOfOutputDir typeDir package outputType )
 	# handle relative dirs that are the same on all platforms
 	if(${outputType} STREQUAL ARCHIVE)
 		set(typeDirLocal lib)
-	elseif(${outputType} STREQUAL COMPILE_PDB OR ${outputType} STREQUAL PDB )
-		set(typeDirLocal debug )
+	elseif(${outputType} STREQUAL COMPILE_PDB )	
+		# We put the compiler pdb files parallel to the lib, because msvc looks for them there.
+		set(typeDirLocal lib )
+	elseif(${outputType} STREQUAL PDB)
+		# We put the linker pdb files parallel to the dll, because msvc looks for them there.
+		set(typeDirLocal . )
 	elseif(${outputType} STREQUAL INCLUDE)
 		set(typeDirLocal include/${package})
 	elseif(${outputType} STREQUAL CMAKE_CONFIG)
 		set(typeDirLocal lib/cmake/${package}) 
+	elseif(${outputType} STREQUAL SOURCE )
+		set(typeDirLocal src/${package}) 
 	endif()
-	
+
 	# handle platform specific relative dirs
 	if( ${CMAKE_SYSTEM_NAME} STREQUAL Windows  )
 		# on windows we put executables and dlls directly in the package directory.

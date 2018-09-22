@@ -286,8 +286,33 @@ function( cpfInstallDebugFiles package )
                 )
                 # Add the installed files to the target property
                 set_property(TARGET ${package} APPEND PROPERTY CPF_INSTALLED_FILES${suffix} "${relPdbLinkerDir}/${linkerPdbName}.pdb" )
-            endif()
-            
+			endif()
+			
+			# Install source files for configurations that require them for debugging.
+			cpfProjectProducesPdbFiles( needsSourcesForDebugging ${config})
+			if(needsSourcesForDebugging)
+
+				getAbsPathsOfTargetSources( absSourcePaths ${target})
+				cpfGetFilepathsWithExtensions( absSourcePaths "${absSourcePaths}" "${CPF_CXX_SOURCE_FILE_EXTENSIONS}" )
+				cpfGetShortFilenames( shortSourceNames "${absSourcePaths}")
+				get_property(sourceDir TARGET ${target} PROPERTY SOURCE_DIR )
+
+				cpfGetRelativeOutputDir( relSourceDir ${package} SOURCE)
+				install(
+                    FILES ${absSourcePaths}
+                    DESTINATION "${relSourceDir}"
+                    CONFIGURATIONS ${config}
+                )
+
+                # Add the installed files to the target property
+				cpfPrependMulti(relInstallPaths "${relSourceDir}/" "${shortSourceNames}" )
+
+				devMessageList("${relInstallPaths}")
+
+                set_property(TARGET ${package} APPEND PROPERTY CPF_INSTALLED_FILES${suffix} ${relInstallPaths} )
+
+			endif()
+
         endforeach()
 	endforeach()
 

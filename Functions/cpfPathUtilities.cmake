@@ -92,7 +92,7 @@ function( cpfGetPathRoot VAR absPath)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# returns true if the given path is absolute 
+# Returns true if the given path is absolute.
 function( cpfIsAbsolutePath boolOut path)
 	cpfGetPathRoot( root ${path})
 	if( ${root} STREQUAL NOTFOUND )
@@ -103,7 +103,7 @@ function( cpfIsAbsolutePath boolOut path)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# removes .. dirUp directories from absolute paths.
+# Removes .. dirUp directories from absolute paths.
 function( cpfNormalizeAbsPath normedPathOut absPath)
 	cpfGetPathRoot( root "${absPath}")
 	get_filename_component( normedPath "${absPath}" ABSOLUTE BASE_DIR ${root} )
@@ -111,7 +111,7 @@ function( cpfNormalizeAbsPath normedPathOut absPath)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# returns multiple relative paths from the fromPath to the toPaths
+# Returns multiple relative paths from the fromPath to the toPaths
 function( cpfGetRelativePaths relPathsOut fromPath toPaths )
 	set(relPaths)
 	foreach( toPath ${toPaths})
@@ -121,5 +121,32 @@ function( cpfGetRelativePaths relPathsOut fromPath toPaths )
 	set(${relPathsOut} "${relPaths}" PARENT_SCOPE)
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# Returns the filenames in the given list that have one of the given extensions.
+function( cpfGetFilepathsWithExtensions pathsOut filePaths extensions)
+
+	# Prepare a regular expression that matches the extensions.
+	cpfPrependMulti( extensionMatcher "\\" "${extensions}")
+	cpfJoinString( oredExtensionMatcher "${extensionMatcher}" "|" )
+	set(regExp ".*(${oredExtensionMatcher})$")
+
+	# Get the files and return them.
+	cpfGetElementsMatching( list "${filePaths}" ${regExp} )
+	set(${pathsOut} "${list}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns the short filenames of the given file-paths.
+function( cpfGetShortFilenames namesOut filePaths )
+	
+	set(shortNames)
+	foreach(path ${filePaths})
+		get_filename_component(shortName ${path} NAME)
+		cpfListAppend(shortNames ${shortName})
+	endforeach()
+	set(${namesOut} "${shortNames}" PARENT_SCOPE)
+
+endfunction()
 
 

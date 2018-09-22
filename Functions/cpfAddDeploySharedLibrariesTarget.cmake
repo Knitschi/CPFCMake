@@ -213,8 +213,15 @@ function( cpfAddDeploySharedLibsToBuildStageTarget package libs outputSubDir )
 		cpfGetConfigurations(configs)
 		foreach(config ${configs})
 
+			# Deploy the dll files
 			cpfGetLibFilePath( libFile ${lib} ${config})
 			cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${outputSubDir}" ${lib} ${libFile} "${outputs}")
+
+			# Deploy the liner pdb files if they are available.
+			cpfGetImportedLibPdbFilePath( libPdbFile ${lib} ${config})
+			if(libPdbFile)
+				cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${outputSubDir}" ${lib} ${libPdbFile} "${outputs}")
+			endif()
 
 		endforeach()
 
@@ -241,6 +248,41 @@ function( cpfGetLibFilePath pathOut libraryTarget config)
 		set(${pathOut} "${sourceDir}/${libraryFileName}" PARENT_SCOPE)
 
 	endif()
+
+endfunction()
+
+#--------------------------------------------------------------------------
+function( cpfGetImportedLibPdbFilePath pathOut libraryTarget config)
+
+	# We only need the file if we compile with debug options ourselves.
+	cpfIsMSVCDebugConfig( isDebugConfig ${config})
+
+	# We only need to deploy pdb files of imported targets.
+	# The locally created ones are found automatically by msvc.
+	get_property( libIsImported TARGET ${libraryTarget} PROPERTY IMPORTED)
+	if(isDebugConfig AND libIsImported)
+
+		# Import targets have no porperty that holds the location of the pdb file.
+		# Therefore we guess that it is at the same location as the dll and has
+		# the same name.
+		cpfGetLibFilePath( dllPath ${libraryTarget} ${config})
+		get_filename_component( dllDir ${dllPath} DIRECTORY )
+		get_filename_component( dllShortNameWE ${dllPath} NAME_WE)
+
+		set(pdbPath ${dllDir}/${dllShortNameWE}.pdb )
+		
+		# As we only guessed the path we have to check if it is there.
+		if(NOT EXISTS ${pdbPath})
+			#message(FATAL_ERROR "Could not find .pdb file of library ${libraryTarget} at guessed location \"${pdbPath}\"." )
+			cpfDebugMessage("Could not find .pdb file of library ${libraryTarget} at guessed location \"${pdbPath}\".")
+		else()
+			set(${pathOut} "${pdbPath}" PARENT_SCOPE)
+			return()
+		endif()
+
+	endif()
+
+	set(${pathOut} "" PARENT_SCOPE)
 
 endfunction()
 
