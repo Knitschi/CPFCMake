@@ -48,6 +48,7 @@ set( files
 	Functions/cpfPathUtilities.cmake
 	Functions/cpfProjectUtilities.cmake
 	Functions/cpfStringUtilities.cmake
+	Functions/cpfTestUtilities.cmake
 	Scripts/addVersionTag.cmake
 	Scripts/clearDirExcept.cmake
 	Scripts/createConfigFile.cmake
@@ -65,7 +66,6 @@ set( files
 	Tests/cpfNumericUtilities_tests.cmake
 	Tests/cpfPathUtilities_tests.cmake
 	Tests/cpfStringUtilities_tests.cmake
-	Tests/cpfTestUtilities.cmake
 	Tests/run_tests.cmake
 	Variables/cpfConstants.cmake
 	Variables/cpfLocations.cmake
