@@ -164,16 +164,16 @@ else()
         cpfWorkingDirectoryIsDirty(isDirty "${ROOT_DIR}")
         if(isDirty) # we actually updated a package
             # Explicitly fetch the notes. Normal pull does not do it.
-            cpfExecuteProcess( unused "git fetch origin refs/notes/*:refs/notes/*" ${ROOT_DIR})
-            cpfExecuteProcess( unused "git commit . -m\"Update package(s): ${updatedPackages}\"" ${ROOT_DIR})
-            cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" ${ROOT_DIR})
+            cpfExecuteProcess( unused "git fetch origin refs/notes/*:refs/notes/*" "${ROOT_DIR}")
+            cpfExecuteProcess( unused "git commit . -m\"Update package(s): ${updatedPackages}\"" "${ROOT_DIR}")
+            cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" "${ROOT_DIR}")
         else() 
             # no package updates were done. We do not need to wait for a successful push
             message( STATUS "No package needed an update.")
             return()
         endif()
 
-        cpfTryPushCommitsAndNotes( pushedChanges origin ${ROOT_DIR})
+        cpfTryPushCommitsAndNotes( pushedChanges origin "${ROOT_DIR}")
         if(pushedChanges)
             message( STATUS "Updated package(s): ${updatedPackages}.")
         endif()
