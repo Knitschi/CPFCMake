@@ -702,7 +702,7 @@ function( cpfAddPlugins package pluginOptionLists )
 		list(GET pluginDirectories ${index} subdirectory)
 		cpfIncrement(index)
 		if(TARGET ${plugin})
-			add_dependencies( ${target} ${plugin}) # adds the artifical dependency
+			add_dependencies( ${package} ${plugin}) # adds the artifical dependency
 			cpfAddDeploySharedLibsToBuildStageTarget( ${package} ${plugin} ${subdirectory} ) 
 		endif()
 	endforeach()
