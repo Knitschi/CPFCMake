@@ -38,8 +38,12 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # This function adds custom targets which call the abi-compliance-checker tool.
-function( cpfAddAbiCheckerTargets package distributionPackageOptionLists )
+function( cpfAddAbiCheckerTargets package distributionPackageOptionLists enableOverride )
 	
+	if(NOT ("${enableOverride}" STREQUAL ""))
+		set(CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS ${enableOverride})
+	endif()
+
 	cpfAssertUserSettingsForCompatibilityChecksMakeSense( ${package} "${distributionPackageOptionLists}" )
 	if( CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS )
 
