@@ -70,6 +70,7 @@ cpfAddPackage(
         [DISTRIBUTION_PACKAGE_FORMAT_OPTIONS 
             [SYSTEM_PACKAGES_DEB packageListString ]]
         [DISTRIBUTION_PACKAGE_CONTENT_TYPE ...] ...]
+    [ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS bool]
 )
 \endcode
 
@@ -219,6 +220,10 @@ A list of keyword arguments that contain further options for the creation of the
 The option must be a string that contains the names and versions of the debian packages 
 that provide the excluded shared libraries from the BINARIES_USER option. E.g. "libc6 (>= 2.3.1-6), libc6 (< 2.4)"
 on which the package depends.
+
+####  [ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS bool] ####
+
+This option can be used to override the global CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS setting.
 
 
 ### Example ###

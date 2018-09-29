@@ -101,16 +101,40 @@ endfunction()
 ]]
 function( cpfAddPackage )
 
+	set( optionKeywords 
+	) 
+	
+	set( singleValueKeywords 
+		PACKAGE_NAME PACKAGE_NAMESPACE
+		TYPE
+		BRIEF_DESCRIPTION
+		LONG_DESCRIPTION
+		HOMEPAGE
+		MAINTAINER_EMAIL
+		ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS
+	)
+
+	set( multiValueKeywords 
+		PUBLIC_HEADER
+		PRODUCTION_FILES
+		PUBLIC_FIXTURE_HEADER
+		FIXTURE_FILES
+		TEST_FILES
+		LINKED_LIBRARIES
+		LINKED_TEST_LIBRARIES
+		PLUGIN_DEPENDENCIES
+		DISTRIBUTION_PACKAGES
+	)
+
 	# parse level 0 keywords
-	set( singleValueKeywords PACKAGE_NAME PACKAGE_NAMESPACE TYPE BRIEF_DESCRIPTION LONG_DESCRIPTION HOMEPAGE MAINTAINER_EMAIL)
-	set( multiValueKeywords PUBLIC_HEADER PRODUCTION_FILES PUBLIC_FIXTURE_HEADER FIXTURE_FILES TEST_FILES LINKED_LIBRARIES LINKED_TEST_LIBRARIES PLUGIN_DEPENDENCIES DISTRIBUTION_PACKAGES )
 	cmake_parse_arguments(
 		ARG 
-		"" 
+		"${optionKeywords}" 
 		"${singleValueKeywords}"
 		"${multiValueKeywords}"
 		${ARGN} 
 	)
+
 	# parse argument sublists
 	set( allKeywords ${singleValueKeywords} ${multiValueKeywords})
 	cpfGetKeywordValueLists( pluginOptionLists PLUGIN_DEPENDENCIES "${allKeywords}" "${ARGN}" pluginOptions)
