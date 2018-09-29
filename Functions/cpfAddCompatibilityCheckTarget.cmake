@@ -461,8 +461,8 @@ endfunction()
 function( cpfGetDumpFilePathRelativeToPackageDir pathOut package binaryTarget )
 	get_property( version TARGET ${package} PROPERTY VERSION )
 	cpfGetAbiDumpFileName( dumpFile ${binaryTarget} ${version})
-	cpfGetTypePartOfOutputDir( typeDir "" PDB )
-	set( ${pathOut} ${typeDir}/${dumpFile} PARENT_SCOPE)
+	cpfGetRelativeOutputDir( relativeDir ${package} OTHER )
+	set( ${pathOut} ${relativeDir}/${dumpFile} PARENT_SCOPE)
 endfunction()
 
 

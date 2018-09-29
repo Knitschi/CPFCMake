@@ -724,6 +724,8 @@ function( cpfGetTypePartOfOutputDir typeDir package outputType )
 		set(typeDirLocal lib/cmake/${package}) 
 	elseif(${outputType} STREQUAL SOURCE )
 		set(typeDirLocal src/${package}) 
+	elseif(${outputType} STREQUAL OTHER )
+		set(typeDirLocal other ) 
 	endif()
 
 	# handle platform specific relative dirs
