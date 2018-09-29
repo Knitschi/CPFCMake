@@ -41,8 +41,6 @@ function( cpfAddInstallPackageTarget package )
         get_property(installedFiles TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix})
 		cpfPrependMulti( outputFiles${configSuffix} "${CMAKE_INSTALL_PREFIX}/" "${installedFiles}" )
 
-
-
         # Setup the command that does the actual installation (file copying)
         # We use the cmake generated script here to only install the files for the package.
         set( installCommand "cmake -DCMAKE_INSTALL_CONFIG_NAME=${config} -DCMAKE_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\" -P \"${cmakeInstallScript}\"")
@@ -67,15 +65,23 @@ function( cpfAddInstallPackageTarget package )
 			COMMANDS_NOT_CONFIG ${touchCommmand}
 		)
 		cpfListAppend( allStampFiles ${stampfile${configSuffix}})
-		cpfListAppend( allOutputFiles ${outputFiles${configSuffix}})
 
 	endforeach()
 
-	list(REMOVE_DUPLICATES allOutputFiles)
+	# Get dumpfile target dependencies
+	set(abiDumpTragets)
+	get_property( binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
+	foreach(binaryTarget ${binaryTargets})
+		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY CPF_ABI_DUMP_SUBTARGET )
+		if(abiDumpTarget)
+			cpfListAppend(abiDumpTargets ${abiDumpTarget})
+		endif()
+	endforeach()
 
+	# Add the target
 	add_custom_target(
         ${targetName}
-        DEPENDS ${binarySubTargets} ${allStampFiles}
+        DEPENDS ${binarySubTargets} ${abiDumpTargets} ${allStampFiles}
     )
 
 	# set some properties
@@ -93,9 +99,10 @@ endfunction()
 function( cpfAddInstallRules package namespace)
 
 	cpfInstallPackageBinaries( ${package} )
-    cpfInstallDebugFiles( ${package} )
-	cpfInstallHeaders( ${package} )
 	cpfGenerateAndInstallCmakeConfigFiles( ${package} ${namespace} )
+	cpfInstallHeaders( ${package} )
+	cpfInstallDebugFiles( ${package} )
+	cpfInstallAbiDumpFiles( ${package} )
 
 endfunction()
 
@@ -465,6 +472,38 @@ function( cpfGenerateAndInstallCmakeConfigFiles package namespace)
 		)
 		cpfAddInstalledFilesToProperty( ${package} ${config} "${installedPackageFiles}" )
 
+	endforeach()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfInstallAbiDumpFiles package )
+
+	set(installedPackageFiles)
+
+	# get files from abiDump targets
+	get_property( binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
+	foreach(binaryTarget ${binaryTargets})
+		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY CPF_ABI_DUMP_SUBTARGET )
+		if(abiDumpTarget)
+
+			cpfGetCurrentDumpFile( dumpFile ${package} ${binaryTarget})
+			get_filename_component( shortDumpFile "${dumpFile}" NAME )
+			cpfGetRelativeOutputDir( relDumpFileDir ${package} OTHER)
+
+			install(
+				FILES ${dumpFile}
+				DESTINATION "${relDumpFileDir}"
+			)
+
+			cpfListAppend( installedPackageFiles "${relDumpFileDir}/${shortDumpFile}" )
+
+		endif()
+	endforeach()
+
+	cpfGetConfigurations(configs)
+	foreach( config ${configs} )
+		cpfAddInstalledFilesToProperty( ${package} ${config} "${installedPackageFiles}" )
 	endforeach()
 
 endfunction()
