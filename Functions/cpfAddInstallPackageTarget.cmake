@@ -41,6 +41,8 @@ function( cpfAddInstallPackageTarget package )
         get_property(installedFiles TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix})
 		cpfPrependMulti( outputFiles${configSuffix} "${CMAKE_INSTALL_PREFIX}/" "${installedFiles}" )
 
+
+
         # Setup the command that does the actual installation (file copying)
         # We use the cmake generated script here to only install the files for the package.
         set( installCommand "cmake -DCMAKE_INSTALL_CONFIG_NAME=${config} -DCMAKE_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\" -P \"${cmakeInstallScript}\"")
@@ -134,7 +136,7 @@ function( cpfInstallTargetsForPackage package targets )
 	# Add the installed files to the target property
 	cpfGetConfigurations(configs)
 	foreach( config ${configs})
-		cpfSetInstalledTargetFilesPackageProperty( ${package} ${config} "${targets}" "" )
+		cpfAddBinaryFilesToInstalledFilesProperty( ${package} ${config} "${targets}" "" )
 	endforeach()
 
 endfunction()
@@ -142,9 +144,11 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # relDir is set for special install directories of plugins
 #
-function( cpfSetInstalledTargetFilesPackageProperty package config targets relDirArg )
+function( cpfAddBinaryFilesToInstalledFilesProperty package config targets relDirArg )
 
 	cpfToConfigSuffix(configSuffix ${config})
+
+	set(installedPackageFiles)
 	foreach( target ${targets})
 
 		cpfGetTargetOutputType( outputType ${target})
@@ -154,7 +158,7 @@ function( cpfSetInstalledTargetFilesPackageProperty package config targets relDi
 			set(relDir "${relDirArg}")
 		endif()
 
-		set(additionalLibFiles)
+		set(additionalTargetFiles)
 		get_property( isImported TARGET ${target} PROPERTY IMPORTED)
 		if(isImported)
 			get_property(location TARGET ${target} PROPERTY LOCATION${configSuffix} )
@@ -165,47 +169,61 @@ function( cpfSetInstalledTargetFilesPackageProperty package config targets relDi
 			# add some other files that are installed
 			get_property( targetType TARGET ${target} PROPERTY TYPE)
 			if( "${CMAKE_SYSTEM_NAME}" STREQUAL Windows AND "${targetType}" STREQUAL SHARED_LIBRARY )
+
 				# on windows platforms there are also .lib files created when the target is a shared library
-			
 				cpfGetRelativeOutputDir( relDirLibFile ${package} ARCHIVE )
 				cpfGetTargetOutputFileNameForTargetType( libFilename ${target} ${config} STATIC_LIBRARY ARCHIVE)
-				cpfListAppend( additionalLibFiles "${relDirLibFile}/${libFilename}")
+				cpfListAppend( additionalTargetFiles "${relDirLibFile}/${libFilename}")
 				
 			elseif( "${CMAKE_SYSTEM_NAME}" STREQUAL Linux )
+
 				# on linux, there are also soname links and name links generated for shared libraries and executables
-				
 				get_property( soVersion TARGET ${target} PROPERTY SOVERSION )
 				get_property( version TARGET ${target} PROPERTY VERSION )
-				
-				# the solink with the shorter version
+
 				if("${targetType}" STREQUAL SHARED_LIBRARY)
+
+					# the solink with the shorter version
 					string(REPLACE ${version} ${soVersion} soName "${targetFile}")
-					cpfListAppend( additionalLibFiles "${relDir}/${soName}")
+					cpfListAppend( additionalTargetFiles "${relDir}/${soName}")
 					
 					# the namelink without the version
 					string(REPLACE .${version} "" nameLink "${targetFile}")
-					cpfListAppend( additionalLibFiles "${relDir}/${nameLink}")
+					cpfListAppend( additionalTargetFiles "${relDir}/${nameLink}")
 					
 				elseif("${targetType}" STREQUAL EXECUTABLE)
 					
 					# the namelink without the version
 					# note that the version is appended with a - instead of a .
 					string(REPLACE -${version} "" nameLink "${targetFile}")
-					cpfListAppend( additionalLibFiles "${relDir}/${nameLink}")
+					cpfListAppend( additionalTargetFiles "${relDir}/${nameLink}")
 					
 				endif()
 				
 			endif()
 		endif()
 
-		# add the target files once only
-		get_property( installedFiles TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix} )
-		cpfListAppend( installedFiles "${relDir}/${targetFile}")
-		cpfListAppend( installedFiles "${additionalLibFiles}")
-		list(REMOVE_DUPLICATES installedFiles)
-		set_property(TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix} ${installedFiles} )
+		# Add the main binary file itself.
+		cpfListAppend( installedPackageFiles "${relDir}/${targetFile}")
+		# Add the addtional files that belong to the main binary file.
+		cpfListAppend( installedPackageFiles "${additionalTargetFiles}")
 
 	endforeach()
+
+	cpfAddInstalledFilesToProperty( ${package} ${config} "${installedPackageFiles}" )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# This function makes sure, that installed files are unique in the list.
+#
+function( cpfAddInstalledFilesToProperty package config files )
+
+	cpfToConfigSuffix(configSuffix ${config})
+	get_property( installedFilesFromProperty TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix} )
+	set( allInstalledPackageFiles ${installedFilesFromProperty} ${files})
+	list(REMOVE_DUPLICATES allInstalledPackageFiles)
+	set_property(TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix} ${allInstalledPackageFiles} )
 
 endfunction()
 
@@ -251,14 +269,20 @@ function( cpfGetLinkedSharedLibsForPackageExecutables output package )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
+# This function adds install rules for the files that are required for debugging.
+# This is currently the pdb and source files for msvc configurations.
+#
 function( cpfInstallDebugFiles package )
 
 	get_property(targets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
 
-	foreach(target ${targets})
-        cpfGetConfigurations( configs )
-        foreach( config ${configs})
-            cpfToConfigSuffix( suffix ${config})
+	cpfGetConfigurations( configs )
+	foreach( config ${configs})
+
+		cpfToConfigSuffix( suffix ${config})
+
+		set(installedPackageFiles)
+		foreach(target ${targets})
     
             # Install compiler generated pdb files
             get_property( compilePdbName TARGET ${target} PROPERTY COMPILE_PDB_NAME${suffix} )
@@ -270,8 +294,7 @@ function( cpfInstallDebugFiles package )
                     DESTINATION "${relPdbCompilerDir}"
                     CONFIGURATIONS ${config}
                 )
-                # Add the installed files to the target property
-                set_property(TARGET ${package} APPEND PROPERTY CPF_INSTALLED_FILES${suffix} "${relPdbCompilerDir}/${compilePdbName}.pdb" )
+				cpfListAppend(installedPackageFiles "${relPdbCompilerDir}/${compilePdbName}.pdb")
             endif()
 
             # Install linker generated pdb files
@@ -284,8 +307,7 @@ function( cpfInstallDebugFiles package )
                     DESTINATION "${relPdbLinkerDir}"
                     CONFIGURATIONS ${config}
                 )
-                # Add the installed files to the target property
-                set_property(TARGET ${package} APPEND PROPERTY CPF_INSTALLED_FILES${suffix} "${relPdbLinkerDir}/${linkerPdbName}.pdb" )
+				cpfListAppend(installedPackageFiles "${relPdbLinkerDir}/${linkerPdbName}.pdb")
 			endif()
 			
 			# Install source files for configurations that require them for debugging.
@@ -306,14 +328,14 @@ function( cpfInstallDebugFiles package )
 
                 # Add the installed files to the target property
 				cpfPrependMulti(relInstallPaths "${relSourceDir}/" "${shortSourceNames}" )
-
-				devMessageList("${relInstallPaths}")
-
-                set_property(TARGET ${package} APPEND PROPERTY CPF_INSTALLED_FILES${suffix} ${relInstallPaths} )
+				cpfListAppend(installedPackageFiles ${relInstallPaths})
 
 			endif()
 
-        endforeach()
+		endforeach()
+		
+		cpfAddInstalledFilesToProperty( ${package} ${config} "${installedPackageFiles}" )
+
 	endforeach()
 
 endfunction()
@@ -333,10 +355,14 @@ function( cpfInstallHeaders package)
     # Add the installed files to the target property
     cpfGetConfigurations(configs)
     foreach( config ${configs} )
-		cpfToConfigSuffix(configSuffix ${config})
+
+		set(installedPackageFiles)
 		foreach(header ${basicHeader} ${fixtureHeader} )
-			set_property(TARGET ${package} APPEND PROPERTY CPF_INSTALLED_FILES${configSuffix} "${header}" )
+			cpfListAppend(installedPackageFiles "${header}")
 		endforeach()
+
+		cpfAddInstalledFilesToProperty( ${package} ${config} "${installedPackageFiles}" )
+
 	endforeach()
 
 endfunction()
@@ -398,13 +424,13 @@ function( cpfGenerateAndInstallCmakeConfigFiles package namespace)
 	set(versionConfigFile ${package}ConfigVersion.cmake )
 	set(packageConfigFileFull "${CMAKE_CURRENT_BINARY_DIR}/${packageConfigFile}")	# The config file is used by find package 
 	set(versionConfigFileFull "${CMAKE_CURRENT_BINARY_DIR}/${versionConfigFile}")
-	cpfGetRelativeOutputDir( relConfigDir ${package} CMAKE_CONFIG)
+	cpfGetRelativeOutputDir( relCmakeFilesDir ${package} CMAKE_PACKAGE_FILES)
 	cpfGetTargetsExportsName( targetsExportName ${package})
 
 	configure_package_config_file(
 		${CPF_PACKAGE_CONFIG_TEMPLATE}
 		"${packageConfigFileFull}"
-		INSTALL_DESTINATION ${relConfigDir}
+		INSTALL_DESTINATION ${relCmakeFilesDir}
 	)
 		
 	write_basic_package_version_file( 
@@ -417,21 +443,28 @@ function( cpfGenerateAndInstallCmakeConfigFiles package namespace)
 	install(
 		EXPORT "${targetsExportName}"
 		NAMESPACE "${namespace}::"
-		DESTINATION "${relConfigDir}"
+		DESTINATION "${relCmakeFilesDir}"
 	)
 
 	# Install cmake config files
 	install(
 		FILES "${packageConfigFileFull}" "${versionConfigFileFull}"
-		DESTINATION "${relConfigDir}"
+		DESTINATION "${relCmakeFilesDir}"
 	)
 
 	# Add the installed files to the target property
 	cpfGetConfigurations(configs)
 	foreach( config ${configs} )
-		cpfToConfigSuffix(configSuffix ${config})
+
 		string( TOLOWER ${config} lowerConfig)
-		set_property(TARGET ${package} APPEND PROPERTY CPF_INSTALLED_FILES${configSuffix} "${relConfigDir}/${packageConfigFile}" "${relConfigDir}/${versionConfigFile}" "${relConfigDir}/${targetsExportName}.cmake" "${relConfigDir}/${targetsExportName}-${lowerConfig}.cmake")
+		set( installedPackageFiles 
+			"${relCmakeFilesDir}/${packageConfigFile}"
+			"${relCmakeFilesDir}/${versionConfigFile}"
+			"${relCmakeFilesDir}/${targetsExportName}.cmake"
+			"${relCmakeFilesDir}/${targetsExportName}-${lowerConfig}.cmake"
+		)
+		cpfAddInstalledFilesToProperty( ${package} ${config} "${installedPackageFiles}" )
+
 	endforeach()
 
 endfunction()
