@@ -278,7 +278,7 @@ function( cpfAddPackageBinaryTargets outProductionLibrary package packageNamespa
 	cpfGetPackageVersionFileName( versionFile ${package} )
 	list(APPEND productionFiles ${CMAKE_CURRENT_SOURCE_DIR}/${versionFile} )
 	cpfGetPackageVersionCppHeaderFileName( versionHeader ${package} )
-	list(APPEND productionFiles ${CMAKE_CURRENT_BINARY_DIR}/${versionHeader} )
+	list(APPEND publicHeaderFiles ${CMAKE_CURRENT_BINARY_DIR}/${versionHeader} )
 	
 
 	# Modify variables if the package creates an executable
