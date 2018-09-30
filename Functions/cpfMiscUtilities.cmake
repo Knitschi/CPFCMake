@@ -174,7 +174,7 @@ endfunction()
 function( cpfToConfigSuffix suffix config)
 
 	string(TOUPPER ${config} upperConfig)
-	set(${suffix} _${upperConfig} PARENT_SCOPE)
+	set(${suffix} ${upperConfig} PARENT_SCOPE)
 
 endfunction()
 

@@ -38,7 +38,7 @@ function( cpfAddInstallPackageTarget package )
 	foreach(config ${configs}) #once more we have to add a target for each configuration because OUTPUT of add_custom_command does not support generator expressions.
         
         cpfToConfigSuffix(configSuffix ${config})
-        get_property(installedFiles TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix})
+        get_property(installedFiles TARGET ${package} PROPERTY CPF_INSTALLED_FILES_${configSuffix})
 		cpfPrependMulti( outputFiles${configSuffix} "${CMAKE_INSTALL_PREFIX}/" "${installedFiles}" )
 
         # Setup the command that does the actual installation (file copying)
@@ -90,8 +90,8 @@ function( cpfAddInstallPackageTarget package )
 	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
 	foreach(config ${configs})
 		cpfToConfigSuffix(configSuffix ${config})
-		set_property( TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES${configSuffix} ${outputFiles${configSuffix}})
-		set_property( TARGET ${targetName} PROPERTY CPF_STAMP_FILE${configSuffix} ${stampfile${configSuffix}})
+		set_property( TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES_${configSuffix} ${outputFiles${configSuffix}})
+		set_property( TARGET ${targetName} PROPERTY CPF_STAMP_FILE_${configSuffix} ${stampfile${configSuffix}})
 	endforeach()
 
 endfunction()
@@ -169,7 +169,7 @@ function( cpfAddBinaryFilesToInstalledFilesProperty package config targets relDi
 		set(additionalTargetFiles)
 		get_property( isImported TARGET ${target} PROPERTY IMPORTED)
 		if(isImported)
-			get_property(location TARGET ${target} PROPERTY LOCATION${configSuffix} )
+			get_property(location TARGET ${target} PROPERTY LOCATION_${configSuffix} )
 			get_filename_component( targetFile "${location}" NAME )
 		else()
 			cpfGetTargetOutputFileName( targetFile ${target} ${config})
@@ -228,10 +228,10 @@ endfunction()
 function( cpfAddInstalledFilesToProperty package config files )
 
 	cpfToConfigSuffix(configSuffix ${config})
-	get_property( installedFilesFromProperty TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix} )
+	get_property( installedFilesFromProperty TARGET ${package} PROPERTY CPF_INSTALLED_FILES_${configSuffix} )
 	set( allInstalledPackageFiles ${installedFilesFromProperty} ${files})
 	list(REMOVE_DUPLICATES allInstalledPackageFiles)
-	set_property(TARGET ${package} PROPERTY CPF_INSTALLED_FILES${configSuffix} ${allInstalledPackageFiles} )
+	set_property(TARGET ${package} PROPERTY CPF_INSTALLED_FILES_${configSuffix} ${allInstalledPackageFiles} )
 
 endfunction()
 
@@ -293,8 +293,8 @@ function( cpfInstallDebugFiles package )
 		foreach(target ${targets})
     
             # Install compiler generated pdb files
-            get_property( compilePdbName TARGET ${target} PROPERTY COMPILE_PDB_NAME${suffix} )
-            get_property( compilePdbDir TARGET ${target} PROPERTY COMPILE_PDB_OUTPUT_DIRECTORY${suffix} )
+            get_property( compilePdbName TARGET ${target} PROPERTY COMPILE_PDB_NAME_${suffix} )
+            get_property( compilePdbDir TARGET ${target} PROPERTY COMPILE_PDB_OUTPUT_DIRECTORY_${suffix} )
             cpfGetRelativeOutputDir( relPdbCompilerDir ${package} COMPILE_PDB )
             if(compilePdbName)
                 install(
@@ -306,8 +306,8 @@ function( cpfInstallDebugFiles package )
             endif()
 
             # Install linker generated pdb files
-            get_property( linkerPdbName TARGET ${target} PROPERTY PDB_NAME${suffix} )
-            get_property( linkerPdbDir TARGET ${target} PROPERTY PDB_OUTPUT_DIRECTORY${suffix} )
+            get_property( linkerPdbName TARGET ${target} PROPERTY PDB_NAME_${suffix} )
+            get_property( linkerPdbDir TARGET ${target} PROPERTY PDB_OUTPUT_DIRECTORY_${suffix} )
             cpfGetRelativeOutputDir( relPdbLinkerDir ${package} PDB)
             if(linkerPdbName)
                 install(

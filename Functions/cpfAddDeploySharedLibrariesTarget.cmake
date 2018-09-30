@@ -51,10 +51,10 @@ function( cpfGetRecursiveLinkedLibraries linkedLibsOut target )
 
 		cpfGetConfigVariableSuffixes(configSuffixes)
 		foreach(configSuffix ${configSuffixes})
-			get_property(importedInterfaceLibraries TARGET ${target} PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES${configSuffix})		# the libraries that are used in the header files of the target
+			get_property(importedInterfaceLibraries TARGET ${target} PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES_${configSuffix})		# the libraries that are used in the header files of the target
 			list(APPEND allLinkedLibraries ${importedInterfaceLibraries})
 			
-			get_property(importedPrivateLibraries TARGET ${target} PROPERTY IMPORTED_LINK_DEPENDENT_LIBRARIES${configSuffix})
+			get_property(importedPrivateLibraries TARGET ${target} PROPERTY IMPORTED_LINK_DEPENDENT_LIBRARIES_${configSuffix})
 			list(APPEND allLinkedLibraries ${importedPrivateLibraries})
 		endforeach()
 
@@ -367,9 +367,9 @@ endfunction()
 function( cpfGetSharedLibraryOutputDir outputDir target configSuffix )
     
     if(${CMAKE_SYSTEM_NAME} STREQUAL Windows )
-        get_property( sourceDir TARGET ${target} PROPERTY RUNTIME_OUTPUT_DIRECTORY${configSuffix})
+        get_property( sourceDir TARGET ${target} PROPERTY RUNTIME_OUTPUT_DIRECTORY_${configSuffix})
     elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-        get_property( sourceDir TARGET ${target} PROPERTY LIBRARY_OUTPUT_DIRECTORY${configSuffix})
+        get_property( sourceDir TARGET ${target} PROPERTY LIBRARY_OUTPUT_DIRECTORY_${configSuffix})
     else()
         message(FATAL_ERROR "Function cpfGetSharedLibraryOutputDir() must be extended for system ${CMAKE_SYSTEM_NAME}")
     endif()
@@ -381,12 +381,12 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 function( cpfGetLibLocation location lib configSuffix )
 
-	get_property( libFile TARGET ${lib} PROPERTY LOCATION${suffix})
+	get_property( libFile TARGET ${lib} PROPERTY LOCATION_${suffix})
 
 	if(NOT libFile) # if the given config is not available for the imported library, we use the RELEASE config instead.
 		get_property( libFile TARGET ${lib} PROPERTY LOCATION_RELEASE)
 		cpfAssertDefinedMessage( libFile "Could not get the location of the .dll/.so file of library ${lib}.")
-		cpfDebugMessage("Library ${lib} has no property LOCATION${suffix} configuration. Defaulting to the LOCATION_RELEASE version.")
+		cpfDebugMessage("Library ${lib} has no property LOCATION_${suffix} configuration. Defaulting to the LOCATION_RELEASE version.")
 	endif()
 
 	set(${location} ${libFile} PARENT_SCOPE)

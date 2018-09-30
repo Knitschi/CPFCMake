@@ -138,7 +138,7 @@ function( cpfAddClearLastBuildDirCommand stampFileOut package distPackagesTarget
 	set(packageFiles)
 	foreach( target ${distPackageTargets})
 		foreach( configSuffix ${configSuffixes})
-			get_property(files TARGET ${target} PROPERTY CPF_OUTPUT_FILES${configSuffix})
+			get_property(files TARGET ${target} PROPERTY CPF_OUTPUT_FILES_${configSuffix})
 			foreach(file ${files})
 				get_filename_component( shortName "${file}" NAME)
 				cpfListAppend( packageFiles ${shortName})
@@ -227,8 +227,8 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 	# set target properties
 	set_property(TARGET ${targetName} PROPERTY FOLDER "${package}/private")
 	foreach( configSuffix ${configSuffixes})
-		set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES${configSuffix} ${outputFiles${configSuffix}})
-		set_property(TARGET ${targetName} PROPERTY CPF_STAMP_FILE${configSuffix} ${stampFile${configSuffix}})
+		set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES_${configSuffix} ${outputFiles${configSuffix}})
+		set_property(TARGET ${targetName} PROPERTY CPF_STAMP_FILE_${configSuffix} ${stampFile${configSuffix}})
 	endforeach()
 
 endfunction()
@@ -273,8 +273,8 @@ function( cpfGetDeveloperPackageFiles sourceTargetsOut sourceDirOut sourceFilesO
 			
 	# get files from install targets
 	get_property( installTarget TARGET ${package} PROPERTY CPF_INSTALL_PACKAGE_SUBTARGET )
-	get_property( packageFiles TARGET ${installTarget} PROPERTY CPF_OUTPUT_FILES${configSuffix} )
-	get_property( stampFile TARGET ${installTarget} PROPERTY CPF_STAMP_FILE${configSuffix} )
+	get_property( packageFiles TARGET ${installTarget} PROPERTY CPF_OUTPUT_FILES_${configSuffix} )
+	get_property( stampFile TARGET ${installTarget} PROPERTY CPF_STAMP_FILE_${configSuffix} )
 
 	cpfGetRelativePaths( relPaths ${sourceDir} "${packageFiles}")
 	cpfListAppend( sourceFiles "${relPaths}")
@@ -391,7 +391,7 @@ function( cpfGetTargetVersionSymlinks symlinksOut target config)
 			# On Linux we also have to get soname symlinks of the shared libraries
 			# Note that there should not be any imported executables. 
 			# Executable targets should only come from the package we are installing.
-			get_property( soName TARGET ${target} PROPERTY IMPORTED_SONAME${configSuffix})
+			get_property( soName TARGET ${target} PROPERTY IMPORTED_SONAME_${configSuffix})
 			if( soName AND NOT "${shortName}" STREQUAL "${soName}" ) 
 				cpfListAppend( symlinks ${soName})
 			endif()
@@ -402,7 +402,7 @@ function( cpfGetTargetVersionSymlinks symlinksOut target config)
 			get_property( targetType TARGET ${target} PROPERTY TYPE)
 			if(${targetType} STREQUAL EXECUTABLE)
 
-				get_property( outputName TARGET ${target} PROPERTY RUNTIME_OUTPUT_NAME${configSuffix})
+				get_property( outputName TARGET ${target} PROPERTY RUNTIME_OUTPUT_NAME_${configSuffix})
 				cpfListAppend( symlinks ${outputName})
 								
 			elseif(${targetType} STREQUAL SHARED_LIBRARY OR ${targetType} STREQUAL MODULE_LIBRARY)
@@ -498,7 +498,7 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 		set( stampFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/copyToHtml_${shortPackageFilename}.stamp")
 		set( touchStampCommand "cmake -E touch \"${stampFile}\"")
 
-		get_property( contentStampFile TARGET ${contentTarget} PROPERTY CPF_STAMP_FILE${configSuffix})
+		get_property( contentStampFile TARGET ${contentTarget} PROPERTY CPF_STAMP_FILE_${configSuffix})
 		cpfAddConfigurationDependendCommand(
             TARGET ${targetName}
 			OUTPUT ${stampFile}			# we use a stamp-file here because we do not want to pollute the output directory with empty files. This should work because there are no consumers of the files.
@@ -522,7 +522,7 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/private")
 	
 	foreach( configSuffix ${configSuffixes})
-		set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES${configSuffix} ${destPackageFile${configSuffix}})
+		set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES_${configSuffix} ${destPackageFile${configSuffix}})
 	endforeach()
 
 endfunction()

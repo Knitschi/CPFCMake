@@ -218,7 +218,7 @@ function( cpfDefineProperties )
 		# A configuration dependent property that is set on all package main targets 
 		define_property(
 			TARGET
-			PROPERTY CPF_INSTALLED_FILES${configSuffix}
+			PROPERTY CPF_INSTALLED_FILES_${configSuffix}
 			BRIEF_DOCS "A list of files that belong to the installed package. Paths are relative to the install prefix."
 			FULL_DOCS " "
 		)
@@ -226,7 +226,7 @@ function( cpfDefineProperties )
 		# A configuration dependent property that is set on some targets (optimally it should be set on all to get a completely clean dependency chain)
 		define_property(
 			TARGET
-			PROPERTY CPF_OUTPUT_FILES${configSuffix}
+			PROPERTY CPF_OUTPUT_FILES_${configSuffix}
 			BRIEF_DOCS "A list of files that are created when the target is build in the given configuration."
 			FULL_DOCS " "
         )
@@ -234,7 +234,7 @@ function( cpfDefineProperties )
         # A configuration dependent property that is set on some targets that produce stamp files.
 		define_property(
 			TARGET
-			PROPERTY CPF_STAMP_FILE${configSuffix}
+			PROPERTY CPF_STAMP_FILE_${configSuffix}
 			BRIEF_DOCS "A list of files that are created when the target is build in the given configuration."
 			FULL_DOCS " "
         )

@@ -443,7 +443,7 @@ function( cpfAddAbiDumpTarget package binaryTarget headerListFile )
 	
 	# set target properties
 	cpfToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} )
-	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES${configSuffix} ${abiDumpFile} )
+	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES_${configSuffix} ${abiDumpFile} )
 	set_property(TARGET ${binaryTarget} PROPERTY CPF_ABI_DUMP_SUBTARGET ${targetName} )
 
 endfunction()
@@ -459,7 +459,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfGetAbiDumpFileName shortNameOut binaryTarget version )
 	cpfToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} )
-	set( ${shortNameOut} ABI_${binaryTarget}${CMAKE${configSuffix}_POSTFIX}.${version}.dump PARENT_SCOPE)
+	set( ${shortNameOut} ABI_${binaryTarget}${CMAKE_${configSuffix}_POSTFIX}.${version}.dump PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------

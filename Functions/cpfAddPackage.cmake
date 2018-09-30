@@ -249,7 +249,7 @@ function( cpfNormalizeImportedTargetProperties targets )
 			endif()
 			cpfToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} ) 
 			
-			get_property( location TARGET ${target} PROPERTY LOCATION${configSuffix} )
+			get_property( location TARGET ${target} PROPERTY LOCATION_${configSuffix} )
 			if( IS_SYMLINK ${location} )
 			
 				# get the file to which the symlink points
@@ -264,10 +264,10 @@ function( cpfNormalizeImportedTargetProperties targets )
 				
 				# change the target properties
 				if( EXISTS ${linkTarget})
-					set_property( TARGET ${target} PROPERTY LOCATION${configSuffix} ${linkTarget})
-					set_property( TARGET ${target} PROPERTY IMPORTED_LOCATION${configSuffix} ${linkTarget} )
+					set_property( TARGET ${target} PROPERTY LOCATION_${configSuffix} ${linkTarget})
+					set_property( TARGET ${target} PROPERTY IMPORTED_LOCATION_${configSuffix} ${linkTarget} )
 					get_filename_component( locationShort ${location} NAME)
-					set_property( TARGET ${target} PROPERTY IMPORTED_SONAME${configSuffix} ${locationShort} )
+					set_property( TARGET ${target} PROPERTY IMPORTED_SONAME_${configSuffix} ${locationShort} )
 				else()
 					message( FATAL_ERROR "The soname symlink \"${location}\" of imported target ${target} points to the not existing file \"${linkTarget}\"." )
 				endif()
@@ -659,7 +659,7 @@ function( cpfSetAllOutputDirectoriesAndNames target package config outputPrefixD
 	cpfProjectProducesPdbFiles(hasOutput ${config})
 	if(hasOutput)
 		cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} COMPILE_PDB)
-		set_property(TARGET ${target} PROPERTY COMPILE_PDB_NAME${configSuffix} ${target}${CMAKE${configSuffix}_POSTFIX}-compiler) # we overwrite the filename to make it more meaningful
+		set_property(TARGET ${target} PROPERTY COMPILE_PDB_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX}-compiler) # we overwrite the filename to make it more meaningful
 	endif()
 
 	cpfTargetHasPdbLinkerOutput(hasOutput ${target} ${configSuffix})
@@ -667,7 +667,7 @@ function( cpfSetAllOutputDirectoriesAndNames target package config outputPrefixD
 		# Note that we use the same name and path for linker as are used for the dlls files.
 		# When consuming imported targets we guess that the pdb files have these locations. 
 		cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} PDB)
-		set_property(TARGET ${target} PROPERTY PDB_NAME${configSuffix} ${target}${CMAKE${configSuffix}_POSTFIX})
+		set_property(TARGET ${target} PROPERTY PDB_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX})
 	endif()
 
 endfunction()
@@ -680,9 +680,9 @@ function( cpfSetOutputDirAndName target package config prefixDir outputType )
 
 	cpfGetRelativeOutputDir( relativeDir ${package} ${outputType})
 	cpfToConfigSuffix(configSuffix ${config})
-	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_DIRECTORY${configSuffix} ${prefixDir}/${relativeDir})
+	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_DIRECTORY_${configSuffix} ${prefixDir}/${relativeDir})
 	# use the config postfix for all target types
-	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME${configSuffix} ${target}${CMAKE_${uConfig}_POSTFIX} )
+	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX} )
 
 endfunction()
 
