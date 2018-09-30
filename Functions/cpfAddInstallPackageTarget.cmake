@@ -78,6 +78,7 @@ function( cpfAddInstallPackageTarget package )
 		endif()
 	endforeach()
 
+
 	# Add the target
 	add_custom_target(
         ${targetName}

@@ -437,6 +437,7 @@ function( cpfAddAbiDumpTarget package binaryTarget headerListFile )
 	# add target
 	add_custom_target(
 		${targetName}
+		ALL										# We have to add this to ALL to make sure it is build before the global install target.
 		DEPENDS ${binaryTarget} ${abiDumpFile}
 	)
 	
