@@ -42,7 +42,7 @@ function( test_cpfGetConfigVariableSuffixes1 )
     # is defined in the CPF.
     set(CMAKE_CONFIGURATION_TYPES Debug Release)
     cpfGetConfigVariableSuffixes(suffixes)
-    cpfAssertListsEqual( "${suffixes}" "_DEBUG;_RELEASE" )
+    cpfAssertListsEqual( "${suffixes}" "DEBUG;RELEASE" )
 
 endfunction()
 
@@ -52,7 +52,7 @@ function( test_cpfGetConfigVariableSuffixes2 )
     # is defined.
     set(CMAKE_BUILD_TYPE Debug)
     cpfGetConfigVariableSuffixes(suffixes)
-    cpfAssertListsEqual( "${suffixes}" "_DEBUG" )
+    cpfAssertListsEqual( "${suffixes}" "DEBUG" )
 
 endfunction()
 
