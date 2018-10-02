@@ -133,12 +133,13 @@ function( cpfInstallTargetsForPackage package targets )
 	install( 
 		TARGETS ${targets}
 		EXPORT ${targetsExportName}
-		RUNTIME DESTINATION "${relRuntimeDir}"
-		LIBRARY DESTINATION "${relLibDir}"
-		ARCHIVE DESTINATION "${relArchiveDir}"
+		RUNTIME DESTINATION "${relRuntimeDir}" COMPONENT runtime
+		LIBRARY DESTINATION "${relLibDir}"     COMPONENT developer
+		ARCHIVE DESTINATION "${relArchiveDir}" COMPONENT developer
 		# This sets the import targets include directories to <package>/include, 
 		# so clients can also include with <package/bla.h>
-		INCLUDES DESTINATION "${relIncludeDir}/.."	
+		INCLUDES DESTINATION "${relIncludeDir}/.."
+		
 	)
 
 	# Add the installed files to the target property
@@ -299,7 +300,8 @@ function( cpfInstallDebugFiles package )
             if(compilePdbName)
                 install(
                     FILES ${compilePdbDir}/${compilePdbName}.pdb
-                    DESTINATION "${relPdbCompilerDir}"
+					DESTINATION "${relPdbCompilerDir}"
+					COMPONENT developer
                     CONFIGURATIONS ${config}
                 )
 				cpfListAppend(installedPackageFiles "${relPdbCompilerDir}/${compilePdbName}.pdb")
@@ -312,7 +314,8 @@ function( cpfInstallDebugFiles package )
             if(linkerPdbName)
                 install(
                     FILES ${linkerPdbDir}/${linkerPdbName}.pdb
-                    DESTINATION "${relPdbLinkerDir}"
+					DESTINATION "${relPdbLinkerDir}"
+					COMPONENT developer
                     CONFIGURATIONS ${config}
                 )
 				cpfListAppend(installedPackageFiles "${relPdbLinkerDir}/${linkerPdbName}.pdb")
@@ -330,7 +333,8 @@ function( cpfInstallDebugFiles package )
 				cpfGetRelativeOutputDir( relSourceDir ${package} SOURCE)
 				install(
                     FILES ${absSourcePaths}
-                    DESTINATION "${relSourceDir}"
+					DESTINATION "${relSourceDir}"
+					COMPONENT developer
                     CONFIGURATIONS ${config}
                 )
 
@@ -413,6 +417,7 @@ function( cpfInstallPublicHeaders installedFilesOut package target )
 		install(
 			FILES ${absHeader}
 			DESTINATION "${relDestDir}"
+			COMPONENT developer
 		)
 
 		# add the relative install path to the returned paths
@@ -452,12 +457,14 @@ function( cpfGenerateAndInstallCmakeConfigFiles package namespace)
 		EXPORT "${targetsExportName}"
 		NAMESPACE "${namespace}::"
 		DESTINATION "${relCmakeFilesDir}"
+		COMPONENT developer
 	)
 
 	# Install cmake config files
 	install(
 		FILES "${packageConfigFileFull}" "${versionConfigFileFull}"
 		DESTINATION "${relCmakeFilesDir}"
+		COMPONENT developer
 	)
 
 	# Add the installed files to the target property
@@ -495,6 +502,7 @@ function( cpfInstallAbiDumpFiles package )
 			install(
 				FILES ${dumpFile}
 				DESTINATION "${relDumpFileDir}"
+				COMPONENT developer
 			)
 
 			cpfListAppend( installedPackageFiles "${relDumpFileDir}/${shortDumpFile}" )
