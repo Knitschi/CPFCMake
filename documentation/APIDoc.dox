@@ -65,7 +65,7 @@ cpfAddPackage(
         PLUGIN_TARGETS target1 [target2 ...]
         [PLUGIN_DIRECTORY ...] ...]
     [DISTRIBUTION_PACKAGES
-        DISTRIBUTION_PACKAGE_CONTENT_TYPE [BINARIES_DEVELOPER|BINARIES_USER excludedTargets]
+        DISTRIBUTION_PACKAGE_CONTENT_TYPE [ CT_RUNTIME | CT_RUNTIME_AND_DEPENDENCIES excludedTargets | CT_DEVELOPER | SOURCES ]
         DISTRIBUTION_PACKAGE_FORMATS [7Z|TBZ2|TGZ|TXZ|TZ|ZIP|DEB] [format2 ...]
         [DISTRIBUTION_PACKAGE_FORMAT_OPTIONS 
             [SYSTEM_PACKAGES_DEB packageListString ]]
@@ -191,21 +191,33 @@ The argument can be given multiple times, in order to define a variety of packag
 The argument takes two lists as sub-arguments. A distribution package is created for each combination of the
 elements in the sub-argument lists.
 For example: 
-argument <code>DISTRIBUTION_PACKAGES_0 DISTRIBUTION_PACKAGE_CONTENT_TYPES BINARIES_USER_PORTABLE DISTRIBUTION_PACKAGE_FORMATS ZIP;7Z</code>
+argument <code>DISTRIBUTION_PACKAGES_0 DISTRIBUTION_PACKAGE_CONTENT_TYPES CT_RUNTIME_PORTABLE DISTRIBUTION_PACKAGE_FORMATS ZIP;7Z</code>
 will cause the creation of a zip and a 7z archive that both contain the packages executables and all depended on shared libraries.
-Adding another argument <code>DISTRIBUTION_PACKAGES_1 DISTRIBUTION_PACKAGE_CONTENT_TYPES BINARIES_USER_NOSYSTEMLIBS DISTRIBUTION_PACKAGE_FORMATS DEB</code>
-will cause the additional creation of a debian package, that will not contain the dependencies marked as system libraries.
+Adding another argument <code>DISTRIBUTION_PACKAGES_1 DISTRIBUTION_PACKAGE_CONTENT_TYPES CT_RUNTIME DISTRIBUTION_PACKAGE_FORMATS DEB</code>
+will cause the additional creation of a debian package that relies on external dependencies being provided by other packages.
 
 Sub-Options:
 
 \c DISTRIBUTION_PACKAGE_CONTENT_TYPE                
 
-- <code>BINARIES_DEVELOPER</code>: The package will include all package binaries, header files and cmake config files for importing the package in another project.
-This content type is supposed to be used for packages that distribute "closed source" libraries.
-- <code>BINARIES_USER listExcludedTargets</code>: The package will include the packages executables and shared libraries and all depended on shared libraries. 
-This is intended for packages that are delivered to the enduser who will not need header files etc.
-The BINARIES_USER keyword can be followed by a list of depended on targets that shall not be included in the package.
-This is usefull when the dependencies are provided by the systems package manager for example.
+- <code>CT_RUNTIME</code>: The distribution-package contains the executables and shared libraries that are produced by this package.
+This can be used for packages that either do not depend on any shared libraries or only on shared libraries that
+are provided externally by the system.
+
+- <code>CT_RUNTIME_AND_DEPENDENCIES listExcludedTargets</code>: The distribution-package will include the packages executables 
+and shared libraries and all depended on shared libraries. This is useful for creating "portable" packages
+that do not rely on any system provided shared libraries.
+The CT_RUNTIME_AND_DEPENDENCIES keyword can be followed by a list of depended on targets that belong
+to shared libraries that should not be included in the package, because they are provided by the system. 
+
+- <code>CT_DEVELOPER</code>: The distribution-package will include all package binaries, header files and cmake config files for 
+importing the package in another project. This content type is supposed to be used for binary library packages
+that are used in other projects. Note that for msvc debug configurations the package will also include source files
+to allow debugging into the package. The package does not include dependencies which are supposed to be imported
+separately by consuming projects.
+
+- <code>CT_SOURCES</code>: The distribution-package contains the files that are needed to compile the package.
+
 
 \c DISTRIBUTION_PACKAGE_FORMATS
 
@@ -218,7 +230,7 @@ A list of keyword arguments that contain further options for the creation of the
 
 - <code>[SYSTEM_PACKAGES_DEB]</code>: This is only relevant when using the DEB package format. 
 The option must be a string that contains the names and versions of the debian packages 
-that provide the excluded shared libraries from the BINARIES_USER option. E.g. "libc6 (>= 2.3.1-6), libc6 (< 2.4)"
+that provide the excluded shared libraries from the CT_RUNTIME option. E.g. "libc6 (>= 2.3.1-6), libc6 (< 2.4)"
 on which the package depends.
 
 ####  [ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS bool] ####
@@ -284,17 +296,17 @@ set( qtPlatformPlugins
 )
 
 set( archiveDevPackageOptions
-	DISTRIBUTION_PACKAGE_CONTENT_TYPE 	BINARIES_DEVELOPER
+	DISTRIBUTION_PACKAGE_CONTENT_TYPE 	CT_DEVELOPER
 	DISTRIBUTION_PACKAGE_FORMATS 		7Z
 )
 
 set( archiveUserPackageOptions
-	DISTRIBUTION_PACKAGE_CONTENT_TYPE 	BINARIES_USER
+	DISTRIBUTION_PACKAGE_CONTENT_TYPE 	CT_RUNTIME
 	DISTRIBUTION_PACKAGE_FORMATS 		ZIP
 )
 
 set( debianPackageOptions
-	DISTRIBUTION_PACKAGE_CONTENT_TYPE	BINARIES_USER Qt5::Core Qt5::Test Qt5::Gui_GL Qt5::QXcbIntegrationPlugin
+	DISTRIBUTION_PACKAGE_CONTENT_TYPE	CT_RUNTIME Qt5::Core Qt5::Test Qt5::Gui_GL Qt5::QXcbIntegrationPlugin
 	DISTRIBUTION_PACKAGE_FORMATS 		DEB
 	DISTRIBUTION_PACKAGE_FORMAT_OPTIONS SYSTEM_PACKAGES_DEB "libqt5core5a, libqt5gui5" 
 )

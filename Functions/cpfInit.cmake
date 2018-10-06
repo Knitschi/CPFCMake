@@ -1,4 +1,4 @@
-# This file cpfContains the main functions of the CMakeProjectFramework cmake module.
+# This file contains the main functions of the CMakeProjectFramework cmake module.
 include_guard(GLOBAL)
 
 set( cpfCmakeDir "${CPF_ROOT_DIR}/Sources/CPFCMake" )

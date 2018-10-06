@@ -53,7 +53,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # This function can be used when a custom target needs to add multiple lines to a file.
 # The function creates a custom command for each line that is added to the file.
-# The inputFile will be left unchanged, while the output file cpfContains the added lines
+# The inputFile will be left unchanged, while the output file contains the added lines
 # Arguments:
 # INPUT The full name of the input text file. This file will be left unchanged.
 # OUTPUT The full name of the generated file that will contain the contents of the INPUT plus the strings given with ADDED_LINES
@@ -178,7 +178,7 @@ endfunction()
 
 
 #----------------------------------------------------------------------------------------
-# This function creates a file that cpfContains definitions for all the given variables with the given values.
+# This function creates a file that contains definitions for all the given variables with the given values.
 # This is intended to be used to pass arguments to cmake scripts. This is a workaround for the problem
 # that there is a limitation to the length of the argument string that can be passed to a script.
 # In these cases we can pass the location of the argument file instead.

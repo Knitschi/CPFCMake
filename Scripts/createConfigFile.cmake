@@ -29,7 +29,7 @@ cpfNormalizeAbsPath( pathToVariables "${CMAKE_CURRENT_LIST_DIR}/../Variables")
 
 # Add standard lines.
 set(fileContent)
-cpfListAppend( fileContent "# This file cpfContains cmake project configuration parameters." )
+cpfListAppend( fileContent "# This file contains cmake project configuration parameters." )
 cpfListAppend( fileContent "" )
 cpfListAppend( fileContent "list( APPEND CMAKE_MODULE_PATH \"${pathToVariables}\")" )
 cpfListAppend( fileContent "include(cpfLocations)")

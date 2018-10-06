@@ -324,7 +324,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # This function extracts value lists from keyword based argument lists where one keyword can occur
 # multiple times. 
-# The returned valueListsOut cpfContains a list of listnames that contain the values that where preceeded
+# The returned valueListsOut contains a list of listnames that contain the values that where preceeded
 # by the valueListsKeyword.
 # valueListsOut:		Elements of this list must be dereferenced twice to get the actual list.
 # valueListsKeyword: 	The keyword that can be used multiple times.

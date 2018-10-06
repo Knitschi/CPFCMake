@@ -19,7 +19,7 @@ function( cpfAddGlobalClangTidyTarget packages)
 	# This is needed for the clang-tidy calls
 	cpfGetCompiler(compiler)
 	if( ${compiler} STREQUAL Clang)
-		set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Create a .json file that cpfContains all compiler calls. This is needed for clang-tidy." FORCE)
+		set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Create a .json file that contains all compiler calls. This is needed for clang-tidy." FORCE)
 	endif()
 
     # add bundle target

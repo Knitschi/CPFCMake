@@ -8,96 +8,10 @@ include(cpfProjectUtilities)
 
 
 
-#----------------------------------------------------------------------------------------
-# This function adds per package install targets and packaging targets.
-# Currently packaging is fixed to creating a variety of compressed archives.
-#
-# Note that this must be done after adding plugins, because the information about
-# plugin libraries must be known at this point.
-function( cpfAddInstallRulesAndTargets package packageNamespace )
-
-	cpfAddInstallRules( ${package} ${packageNamespace}) # creates the CMake INSTALL target
-	cpfAddInstallPackageTarget( ${package} )			   # creates a per package install target
-
-endfunction()
-
-
-#----------------------------------------------------------------------------------------
-# Adds a target that installs only the files that belong to the given package to the local
-# InstallStage directory.
-function( cpfAddInstallPackageTarget package )
-
-	set( targetName install_${package} )
-
-	# locations / files
-	set( cmakeInstallScript "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake" )
-	
-	# again we need the hack with the cpfAddConfigurationDependendCommand() to allow config information in the output of our custom commands
-	set(stampFiles)
-	cpfGetConfigurations(configs)
-	foreach(config ${configs}) #once more we have to add a target for each configuration because OUTPUT of add_custom_command does not support generator expressions.
-        
-        cpfToConfigSuffix(configSuffix ${config})
-        get_property(installedFiles TARGET ${package} PROPERTY CPF_INSTALLED_FILES_${configSuffix})
-		cpfPrependMulti( outputFiles${configSuffix} "${CMAKE_INSTALL_PREFIX}/" "${installedFiles}" )
-
-        # Setup the command that does the actual installation (file copying)
-        # We use the cmake generated script here to only install the files for the package.
-        set( installCommand "cmake -DCMAKE_INSTALL_CONFIG_NAME=${config} -DCMAKE_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\" -P \"${cmakeInstallScript}\"")
-
-        # We use a stampfile here instead of the real output files, because we do not have config specific output filenames
-        # but config specific input files.
-        set(stampfile${configSuffix} "${CMAKE_CURRENT_BINARY_DIR}/${CPF_PRIVATE_DIR}/installFiles${package}${config}.stamp")
-		cpfGetTouchFileCommands( touchCommmand "${stampfile${configSuffix}}")
-
-        get_property(binarySubTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
-        cpfGetTargetLocations( targetFiles "${binarySubTargets}" ${config})
-
-        cpfAddConfigurationDependendCommand(
-			TARGET ${targetName}
-			# We use a stamp file instead of the real output files because OUTPUT does not support generator expressions (cmake 3.11)
-			#OUTPUT ${outputFiles${configSuffix}}
-			OUTPUT ${stampfile${configSuffix}}
-            DEPENDS ${cmakeInstallScript} ${targetFiles} ${binarySubTargets}
-            COMMENT "Install files for package ${package} ${config}"
-            CONFIG ${config}
-            COMMANDS_CONFIG ${installCommand} ${touchCommmand}
-			COMMANDS_NOT_CONFIG ${touchCommmand}
-		)
-		cpfListAppend( allStampFiles ${stampfile${configSuffix}})
-
-	endforeach()
-
-	# Get dumpfile target dependencies
-	set(abiDumpTragets)
-	get_property( binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
-	foreach(binaryTarget ${binaryTargets})
-		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY CPF_ABI_DUMP_SUBTARGET )
-		if(abiDumpTarget)
-			cpfListAppend(abiDumpTargets ${abiDumpTarget})
-		endif()
-	endforeach()
-
-
-	# Add the target
-	add_custom_target(
-        ${targetName}
-        DEPENDS ${binarySubTargets} ${abiDumpTargets} ${allStampFiles}
-    )
-
-	# set some properties
-	set_property( TARGET ${package} PROPERTY CPF_INSTALL_PACKAGE_SUBTARGET ${targetName})
-	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
-	foreach(config ${configs})
-		cpfToConfigSuffix(configSuffix ${config})
-		set_property( TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES_${configSuffix} ${outputFiles${configSuffix}})
-		set_property( TARGET ${targetName} PROPERTY CPF_STAMP_FILE_${configSuffix} ${stampfile${configSuffix}})
-	endforeach()
-
-endfunction()
-
 #---------------------------------------------------------------------------------------------
-function( cpfAddInstallRules package namespace)
+# Adds install rules for the various package components.
+#
+function( cpfAddInstallRules package namespace pluginOptionLists)
 
 	cpfInstallPackageBinaries( ${package} )
 	cpfGenerateAndInstallCmakeConfigFiles( ${package} ${namespace} )
@@ -515,4 +429,34 @@ function( cpfInstallAbiDumpFiles package )
 		cpfAddInstalledFilesToProperty( ${package} ${config} "${installedPackageFiles}" )
 	endforeach()
 
+endfunction()
+
+
+#----------------------------------------------------------------------------------------
+# Parses the pluginOptionLists and returns two lists of same size. One list contains the
+# plugin target while the element with the same index in the other list contains the 
+# directory of the plugin target.
+function( cpfGetPluginTargetDirectoryPairLists targetsOut directoriesOut pluginOptionLists )
+	# parse the plugin dependencies arguments
+	# Creates two lists of the same length, where one list contains the plugin targets
+	# and the other the directory to which they are deployed.
+	set(pluginTargets)
+	set(pluginDirectories)
+	foreach( list ${pluginOptionLists})
+		cmake_parse_arguments(
+			ARG 
+			"" 
+			"PLUGIN_DIRECTORY"
+			"PLUGIN_TARGETS"
+			${${list}}
+		)
+		foreach( pluginTarget ${ARG_PLUGIN_TARGETS})
+			cpfListAppend( pluginTargets ${pluginTarget})
+			cpfListAppend( pluginDirectories ${ARG_PLUGIN_DIRECTORY})
+		endforeach()
+	endforeach()
+	
+	set(${targetsOut} ${pluginTargets} PARENT_SCOPE)
+	set(${directoriesOut} ${pluginDirectories} PARENT_SCOPE)
+	
 endfunction()

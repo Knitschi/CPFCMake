@@ -47,7 +47,7 @@ function( cpfDefineProperties )
 	define_property(
         TARGET
         PROPERTY CPF_PRODUCTION_LIB_SUBTARGET
-        BRIEF_DOCS "For executables this cpfContains the name of the helper implementation library target. For library targets this contains the name of the main target."
+        BRIEF_DOCS "For executables this contains the name of the helper implementation library target. For library targets this contains the name of the main target."
         FULL_DOCS " "
     )
 
@@ -218,8 +218,32 @@ function( cpfDefineProperties )
 		# A configuration dependent property that is set on all package main targets 
 		define_property(
 			TARGET
-			PROPERTY CPF_INSTALLED_FILES_${configSuffix}
-			BRIEF_DOCS "A list of files that belong to the installed package. Paths are relative to the install prefix."
+			PROPERTY CPF_INSTALLED_FILES_runtime_${configSuffix}
+			BRIEF_DOCS "A list of files that belong to the runtime installation component. Paths are relative to the install prefix."
+			FULL_DOCS " "
+        )
+        
+        # A configuration dependent property that is set on all package main targets 
+		define_property(
+			TARGET
+			PROPERTY CPF_INSTALLED_FILES_runtime_dependencies_${configSuffix}
+			BRIEF_DOCS "A list of files that belong to the runtime_dependencies installation component. Paths are relative to the install prefix."
+			FULL_DOCS " "
+        )
+        
+        # A configuration dependent property that is set on all package main targets 
+		define_property(
+			TARGET
+			PROPERTY CPF_INSTALLED_FILES_developer_${configSuffix}
+			BRIEF_DOCS "A list of files that belong to the developer installation component. Paths are relative to the install prefix."
+			FULL_DOCS " "
+        )
+        
+        # A configuration dependent property that is set on all package main targets 
+		define_property(
+			TARGET
+			PROPERTY CPF_INSTALLED_FILES_sources_${configSuffix}
+			BRIEF_DOCS "A list of files that belong to the sources installation component. Paths are relative to the install prefix."
 			FULL_DOCS " "
 		)
 

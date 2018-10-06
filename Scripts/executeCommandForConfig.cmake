@@ -3,7 +3,7 @@
 # CMAKE_HOST_SYSTEM_NAME
 # CURRENT_CONFIG								- should be set to $<CONFIG>
 # STATIC_CONFIG									- A fixed set configuration
-# ARGUMENT_FILE									- An absolute path to a .cmake file that cpfContains the definitions for the following variables.
+# ARGUMENT_FILE									- An absolute path to a .cmake file that contains the definitions for the following variables.
 #	COMMANDS_CONFIG								- the commands that are executed when CURRENT_CONFIG is not STATIC_CONFIG
 #	COMMANDS_NOT_CONFIG							- the commands that are executed when CURRENT_CONFIG is STATIC_CONFIG
 # PRINT_SKIPPED_INSTEAD_OF_NON_CONFIG_OUTPUT	- If set to true the output of the non-config commands is suppressed and one "... skiped" message is printed instead.
