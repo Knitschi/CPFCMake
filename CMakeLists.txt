@@ -32,7 +32,7 @@ set( files
 	Functions/cpfAddDeploySharedLibrariesTarget.cmake
 	Functions/cpfAddDistributionPackageTarget.cmake
 	Functions/cpfAddDocumentationTarget.cmake
-	Functions/cpfAddInstallPackageTarget.cmake
+	Functions/cpfAddInstallRules.cmake
 	Functions/cpfAddOpenCppCoverageTarget.cmake
 	Functions/cpfAddPackage.cmake
 	Functions/cpfAddPipelineTarget.cmake

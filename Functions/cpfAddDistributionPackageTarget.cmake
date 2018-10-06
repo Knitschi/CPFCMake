@@ -196,7 +196,7 @@ function( cpfGetPackageComponents componentsOut contentType )
 	set(components)
 	if( "${contentType}" STREQUAL CT_RUNTIME )
 		set(components runtime)
-	elseif( "${contentType}" STREQUAL CT_RUNTIME_AND_DEPENDENCIES )
+	elseif( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
 		set(components runtime runtime_dependencies )
 	elseif( "${contentType}" STREQUAL CT_DEVELOPER )
 		set(components runtime developer )
@@ -260,7 +260,7 @@ function( cpfGetRunInstallScriptCommands runInstallScriptCommandsOut package con
 
 	set(commands)
 	foreach(component ${components})
-		cpfListAppend( commands "${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=\"${destDir}\" -DCMAKE_INSTALL_COMPONENT=${component} -DCMAKE_INSTALL_CONFIG_NAME=${config} -P \"${install_script}\"" )
+		cpfListAppend( commands "${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=\"${destDir}\" -DCMAKE_INSTALL_COMPONENT=${component} -DCMAKE_INSTALL_CONFIG_NAME=${config} -P \"${scriptFile}\"" )
 	endforeach()
 
 	set( ${runInstallScriptCommandsOut} "${commands}" PARENT_SCOPE )

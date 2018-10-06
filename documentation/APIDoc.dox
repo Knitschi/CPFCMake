@@ -65,7 +65,7 @@ cpfAddPackage(
         PLUGIN_TARGETS target1 [target2 ...]
         [PLUGIN_DIRECTORY ...] ...]
     [DISTRIBUTION_PACKAGES
-        DISTRIBUTION_PACKAGE_CONTENT_TYPE [ CT_RUNTIME | CT_RUNTIME_AND_DEPENDENCIES excludedTargets | CT_DEVELOPER | SOURCES ]
+        DISTRIBUTION_PACKAGE_CONTENT_TYPE [ CT_RUNTIME | CT_RUNTIME_PORTABLE excludedTargets | CT_DEVELOPER | SOURCES ]
         DISTRIBUTION_PACKAGE_FORMATS [7Z|TBZ2|TGZ|TXZ|TZ|ZIP|DEB] [format2 ...]
         [DISTRIBUTION_PACKAGE_FORMAT_OPTIONS 
             [SYSTEM_PACKAGES_DEB packageListString ]]
@@ -191,9 +191,9 @@ The argument can be given multiple times, in order to define a variety of packag
 The argument takes two lists as sub-arguments. A distribution package is created for each combination of the
 elements in the sub-argument lists.
 For example: 
-argument <code>DISTRIBUTION_PACKAGES_0 DISTRIBUTION_PACKAGE_CONTENT_TYPES CT_RUNTIME_PORTABLE DISTRIBUTION_PACKAGE_FORMATS ZIP;7Z</code>
+argument <code>DISTRIBUTION_PACKAGES DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_RUNTIME_PORTABLE DISTRIBUTION_PACKAGE_FORMATS ZIP;7Z</code>
 will cause the creation of a zip and a 7z archive that both contain the packages executables and all depended on shared libraries.
-Adding another argument <code>DISTRIBUTION_PACKAGES_1 DISTRIBUTION_PACKAGE_CONTENT_TYPES CT_RUNTIME DISTRIBUTION_PACKAGE_FORMATS DEB</code>
+Adding another argument <code>DISTRIBUTION_PACKAGES DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_RUNTIME DISTRIBUTION_PACKAGE_FORMATS DEB</code>
 will cause the additional creation of a debian package that relies on external dependencies being provided by other packages.
 
 Sub-Options:
@@ -204,10 +204,10 @@ Sub-Options:
 This can be used for packages that either do not depend on any shared libraries or only on shared libraries that
 are provided externally by the system.
 
-- <code>CT_RUNTIME_AND_DEPENDENCIES listExcludedTargets</code>: The distribution-package will include the packages executables 
+- <code>CT_RUNTIME_PORTABLE listExcludedTargets</code>: The distribution-package will include the packages executables 
 and shared libraries and all depended on shared libraries. This is useful for creating "portable" packages
 that do not rely on any system provided shared libraries.
-The CT_RUNTIME_AND_DEPENDENCIES keyword can be followed by a list of depended on targets that belong
+The CT_RUNTIME_PORTABLE keyword can be followed by a list of depended on targets that belong
 to shared libraries that should not be included in the package, because they are provided by the system. 
 
 - <code>CT_DEVELOPER</code>: The distribution-package will include all package binaries, header files and cmake config files for 
@@ -295,6 +295,11 @@ set( qtPlatformPlugins
 	PLUGIN_TARGETS		Qt5::QWindowsIntegrationPlugin Qt5::QXcbIntegrationPlugin
 )
 
+set( myPlugin 
+	PLUGIN_DIRECTORY 	plugins
+	PLUGIN_TARGETS		MyPlugin
+)
+
 set( archiveDevPackageOptions
 	DISTRIBUTION_PACKAGE_CONTENT_TYPE 	CT_DEVELOPER
 	DISTRIBUTION_PACKAGE_FORMATS 		7Z
@@ -327,6 +332,7 @@ cpfAddPackage(
 	LINKED_LIBRARIES		${PACKAGE_LINKED_LIBRARIES}
 	LINKED_TEST_LIBRARIES	${PACKAGE_LINKED_TEST_LIBRARIES}
 	PLUGIN_DEPENDENCIES		${qtPlatformPlugins}
+    PLUGIN_DEPENDENCIES		${myPlugin}
 	DISTRIBUTION_PACKAGES 	${archiveDevPackageOptions}
 	DISTRIBUTION_PACKAGES 	${archiveUserPackageOptions}
 	DISTRIBUTION_PACKAGES 	${debianPackageOptions}

@@ -228,23 +228,43 @@ function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut di
 		${argumentList}
 	)
 
+	set( contentTypeOptions 
+		CT_DEVELOPER
+		CT_RUNTIME
+		CT_SOURCES
+	)
+
+	set(runtimePortableOption CT_RUNTIME_PORTABLE) 
 	cmake_parse_arguments(
 		ARG
-		"CT_DEVELOPER"
+		"${contentTypeOptions}"
 		""
-		"CT_RUNTIME"
+		"${runtimePortableOption}"
 		"${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}"
 	)
 	
-	cpfContains(isBinaryUserType "${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" CT_RUNTIME)
-	if( ${ARG_CT_DEVELOPER} AND ${isBinaryUserType} )
-		message(FATAL_ERROR "The DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage() can not take both options CT_DEVELOPER and CT_RUNTIME" )
+	# Check that only one content type was given.
+	cpfContains(isRuntimeAndDependenciesType "${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" ${runtimePortableOption})
+	cpfPrependMulti( argOptions ARG_ "${contentTypeOptions}")
+	set(nrOptions 0)
+	foreach(option ${isRuntimeAndDependenciesType} ${argOptions})
+		if(${option})
+			cpfIncrement(nrOptions)
+		endif()
+	endforeach()
+	
+	if( NOT (${nrOptions} EQUAL 1) )
+		message(FATAL_ERROR "Each DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage() must contain exactly one of these options: ${contentTypeOptions};${runtimePortableOption}. The given option was ${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" )
 	endif()
 	
 	if(ARG_CT_DEVELOPER)
 		set(contentType CT_DEVELOPER)
-	elseif(isBinaryUserType)
+	elseif(ARG_CT_RUNTIME)
 		set(contentType CT_RUNTIME)
+	elseif(isRuntimeAndDependenciesType)
+		set(contentType CT_RUNTIME_PORTABLE)
+	elseif(ARG_CT_SOURCES)
+		set(contentType CT_SOURCES)
 	else()
 		message(FATAL_ERROR "Faulty DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage().")
 	endif()
@@ -252,7 +272,7 @@ function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut di
 	set(${contentTypeOut} ${contentType} PARENT_SCOPE)
 	set(${packageFormatsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMATS} PARENT_SCOPE)
 	set(${distributionPackageFormatOptionsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMAT_OPTIONS} PARENT_SCOPE)
-	set(${excludedTargetsOut} ${ARG_CT_RUNTIME} PARENT_SCOPE)
+	set(${excludedTargetsOut} ${ARG_CT_RUNTIME_PORTABLE} PARENT_SCOPE)
 
 endfunction()
 
@@ -314,9 +334,11 @@ endfunction()
 function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTargets )
 
 	if( "${contentType}" STREQUAL CT_DEVELOPER)
-		set(contentIdLocal dev-bin)
+		set(contentIdLocal dev)
 	elseif( "${contentType}" STREQUAL CT_RUNTIME )
-		set(contentIdLocal usr-bin )
+		set(contentIdLocal runtime )
+	elseif( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
+		set(contentIdLocal runtime-port )
 		if( NOT "${excludedTargets}" STREQUAL "")
 			list(SORT excludedTargets)
 			string(MD5 excludedTargetsHash "${excludedTargets}")
@@ -324,9 +346,9 @@ function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTa
 			# rare engough to never occur
 			string(SUBSTRING ${excludedTargetsHash} 0 8 excludedTargetsHash)
 			string(APPEND contentIdLocal -${excludedTargetsHash})
-		else()
-			string(APPEND contentIdLocal -port)
 		endif()
+	elseif( "${contentType}" STREQUAL CT_SOURCES )
+		set(contentIdLocal src )
 	else()
 		message(FATAL_ERROR "Content type \"${contentType}\" is not supported by function contentTypeOutputNameIdentifier().")
 	endif()

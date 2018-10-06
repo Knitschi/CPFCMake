@@ -41,7 +41,6 @@ cpfListAppend( fileContent "" )
 cpfListAppend( fileContent "# internal variables" )
 cpfListAppend( fileContent "set( CPF_ROOT_DIR \"${CPF_ROOT_DIR}\" CACHE FILEPATH \"The path to the root directory of this CPF CI-project.\" FORCE)" )
 cpfListAppend( fileContent "set( CPF_CONFIG \"${CPF_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE)" )
-cpfListAppend( fileContent "set( CMAKE_INSTALL_PREFIX \"\${CPF_ROOT_DIR}/\${CPF_GENERATED_DIR}/\${CPF_CONFIG}/\${CPF_INSTALL_STAGE}\" CACHE STRING \"The directory to which files are copied by the install target.\" FORCE)" )
 cpfListAppend( fileContent "" )
 
 

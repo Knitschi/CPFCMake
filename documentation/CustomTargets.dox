@@ -54,7 +54,6 @@ Here is a list of targets that can exist once per CPF package.
 - \ref abicompliancechecker_package
 - \ref clangtidy_package
 - \ref distributionPackages_package
-- \ref install_package
 - \ref opencppcoverage_package
 - \ref package
 - \ref package_fixtures
@@ -160,14 +159,6 @@ Creates all *distribution packages* of the package. A *distribution package* is 
 distributed to users of the package. This can be a zip file that contains the binaries or sources or 
 an installer. The target is only created if the \c addPackage() function has the \c DISTRIBUTION_PACKAGES
 argument set.
-
-\subsubsection install_package install_\&lt;package\&gt;
-
-This target copies the packages binary files and public headers to the
-\c ${CMAKE_INSTALL_PREFIX}/\<package\> directory.
-
-\todo Check if this can still be used like the Linux \c {make install} step without breaking the
-creation of the distribution packages.
 
 \subsubsection opencppcoverage_package opencppcoverage_\&lt;package\&gt;
 

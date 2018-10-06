@@ -41,19 +41,19 @@ function( cpfInstallTargetsForPackage package targets )
 	cpfGetRelativeOutputDir( relIncludeDir ${package} INCLUDE)
 	cpfGetTargetsExportsName( targetsExportName ${package})
 		
-	file(RELATIVE_PATH rpath "${CMAKE_INSTALL_PREFIX}/${relRuntimeDir}" "${CMAKE_INSTALL_PREFIX}/${relLibDir}")
+	# Add an relative rpath to the executables that points to the lib directory.
+	file(RELATIVE_PATH rpath "${CMAKE_CURRENT_BINARY_DIR}/${relRuntimeDir}" "${CMAKE_CURRENT_BINARY_DIR}/${relLibDir}")
 	cpfAppendPackageExeRPaths( ${package} "\$ORIGIN/${rpath}")
 
 	install( 
 		TARGETS ${targets}
 		EXPORT ${targetsExportName}
 		RUNTIME DESTINATION "${relRuntimeDir}" COMPONENT runtime
-		LIBRARY DESTINATION "${relLibDir}"     COMPONENT developer
+		LIBRARY DESTINATION "${relLibDir}"     COMPONENT runtime
 		ARCHIVE DESTINATION "${relArchiveDir}" COMPONENT developer
 		# This sets the import targets include directories to <package>/include, 
 		# so clients can also include with <package/bla.h>
 		INCLUDES DESTINATION "${relIncludeDir}/.."
-		
 	)
 
 	# Add the installed files to the target property
