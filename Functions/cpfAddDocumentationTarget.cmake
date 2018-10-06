@@ -160,7 +160,7 @@ endfunction()
 
 #-------------------------------------------------------------------------
 # This targets generates .dox files that provide the doxygen documentation for the package.
-# The documentation cpfContains the given briefDescription, longDescription and links to the packages distribution
+# The documentation contains the given briefDescription, longDescription and links to the packages distribution
 # packages, coverage reports and abi/api compatibility reports.
 # The documentation can be extended by using \addtogroup <package>Group in another doxygen comment.
 #

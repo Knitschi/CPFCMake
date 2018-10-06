@@ -6,7 +6,7 @@ include(cpfGitUtilities)
 include(cpfLocations)
 
  
-# This file cpfContains functions that the targets that are used to implement the ABI and API compatibility checks.
+# This file contains functions that the targets that are used to implement the ABI and API compatibility checks.
 
 
 #----------------------------------------------------------------------------------------
@@ -132,9 +132,9 @@ The compatibility check targets require the version information from to reposito
 		if(NOT hasDevBinPackage)
 			set(errorMessage "\
 Error with project settings!\n\
-Option CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS was set to ON but package ${package} does not create a distribution package with content type BINARIES_DEVELOPER. \
-The packages with content type BINARIES_DEVELOPER contain the abi dump files for previously build libraries which are needed to compare the abi-compliance. \
-You need to add an DISTRIBUTION_PACKAGES to your call of cpfAddPackage() with the DISTRIBUTION_PACKAGE_CONTENT_TYPE BINARIES_DEVELOPER sub-option to remove this error.\n\
+Option CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS was set to ON but package ${package} does not create a distribution package with content type CT_DEVELOPER. \
+The packages with content type CT_DEVELOPER contain the abi dump files for previously build libraries which are needed to compare the abi-compliance. \
+You need to add an DISTRIBUTION_PACKAGES to your call of cpfAddPackage() with the DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_DEVELOPER sub-option to remove this error.\n\
 			")
 			message(FATAL_ERROR ${errorMessage} )
 		endif()
@@ -198,7 +198,7 @@ function( cpfHasDevBinDistributionPackage hasDevBinPackageOut packageFormatOut d
 	
 		cpfParseDistributionPackageOptions( contentType packageFormats unused unused "${${list}}")
 		
-		if( ${contentType} STREQUAL BINARIES_DEVELOPER )
+		if( ${contentType} STREQUAL CT_DEVELOPER )
 			set( ${hasDevBinPackageOut} TRUE PARENT_SCOPE)
 			
 			foreach( format ${packageFormats})
@@ -230,21 +230,21 @@ function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut di
 
 	cmake_parse_arguments(
 		ARG
-		"BINARIES_DEVELOPER"
+		"CT_DEVELOPER"
 		""
-		"BINARIES_USER"
+		"CT_RUNTIME"
 		"${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}"
 	)
 	
-	cpfContains(isBinaryUserType "${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" BINARIES_USER)
-	if( ${ARG_BINARIES_DEVELOPER} AND ${isBinaryUserType} )
-		message(FATAL_ERROR "The DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage() can not take both options BINARIES_DEVELOPER and BINARIES_USER" )
+	cpfContains(isBinaryUserType "${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" CT_RUNTIME)
+	if( ${ARG_CT_DEVELOPER} AND ${isBinaryUserType} )
+		message(FATAL_ERROR "The DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage() can not take both options CT_DEVELOPER and CT_RUNTIME" )
 	endif()
 	
-	if(ARG_BINARIES_DEVELOPER)
-		set(contentType BINARIES_DEVELOPER)
+	if(ARG_CT_DEVELOPER)
+		set(contentType CT_DEVELOPER)
 	elseif(isBinaryUserType)
-		set(contentType BINARIES_USER)
+		set(contentType CT_RUNTIME)
 	else()
 		message(FATAL_ERROR "Faulty DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage().")
 	endif()
@@ -252,7 +252,7 @@ function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut di
 	set(${contentTypeOut} ${contentType} PARENT_SCOPE)
 	set(${packageFormatsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMATS} PARENT_SCOPE)
 	set(${distributionPackageFormatOptionsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMAT_OPTIONS} PARENT_SCOPE)
-	set(${excludedTargetsOut} ${ARG_BINARIES_USER} PARENT_SCOPE)
+	set(${excludedTargetsOut} ${ARG_CT_RUNTIME} PARENT_SCOPE)
 
 endfunction()
 
@@ -303,7 +303,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfGetShortDevBinPackageName shortNameOut package config version packageFormat )
 
-	cpfGetDistributionPackageContentId( contentId BINARIES_DEVELOPER "")
+	cpfGetDistributionPackageContentId( contentId CT_DEVELOPER "")
 	cpfGetBasePackageFilename( basePackageFileName ${package} ${config} ${version} ${contentId} ${packageFormat})
 	cpfGetDistributionPackageExtension( extension ${packageFormat})
 	set( ${shortNameOut} ${basePackageFileName}.${extension} PARENT_SCOPE)
@@ -313,9 +313,9 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTargets )
 
-	if( "${contentType}" STREQUAL BINARIES_DEVELOPER)
+	if( "${contentType}" STREQUAL CT_DEVELOPER)
 		set(contentIdLocal dev-bin)
-	elseif( "${contentType}" STREQUAL BINARIES_USER )
+	elseif( "${contentType}" STREQUAL CT_RUNTIME )
 		set(contentIdLocal usr-bin )
 		if( NOT "${excludedTargets}" STREQUAL "")
 			list(SORT excludedTargets)

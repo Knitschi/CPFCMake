@@ -29,58 +29,28 @@ endfunction()
 #----------------------------------------------------------------------------------------
 #
 # For argument documentation see the cpfAddPackage() function.
-function( cpfAddDistributionPackageTargets package packageOptionLists pluginOptionLists )
+function( cpfAddDistributionPackageTargets package packageOptionLists )
 
-	# todo create pair list for plugin options
-	cpfGetPluginTargetDirectoryPairLists( pluginTargets pluginDirectories "${pluginOptionLists}" )
-	
 	foreach( list ${packageOptionLists})
 
 		cpfParseDistributionPackageOptions( contentType packageFormats distributionPackageFormatOptions excludedTargets "${${list}}")
 
-		# First we create targets that assemble the content of the desired contentType
+		# First we create targets that assemble the content of the desired contentType.
+		# We have extra targets for this so we can create multiple packages with the same content.
 		cpfGetCollectPackageContentTargetNameAnId( packageContentTarget contentId ${package} ${contentType} "${excludedTargets}")
 		if(NOT TARGET ${packageContentTarget})
-			cpfAddPackageContentTarget( packageAssembleOutputFiles ${packageContentTarget} ${package} ${contentId} ${contentType} "${excludedTargets}" "${pluginTargets}" "${pluginDirectories}")
+			cpfAddPackageContentTarget( ${packageContentTarget} ${package} ${contentId} ${contentType} )
 		endif()
 
 		foreach(packageFormat ${packageFormats})
 			cpfAddDistributionPackageTarget( ${package} ${packageContentTarget} ${contentId} ${contentType} ${packageFormat} "${distributionPackageFormatOptions}")
 		endforeach()
+
 	endforeach()
 
 	# Create one target to knot up all distribution package targets for the package.
 	cpfAddDistributionPackagesTarget( ${package} )
 
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Parses the pluginOptionLists and returns two lists of same size. One list cpfContains the
-# plugin target while the element with the same index in the other list contains the 
-# directory of the plugin target.
-function( cpfGetPluginTargetDirectoryPairLists targetsOut directoriesOut pluginOptionLists )
-	# parse the plugin dependencies arguments
-	# Creates two lists of the same length, where one list contains the plugin targets
-	# and the other the directory to which they are deployed.
-	set(pluginTargets)
-	set(pluginDirectories)
-	foreach( list ${pluginOptionLists})
-		cmake_parse_arguments(
-			ARG 
-			"" 
-			"PLUGIN_DIRECTORY"
-			"PLUGIN_TARGETS"
-			${${list}}
-		)
-		foreach( pluginTarget ${ARG_PLUGIN_TARGETS})
-			cpfListAppend( pluginTargets ${pluginTarget})
-			cpfListAppend( pluginDirectories ${ARG_PLUGIN_DIRECTORY})
-		endforeach()
-	endforeach()
-	
-	set(${targetsOut} ${pluginTargets} PARENT_SCOPE)
-	set(${directoriesOut} ${pluginDirectories} PARENT_SCOPE)
-	
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -160,44 +130,30 @@ function( cpfGetLastBuildPackagesDir dirOut package)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName package contentId contentType excludedTargets pluginTargets pluginDirectories)
+function( cpfAddPackageContentTarget targetName package contentId contentType )
 
 	get_property( installTarget TARGET ${package} PROPERTY CPF_INSTALL_PACKAGE_SUBTARGET )
 
-	set(allSourceTargets)
-	set(allOutputFiles)
+	cpfGetPackageComponents( components ${contentType} )
+	cpfGetContentProducingTargets( contentProducerTargets ${package} "${components}" )
+
     set(allStampFiles)
 	set(configSuffixes)
-
 	cpfGetConfigurations(configs)
     foreach( config ${configs})
 		cpfToConfigSuffix( configSuffix ${config})
 		cpfListAppend( configSuffixes ${configSuffix})
 
-		set(sourceFiles)
-		set(relativeDestinationFiles)
-
 		# get the files that are included in the package
-		set(installTargetStampFile)
-		if( "${contentType}" STREQUAL BINARIES_DEVELOPER )
-			cpfGetDeveloperPackageFiles( sourceTargets${configSuffix} sourceDir sourceFiles relativeDestinationFiles installTargetStampFile ${package} ${config} )
-		elseif( "${contentType}" STREQUAL BINARIES_USER )
-			cpfGetUserPackageFiles( sourceTargets${configSuffix} sourceDir sourceFiles relativeDestinationFiles ${package} ${config} "${excludedTargets}" "${pluginTargets}" "${pluginDirectories}" )
-		else()
-			message(FATAL_ERROR "Function cpfAddPackageContentTarget() does not support contentType \"${contentType}\"")
-		endif()
+		cpfGetPackageContentStagingDir( destDir ${package} ${config} ${contentId})
+		cpfGetInstalledFiles( relativeDestinationFiles ${package} ${config} "${components}" )
+		cpfPrependMulti( outputFiles${configSuffix} "${destDir}/" "${relativeDestinationFiles}")
 
 		# commands for clearing the package stage
-		cpfGetPackageContentStagingDir( destDir ${package} ${config} ${contentId})
 		cpfGetClearDirectoryCommands( clearContentStageCommands "${destDir}")
 
-		# commands to copy the package files
-		cpfPrependMulti( outputFiles${configSuffix} "${destDir}/" "${relativeDestinationFiles}")
-		if( NOT "${sourceDir}" STREQUAL "")
-			cpfPrependMulti( sourceFiles "${sourceDir}/" "${sourceFiles}")
-		endif()
-
-		cpfGetInstallFileCommands( copyFilesCommmands "${sourceFiles}" "${outputFiles${configSuffix}}")
+		# commands to run the packages install script
+		cpfGetRunInstallScriptCommands( runInstallScriptCommands ${package} ${config} "${components}" "${destDir}" )
 
 		# command to touch the target stamp
 		set( stampFile${configSuffix} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/${config}_copyFiles.stamp")
@@ -205,23 +161,22 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 
 		cpfAddConfigurationDependendCommand(
 			TARGET ${targetName}
-            OUTPUT ${stampFile${configSuffix}}  
-            DEPENDS ${sourceTargets${configSuffix}} ${installTargetStampFile}
+            OUTPUT ${stampFile${configSuffix}}
+            DEPENDS ${sourceTargets${configSuffix}}
 			COMMENT "Collect ${package} ${contentType} package files for config ${config}"
             CONFIG ${config}
-            COMMANDS_CONFIG ${clearContentStageCommands} ${copyFilesCommmands} ${touchCommmand}
+            COMMANDS_CONFIG ${clearContentStageCommands} ${runInstallScriptCommands} ${touchCommmand}
 			COMMANDS_NOT_CONFIG ${touchCommmand}
-        )
-        cpfListAppend( allOutputFiles "${outputFiles${configSuffix}}")
+		)
+		
         cpfListAppend( allStampFiles ${stampFile${configSuffix}} )
-		cpfListAppend( allSourceTargets "${sourceTargets${configSuffix}}")
 
 	endforeach()
 
 	# add a target
 	add_custom_target(
 		${targetName}
-		DEPENDS ${allSourceTargets} ${allStampFiles}
+		DEPENDS ${contentProducerTargets} ${allStampFiles}
 	)
 
 	# set target properties
@@ -232,6 +187,40 @@ function( cpfAddPackageContentTarget packageAssembleOutputFiles targetName packa
 	endforeach()
 
 endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns a list of components that belong to a contentType.
+#
+function( cpfGetPackageComponents componentsOut contentType )
+
+	set(components)
+	if( "${contentType}" STREQUAL CT_RUNTIME )
+		set(components runtime)
+	elseif( "${contentType}" STREQUAL CT_RUNTIME_AND_DEPENDENCIES )
+		set(components runtime runtime_dependencies )
+	elseif( "${contentType}" STREQUAL CT_DEVELOPER )
+		set(components runtime developer )
+	elseif( "${contentType}" STREQUAL CT_SOURCES )
+		set(components sources )
+	else()
+		message(FATAL_ERROR "Function cpfAddPackageContentTarget() does not support contentType \"${contentType}\"")
+	endif()
+
+	set(${componentsOut} "${components}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetContentProducingTargets contentProducerTargetsOut package components )
+
+	get_property(binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
+	get_property(abiDumpTargets TARGET ${package} PROPERTY CPF_ABI_DUMP_SUBTARGET )
+	set( contentTargets ${binaryTargets} ${abiDumpTargets} )
+
+	set(${contentProducerTargetsOut} "${contentTargets}" PARENT_SCOPE)
+
+endfunction()
+
 
 #----------------------------------------------------------------------------------------
 # returns the "private" _packaging directory which is used while creating the distribution packages. 
@@ -249,26 +238,44 @@ function( cpfGetPackageContentStagingDir stagingDirOut package config contentId 
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetCPackWorkingDir dirOut package config contentId )
-		
-	# We remove some directory levels and replace them with a hash
-	# to shorten the long filenames, which has caused trouble in the past. 
-	string(MD5 hash "${package}/${config}/${contentId}" )
-	string(SUBSTRING ${hash} 0 8 shortCpackDir)
+#
+function( cpfGetInstalledFiles relativeDestinationFilesOut package config components )
 
-	cpfGetPackagingDir( baseDir )
-	set( ${dirOut} "${baseDir}/${shortCpackDir}" PARENT_SCOPE) 
+	cpfToConfigSuffix(configSuffix ${config})
+
+	set(files)
+	foreach(component ${components})
+		get_property(componentFiles TARGET ${package} PROPERTY CPF_INSTALLED_FILES_${component}_${configSuffix} )
+		cpfListAppend(files ${componentFiles})
+	endforeach()
+
+	set(${relativeDestinationFilesOut} "${files}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetRunInstallScriptCommands runInstallScriptCommandsOut package config components destDir )
+
+	set(scriptFile "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake")
+
+	set(commands)
+	foreach(component ${components})
+		cpfListAppend( commands "${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=\"${destDir}\" -DCMAKE_INSTALL_COMPONENT=${component} -DCMAKE_INSTALL_CONFIG_NAME=${config} -P \"${install_script}\"" )
+	endforeach()
+
+	set( ${runInstallScriptCommandsOut} "${commands}" PARENT_SCOPE )
+
 endfunction()
 
 
+#[[
 #----------------------------------------------------------------------------------------
-# The BINARIES_DEVELOPER package cpfContains the same files as the install directory of the package
+# The CT_DEVELOPER package contains the same files as the install directory of the package
 #
 function( cpfGetDeveloperPackageFiles sourceTargetsOut sourceDirOut sourceFilesOut destFilesOut installTargetStampFileOut package config )
 		
 	cpfToConfigSuffix( configSuffix ${config})
 	cpfGetPackagePrefixOutputDir( packageDir ${package} )
-	#set( sourceDir "${CMAKE_INSTALL_PREFIX}/${packageDir}")
 	set( sourceDir "${CMAKE_INSTALL_PREFIX}")
 			
 	# get files from install targets
@@ -279,17 +286,17 @@ function( cpfGetDeveloperPackageFiles sourceTargetsOut sourceDirOut sourceFilesO
 	cpfGetRelativePaths( relPaths ${sourceDir} "${packageFiles}")
 	cpfListAppend( sourceFiles "${relPaths}")
 
-	set(${sourceTargetsOut} ${installTarget} PARENT_SCOPE)
-	set(${sourceDirOut} ${sourceDir} PARENT_SCOPE)
-	set(${sourceFilesOut} ${sourceFiles}  PARENT_SCOPE)
+	set(${sourceTargetsOut} "${installTarget}" PARENT_SCOPE)
+	set(${sourceDirOut} "${sourceDir}" PARENT_SCOPE)
+	set(${sourceFilesOut} "${sourceFiles}" PARENT_SCOPE)
 	# The destination directory structure is already correct here
-	set(${destFilesOut} ${sourceFiles}  PARENT_SCOPE)
-	set(${installTargetStampFileOut} ${stampFile} PARENT_SCOPE)
+	set(${destFilesOut} "${sourceFiles}" PARENT_SCOPE)
+	set(${installTargetStampFileOut} "${stampFile}" PARENT_SCOPE)
 
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# The BINARIES_USER_PORTABLE package cpfContains:
+# The CT_RUNTIME_PORTABLE package contains:
 # The packages shared libraries and executables
 # no header, cmake-files, debug files and static libraries
 # All depended-on shared libraries and plugin libraries except the ones given in the excludedTargets option.
@@ -429,8 +436,8 @@ function( cpfFilterOutSystemPlugins pluginTargetsOut pluginDirectoriesOut plugin
 
 	set(index 0)
 	foreach( plugin ${pluginTargetsIn})
-		cpfContains( cpfContains "${excludedTargets}" ${plugin})
-		if(NOT ${cpfContains})
+		cpfContains( contains "${excludedTargets}" ${plugin})
+		if(NOT ${contains})
 			list(GET pluginDirectoriesIn ${index} directory )
 			cpfListAppend( pluginTargetsLocal ${plugin} )
 			cpfListAppend( pluginDirectoriesLocal ${directory})
@@ -442,6 +449,11 @@ function( cpfFilterOutSystemPlugins pluginTargetsOut pluginDirectoriesOut plugin
 	set(${pluginDirectoriesOut} ${pluginDirectoriesLocal} PARENT_SCOPE )
 
 endfunction()
+]]
+
+#----------------------------------------------------------------------------------------
+# returns the commands 
+
 
 #----------------------------------------------------------------------------------------
 # This function adds target that creates a distribution package. The command specifies how this is done.
@@ -525,6 +537,18 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 		set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES_${configSuffix} ${destPackageFile${configSuffix}})
 	endforeach()
 
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetCPackWorkingDir dirOut package config contentId )
+		
+	# We remove some directory levels and replace them with a hash
+	# to shorten the long filenames, which has caused trouble in the past. 
+	string(MD5 hash "${package}/${config}/${contentId}" )
+	string(SUBSTRING ${hash} 0 8 shortCpackDir)
+
+	cpfGetPackagingDir( baseDir )
+	set( ${dirOut} "${baseDir}/${shortCpackDir}" PARENT_SCOPE) 
 endfunction()
 
 #----------------------------------------------------------------------------------------

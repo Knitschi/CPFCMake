@@ -129,7 +129,7 @@ ABBREVIATE_BRIEF       = "The $name class" \
                          is \
                          provides \
                          specifies \
-                         cpfContains \
+                         contains \
                          represents \
                          a \
                          an \

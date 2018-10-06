@@ -195,10 +195,10 @@ function( cpfAddPackage )
 	list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
 
 	# Adds the install rules and the per package install targets.
-	cpfAddInstallRulesAndTargets( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} )
+	cpfAddInstallRules( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" )
 
 	# Adds the targets that create the distribution packages.
-	cpfAddDistributionPackageTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" "${pluginOptionLists}" )
+	cpfAddDistributionPackageTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" )
 
 endfunction() 
 
@@ -687,7 +687,7 @@ function( cpfSetOutputDirAndName target package config prefixDir outputType )
 endfunction()
 
 #---------------------------------------------------------------------
-# generate a header file that cpfContains the EXPORT macros
+# generate a header file that contains the EXPORT macros
 function( cpfGenerateExportMacroHeader target macroBaseName )
 
 	get_property( targetType TARGET ${target} PROPERTY TYPE)

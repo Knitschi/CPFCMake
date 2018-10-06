@@ -95,7 +95,7 @@ function( cpfListLength lengthOut list)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Returns true if the given list cpfContains the given element
+# Returns true if the given list contains the given element
 function( cpfContains ret list element)
 
 	list(FIND list "${element}" index)
@@ -108,7 +108,7 @@ function( cpfContains ret list element)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Returns true if listLoockedIn cpfContains one of the elements of listSearchStrings
+# Returns true if listLoockedIn contains one of the elements of listSearchStrings
 function( cpfContainsOneOf ret listLookedIn listSearchStrings)
 	
 	foreach( searchString IN LISTS listSearchStrings )

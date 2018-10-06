@@ -100,8 +100,8 @@ endfunction()
 #
 function( cpfAssertContainsNoGeneratorExpressions string message )
 
-	cpfContainsGeneratorExpressions( cpfContains ${string})
-	if(cpfContains)
+	cpfContainsGeneratorExpressions( contains ${string})
+	if(contains)
 		message(FATAL_ERROR "${massage}")
 	endif()
 
