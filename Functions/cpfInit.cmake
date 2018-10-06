@@ -1,4 +1,5 @@
 # This file contains the main functions of the CMakeProjectFramework cmake module.
+
 include_guard(GLOBAL)
 
 set( cpfCmakeDir "${CPF_ROOT_DIR}/Sources/CPFCMake" )
@@ -20,13 +21,12 @@ include(cpfAddDistributionPackageTarget)
 include(cpfAddValgrindTarget)
 include(cpfAddOpenCppCoverageTarget)
 
-
 # cotire must be included on the global scope or we get errors thta target xyz already has a custom rule
 include("${CMAKE_SOURCE_DIR}/cotire/CMake/cotire.cmake")
 
+# We include the config file here to retrigger the cmake generate step when the config changes.
 cpfFindConfigFile(configFile "${CPF_CONFIG}")
-include(${configFile})
-
+include("${configFile}")
 
 #----------------------------------------------------------------------------------------
 function( cpfInit )

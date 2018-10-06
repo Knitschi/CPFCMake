@@ -100,7 +100,7 @@ endfunction()
 # dependedOnPackages -> This argument is used to outdate the test target if the sources of some
 # other package/target change. This is usefull if the tests internally use functionality from
 # an external package.
-function( cpfAddRunPython3TestTarget package testScript args sourceFiles dependedOnPackages)
+function( cpfAddRunPython3TestTarget package testScript args sourceFiles dependedOnPackages dependedOnExternalFiles)
 	if(TOOL_PYTHON3)
 
 		cpfPrependMulti( sourceFiles "${CMAKE_CURRENT_SOURCE_DIR}/" "${sourceFiles}")
@@ -118,21 +118,21 @@ function( cpfAddRunPython3TestTarget package testScript args sourceFiles depende
 		cpfStringRemoveRight( pythonModulePath ${pythonModulePath} 3)
 
 		set( runTestsCommand "\"${TOOL_PYTHON3}\" -u -m ${pythonModulePath} ${args}")
-		cpfAddCustomTestTarget(${package} ${runTestsCommand} "${sourceFiles}" )
+		cpfAddCustomTestTarget(${package} ${runTestsCommand} "${sourceFiles}" "${dependedOnExternalFiles}" )
 
 	endif()
 endfunction()
 
 
 #----------------------------------------------------------------------------------------
-function( cpfAddCustomTestTarget package runTestsCommand sourceFiles )
+function( cpfAddCustomTestTarget package runTestsCommand sourceFiles dependedOnExternalFiles )
 
 	set(runTargetName ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${PACKAGE_NAME})
 	getRunTestStampFile( stampFile ${runTargetName} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX})
 	set( touchCommand "cmake -E touch \"${stampFile}\"" )
 
 	cpfAddStandardCustomCommand(
-		DEPENDS "${sourceFiles}"
+		DEPENDS ${sourceFiles} ${dependedOnExternalFiles}
 		OUTPUT "${stampFile}"
 		COMMANDS ${runTestsCommand} ${touchCommand}
 	)
@@ -152,7 +152,7 @@ endfunction()
 # Adds a run-tests target that runs a cmake script
 function( cpfAddRunCMakeTestScriptTarget package testScript sourceFiles)
 	set( runTestsCommand "cmake -P \"${CMAKE_CURRENT_SOURCE_DIR}/${testScript}\"")
-	cpfAddCustomTestTarget(${package} ${runTestsCommand} "${sourceFiles}")
+	cpfAddCustomTestTarget(${package} ${runTestsCommand} "${sourceFiles}" "")
 endfunction()
 
 
