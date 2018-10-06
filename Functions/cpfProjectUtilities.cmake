@@ -954,7 +954,7 @@ endfunction()
 function( cpfFindConfigFile absFilePathOut configName )
 
 	if(EXISTS "${configName}")
-		set(absPath "${configName}")
+		set( ${absFilePathOut} "${configName}" PARENT_SCOPE )
 	else()
 
 		set( searchLocations
@@ -966,18 +966,14 @@ function( cpfFindConfigFile absFilePathOut configName )
 		foreach( dir ${searchLocations})
 			cpfNormalizeAbsPath( fullConfigFile "${dir}/${configName}${CPF_CONFIG_FILE_ENDING}" )
 			if( EXISTS "${fullConfigFile}" )
-				set( absPath "${fullConfigFile}" )
-				continue()
+				set( ${absFilePathOut} "${fullConfigFile}" PARENT_SCOPE )
+				return()
 			endif()
 		endforeach()
 
-		if( NOT absPath )
-			message(FATAL_ERROR "Could not find any configuration file with base-name ${configName}.")
-		endif()
-
 	endif()
 	
-	set( ${absFilePathOut} ${absPath} PARENT_SCOPE )
+	message(FATAL_ERROR "Could not find any configuration file with base-name ${configName}.")
 
 endfunction()
 
