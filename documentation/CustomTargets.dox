@@ -99,7 +99,9 @@ files, global documentation, etc..
 
 \subsubsection install install
 
-This CMake standard target bundles the \ref install_package targets.
+This CMake standard target copies all installed files to the directory specified
+with CMAKE_INSTALL_PREFIX. Not that this includes runtime files, developer files,
+external shared library dependencies and source files.
 
 \subsubsection opencppcoverage opencppcoverage
 
