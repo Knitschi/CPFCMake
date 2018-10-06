@@ -214,9 +214,17 @@ endfunction()
 function( cpfGetContentProducingTargets contentProducerTargetsOut package components )
 
 	get_property(binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
-	get_property(abiDumpTargets TARGET ${package} PROPERTY CPF_ABI_DUMP_SUBTARGET )
-	set( contentTargets ${binaryTargets} ${abiDumpTargets} )
 
+	# Get dumpfile target dependencies
+	set(abiDumpTargets)
+	foreach(binaryTarget ${binaryTargets})
+		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY CPF_ABI_DUMP_SUBTARGET )
+		if(abiDumpTarget)
+			cpfListAppend(abiDumpTargets ${abiDumpTarget})
+		endif()
+	endforeach()
+
+	set(contentTargets ${binaryTargets} ${abiDumpTargets})
 	set(${contentProducerTargetsOut} "${contentTargets}" PARENT_SCOPE)
 
 endfunction()
@@ -266,7 +274,6 @@ function( cpfGetRunInstallScriptCommands runInstallScriptCommandsOut package con
 	set( ${runInstallScriptCommandsOut} "${commands}" PARENT_SCOPE )
 
 endfunction()
-
 
 #[[
 #----------------------------------------------------------------------------------------
