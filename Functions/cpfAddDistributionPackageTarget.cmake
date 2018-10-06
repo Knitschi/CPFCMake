@@ -135,7 +135,6 @@ function( cpfAddPackageContentTarget targetName package contentId contentType )
 	get_property( installTarget TARGET ${package} PROPERTY CPF_INSTALL_PACKAGE_SUBTARGET )
 
 	cpfGetPackageComponents( components ${contentType} )
-	cpfGetContentProducingTargets( contentProducerTargets ${package} "${components}" )
 
     set(allStampFiles)
 	set(configSuffixes)
@@ -143,6 +142,9 @@ function( cpfAddPackageContentTarget targetName package contentId contentType )
     foreach( config ${configs})
 		cpfToConfigSuffix( configSuffix ${config})
 		cpfListAppend( configSuffixes ${configSuffix})
+
+		# Get target and file dependencies
+		cpfGetContentProducingTargetsAndOutputFiles( contentProducerTargets dependedOnFiles ${package} ${config} "${components}" )
 
 		# get the files that are included in the package
 		cpfGetPackageContentStagingDir( destDir ${package} ${config} ${contentId})
@@ -158,11 +160,10 @@ function( cpfAddPackageContentTarget targetName package contentId contentType )
 		# command to touch the target stamp
 		set( stampFile${configSuffix} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/${config}_copyFiles.stamp")
         cpfGetTouchFileCommands( touchCommmand "${stampFile${configSuffix}}")
-
 		cpfAddConfigurationDependendCommand(
 			TARGET ${targetName}
             OUTPUT ${stampFile${configSuffix}}
-            DEPENDS ${sourceTargets${configSuffix}}
+            DEPENDS ${sourceTargets${configSuffix}} ${dependedOnFiles}
 			COMMENT "Collect ${package} ${contentType} package files for config ${config}"
             CONFIG ${config}
             COMMANDS_CONFIG ${clearContentStageCommands} ${runInstallScriptCommands} ${touchCommmand}
@@ -211,21 +212,38 @@ function( cpfGetPackageComponents componentsOut contentType )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetContentProducingTargets contentProducerTargetsOut package components )
+function( cpfGetContentProducingTargetsAndOutputFiles contentProducerTargetsOut filesOut package config components )
 
+	cpfToConfigSuffix(configSuffix ${config})
+
+	# The content depends on the binary targets
 	get_property(binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
 
 	# Get dumpfile target dependencies
 	set(abiDumpTargets)
+	set(files)
 	foreach(binaryTarget ${binaryTargets})
+		
+		# Add target main output file.
+		cpfListAppend(files $<TARGET_FILE:${binaryTarget}>)
+
 		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY CPF_ABI_DUMP_SUBTARGET )
 		if(abiDumpTarget)
+			# add target
 			cpfListAppend(abiDumpTargets ${abiDumpTarget})
+			# add dump file
+			get_property( dumpFile TARGET ${abiDumpTarget} PROPERTY CPF_OUTPUT_FILES_${configSuffix} )
+			cpfListAppend(files "${dumpFile}")
+			devMessage("${dumpFile}")
+
 		endif()
+
 	endforeach()
 
 	set(contentTargets ${binaryTargets} ${abiDumpTargets})
+
 	set(${contentProducerTargetsOut} "${contentTargets}" PARENT_SCOPE)
+	set(${filesOut} "${files}" PARENT_SCOPE)
 
 endfunction()
 
