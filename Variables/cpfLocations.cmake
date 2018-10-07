@@ -10,7 +10,6 @@ set(CPF_SOURCE_DIR Sources)						# The directory that should hold all non genera
 set(CPF_CONFIG_DIR Configuration)				# The directory that holds files that define cmake variables that are specific to the local project instance, like local paths to dependencies etc.
 set(CPF_PACKAGES_ASSEMBLE_DIR _pckg)			# Utility directory which is used to copy the content of the packages together.
 set(CPF_PRIVATE_DIR _CPF)						# A directory for storing generated helper files of the CMakeProjectFramework project.
-set(CPF_INSTALL_STAGE InstallStage)             # The trailing directory in the default install prefix
 set(CPF_CMAKE_DIR CPFCMake )					# The directory of the CPFCMake package
 set(CPF_BUILDSCRIPTS_DIR CPFBuildscripts )			# The directory of the CPFBuildscripts package
 set(CPF_JENKINSFILE_DIR CPFJenkinsfile )			# The directory of the CPFJenkinsfile package
