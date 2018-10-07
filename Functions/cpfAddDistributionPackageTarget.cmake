@@ -234,7 +234,6 @@ function( cpfGetContentProducingTargetsAndOutputFiles contentProducerTargetsOut 
 			# add dump file
 			get_property( dumpFile TARGET ${abiDumpTarget} PROPERTY CPF_OUTPUT_FILES_${configSuffix} )
 			cpfListAppend(files "${dumpFile}")
-			devMessage("${dumpFile}")
 
 		endif()
 
