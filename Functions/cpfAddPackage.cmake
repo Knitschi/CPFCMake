@@ -519,8 +519,6 @@ function(cpfAddPrecompiledHeader target )
     # add the precompiled header (targets and compile flags)
     set_target_properties(${target} PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)  # prevent the generation of unity build targets
 	
-	devMessage("")
-
 	if(CPF_ENABLE_PRECOMPILED_HEADER AND CPF_USE_PRECOMPILED_HEADERS ) 
 		cotire( ${target})
 		cpfReAddInheritedCompileOptions( ${target})
