@@ -21,8 +21,13 @@ include(cpfAddDistributionPackageTarget)
 include(cpfAddValgrindTarget)
 include(cpfAddOpenCppCoverageTarget)
 
-# cotire must be included on the global scope or we get errors thta target xyz already has a custom rule
-include("${CMAKE_SOURCE_DIR}/cotire/CMake/cotire.cmake")
+# cotire must be included on the global scope or we get errors that target xyz already has a custom rule
+set(cotirePath "${CMAKE_SOURCE_DIR}/cotire/CMake/cotire.cmake")
+if(EXISTS ${cotirePath})
+	include(${cotirePath})
+	set(CPF_HAS_COTIRE TRUE PARENT_SCOPE)
+endif()
+
 
 # We include the config file here to retrigger the cmake generate step when the config changes.
 cpfFindConfigFile(configFile "${CPF_CONFIG}")
