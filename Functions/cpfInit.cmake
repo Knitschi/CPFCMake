@@ -23,9 +23,14 @@ include(cpfAddOpenCppCoverageTarget)
 
 # cotire must be included on the global scope or we get errors that target xyz already has a custom rule
 set(cotirePath "${CMAKE_SOURCE_DIR}/cotire/CMake/cotire.cmake")
-if(EXISTS ${cotirePath})
-	include(${cotirePath})
-	set(CPF_HAS_COTIRE TRUE PARENT_SCOPE)
+if(CPF_ENABLE_PRECOMPILED_HEADER)
+	if(EXISTS ${cotirePath})
+		include(${cotirePath})
+		set( CPF_USE_PRECOMPILED_HEADERS TRUE )
+	else()
+		message(WARNING "Cotire not found! Add it as package to \"${CMAKE_SOURCE_DIR}/cotire\" to enable precompiled headers.")
+		set( CPF_USE_PRECOMPILED_HEADERS FALSE )
+	endif()
 endif()
 
 
