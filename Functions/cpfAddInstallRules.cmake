@@ -270,7 +270,8 @@ endfunction()
 function( cpfInstallHeaders package)
 
 	# Install rules for production headers
-	cpfInstallPublicHeaders( basicHeader ${package} ${package})
+	get_property( productionLib TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET)
+	cpfInstallPublicHeaders( basicHeader ${package} ${productionLib})
 	
 	# Install rules for test fixture library headers
 	get_property( fixtureTarget TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET)
