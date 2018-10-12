@@ -195,7 +195,7 @@ function( cpfAddPackage )
 	list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
 
 	# Adds the install rules and the per package install targets.
-	cpfAddInstallRules( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" )
+	cpfAddInstallRules( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" )
 
 	# Adds the targets that create the distribution packages.
 	cpfAddDistributionPackageTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" )

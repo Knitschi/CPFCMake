@@ -5,19 +5,20 @@ include(CMakePackageConfigHelpers)
 include(cpfCustomTargetUtilities)
 include(cpfLocations)
 include(cpfProjectUtilities)
-
+include(cpfAddDeploySharedLibrariesTarget)
 
 
 #---------------------------------------------------------------------------------------------
 # Adds install rules for the various package components.
 #
-function( cpfAddInstallRules package namespace pluginOptionLists)
+function( cpfAddInstallRules package namespace pluginOptionLists distributionPackageOptionLists )
 
 	cpfInstallPackageBinaries( ${package} )
 	cpfGenerateAndInstallCmakeConfigFiles( ${package} ${namespace} )
 	cpfInstallHeaders( ${package} )
 	cpfInstallDebugFiles( ${package} )
 	cpfInstallAbiDumpFiles( ${package} )
+	cpfInstallDependedOnSharedLibraries( ${package} "${pluginOptionLists}" "${distributionPackageOptionLists}" )
 
 endfunction()
 
@@ -164,31 +165,6 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 function( cpfGetTargetsExportsName output package)
 	set(${output} ${package}Targets PARENT_SCOPE)
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfGetLinkedSharedLibsForPackageExecutables output package )
-
-	get_property(targetType TARGET ${package} PROPERTY TYPE)
-	get_property(testTarget TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET)
-
-	# get the shared external libraries
-	if(${targetType} STREQUAL EXECUTABLE)
-		cpfGetRecursiveLinkedLibraries( packageExeLibs ${package})
-	endif()
-
-	if(testTarget AND ${package}_BUILD_TESTS)
-		cpfGetRecursiveLinkedLibraries( testTargetLibs ${testTarget})
-	endif()
-
-	set(allLibs ${packageExeLibs} ${testTargetLibs})
-	if(allLibs)
-		list(REMOVE_DUPLICATES allLibs)
-	endif()
-	cpfFilterInTargetsWithProperty(sharedLibraries "${allLibs}" TYPE SHARED_LIBRARY )
-
-	set(${output} ${sharedLibraries} PARENT_SCOPE)
-
 endfunction()
 
 #---------------------------------------------------------------------------------------------
@@ -460,4 +436,189 @@ function( cpfGetPluginTargetDirectoryPairLists targetsOut directoriesOut pluginO
 	set(${targetsOut} ${pluginTargets} PARENT_SCOPE)
 	set(${directoriesOut} ${pluginDirectories} PARENT_SCOPE)
 	
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# This function adds install rules for the shared libraries that are provided by other
+# internal or external packages. We only add these rules for packages that actually
+# create distribution packages that include depended on shared libraries.
+#
+function( cpfInstallDependedOnSharedLibraries package pluginOptions distributionPackageOptionLists )
+
+	# Get 
+	cpfDependedOnSharedLibrariesAndDirectories( libraries directories ${package} "${pluginOptions}" "${excludedTargets}" )
+
+	# Add install rules for each distribution package that has a runtime-portable content.
+	set(contentIds)
+	foreach( list ${distributionPackageOptionLists})
+		cpfParseDistributionPackageOptions( contentType packageFormats distributionPackageFormatOptions excludedTargets "${${list}}")
+		if( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
+			cpfGetDistributionPackageContentId( contentId ${contentType} "${excludedTargets}" )
+			cpfContains(contentTypeHandled "${contentIds}" ${contentId})
+			if(NOT ${contentTypeHandled})
+				
+				cpfListAppend(contentIds ${contentId})
+				addSharedLibraryDependenciesInstallRules( ${package} ${contentId} "${libraries}" "${directories}" )
+			
+			endif()
+		endif()
+	endforeach()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns a list with shared library targets and one with a relative directory for each
+# target to which the shared library must be copied.
+#
+function( cpfDependedOnSharedLibrariesAndDirectories librariesOut directoriesOut package pluginOptionLists excludedTargets )
+
+	cpfGetPluginTargetDirectoryPairLists( pluginTargets pluginDirectories "${pluginOptionLists}" )
+	cpfGetSharedLibrariesRequiredByPackageExecutables( libraries ${package} )
+	set( allLibraries ${pluginTargets} )
+	set( allDirectories ${pluginDirectories} )
+	foreach( library ${libraries} )
+		cpfListAppend( allLibraries ${library} )
+		cpfListAppend( allDirectories "." )
+	endforeach()
+
+	# Filter out excluded targets.
+	set(index 0)
+	set(filteredLibraries)
+	set(filteredDirectories)
+	foreach( library ${allLibraries} )
+		cpfContains(isExcluded "${excludedTargets}" ${library})
+		if(NOT isExcluded)
+			cpfListAppend(filteredLibraries ${library})
+			list(GET allDirectories ${index} dir)
+			cpfListAppend(filteredDirectories ${dir})
+		endif()	
+		cpfIncrement(index)
+	endforeach()
+
+	set(${librariesOut} "${filteredLibraries}" PARENT_SCOPE)
+	set(${directoriesOut} "${filteredDirectories}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# This function was introduced to only have one definition of the distribution package option keywords
+function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut distributionPackageFormatOptionsOut excludedTargetsOut argumentList )
+
+	cmake_parse_arguments(
+		ARG 
+		"" 
+		"" 
+		"DISTRIBUTION_PACKAGE_CONTENT_TYPE;DISTRIBUTION_PACKAGE_FORMATS;DISTRIBUTION_PACKAGE_FORMAT_OPTIONS"
+		${argumentList}
+	)
+
+	set( contentTypeOptions 
+		CT_DEVELOPER
+		CT_RUNTIME
+		CT_SOURCES
+	)
+
+	set(runtimePortableOption CT_RUNTIME_PORTABLE) 
+	cmake_parse_arguments(
+		ARG
+		"${contentTypeOptions}"
+		""
+		"${runtimePortableOption}"
+		"${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}"
+	)
+	
+	# Check that only one content type was given.
+	cpfContains(isRuntimeAndDependenciesType "${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" ${runtimePortableOption})
+	cpfPrependMulti( argOptions ARG_ "${contentTypeOptions}")
+	set(nrOptions 0)
+	foreach(option ${isRuntimeAndDependenciesType} ${argOptions})
+		if(${option})
+			cpfIncrement(nrOptions)
+		endif()
+	endforeach()
+	
+	if( NOT (${nrOptions} EQUAL 1) )
+		message(FATAL_ERROR "Each DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage() must contain exactly one of these options: ${contentTypeOptions};${runtimePortableOption}. The given option was ${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" )
+	endif()
+	
+	if(ARG_CT_DEVELOPER)
+		set(contentType CT_DEVELOPER)
+	elseif(ARG_CT_RUNTIME)
+		set(contentType CT_RUNTIME)
+	elseif(isRuntimeAndDependenciesType)
+		set(contentType CT_RUNTIME_PORTABLE)
+	elseif(ARG_CT_SOURCES)
+		set(contentType CT_SOURCES)
+	else()
+		message(FATAL_ERROR "Faulty DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage().")
+	endif()
+	
+	set(${contentTypeOut} ${contentType} PARENT_SCOPE)
+	set(${packageFormatsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMATS} PARENT_SCOPE)
+	set(${distributionPackageFormatOptionsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMAT_OPTIONS} PARENT_SCOPE)
+	set(${excludedTargetsOut} ${ARG_CT_RUNTIME_PORTABLE} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTargets )
+
+	if( "${contentType}" STREQUAL CT_DEVELOPER)
+		set(contentIdLocal dev)
+	elseif( "${contentType}" STREQUAL CT_RUNTIME )
+		set(contentIdLocal runtime )
+	elseif( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
+		set(contentIdLocal runtime-port )
+		if( NOT "${excludedTargets}" STREQUAL "")
+			list(SORT excludedTargets)
+			string(MD5 excludedTargetsHash "${excludedTargets}")
+			# to keep things short we only use the first 8 characters and hope that collisions are
+			# rare engough to never occur
+			string(SUBSTRING ${excludedTargetsHash} 0 8 excludedTargetsHash)
+			string(APPEND contentIdLocal -${excludedTargetsHash})
+		endif()
+	elseif( "${contentType}" STREQUAL CT_SOURCES )
+		set(contentIdLocal src )
+	else()
+		message(FATAL_ERROR "Content type \"${contentType}\" is not supported by function contentTypeOutputNameIdentifier().")
+	endif()
+	
+	set(${contentIdOut} ${contentIdLocal} PARENT_SCOPE)
+
+endfunction()
+
+
+#----------------------------------------------------------------------------------------
+# This function parses the distribution package options of the package and returns a list
+# with the content-ids of all runtime-portable packages.
+function( addSharedLibraryDependenciesInstallRules package contentId libraries directories )
+
+	set(installedFiles)
+	cpfGetRelativeOutputDir( relRuntimeDir ${package} RUNTIME )
+	
+	cpfGetConfigurations(configurations)
+	foreach(config ${configurations})
+
+		set(index 0)
+		foreach(library ${libraries})
+
+			cpfGetLibFilePath( libFile ${library} ${config})
+
+			list(GET directories ${index} dir)
+			install(
+				FILES ${libFile}
+				DESTINATION "${relRuntimeDir}/${dir}"
+				COMPONENT ${contentId}
+				CONFIGURATIONS ${config}
+			)
+			cpfListAppend(installedFiles "${libFile}")
+			cpfIncrement(index)
+
+			devMessage("Add install rule for file ${libFile} with content-id ${contentId}")
+
+		endforeach()
+	endforeach()
+
+	cpfAddInstalledFilesToProperty( ${package} ${config} "${installedFiles}" )
+
 endfunction()

@@ -4,6 +4,7 @@ include(cpfCustomTargetUtilities)
 include(cpfProjectUtilities)
 include(cpfGitUtilities)
 include(cpfLocations)
+include(cpfAddInstallRules)
 
  
 # This file contains functions that the targets that are used to implement the ABI and API compatibility checks.
@@ -217,66 +218,6 @@ function( cpfHasDevBinDistributionPackage hasDevBinPackageOut packageFormatOut d
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# This function was introduced to only have one definition of the distribution package option keywords
-function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut distributionPackageFormatOptionsOut excludedTargetsOut argumentList )
-
-	cmake_parse_arguments(
-		ARG 
-		"" 
-		"" 
-		"DISTRIBUTION_PACKAGE_CONTENT_TYPE;DISTRIBUTION_PACKAGE_FORMATS;DISTRIBUTION_PACKAGE_FORMAT_OPTIONS"
-		${argumentList}
-	)
-
-	set( contentTypeOptions 
-		CT_DEVELOPER
-		CT_RUNTIME
-		CT_SOURCES
-	)
-
-	set(runtimePortableOption CT_RUNTIME_PORTABLE) 
-	cmake_parse_arguments(
-		ARG
-		"${contentTypeOptions}"
-		""
-		"${runtimePortableOption}"
-		"${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}"
-	)
-	
-	# Check that only one content type was given.
-	cpfContains(isRuntimeAndDependenciesType "${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" ${runtimePortableOption})
-	cpfPrependMulti( argOptions ARG_ "${contentTypeOptions}")
-	set(nrOptions 0)
-	foreach(option ${isRuntimeAndDependenciesType} ${argOptions})
-		if(${option})
-			cpfIncrement(nrOptions)
-		endif()
-	endforeach()
-	
-	if( NOT (${nrOptions} EQUAL 1) )
-		message(FATAL_ERROR "Each DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage() must contain exactly one of these options: ${contentTypeOptions};${runtimePortableOption}. The given option was ${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" )
-	endif()
-	
-	if(ARG_CT_DEVELOPER)
-		set(contentType CT_DEVELOPER)
-	elseif(ARG_CT_RUNTIME)
-		set(contentType CT_RUNTIME)
-	elseif(isRuntimeAndDependenciesType)
-		set(contentType CT_RUNTIME_PORTABLE)
-	elseif(ARG_CT_SOURCES)
-		set(contentType CT_SOURCES)
-	else()
-		message(FATAL_ERROR "Faulty DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage().")
-	endif()
-	
-	set(${contentTypeOut} ${contentType} PARENT_SCOPE)
-	set(${packageFormatsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMATS} PARENT_SCOPE)
-	set(${distributionPackageFormatOptionsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMAT_OPTIONS} PARENT_SCOPE)
-	set(${excludedTargetsOut} ${ARG_CT_RUNTIME_PORTABLE} PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
 function( cpfIsArchiveFormat isArchiveFormatOut packageFormat )
 	cpfGetArchiveFormats(archiveGenerators)
 	cpfContains( isArchiveGenerator "${archiveGenerators}" ${packageFormat})
@@ -327,33 +268,6 @@ function( cpfGetShortDevBinPackageName shortNameOut package config version packa
 	cpfGetBasePackageFilename( basePackageFileName ${package} ${config} ${version} ${contentId} ${packageFormat})
 	cpfGetDistributionPackageExtension( extension ${packageFormat})
 	set( ${shortNameOut} ${basePackageFileName}.${extension} PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTargets )
-
-	if( "${contentType}" STREQUAL CT_DEVELOPER)
-		set(contentIdLocal dev)
-	elseif( "${contentType}" STREQUAL CT_RUNTIME )
-		set(contentIdLocal runtime )
-	elseif( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
-		set(contentIdLocal runtime-port )
-		if( NOT "${excludedTargets}" STREQUAL "")
-			list(SORT excludedTargets)
-			string(MD5 excludedTargetsHash "${excludedTargets}")
-			# to keep things short we only use the first 8 characters and hope that collisions are
-			# rare engough to never occur
-			string(SUBSTRING ${excludedTargetsHash} 0 8 excludedTargetsHash)
-			string(APPEND contentIdLocal -${excludedTargetsHash})
-		endif()
-	elseif( "${contentType}" STREQUAL CT_SOURCES )
-		set(contentIdLocal src )
-	else()
-		message(FATAL_ERROR "Content type \"${contentType}\" is not supported by function contentTypeOutputNameIdentifier().")
-	endif()
-	
-	set(${contentIdOut} ${contentIdLocal} PARENT_SCOPE)
 
 endfunction()
 

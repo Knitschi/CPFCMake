@@ -3,7 +3,8 @@ include_guard(GLOBAL)
 include(cpfCustomTargetUtilities)
 include(cpfLocations)
 include(cpfAddCompatibilityCheckTarget)
-#include(CPack) # adding this creates the global package target
+include(cpfAddInstallRules)
+
 
 
 

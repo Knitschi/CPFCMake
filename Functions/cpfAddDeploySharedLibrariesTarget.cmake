@@ -17,6 +17,14 @@ function( cpfAddDeploySharedLibrariesTarget package )
 	endif()
 
 	# Get all libraries that need to be copied.
+	cpfGetSharedLibrariesRequiredByPackageExecutables( sharedLibraries ${package} )
+	cpfAddDeploySharedLibsToBuildStageTarget( ${package} "${sharedLibraries}" "" ) 
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetSharedLibrariesRequiredByPackageExecutables librariesOut package )
+
 	cpfGetExecutableTargets( exeTargets ${package})
 	set(allLinkedLibraries)
 	foreach(exeTarget ${exeTargets})
@@ -28,7 +36,8 @@ function( cpfAddDeploySharedLibrariesTarget package )
 	endif()
 
 	cpfFilterInTargetsWithProperty( sharedLibraries "${allLinkedLibraries}" TYPE SHARED_LIBRARY )
-	cpfAddDeploySharedLibsToBuildStageTarget( ${package} "${sharedLibraries}" "" ) 
+
+	set(${librariesOut} "${sharedLibraries}" PARENT_SCOPE)
 
 endfunction()
 
