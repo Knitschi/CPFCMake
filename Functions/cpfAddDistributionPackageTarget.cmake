@@ -135,7 +135,7 @@ function( cpfAddPackageContentTarget targetName package contentId contentType )
 
 	get_property( installTarget TARGET ${package} PROPERTY CPF_INSTALL_PACKAGE_SUBTARGET )
 
-	cpfGetPackageComponents( components ${contentType} )
+	cpfGetPackageComponents( components ${contentType} ${contentId} )
 
     set(allStampFiles)
 	set(configSuffixes)
@@ -193,13 +193,13 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns a list of components that belong to a contentType.
 #
-function( cpfGetPackageComponents componentsOut contentType )
+function( cpfGetPackageComponents componentsOut contentType contentId )
 
 	set(components)
 	if( "${contentType}" STREQUAL CT_RUNTIME )
 		set(components runtime)
 	elseif( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
-		set(components runtime runtime_dependencies )
+		set(components runtime ${contentId} )
 	elseif( "${contentType}" STREQUAL CT_DEVELOPER )
 		set(components runtime developer )
 	elseif( "${contentType}" STREQUAL CT_SOURCES )

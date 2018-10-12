@@ -414,6 +414,7 @@ endfunction()
 # plugin target while the element with the same index in the other list contains the 
 # directory of the plugin target.
 function( cpfGetPluginTargetDirectoryPairLists targetsOut directoriesOut pluginOptionLists )
+	
 	# parse the plugin dependencies arguments
 	# Creates two lists of the same length, where one list contains the plugin targets
 	# and the other the directory to which they are deployed.
@@ -427,14 +428,25 @@ function( cpfGetPluginTargetDirectoryPairLists targetsOut directoriesOut pluginO
 			"PLUGIN_TARGETS"
 			${${list}}
 		)
+
+		# check for correct keywords
+		if(NOT ARG_PLUGIN_TARGETS)
+			message(FATAL_ERROR "Faulty plugin option \"${${list}}\"! The option is missing the PLUGIN_TARGETS key word or values for it.")
+		endif()
+
+		if(NOT ARG_PLUGIN_DIRECTORY)
+			message(FATAL_ERROR "Faulty plugin option \"${${list}}\"! The option is missing the PLUGIN_DIRECTORY key word or a value for it.")
+		endif()
+
 		foreach( pluginTarget ${ARG_PLUGIN_TARGETS})
 			cpfListAppend( pluginTargets ${pluginTarget})
 			cpfListAppend( pluginDirectories ${ARG_PLUGIN_DIRECTORY})
 		endforeach()
+
 	endforeach()
-	
-	set(${targetsOut} ${pluginTargets} PARENT_SCOPE)
-	set(${directoriesOut} ${pluginDirectories} PARENT_SCOPE)
+
+	set(${targetsOut} "${pluginTargets}" PARENT_SCOPE)
+	set(${directoriesOut} "${pluginDirectories}" PARENT_SCOPE)
 	
 endfunction()
 
@@ -445,12 +457,12 @@ endfunction()
 #
 function( cpfInstallDependedOnSharedLibraries package pluginOptions distributionPackageOptionLists )
 
-	# Get 
-	cpfDependedOnSharedLibrariesAndDirectories( libraries directories ${package} "${pluginOptions}" "${excludedTargets}" )
+	cpfDependedOnSharedLibrariesAndDirectories( libraries directories ${package} "${pluginOptions}" )
 
 	# Add install rules for each distribution package that has a runtime-portable content.
 	set(contentIds)
 	foreach( list ${distributionPackageOptionLists})
+
 		cpfParseDistributionPackageOptions( contentType packageFormats distributionPackageFormatOptions excludedTargets "${${list}}")
 		if( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
 			cpfGetDistributionPackageContentId( contentId ${contentType} "${excludedTargets}" )
@@ -458,6 +470,7 @@ function( cpfInstallDependedOnSharedLibraries package pluginOptions distribution
 			if(NOT ${contentTypeHandled})
 				
 				cpfListAppend(contentIds ${contentId})
+				removeExcludedTargets( libraries directories "${libraries}" "${directories}" "${excludedTargets}" )
 				addSharedLibraryDependenciesInstallRules( ${package} ${contentId} "${libraries}" "${directories}" )
 			
 			endif()
@@ -470,33 +483,47 @@ endfunction()
 # Returns a list with shared library targets and one with a relative directory for each
 # target to which the shared library must be copied.
 #
-function( cpfDependedOnSharedLibrariesAndDirectories librariesOut directoriesOut package pluginOptionLists excludedTargets )
+function( cpfDependedOnSharedLibrariesAndDirectories librariesOut directoriesOut package pluginOptionLists )
 
+	cpfGetRelativeOutputDir( relRuntimeDir ${package} RUNTIME)
+	cpfGetRelativeOutputDir( relLibraryDir ${package} LIBRARY)
+
+	# Get plugin targets and relative directories
 	cpfGetPluginTargetDirectoryPairLists( pluginTargets pluginDirectories "${pluginOptionLists}" )
+	cpfPrependMulti( pluginDirectories "${relRuntimeDir}/" "${pluginDirectories}" )
+	
+	# Get library targets and add them to directories
 	cpfGetSharedLibrariesRequiredByPackageExecutables( libraries ${package} )
 	set( allLibraries ${pluginTargets} )
 	set( allDirectories ${pluginDirectories} )
 	foreach( library ${libraries} )
 		cpfListAppend( allLibraries ${library} )
-		cpfListAppend( allDirectories "." )
+		cpfListAppend( allDirectories ${relLibraryDir} )
 	endforeach()
 
-	# Filter out excluded targets.
+	set(${librariesOut} "${allLibraries}" PARENT_SCOPE)
+	set(${directoriesOut} "${allDirectories}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( removeExcludedTargets librariesOut directoriesOut libraries directories excludedTargets )
+
 	set(index 0)
 	set(filteredLibraries)
 	set(filteredDirectories)
-	foreach( library ${allLibraries} )
+	foreach( library ${libraries} )
 		cpfContains(isExcluded "${excludedTargets}" ${library})
 		if(NOT isExcluded)
 			cpfListAppend(filteredLibraries ${library})
-			list(GET allDirectories ${index} dir)
+			list(GET directories ${index} dir)
 			cpfListAppend(filteredDirectories ${dir})
 		endif()	
 		cpfIncrement(index)
 	endforeach()
 
-	set(${librariesOut} "${filteredLibraries}" PARENT_SCOPE)
-	set(${directoriesOut} "${filteredDirectories}" PARENT_SCOPE)
+	set(${librariesOut} ${filteredLibraries} PARENT_SCOPE)
+	set(${directoriesOut} ${filteredDirectories} PARENT_SCOPE)
 
 endfunction()
 
@@ -593,32 +620,33 @@ endfunction()
 # with the content-ids of all runtime-portable packages.
 function( addSharedLibraryDependenciesInstallRules package contentId libraries directories )
 
-	set(installedFiles)
-	cpfGetRelativeOutputDir( relRuntimeDir ${package} RUNTIME )
-	
 	cpfGetConfigurations(configurations)
 	foreach(config ${configurations})
 
+		set(installedFiles)
 		set(index 0)
 		foreach(library ${libraries})
 
 			cpfGetLibFilePath( libFile ${library} ${config})
-
 			list(GET directories ${index} dir)
+
 			install(
 				FILES ${libFile}
-				DESTINATION "${relRuntimeDir}/${dir}"
+				DESTINATION "${dir}"
 				COMPONENT ${contentId}
 				CONFIGURATIONS ${config}
 			)
-			cpfListAppend(installedFiles "${libFile}")
+
+			# Get full path of installed file and add it to installedFiles
+			get_filename_component( shortLibFile "${libFile}" NAME )
+			cpfListAppend(installedFiles "${dir}/${shortLibFile}")
+
 			cpfIncrement(index)
 
-			devMessage("Add install rule for file ${libFile} with content-id ${contentId}")
-
 		endforeach()
-	endforeach()
 
-	cpfAddInstalledFilesToProperty( ${package} ${config} "${installedFiles}" )
+		cpfAddInstalledFilesToProperty( ${package} ${config} "${installedFiles}" )
+
+	endforeach()
 
 endfunction()
