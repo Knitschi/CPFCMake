@@ -111,6 +111,7 @@ function( cpfAddPackage )
 		LONG_DESCRIPTION
 		HOMEPAGE
 		MAINTAINER_EMAIL
+		VERSION_COMPATIBILITY_SCHEME
 		ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS
 	)
 
@@ -158,11 +159,29 @@ function( cpfAddPackage )
 		message(FATAL_ERROR "Library package ${ARG_PACKAGE_NAME} has no public headers. The library can not be used without public headers, so please add the PUBLIC_HEADER argument to the cpfAddPackage() call.")
 	endif()
 
+	cpfAssertCompatibilitySchemeOption(${ARG_VERSION_COMPATIBILITY_SCHEME})
+	if(NOT ARG_VERSION_COMPATIBILITY_SCHEME)
+		set(ARG_VERSION_COMPATIBILITY_SCHEME EXACT_SAME_VERSION)
+	endif()
+
 	# make sure that the properties of the imported targets follow our assumptions
 	cpfNormalizeImportedTargetProperties( "${linkedLibraries};${linkedTestLibraries}" )
 
 	# Add the binary targets
-	cpfAddPackageBinaryTargets( productionLibrary ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} ${ARG_TYPE} "${ARG_PUBLIC_HEADER}" "${ARG_PRODUCTION_FILES}" "${ARG_PUBLIC_FIXTURE_HEADER}" "${ARG_FIXTURE_FILES}" "${ARG_TEST_FILES}" "${ARG_LINKED_LIBRARIES}" "${ARG_LINKED_TEST_LIBRARIES}" )
+	cpfAddPackageBinaryTargets( 
+		productionLibrary 
+		${ARG_PACKAGE_NAME} 
+		${ARG_PACKAGE_NAMESPACE} 
+		${ARG_TYPE} 
+		"${ARG_PUBLIC_HEADER}" 
+		"${ARG_PRODUCTION_FILES}" 
+		"${ARG_PUBLIC_FIXTURE_HEADER}" 
+		"${ARG_FIXTURE_FILES}" 
+		"${ARG_TEST_FILES}" 
+		"${ARG_LINKED_LIBRARIES}" 
+		"${ARG_LINKED_TEST_LIBRARIES}"
+		${ARG_VERSION_COMPATIBILITY_SCHEME}
+	)
 
 	#set some properties
 	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CPF_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
@@ -195,7 +214,7 @@ function( cpfAddPackage )
 	list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
 
 	# Adds the install rules and the per package install targets.
-	cpfAddInstallRules( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" )
+	cpfAddInstallRules( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${ARG_VERSION_COMPATIBILITY_SCHEME} )
 
 	# Adds the targets that create the distribution packages.
 	cpfAddDistributionPackageTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" )
@@ -223,6 +242,13 @@ function( cpfDebugAssertLinkedLibrariesExists linkedLibrariesOut package linkedL
 
 endfunction()
 
+#---------------------------------------------------------------------
+# Checks that the compatibility scheme option contains one of the allowed values.
+function( cpfAssertCompatibilitySchemeOption scheme )
+	if( NOT ( ( "${scheme}" STREQUAL "" ) OR ( "${scheme}" STREQUAL ExactVersion )) )
+		message(FATAL_ERROR "Invalid argument to cpfAddPackage()!. Value \"${scheme}\" for option VERSION_COMPATIBILITY_SCHEME is not allowed.")
+	endif()
+endfunction()
 
 #---------------------------------------------------------------------
 # This function is used to change properties of imported targets to make
@@ -281,7 +307,21 @@ endfunction()
 
 #---------------------------------------------------------------------
 #
-function( cpfAddPackageBinaryTargets outProductionLibrary package packageNamespace type publicHeaderFiles productionFiles publicFixtureHeaderFiles fixtureFiles testFiles linkedLibraries linkedTestLibraries	)
+function( 
+	cpfAddPackageBinaryTargets 
+	outProductionLibrary 
+	package 
+	packageNamespace 
+	type 
+	publicHeaderFiles 
+	productionFiles 
+	publicFixtureHeaderFiles 
+	fixtureFiles 
+	testFiles 
+	linkedLibraries 
+	linkedTestLibraries
+	versionCompatibilityScheme
+)
 
 	# filter some files
 	foreach( file ${productionFiles})
@@ -343,6 +383,7 @@ function( cpfAddPackageBinaryTargets outProductionLibrary package packageNamespa
 			FILES ${productionFiles}
 			LINKED_LIBRARIES ${linkedLibraries}
 			IDE_FOLDER ${package}
+			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 	    )
 
     endif()
@@ -358,6 +399,7 @@ function( cpfAddPackageBinaryTargets outProductionLibrary package packageNamespa
 			FILES ${MAIN_CPP} ${iconFiles}
 			LINKED_LIBRARIES ${linkedLibraries} ${productionTarget}
 			IDE_FOLDER ${package}/exe
+			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 	    )
 
 	endif()
@@ -378,6 +420,7 @@ function( cpfAddPackageBinaryTargets outProductionLibrary package packageNamespa
 			FILES ${fixtureFiles}
 			LINKED_LIBRARIES ${productionTarget} ${linkedTestLibraries}
 			IDE_FOLDER ${package}/${VSTestFolder}
+			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
         )
 
 		# respect an option that is used by hunter to not compile test targets
@@ -398,6 +441,7 @@ function( cpfAddPackageBinaryTargets outProductionLibrary package packageNamespa
 			FILES ${testFiles}
 			LINKED_LIBRARIES ${productionTarget} ${fixtureTarget} ${linkedTestLibraries}
 			IDE_FOLDER ${package}/${VSTestFolder}
+			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
         )
 		set_property(TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET ${unitTestsTarget} )
 
@@ -434,7 +478,7 @@ function( cpfAddBinaryTarget	)
 	cmake_parse_arguments(
 		ARG 
 		"" 
-		"PACKAGE_NAME;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;LINKAGE;IDE_FOLDER" 
+		"PACKAGE_NAME;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;LINKAGE;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME" 
 		"PUBLIC_HEADER;FILES;LINKED_LIBRARIES" 
 		${ARGN} 
 	)
@@ -442,12 +486,12 @@ function( cpfAddBinaryTarget	)
 
 	cpfQt5AddUIAndQrcFiles( allSources )
 
-    # Create Qt ui application
+    # Create Window application
     if( ${ARG_TARGET_TYPE} STREQUAL GUI_APP)
         add_executable(${ARG_NAME} WIN32 ${allSources} )
     endif()
 
-    # Create Qt console application
+    # Create console application
     if( ${ARG_TARGET_TYPE} MATCHES CONSOLE_APP)
         add_executable(${ARG_NAME} ${allSources} )
     endif()
@@ -489,8 +533,12 @@ function( cpfAddBinaryTarget	)
 	set_property( TARGET ${ARG_NAME} PROPERTY AUTOMOC ON)
 	# Set the target version
 	set_property( TARGET ${ARG_NAME} PROPERTY VERSION ${PROJECT_VERSION} )
-	set_property( TARGET ${ARG_NAME} PROPERTY SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR} )	# so version depends on the compatibility scheme, we currently have a hard-coded same-minor scheme.
-	
+	if("${ARG_VERSION_COMPATIBILITY_SCHEME}" STREQUALS ExactVersion)
+		set_property( TARGET ${ARG_NAME} PROPERTY SOVERSION ${PROJECT_VERSION} )
+	else()
+		message(FATAL_ERROR "Unexpected compatibility scheme!")
+	endif()
+
 	# sets all the <bla>_OUTPUT_DIRECTORY_<config> options
 	cpfSetTargetOutputDirectoriesAndNames( ${ARG_PACKAGE_NAME} ${ARG_NAME})
 

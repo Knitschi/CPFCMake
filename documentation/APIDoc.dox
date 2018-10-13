@@ -70,6 +70,7 @@ cpfAddPackage(
         [DISTRIBUTION_PACKAGE_FORMAT_OPTIONS 
             [SYSTEM_PACKAGES_DEB packageListString ]]
         [DISTRIBUTION_PACKAGE_CONTENT_TYPE ...] ...]
+    [VERSION_COMPATIBILITY_SCHEME [ExactVersion] ]
     [ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS bool]
 )
 \endcode
@@ -232,6 +233,23 @@ A list of keyword arguments that contain further options for the creation of the
 The option must be a string that contains the names and versions of the debian packages 
 that provide the excluded shared libraries from the CT_RUNTIME option. E.g. "libc6 (>= 2.3.1-6), libc6 (< 2.4)"
 on which the package depends.
+
+####  [VERSION_COMPATIBILITY_SCHEME] ####
+
+This option determines which versions of the package are can compatible to each other. This is only
+of interest for shared library packages. For compatible versions it should be possible to replace
+an older version with a newer one by simply replacing the library file or on linux by changing the symlink
+that points to the used library. Not that it is still the developers responsibility to implement the
+library in a compatible way. This option will only influence which symlinks are created, output file names
+and the version.cmake files that are used to import the library.
+
+\note Currently only <code>ExactVersion</code> scheme is available, so you do not need to set this option.
+
+##### Schemes #####
+
+- <code>ExactVersion</code>: This option means, that different versions of the library are not compatible.
+This is the most simple scheme and relieves developers from the burdon of keeping things compatible.
+
 
 ####  [ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS bool] ####
 

@@ -11,10 +11,10 @@ include(cpfAddDeploySharedLibrariesTarget)
 #---------------------------------------------------------------------------------------------
 # Adds install rules for the various package components.
 #
-function( cpfAddInstallRules package namespace pluginOptionLists distributionPackageOptionLists )
+function( cpfAddInstallRules package namespace pluginOptionLists distributionPackageOptionLists versionCompatibilityScheme )
 
 	cpfInstallPackageBinaries( ${package} )
-	cpfGenerateAndInstallCmakeConfigFiles( ${package} ${namespace} )
+	cpfGenerateAndInstallCmakeConfigFiles( ${package} ${namespace} ${versionCompatibilityScheme} )
 	cpfInstallHeaders( ${package} )
 	cpfInstallDebugFiles( ${package} )
 	cpfInstallAbiDumpFiles( ${package} )
@@ -321,7 +321,7 @@ function( cpfInstallPublicHeaders installedFilesOut package target )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGenerateAndInstallCmakeConfigFiles package namespace)
+function( cpfGenerateAndInstallCmakeConfigFiles package namespace compatibilityScheme )
 
 	# Generate the cmake config files
 	set(packageConfigFile ${package}Config.cmake)
@@ -339,7 +339,7 @@ function( cpfGenerateAndInstallCmakeConfigFiles package namespace)
 		
 	write_basic_package_version_file( 
 		"${versionConfigFileFull}" 
-		COMPATIBILITY SameMajorVersion # currently we assume globally that this compatibility scheme applies
+		COMPATIBILITY ${compatibilityScheme}
 	) 
 
 	# Install cmake exported targets config file
@@ -597,11 +597,13 @@ function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTa
 	elseif( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
 		set(contentIdLocal runtime-port )
 		if( NOT "${excludedTargets}" STREQUAL "")
+			# When using excluded targets there are arbitrary numbers of possible
+			# package contents. To distinguish between them and get a short content
+			# id we calculate the MD5 checksum of the excluded targets list and add
+			# it to the base runtime portable content id.
 			list(SORT excludedTargets)
 			string(MD5 excludedTargetsHash "${excludedTargets}")
-			# to keep things short we only use the first 8 characters and hope that collisions are
-			# rare engough to never occur
-			string(SUBSTRING ${excludedTargetsHash} 0 8 excludedTargetsHash)
+			string(SUBSTRING ${excludedTargetsHash} 0 8 excludedTargetsHash) # Only use the first 8 characters to keep things short.
 			string(APPEND contentIdLocal -${excludedTargetsHash})
 		endif()
 	elseif( "${contentType}" STREQUAL CT_SOURCES )
