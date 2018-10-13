@@ -210,7 +210,7 @@ function( cpfAddCppPackage )
 	cpfAddAbiCheckerTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" "${ARG_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS}" )
 	
 	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
-	cpfAddCppPackageDocsTarget( packageLinkFile ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
+	cpfAddPackageDocsTarget( packageLinkFile ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
 	list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
 
 	# Adds the install rules and the per package install targets.
