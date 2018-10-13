@@ -1,7 +1,7 @@
 # This file bundles the cmake code file into a custom target to make them visible in the vs solution.
 
 include(cpfLocations)
-include(cpfAddPackage)
+include(cpfAddCppPackage)
 
 cpfInitPackageProject(
 	PACKAGE_NAME
@@ -34,7 +34,7 @@ set( files
 	Functions/cpfAddDocumentationTarget.cmake
 	Functions/cpfAddInstallRules.cmake
 	Functions/cpfAddOpenCppCoverageTarget.cmake
-	Functions/cpfAddPackage.cmake
+	Functions/cpfAddCppPackage.cmake
 	Functions/cpfAddPipelineTarget.cmake
 	Functions/cpfAddRunTestsTarget.cmake
 	Functions/cpfAddRunUicTarget.cmake

@@ -99,7 +99,7 @@ endfunction()
 #[[-----------------------------------------------------------
 # Documentation in APIDocs.dox
 ]]
-function( cpfAddPackage )
+function( cpfAddCppPackage )
 
 	set( optionKeywords 
 	) 
@@ -156,7 +156,7 @@ function( cpfAddPackage )
 	cpfDebugAssertLinkedLibrariesExists( linkedTestLibraries ${ARG_PACKAGE_NAME} "${ARG_LINKED_TEST_LIBRARIES}")
 	# If a library does not have a public header, it must be a user mistake
 	if( (${ARG_TYPE} STREQUAL LIB) AND (NOT ARG_PUBLIC_HEADER) )
-		message(FATAL_ERROR "Library package ${ARG_PACKAGE_NAME} has no public headers. The library can not be used without public headers, so please add the PUBLIC_HEADER argument to the cpfAddPackage() call.")
+		message(FATAL_ERROR "Library package ${ARG_PACKAGE_NAME} has no public headers. The library can not be used without public headers, so please add the PUBLIC_HEADER argument to the cpfAddCppPackage() call.")
 	endif()
 
 	cpfAssertCompatibilitySchemeOption(${ARG_VERSION_COMPATIBILITY_SCHEME})
@@ -246,7 +246,7 @@ endfunction()
 # Checks that the compatibility scheme option contains one of the allowed values.
 function( cpfAssertCompatibilitySchemeOption scheme )
 	if( NOT ( ( "${scheme}" STREQUAL "" ) OR ( "${scheme}" STREQUAL ExactVersion )) )
-		message(FATAL_ERROR "Invalid argument to cpfAddPackage()!. Value \"${scheme}\" for option VERSION_COMPATIBILITY_SCHEME is not allowed.")
+		message(FATAL_ERROR "Invalid argument to cpfAddCppPackage()!. Value \"${scheme}\" for option VERSION_COMPATIBILITY_SCHEME is not allowed.")
 	endif()
 endfunction()
 

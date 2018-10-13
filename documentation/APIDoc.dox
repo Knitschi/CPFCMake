@@ -5,12 +5,12 @@ This page holds the documentation of the *CMake* functions that are provided to 
 users of the *CPFCMake* package.
 
 
-\section cpfAddPackageModule Module cpfAddPackage.cmake
+\section cpfAddPackageModule Module cpfAddCppPackage.cmake
 
 This module provides the following functions.
 
 - \ref cpfInitPackageProject
-- \ref cpfAddPackage
+- \ref cpfAddCppPackage
 
 
 \subsection cpfInitPackageProject cpfInitPackageProject()
@@ -42,10 +42,10 @@ documentation of that namespace.
 \see \ref CIProjectAndPackageProjects
 
 
-\subsection cpfAddPackage cpfAddPackage()
+\subsection cpfAddCppPackage cpfAddCppPackage()
 
 \code
-cpfAddPackage(
+cpfAddCppPackage(
     PACKAGE_NAME name
     [BRIEF_DESCRIPTION description]
     [LONG_DESCRIPTION description]
@@ -263,7 +263,7 @@ Here is an example of an \c CMakeLists.txt file for a library package.
 \code{.unparsed}
 # MyLib/CMakeLists.txt
 
-include(cpfAddPackage)
+include(cpfAddCppPackage)
 include(cpfConstants)
 
 set( PACKAGE_NAMESPACE myl )
@@ -335,7 +335,7 @@ set( debianPackageOptions
 )
 
 ############################################## Add Package ###################################################
-cpfAddPackage( 
+cpfAddCppPackage( 
 	PACKAGE_NAME			${PACKAGE_NAME}
 	PACKAGE_NAMESPACE		${PACKAGE_NAMESPACE}
 	HOMEPAGE				"http://www.awsomelib.com/index.html"

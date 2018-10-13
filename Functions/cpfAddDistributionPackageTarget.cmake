@@ -29,7 +29,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 #
-# For argument documentation see the cpfAddPackage() function.
+# For argument documentation see the cpfAddCppPackage() function.
 function( cpfAddDistributionPackageTargets package packageOptionLists )
 
 	foreach( list ${packageOptionLists})
@@ -383,7 +383,7 @@ function( cpfGetUserPackageFiles sourceTargetsOut sourceDirOut sourceFilesOut de
 	cpfFilterOutSystemPlugins(filteredPluginTargets filteredPluginDirectories "${pluginTargets}" "${pluginDirectories}" "${excludedTargets}")
 	set(index 0)
 	foreach( pluginTarget ${filteredPluginTargets})
-		if(TARGET ${pluginTarget}) # plugins can not exist, so we do not need to specify the platform on which the plugin is needed in cpfAddPackage().
+		if(TARGET ${pluginTarget}) # plugins can not exist, so we do not need to specify the platform on which the plugin is needed in cpfAddCppPackage().
 
 			# source path
 			cpfGetTargetLocation( targetDir shortName ${pluginTarget} ${config})

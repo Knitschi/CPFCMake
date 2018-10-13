@@ -565,7 +565,7 @@ function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut di
 	endforeach()
 	
 	if( NOT (${nrOptions} EQUAL 1) )
-		message(FATAL_ERROR "Each DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage() must contain exactly one of these options: ${contentTypeOptions};${runtimePortableOption}. The given option was ${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" )
+		message(FATAL_ERROR "Each DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddCppPackage() must contain exactly one of these options: ${contentTypeOptions};${runtimePortableOption}. The given option was ${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" )
 	endif()
 	
 	if(ARG_CT_DEVELOPER)
@@ -577,7 +577,7 @@ function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut di
 	elseif(ARG_CT_SOURCES)
 		set(contentType CT_SOURCES)
 	else()
-		message(FATAL_ERROR "Faulty DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddPackage().")
+		message(FATAL_ERROR "Faulty DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddCppPackage().")
 	endif()
 	
 	set(${contentTypeOut} ${contentType} PARENT_SCOPE)
