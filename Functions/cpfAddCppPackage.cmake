@@ -159,10 +159,10 @@ function( cpfAddCppPackage )
 		message(FATAL_ERROR "Library package ${ARG_PACKAGE_NAME} has no public headers. The library can not be used without public headers, so please add the PUBLIC_HEADER argument to the cpfAddCppPackage() call.")
 	endif()
 
-	cpfAssertCompatibilitySchemeOption(${ARG_VERSION_COMPATIBILITY_SCHEME})
 	if(NOT ARG_VERSION_COMPATIBILITY_SCHEME)
-		set(ARG_VERSION_COMPATIBILITY_SCHEME EXACT_SAME_VERSION)
+		set(ARG_VERSION_COMPATIBILITY_SCHEME ExactVersion)
 	endif()
+	cpfAssertCompatibilitySchemeOption(${ARG_VERSION_COMPATIBILITY_SCHEME})
 
 	# make sure that the properties of the imported targets follow our assumptions
 	cpfNormalizeImportedTargetProperties( "${linkedLibraries};${linkedTestLibraries}" )
@@ -210,7 +210,7 @@ function( cpfAddCppPackage )
 	cpfAddAbiCheckerTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" "${ARG_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS}" )
 	
 	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
-	cpfAddPackageDocsTarget( packageLinkFile ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
+	cpfAddCppPackageDocsTarget( packageLinkFile ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
 	list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
 
 	# Adds the install rules and the per package install targets.
@@ -245,7 +245,7 @@ endfunction()
 #---------------------------------------------------------------------
 # Checks that the compatibility scheme option contains one of the allowed values.
 function( cpfAssertCompatibilitySchemeOption scheme )
-	if( NOT ( ( "${scheme}" STREQUAL "" ) OR ( "${scheme}" STREQUAL ExactVersion )) )
+	if( NOT ( "${scheme}" STREQUAL ExactVersion ) )
 		message(FATAL_ERROR "Invalid argument to cpfAddCppPackage()!. Value \"${scheme}\" for option VERSION_COMPATIBILITY_SCHEME is not allowed.")
 	endif()
 endfunction()
@@ -533,7 +533,7 @@ function( cpfAddBinaryTarget	)
 	set_property( TARGET ${ARG_NAME} PROPERTY AUTOMOC ON)
 	# Set the target version
 	set_property( TARGET ${ARG_NAME} PROPERTY VERSION ${PROJECT_VERSION} )
-	if("${ARG_VERSION_COMPATIBILITY_SCHEME}" STREQUALS ExactVersion)
+	if("${ARG_VERSION_COMPATIBILITY_SCHEME}" STREQUAL ExactVersion)
 		set_property( TARGET ${ARG_NAME} PROPERTY SOVERSION ${PROJECT_VERSION} )
 	else()
 		message(FATAL_ERROR "Unexpected compatibility scheme!")
