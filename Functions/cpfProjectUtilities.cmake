@@ -1123,6 +1123,39 @@ function( cpfGetExecutableTargets exeTargetsOut package )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
+function( cpfGetProductionTargets productionTargetsOut package)
+	
+	set(targets ${package})
+	get_property( prodLibTarget TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET )
+	if(prodLibTarget)
+		cpfListAppend(targets ${prodLibTarget})
+	endif()
+
+	set(${productionTargetsOut} ${targets} PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetTestTargets testTargetsOut package )
+
+	set(targets)
+
+	get_property( fixtureTarget TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET )
+	if(fixtureTarget)
+		cpfListAppend(targets ${fixtureTarget})
+	endif()
+
+	get_property( testExeTarget TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET )
+	if(testExeTarget)
+		cpfListAppend(targets ${testExeTarget})
+	endif()
+
+	set(${testTargetsOut} ${targets} PARENT_SCOPE)
+
+endfunction()
+
+
+#---------------------------------------------------------------------------------------------
 # Reads the value of the CPF_OWNED_PACKAGES variable frwom the ci-projects owned packages file.
 # 
 function( cpfGetOwnedPackages ownedPackagesOut rootDir )

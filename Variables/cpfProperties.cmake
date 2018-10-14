@@ -63,7 +63,7 @@ function( cpfDefineProperties )
     define_property(
         TARGET
         PROPERTY CPF_TESTS_SUBTARGET
-        BRIEF_DOCS "The test target that contains the quick tests."
+        BRIEF_DOCS "The test-executable binary target."
         FULL_DOCS " "
     )
 

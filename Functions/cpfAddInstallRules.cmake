@@ -23,15 +23,20 @@ function( cpfAddInstallRules package namespace pluginOptionLists distributionPac
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfInstallPackageBinaries )
+function( cpfInstallPackageBinaries package )
 	
-	get_property(binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
-	cpfInstallTargetsForPackage( ${package} "${binaryTargets}")
+	cpfGetProductionTargets( productionTargets ${package} )
+	cpfInstallTargetsForPackage( ${package} "${productionTargets}" runtime )
+
+	cpfGetTestTargets( testTargets ${package})
+	if(testTargets)
+		cpfInstallTargetsForPackage( ${package} "${testTargets}" developer )
+	endif()
     
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfInstallTargetsForPackage package targets )
+function( cpfInstallTargetsForPackage package targets component )
 
 	# Do not install the targets that have been removed from the ALL_BUILD target
 	cpfFilterOutTargetsWithProperty( targets "${targets}" EXCLUDE_FROM_ALL TRUE )
@@ -46,11 +51,13 @@ function( cpfInstallTargetsForPackage package targets )
 	file(RELATIVE_PATH rpath "${CMAKE_CURRENT_BINARY_DIR}/${relRuntimeDir}" "${CMAKE_CURRENT_BINARY_DIR}/${relLibDir}")
 	cpfAppendPackageExeRPaths( ${package} "\$ORIGIN/${rpath}")
 
+	devMessage("install ${targets}")
+
 	install( 
 		TARGETS ${targets}
 		EXPORT ${targetsExportName}
-		RUNTIME DESTINATION "${relRuntimeDir}" COMPONENT runtime
-		LIBRARY DESTINATION "${relLibDir}"     COMPONENT runtime
+		RUNTIME DESTINATION "${relRuntimeDir}" COMPONENT ${component}
+		LIBRARY DESTINATION "${relLibDir}"     COMPONENT ${component}
 		ARCHIVE DESTINATION "${relArchiveDir}" COMPONENT developer
 		# This sets the import targets include directories to <package>/include, 
 		# so clients can also include with <package/bla.h>
