@@ -236,8 +236,8 @@ ${longDescription}
 )
 
 	# executable packages do never have compatibility reports.
-	get_property( type TARGET ${package} PROPERTY TYPE)
-	if(NOT ${type} STREQUAL EXECUTABLE)
+	cpfIsExecutable(isExe ${package})
+	if(NOT isExe)
 		cpfGetCompatiblityReportLinks(linksOut ${package})
 		string(APPEND fileContent ${linksOut})
 	endif()

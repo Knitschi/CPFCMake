@@ -9,6 +9,7 @@ include(cpfConstants)
 include(cpfProjectUtilities)
 include(cpfGitUtilities)
 include(cpfPathUtilities)
+include(cpfTargetUtilities)
 
 include(cpfAddClangTidyTarget)
 include(cpfAddRunTestsTarget)
@@ -738,8 +739,8 @@ endfunction()
 # generate a header file that contains the EXPORT macros
 function( cpfGenerateExportMacroHeader target macroBaseName )
 
-	get_property( targetType TARGET ${target} PROPERTY TYPE)
-	if(NOT ${targetType} STREQUAL EXECUTABLE)
+	cpfIsExecutable(isExe ${target})
+	if(NOT isExe)
 		string(TOLOWER ${macroBaseName} macroBaseNameLower ) # the generate_export_header() function will create a file with lower case name.
 		generate_export_header( 
 			${target}

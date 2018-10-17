@@ -51,8 +51,6 @@ function( cpfInstallTargetsForPackage package targets component )
 	file(RELATIVE_PATH rpath "${CMAKE_CURRENT_BINARY_DIR}/${relRuntimeDir}" "${CMAKE_CURRENT_BINARY_DIR}/${relLibDir}")
 	cpfAppendPackageExeRPaths( ${package} "\$ORIGIN/${rpath}")
 
-	devMessage("install ${targets}")
-
 	install( 
 		TARGETS ${targets}
 		EXPORT ${targetsExportName}
@@ -161,8 +159,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 function( cpfAppendPackageExeRPaths package rpath )
 
-	get_property(targets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
-	cpfFilterInTargetsWithProperty(exeTargets "${targets}" TYPE EXECUTABLE)
+	cpfGetExecutableTargets( exeTargets ${package})
 	foreach(target ${exeTargets})
 		set_property(TARGET ${target} APPEND PROPERTY INSTALL_RPATH "${rpath}")
 	endforeach()
@@ -446,8 +443,12 @@ function( cpfGetPluginTargetDirectoryPairLists targetsOut directoriesOut pluginO
 		endif()
 
 		foreach( pluginTarget ${ARG_PLUGIN_TARGETS})
-			cpfListAppend( pluginTargets ${pluginTarget})
-			cpfListAppend( pluginDirectories ${ARG_PLUGIN_DIRECTORY})
+			if(TARGET ${pluginTarget})
+				cpfListAppend( pluginTargets ${pluginTarget})
+				cpfListAppend( pluginDirectories ${ARG_PLUGIN_DIRECTORY})
+			else()
+				cpfDebugMessage("Ignored missing plugin target ${pluginTarget}.")
+			endif()
 		endforeach()
 
 	endforeach()

@@ -49,6 +49,7 @@ set( files
 	Functions/cpfProjectUtilities.cmake
 	Functions/cpfStringUtilities.cmake
 	Functions/cpfTestUtilities.cmake
+	Functions/cpfTargetUtilities.cmake
 	Scripts/addVersionTag.cmake
 	Scripts/clearDirExcept.cmake
 	Scripts/createConfigFile.cmake
