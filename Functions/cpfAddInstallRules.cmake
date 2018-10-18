@@ -28,11 +28,8 @@ function( cpfInstallPackageBinaries package versionCompatibilityScheme )
 	cpfGetProductionTargets( productionTargets ${package} )
 	cpfInstallTargetsForPackage( ${package} "${productionTargets}" runtime ${versionCompatibilityScheme} )
 
-	devMessage("prod targets ${productionTargets}")
-
 	cpfGetTestTargets( testTargets ${package})
 	if(testTargets)
-		devMessage("test targets ${testTargets}")
 		cpfInstallTargetsForPackage( ${package} "${testTargets}" developer ${versionCompatibilityScheme} )
 	endif()
     
@@ -519,7 +516,7 @@ function( cpfDependedOnSharedLibrariesAndDirectories librariesOut directoriesOut
 	cpfPrependMulti( pluginDirectories "${relRuntimeDir}/" "${pluginDirectories}" )
 	
 	# Get library targets and add them to directories
-	cpfGetSharedLibrariesRequiredByPackageExecutables( libraries ${package} )
+	cpfGetSharedLibrariesRequiredByPackageProductionLib( libraries ${package} )
 	set( allLibraries ${pluginTargets} )
 	set( allDirectories ${pluginDirectories} )
 	foreach( library ${libraries} )

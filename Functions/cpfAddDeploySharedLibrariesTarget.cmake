@@ -42,6 +42,21 @@ function( cpfGetSharedLibrariesRequiredByPackageExecutables librariesOut package
 endfunction()
 
 #---------------------------------------------------------------------------------------------
+function( cpfGetSharedLibrariesRequiredByPackageProductionLib librariesOut package )
+
+	get_property( productionLib TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET )
+	cpfGetRecursiveLinkedLibraries( linkedLibraries ${productionLib})
+	if(linkedLibraries)
+		list(REMOVE_DUPLICATES linkedLibraries)
+	endif()
+
+	cpfFilterInTargetsWithProperty( sharedLibraries "${linkedLibraries}" TYPE SHARED_LIBRARY )
+
+	set(${librariesOut} "${sharedLibraries}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
 # Recursively get either imported or non-imported linked shared libraries of the target.
 #
 function( cpfGetRecursiveLinkedLibraries linkedLibsOut target )
