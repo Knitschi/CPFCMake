@@ -13,7 +13,7 @@ include(cpfAddDeploySharedLibrariesTarget)
 #
 function( cpfAddInstallRules package namespace pluginOptionLists distributionPackageOptionLists versionCompatibilityScheme )
 
-	cpfInstallPackageBinaries( ${package} )
+	cpfInstallPackageBinaries( ${package} ${versionCompatibilityScheme} )
 	cpfGenerateAndInstallCmakeConfigFiles( ${package} ${namespace} ${versionCompatibilityScheme} )
 	cpfInstallHeaders( ${package} )
 	cpfInstallDebugFiles( ${package} )
@@ -23,20 +23,23 @@ function( cpfAddInstallRules package namespace pluginOptionLists distributionPac
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfInstallPackageBinaries package )
+function( cpfInstallPackageBinaries package versionCompatibilityScheme )
 	
 	cpfGetProductionTargets( productionTargets ${package} )
-	cpfInstallTargetsForPackage( ${package} "${productionTargets}" runtime )
+	cpfInstallTargetsForPackage( ${package} "${productionTargets}" runtime ${versionCompatibilityScheme} )
+
+	devMessage("prod targets ${productionTargets}")
 
 	cpfGetTestTargets( testTargets ${package})
 	if(testTargets)
-		cpfInstallTargetsForPackage( ${package} "${testTargets}" developer )
+		devMessage("test targets ${testTargets}")
+		cpfInstallTargetsForPackage( ${package} "${testTargets}" developer ${versionCompatibilityScheme} )
 	endif()
     
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfInstallTargetsForPackage package targets component )
+function( cpfInstallTargetsForPackage package targets component versionCompatibilityScheme )
 
 	# Do not install the targets that have been removed from the ALL_BUILD target
 	cpfFilterOutTargetsWithProperty( targets "${targets}" EXCLUDE_FROM_ALL TRUE )
@@ -51,21 +54,34 @@ function( cpfInstallTargetsForPackage package targets component )
 	file(RELATIVE_PATH rpath "${CMAKE_CURRENT_BINARY_DIR}/${relRuntimeDir}" "${CMAKE_CURRENT_BINARY_DIR}/${relLibDir}")
 	cpfAppendPackageExeRPaths( ${package} "\$ORIGIN/${rpath}")
 
+	set(skipNameLinkOption)
+	if( ${versionCompatibilityScheme} STREQUAL ExactVersion)
+		set(skipNameLinkOption NAMELINK_SKIP)
+	endif()
+
 	install( 
 		TARGETS ${targets}
 		EXPORT ${targetsExportName}
-		RUNTIME DESTINATION "${relRuntimeDir}" COMPONENT ${component}
-		LIBRARY DESTINATION "${relLibDir}"     COMPONENT ${component}
-		ARCHIVE DESTINATION "${relArchiveDir}" COMPONENT developer
+		RUNTIME 
+			DESTINATION "${relRuntimeDir}"
+			COMPONENT ${component}
+		LIBRARY
+			DESTINATION "${relLibDir}"
+			COMPONENT ${component}
+			${skipNameLinkOption}
+		ARCHIVE
+			DESTINATION "${relArchiveDir}"
+			COMPONENT developer
 		# This sets the import targets include directories to <package>/include, 
 		# so clients can also include with <package/bla.h>
-		INCLUDES DESTINATION "${relIncludeDir}/.."
+		INCLUDES
+			DESTINATION "${relIncludeDir}/.."
 	)
 
 	# Add the installed files to the target property
 	cpfGetConfigurations(configs)
 	foreach( config ${configs})
-		cpfAddBinaryFilesToInstalledFilesProperty( ${package} ${config} "${targets}" "" )
+		cpfAddBinaryFilesToInstalledFilesProperty( ${package} ${config} "${targets}" "" ${versionCompatibilityScheme} )
 	endforeach()
 
 endfunction()
@@ -73,7 +89,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # relDir is set for special install directories of plugins
 #
-function( cpfAddBinaryFilesToInstalledFilesProperty package config targets relDirArg )
+function( cpfAddBinaryFilesToInstalledFilesProperty package config targets relDirArg versionCompatibilityScheme )
 
 	cpfToConfigSuffix(configSuffix ${config})
 
@@ -110,23 +126,25 @@ function( cpfAddBinaryFilesToInstalledFilesProperty package config targets relDi
 				get_property( soVersion TARGET ${target} PROPERTY SOVERSION )
 				get_property( version TARGET ${target} PROPERTY VERSION )
 
-				if("${targetType}" STREQUAL SHARED_LIBRARY)
+				if( NOT (${versionCompatibilityScheme} STREQUAL ExactVersion) )
+					if("${targetType}" STREQUAL SHARED_LIBRARY)
 
-					# the solink with the shorter version
-					string(REPLACE ${version} ${soVersion} soName "${targetFile}")
-					cpfListAppend( additionalTargetFiles "${relDir}/${soName}")
-					
-					# the namelink without the version
-					string(REPLACE .${version} "" nameLink "${targetFile}")
-					cpfListAppend( additionalTargetFiles "${relDir}/${nameLink}")
-					
-				elseif("${targetType}" STREQUAL EXECUTABLE)
-					
-					# the namelink without the version
-					# note that the version is appended with a - instead of a .
-					string(REPLACE -${version} "" nameLink "${targetFile}")
-					cpfListAppend( additionalTargetFiles "${relDir}/${nameLink}")
-					
+						# the solink with the shorter version
+						string(REPLACE ${version} ${soVersion} soName "${targetFile}")
+						cpfListAppend( additionalTargetFiles "${relDir}/${soName}")
+						
+						# the namelink without the version
+						string(REPLACE .${version} "" nameLink "${targetFile}")
+						cpfListAppend( additionalTargetFiles "${relDir}/${nameLink}")
+						
+					elseif("${targetType}" STREQUAL EXECUTABLE)
+						
+						# the namelink without the version
+						# note that the version is appended with a - instead of a .
+						string(REPLACE -${version} "" nameLink "${targetFile}")
+						cpfListAppend( additionalTargetFiles "${relDir}/${nameLink}")
+						
+					endif()
 				endif()
 				
 			endif()
