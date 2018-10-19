@@ -356,18 +356,11 @@ function(
 		foreach( iconFile ${iconFiles})
 			list(REMOVE_ITEM productionFiles ${iconFile})
 		endforeach()
-		# use always static linkage for internal exe target libraries
-		set(libLinkage STATIC)
+
 	else()
+
 		set(isExe FALSE)
 		set(productionTarget ${package})
-
-		# respect the clients BUILD_SHARED_LIBS setting when the main target is a library
-		if(${BUILD_SHARED_LIBS})
-			set(libLinkage SHARED)
-		else()
-			set(libLinkage STATIC)
-		endif()
 
 	endif()
 	
@@ -378,7 +371,6 @@ function(
 			PACKAGE_NAME ${package}  
 			EXPORT_MACRO_PREFIX ${packageNamespace}
 			TARGET_TYPE LIB
-			LINKAGE ${libLinkage}
 			NAME ${productionTarget}
 			PUBLIC_HEADER ${publicHeaderFiles}
 			FILES ${productionFiles}
@@ -415,7 +407,6 @@ function(
 			PACKAGE_NAME ${package}
 			EXPORT_MACRO_PREFIX ${packageNamespace}_TESTS
 			TARGET_TYPE LIB
-			LINKAGE ${libLinkage}
 			NAME ${fixtureTarget}
 			PUBLIC_HEADER ${publicFixtureHeaderFiles}
 			FILES ${fixtureFiles}
@@ -479,7 +470,7 @@ function( cpfAddBinaryTarget	)
 	cmake_parse_arguments(
 		ARG 
 		"" 
-		"PACKAGE_NAME;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;LINKAGE;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME" 
+		"PACKAGE_NAME;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME" 
 		"PUBLIC_HEADER;FILES;LINKED_LIBRARIES" 
 		${ARGN} 
 	)
@@ -500,15 +491,16 @@ function( cpfAddBinaryTarget	)
     # library
     if( ${ARG_TARGET_TYPE} MATCHES LIB )
 		
-		add_library(${ARG_NAME} ${ARG_LINKAGE} ${allSources} )
+		add_library(${ARG_NAME} ${allSources} )
 		
 		# make sure that clients have the /D <target>_IMPORTS compile option set.
-		if( ${ARG_LINKAGE} STREQUAL SHARED AND MSVC)
+		if( ${BUILD_SHARED_LIBS} AND MSVC)
 			target_compile_definitions(${ARG_NAME} INTERFACE /D ${ARG_NAME}_IMPORTS )
 		endif()
 		
 		# Remove the lib prefix on Linux. We expect that to be part of the package name.
 		set_property(TARGET ${ARG_NAME} PROPERTY PREFIX "")
+		
     endif()
 
     # Set target properties
