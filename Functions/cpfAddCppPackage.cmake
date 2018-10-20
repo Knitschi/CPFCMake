@@ -340,6 +340,7 @@ function(
 	endforeach()
 
 	# add version header and cmake files to the production files
+	list(APPEND productionFiles ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt )
 	cpfGetPackageVersionFileName( versionFile ${package} )
 	list(APPEND productionFiles ${CMAKE_CURRENT_SOURCE_DIR}/${versionFile} )
 	cpfGetPackageVersionCppHeaderFileName( versionHeader ${package} )
