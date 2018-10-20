@@ -41,8 +41,12 @@ include("${configFile}")
 #----------------------------------------------------------------------------------------
 function( cpfInit )
 
-	# generate a .gitignore file that contains the generated files of a CPFCMake project
-	configure_file( "${CPF_ABS_TEMPLATE_DIR}/.gitignore.in" "${CPF_ROOT_DIR}/.gitignore" COPYONLY )
+	# Generate a .gitignore file that contains the generated files of a CPFCMake project.
+	# We do not overwrite it if it already exists to make sure clients can change it.
+	set(gitIgnoreFile "${CPF_ROOT_DIR}/.gitignore" )
+	if(NOT EXISTS "${gitIgnoreFile}")
+		configure_file( "${CPF_ABS_TEMPLATE_DIR}/.gitignore.in" "${gitIgnoreFile}" COPYONLY )
+	endif()
 
 	# generate the file with the graphviz options
 	configure_file( "${CPF_ABS_TEMPLATE_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}.in" "${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}" COPYONLY )
