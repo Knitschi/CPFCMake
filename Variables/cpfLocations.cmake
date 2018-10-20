@@ -44,13 +44,6 @@ function( cpfGetPackageVersionFileName filenameOut package )
 	set( ${filenameOut} cpfPackageVersion_${package}.cmake PARENT_SCOPE)
 endfunction()
 
-# Returns the absolute path to a packages version file
-function( cpfGetAbsPathOfPackageVersionFile fullFilenameOut package cpfRootDir )
-	cpfGetPackageVersionFileName( shortName ${package})
-	cpfGetAbsPackageDirectory( packageDir ${package} ${cpfRootDir})
-	set( ${fullFilenameOut} "${packageDir}/${shortName}" PARENT_SCOPE)
-endfunction()
-
 # This function defines the name of a packages c++ header version file. 
 function( cpfGetPackageVersionCppHeaderFileName filenameOut package )
 	set( ${filenameOut} cpfPackageVersion_${package}.h PARENT_SCOPE)

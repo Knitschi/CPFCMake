@@ -893,12 +893,31 @@ endfunction()
 # This function reads the package version from a packages version file.
 function( cpfGetPackageVersionFromFile versionOut package absPackageSourceDir )
 
-	cpfGetPackageVersionFileName( versionFile ${package})
-	include("${absPackageSourceDir}/${versionFile}")
+	getExistingPackageVersionFile( versionFile ${package} )
+
+	include("${versionFile}")
 	if( "${CPF_${package}_VERSION}" STREQUAL "")
 		message(FATAL_ERROR "Could not read value of variable CPF_${package}_VERSION from file \"${absPackageSourceDir}/${versionFile}\"." )
 	endif()
 	set( ${versionOut} ${CPF_${package}_VERSION} PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns the path to the version.cmake file in the source tree or in the binary tree depending on which exists.
+function( getExistingPackageVersionFile absPathOut package )
+
+	cpfGetPackageVersionFileName( versionFile ${package})
+	set(sourceTreePath "${CMAKE_CURRENT_SOURCE_DIR}/${versionFile}")
+	set(binaryTreePath "${CMAKE_CURRENT_BINARY_DIR}/${versionFile}")
+
+	if(EXISTS "${sourceTreePath}")
+		set(${absPathOut} "${sourceTreePath}" PARENT_SCOPE)
+	elseif(EXISTS "${binaryTreePath}")
+		set(${absPathOut} "${binaryTreePath}" PARENT_SCOPE)
+	else()
+		message(FATAL_ERROR "File ${verisonFile} is missing! It should be in the source or binary directory of package ${package}." )
+	endif()
 
 endfunction()
 

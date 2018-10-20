@@ -61,8 +61,7 @@ function( cpfConfigurePackageVersionFile package )
 
 	# Get the paths of the created files.
 	cpfGetPackageVersionFileName( cmakeVersionFile ${package})
-	set( absPathCmakeVersionFile "${CMAKE_CURRENT_SOURCE_DIR}/${cmakeVersionFile}")
-	
+
 	# Check if we work with a git repository.
 	# If so, we retrieve the version from the repository.
 	# If not, this must be an installed archive and the .cmake version file must already exist.
@@ -71,9 +70,13 @@ function( cpfConfigurePackageVersionFile package )
 	
 		set(PACKAGE_NAME ${package})
 		cpfGetCurrentVersionFromGitRepository( CPF_PACKAGE_VERSION "${CMAKE_CURRENT_SOURCE_DIR}")
+		set( absPathCmakeVersionFile "${CMAKE_CURRENT_BINARY_DIR}/${cmakeVersionFile}")
 		cpfConfigureFileWithVariables( "${CPF_ABS_TEMPLATE_DIR}/packageVersion.cmake.in" "${absPathCmakeVersionFile}" PACKAGE_NAME CPF_PACKAGE_VERSION )
 	
 	else()
+		# Note that the version.cmake file is generated in the binary tree, but is moved
+		# to the source tree when creating source packages.
+		set( absPathCmakeVersionFile "${CMAKE_CURRENT_SOURCE_DIR}/${cmakeVersionFile}")
 		if(NOT EXISTS "${absPathCmakeVersionFile}" )
 			message(FATAL_ERROR "The package source directory \"${CMAKE_CURRENT_SOURCE_DIR}\" neither belongs to a git repository nor contains a .cmake version file.")
 		endif()
@@ -341,8 +344,8 @@ function(
 
 	# add version header and cmake files to the production files
 	list(APPEND productionFiles ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt )
-	cpfGetPackageVersionFileName( versionFile ${package} )
-	list(APPEND productionFiles ${CMAKE_CURRENT_SOURCE_DIR}/${versionFile} )
+	getExistingPackageVersionFile( versionFile ${package} )
+	list(APPEND productionFiles ${versionFile} )
 	cpfGetPackageVersionCppHeaderFileName( versionHeader ${package} )
 	list(APPEND publicHeaderFiles ${CMAKE_CURRENT_BINARY_DIR}/${versionHeader} )
 	
