@@ -694,8 +694,7 @@ function( cpfInstallSources package )
 		install(
 			FILES ${absSourcePaths}
 			DESTINATION "${relSourceDir}"
-			COMPONENT source
-			CONFIGURATIONS ${config}
+			COMPONENT sources
 		)
 
 		# Add the installed files to the target property
