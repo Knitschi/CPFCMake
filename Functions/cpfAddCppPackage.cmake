@@ -565,7 +565,7 @@ function(cpfAddPrecompiledHeader target )
 		cotire( ${target})
 		cpfReAddInheritedCompileOptions( ${target})
 
-		# add the prefix header to the target files
+		# Add the prefix header to the target files to make sure it appears in the visual studio solution.
 		get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
 		set_property(TARGET ${target} APPEND PROPERTY SOURCES ${prefixHeader})
 

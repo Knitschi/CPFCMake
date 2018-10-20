@@ -692,7 +692,7 @@ function( cpfInstallSources package )
 	set(packageSourceFiles)
 	get_property( binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
 	foreach(target ${binaryTargets})
-		get_property(sources TARGET ${target} PROPERTY SOURCES)
+		get_target_sources_without_prefix_header( sources ${target})
 		cpfListAppend(packageSourceFiles ${sources})
 	endforeach()
 	cpfInstallSourceFiles( relFiles ${package} "${packageSourceFiles}" SOURCE sources )
@@ -702,5 +702,16 @@ function( cpfInstallSources package )
 	foreach( config ${configs} )
 		cpfAddInstalledFilesToProperty( ${package} ${config} "${relFiles}" )
 	endforeach()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( get_target_sources_without_prefix_header sourcesOut target )
+
+	get_property(sources TARGET ${target} PROPERTY SOURCES)
+	get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
+	if(sources AND prefixHeader)
+	list(REMOVE_ITEM sources "${prefixHeader}")
+	set(${sourcesOut} ${sources} PARENT_SCOPE )
 
 endfunction()
