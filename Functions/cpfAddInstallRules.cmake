@@ -235,22 +235,15 @@ function( cpfInstallDebugFiles package )
 			cpfProjectProducesPdbFiles( needsSourcesForDebugging ${config})
 			if(needsSourcesForDebugging)
 
-				getAbsPathsOfTargetSources( absSourcePaths ${target})
-				cpfGetFilepathsWithExtensions( absSourcePaths "${absSourcePaths}" "${CPF_CXX_SOURCE_FILE_EXTENSIONS}" )
-				cpfGetShortFilenames( shortSourceNames "${absSourcePaths}")
-				get_property(sourceDir TARGET ${target} PROPERTY SOURCE_DIR )
-
-				cpfGetRelativeOutputDir( relSourceDir ${package} SOURCE)
-				install(
-                    FILES ${absSourcePaths}
-					DESTINATION "${relSourceDir}"
-					COMPONENT developer
-                    CONFIGURATIONS ${config}
-                )
+				get_property( sources TARGET ${target} PROPERTY SOURCES )
+				cpfGetFilepathsWithExtensions( cppSources "${sources}" "${CPF_CXX_SOURCE_FILE_EXTENSIONS}" )
+				cpfInstallSourceFiles( relFiles ${package} "${cppSources}" SOURCE developer "CONFIGURATIONS ${config}" )
 
                 # Add the installed files to the target property
 				cpfPrependMulti(relInstallPaths "${relSourceDir}/" "${shortSourceNames}" )
-				cpfListAppend(installedPackageFiles ${relInstallPaths})
+				cpfListAppend(installedPackageFiles ${relFiles})
+
+				devMessageList("${relFiles}")
 
 			endif()
 
@@ -271,13 +264,13 @@ function( cpfInstallHeaders package)
 	# Install rules for production headers
 	get_property( productionLib TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET)
 	get_property( header TARGET ${productionLib} PROPERTY CPF_PUBLIC_HEADER)
-	cpfInstallSourceFiles( relBasicHeader ${package} "${header}" ${outputType} ${installComponent} )
+	cpfInstallSourceFiles( relBasicHeader ${package} "${header}" ${outputType} ${installComponent} "")
 	
 	# Install rules for test fixture library headers
 	get_property( fixtureTarget TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET)
 	if(TARGET ${fixtureTarget})
 		get_property( header TARGET ${fixtureTarget} PROPERTY CPF_PUBLIC_HEADER)
-		cpfInstallSourceFiles( relfixtureHeader ${package} "${header}" ${outputType} ${installComponent})
+		cpfInstallSourceFiles( relfixtureHeader ${package} "${header}" ${outputType} ${installComponent} "")
 	endif()
 
     # Add the installed files to the target property
@@ -296,7 +289,7 @@ function( cpfInstallHeaders package)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfInstallSourceFiles installedFilesOut package sources outputType installComponent )
+function( cpfInstallSourceFiles installedFilesOut package sources outputType installComponent configOption )
 
     # Create header pathes relative to the install include directory.
     set( sourceDir ${${package}_SOURCE_DIR})
@@ -333,6 +326,7 @@ function( cpfInstallSourceFiles installedFilesOut package sources outputType ins
 			FILES ${absFile}
 			DESTINATION "${relDestDir}"
 			COMPONENT ${installComponent}
+			${configOption}
 		)
 
 		# add the relative install path to the returned paths
@@ -695,7 +689,7 @@ function( cpfInstallSources package )
 		get_property(sources TARGET ${target} PROPERTY SOURCES)
 		cpfListAppend(packageSourceFiles ${sources})
 	endforeach()
-	cpfInstallSourceFiles( relFiles ${package} "${packageSourceFiles}" SOURCE sources )
+	cpfInstallSourceFiles( relFiles ${package} "${packageSourceFiles}" SOURCE sources "" )
 
 	# Add the installed files to the target property
 	cpfGetConfigurations(configs)
