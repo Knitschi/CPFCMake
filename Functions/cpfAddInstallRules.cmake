@@ -235,15 +235,13 @@ function( cpfInstallDebugFiles package )
 			cpfProjectProducesPdbFiles( needsSourcesForDebugging ${config})
 			if(needsSourcesForDebugging)
 
-				get_property( sources TARGET ${target} PROPERTY SOURCES )
+				get_target_sources_without_prefix_header( sources ${target} )
 				cpfGetFilepathsWithExtensions( cppSources "${sources}" "${CPF_CXX_SOURCE_FILE_EXTENSIONS}" )
-				cpfInstallSourceFiles( relFiles ${package} "${cppSources}" SOURCE developer "CONFIGURATIONS ${config}" )
+				cpfInstallSourceFiles( relFiles ${package} "${cppSources}" SOURCE developer ${config} )
 
                 # Add the installed files to the target property
 				cpfPrependMulti(relInstallPaths "${relSourceDir}/" "${shortSourceNames}" )
 				cpfListAppend(installedPackageFiles ${relFiles})
-
-				devMessageList("${relFiles}")
 
 			endif()
 
@@ -289,7 +287,7 @@ function( cpfInstallHeaders package)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfInstallSourceFiles installedFilesOut package sources outputType installComponent configOption )
+function( cpfInstallSourceFiles installedFilesOut package sources outputType installComponent config )
 
     # Create header pathes relative to the install include directory.
     set( sourceDir ${${package}_SOURCE_DIR})
@@ -322,6 +320,10 @@ function( cpfInstallSourceFiles installedFilesOut package sources outputType ins
 			set(relDestDir ${relIncludeDir} )
 		endif()
 		
+		if(config)
+			set(configOption CONFIGURATIONS ${config})
+		endif()
+
 		install(
 			FILES ${absFile}
 			DESTINATION "${relDestDir}"
@@ -705,7 +707,8 @@ function( get_target_sources_without_prefix_header sourcesOut target )
 	get_property(sources TARGET ${target} PROPERTY SOURCES)
 	get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
 	if(sources AND prefixHeader)
-	list(REMOVE_ITEM sources "${prefixHeader}")
+		list(REMOVE_ITEM sources "${prefixHeader}")
+	endif()
 	set(${sourcesOut} ${sources} PARENT_SCOPE )
 
 endfunction()
