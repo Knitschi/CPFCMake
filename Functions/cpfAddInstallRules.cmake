@@ -298,9 +298,9 @@ function( cpfInstallPublicHeaders installedFilesOut package target )
 	set( binaryDir ${${package}_BINARY_DIR})
 	cpfGetRelativeOutputDir( relIncludeDir ${package} INCLUDE)
 
-	get_property( fixtureHeaderShort TARGET ${target} PROPERTY CPF_PUBLIC_HEADER)
+	get_property( publicHeaderShort TARGET ${target} PROPERTY CPF_PUBLIC_HEADER)
 	set(installedFiles)
-	foreach( header ${fixtureHeaderShort})
+	foreach( header ${publicHeaderShort})
 		
 		cpfIsAbsolutePath( cpfIsAbsolutePath ${header})
 
