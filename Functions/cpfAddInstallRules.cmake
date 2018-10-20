@@ -19,6 +19,7 @@ function( cpfAddInstallRules package namespace pluginOptionLists distributionPac
 	cpfInstallDebugFiles( ${package} )
 	cpfInstallAbiDumpFiles( ${package} )
 	cpfInstallDependedOnSharedLibraries( ${package} "${pluginOptionLists}" "${distributionPackageOptionLists}" )
+	cpfInstallSources( ${package} )
 
 endfunction()
 
@@ -672,6 +673,40 @@ function( addSharedLibraryDependenciesInstallRules package contentId libraries d
 
 		cpfAddInstalledFilesToProperty( ${package} ${config} "${installedFiles}" )
 
+	endforeach()
+
+endfunction()
+
+
+#----------------------------------------------------------------------------------------
+function( cpfInstallSources package )
+
+	set(installedPackageFiles)
+
+	get_property(targets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
+	foreach(target ${targets})
+
+		getAbsPathsOfTargetSources( absSourcePaths ${target})
+		cpfGetShortFilenames( shortSourceNames "${absSourcePaths}")
+		get_property(sourceDir TARGET ${target} PROPERTY SOURCE_DIR )
+
+		cpfGetRelativeOutputDir( relSourceDir ${package} SOURCE)
+		install(
+			FILES ${absSourcePaths}
+			DESTINATION "${relSourceDir}"
+			COMPONENT source
+			CONFIGURATIONS ${config}
+		)
+
+		# Add the installed files to the target property
+		cpfPrependMulti(relInstallPaths "${relSourceDir}/" "${shortSourceNames}" )
+		cpfListAppend(installedPackageFiles ${relInstallPaths})
+
+	endforeach()
+
+	cpfGetConfigurations(configs)
+	foreach(config ${configs})
+		cpfAddInstalledFilesToProperty( ${package} ${config} "${installedPackageFiles}" )
 	endforeach()
 
 endfunction()
