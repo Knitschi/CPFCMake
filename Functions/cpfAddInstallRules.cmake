@@ -265,14 +265,19 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 function( cpfInstallHeaders package)
 
+	set(outputType INCLUDE)
+	set(installComponent developer)
+
 	# Install rules for production headers
 	get_property( productionLib TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET)
-	cpfInstallPublicHeaders( basicHeader ${package} ${productionLib})
+	get_property( header TARGET ${productionLib} PROPERTY CPF_PUBLIC_HEADER)
+	cpfInstallSourceFiles( relBasicHeader ${package} "${header}" ${outputType} ${installComponent} )
 	
 	# Install rules for test fixture library headers
 	get_property( fixtureTarget TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET)
 	if(TARGET ${fixtureTarget})
-		cpfInstallPublicHeaders( fixtureHeader ${package} ${fixtureTarget})
+		get_property( header TARGET ${fixtureTarget} PROPERTY CPF_PUBLIC_HEADER)
+		cpfInstallSourceFiles( relfixtureHeader ${package} "${header}" ${outputType} ${installComponent})
 	endif()
 
     # Add the installed files to the target property
@@ -280,7 +285,7 @@ function( cpfInstallHeaders package)
     foreach( config ${configs} )
 
 		set(installedPackageFiles)
-		foreach(header ${basicHeader} ${fixtureHeader} )
+		foreach(header ${relBasicHeader} ${relfixtureHeader} )
 			cpfListAppend(installedPackageFiles "${header}")
 		endforeach()
 
@@ -291,30 +296,29 @@ function( cpfInstallHeaders package)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfInstallPublicHeaders installedFilesOut package target )
+function( cpfInstallSourceFiles installedFilesOut package sources outputType installComponent )
 
     # Create header pathes relative to the install include directory.
     set( sourceDir ${${package}_SOURCE_DIR})
 	set( binaryDir ${${package}_BINARY_DIR})
-	cpfGetRelativeOutputDir( relIncludeDir ${package} INCLUDE)
+	cpfGetRelativeOutputDir( relIncludeDir ${package} ${outputType})
 
-	get_property( publicHeaderShort TARGET ${target} PROPERTY CPF_PUBLIC_HEADER)
 	set(installedFiles)
-	foreach( header ${publicHeaderShort})
+	foreach( file ${sources})
 		
-		cpfIsAbsolutePath( cpfIsAbsolutePath ${header})
+		cpfIsAbsolutePath( cpfIsAbsolutePath ${file})
 
 		if(NOT cpfIsAbsolutePath)	# The file is located in the source directory
-			set(absHeader "${${package}_SOURCE_DIR}/${header}" )
+			set(absFile "${${package}_SOURCE_DIR}/${file}" )
 		else()
-			set(absHeader ${header})
+			set(absFile ${file})
 		endif()
 
 		# When building, the include directories are the packages binary and source directory.
 		# This means we need the path of the header relative to one of the two in order to get the
 		# relative path to the distribution packages install directory right.
-		file(RELATIVE_PATH relPathSource ${${package}_SOURCE_DIR} ${absHeader} )
-		file(RELATIVE_PATH relPathBinary ${${package}_BINARY_DIR} ${absHeader} )
+		file(RELATIVE_PATH relPathSource ${${package}_SOURCE_DIR} ${absFile} )
+		file(RELATIVE_PATH relPathBinary ${${package}_BINARY_DIR} ${absFile} )
 		cpfGetShorterString( relFilePath ${relPathSource} ${relPathBinary}) # assume the shorter path is the correct one
 
 		# prepend the include/<package> directory
@@ -326,13 +330,13 @@ function( cpfInstallPublicHeaders installedFilesOut package target )
 		endif()
 		
 		install(
-			FILES ${absHeader}
+			FILES ${absFile}
 			DESTINATION "${relDestDir}"
-			COMPONENT developer
+			COMPONENT ${installComponent}
 		)
 
 		# add the relative install path to the returned paths
-		get_filename_component( header ${absHeader} NAME)
+		get_filename_component( header ${absFile} NAME)
 		list( APPEND installedFiles ${relDestDir}/${header})
 	endforeach()
 
@@ -681,31 +685,22 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfInstallSources package )
 
-	set(installedPackageFiles)
+	set(outputType INCLUDE)
+	set(installComponent developer)
 
-	get_property(targets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
-	foreach(target ${targets})
-
-		getAbsPathsOfTargetSources( absSourcePaths ${target})
-		cpfGetShortFilenames( shortSourceNames "${absSourcePaths}")
-		get_property(sourceDir TARGET ${target} PROPERTY SOURCE_DIR )
-
-		cpfGetRelativeOutputDir( relSourceDir ${package} SOURCE)
-		install(
-			FILES ${absSourcePaths}
-			DESTINATION "${relSourceDir}"
-			COMPONENT sources
-		)
-
-		# Add the installed files to the target property
-		cpfPrependMulti(relInstallPaths "${relSourceDir}/" "${shortSourceNames}" )
-		cpfListAppend(installedPackageFiles ${relInstallPaths})
-
+	# Install rules for production headers
+	set(packageSourceFiles)
+	get_property( binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
+	foreach(target ${binaryTargets})
+		get_property(sources TARGET ${target} PROPERTY SOURCES)
+		cpfListAppend(packageSourceFiles ${sources})
 	endforeach()
+	cpfInstallSourceFiles( relFiles ${package} "${packageSourceFiles}" SOURCE sources )
 
+	# Add the installed files to the target property
 	cpfGetConfigurations(configs)
-	foreach(config ${configs})
-		cpfAddInstalledFilesToProperty( ${package} ${config} "${installedPackageFiles}" )
+	foreach( config ${configs} )
+		cpfAddInstalledFilesToProperty( ${package} ${config} "${relFiles}" )
 	endforeach()
 
 endfunction()
