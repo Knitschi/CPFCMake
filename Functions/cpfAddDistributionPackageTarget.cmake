@@ -115,6 +115,13 @@ function( cpfAddClearLastBuildDirCommand stampFileOut package distPackagesTarget
 				cpfListAppend( packageFiles ${shortName})
 			endforeach()
 		endforeach()
+
+		get_property(files TARGET ${target} PROPERTY CPF_OUTPUT_FILES)
+		foreach(file ${files})
+			get_filename_component( shortName "${file}" NAME)
+			cpfListAppend( packageFiles ${shortName})
+		endforeach()
+
 	endforeach()
 
 	cpfGetLastBuildPackagesDir( packagesDir ${package})
@@ -401,14 +408,14 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 	set_property( TARGET ${package} APPEND PROPERTY CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS ${targetName})
 	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/private")
 	
-	if(configSuffixes)
+	if(${contentType} STREQUAL CT_SOURCES)
+		set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${destPackageFile})
+	else()
 		foreach( configSuffix ${configSuffixes})
 			set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES_${configSuffix} ${destPackageFile${configSuffix}})
 		endforeach()
-	else()
-		set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${destPackageFile})
 	endif()
-
+	
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -457,14 +464,13 @@ function( cpfSetUpPackagingCommands
 
 	# use a stamp file instead of real output files so we do not need to polute the LastBuild dir with empty package files
 	set( stampFileDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}")
-	set( stampFile ${stampFileDir}/copyToHtml_${shortPackageFilename}.stamp)
-	set( touchStampCommand "cmake -E touch \"${stampFile}\"")
-	file(MAKE_DIRECTORY ${stampFileDir})
+	set( stampFile ${stampFileDir}/createPackage_${shortPackageFilename}.stamp)
+	cpfGetTouchFileCommands( touchCommmand "${stampFile}")
 
 	set(${packagingCommandOut} "${packagingCommand}" PARENT_SCOPE)
 	set(${copyToHtmlLastBuildCommandOut} "${copyToHtmlLastBuildCommand}" PARENT_SCOPE)
 	set(${copyToHtmlReleasesCommandOut} "${copyToHtmlReleasesCommand}" PARENT_SCOPE)
-	set(${touchCommandOut} "${touchStampCommand}" PARENT_SCOPE)
+	set(${touchCommandOut} "${touchCommmand}" PARENT_SCOPE)
 	set(${outputFilesOut} "${outputFiles}" PARENT_SCOPE)
 	set(${stampFileOut} "${stampFile}" PARENT_SCOPE)
 
