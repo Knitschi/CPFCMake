@@ -149,15 +149,10 @@ function( cpfAddPackageContentTarget targetName package contentId contentType )
 		# command to touch the target stamp
 		set( stampFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/install_${contentId}.stamp")
 		cpfGetTouchFileCommands( touchCommmand "${stampFile}")
-		add_custom_command(
-			OUTPUT "${stampFile}"
+		cpfAddStandardCustomCommand(
 			DEPENDS ${ARG_DEPENDS}
-			COMMAND ${clearContentStageCommands}
-			COMMAND ${runInstallScriptCommands}
-			COMMAND ${touchCommmand}
-			WORKING_DIRECTORY ${CPF_ROOT_DIR}
-			COMMENT "Collect ${package} ${contentType} package files for config ${config}"
-			VERBATIM
+			COMMANDS ${clearContentStageCommands} ${runInstallScriptCommands} ${touchCommmand}
+			OUTPUT "${stampFile}"
 		)
 		
 		cpfListAppend( allStampFiles ${stampFile} )
@@ -299,7 +294,7 @@ function( cpfGetRunInstallScriptCommands runInstallScriptCommandsOut package con
 
 	set(commands)
 	foreach(component ${components})
-		cpfListAppend( commands "${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=\"${destDir}\" -DCMAKE_INSTALL_COMPONENT=${component} ${configOption} -P \"${scriptFile}\"" )
+		cpfListAppend( commands "\"${CMAKE_COMMAND}\" -DCMAKE_INSTALL_PREFIX=\"${destDir}\" -DCMAKE_INSTALL_COMPONENT=${component} ${configOption} -P \"${scriptFile}\"" )
 	endforeach()
 
 	set( ${runInstallScriptCommandsOut} "${commands}" PARENT_SCOPE )
@@ -324,6 +319,8 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 		endif()
 	endif()
 	
+	cpfGetDistributionPackageTargetName( targetName ${package} ${contentId} ${contentType} ${packageFormat})
+
 	set(configSuffixes)
 	set(allOutputFiles)
 	if(${contentType} STREQUAL CT_SOURCES) # The source package does not depend on the config.
@@ -376,7 +373,6 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 				${config}
 			)
 
-			cpfGetDistributionPackageTargetName( targetName ${package} ${contentId} ${contentType} ${packageFormat})
 			get_property( contentStampFile TARGET ${contentTarget} PROPERTY CPF_STAMP_FILE_${configSuffix})
 			cpfAddConfigurationDependendCommand(
 				TARGET ${targetName}
@@ -440,7 +436,7 @@ function( cpfSetUpPackagingCommands
 
 	# Get the cpack command that creates the package file
 	cpfGetPackagingCommand( packagingCommand ${package} "${config}" ${version} ${contentId} ${contentType} ${packageFormat} ${packagesOutputDirTemp} ${basePackageFileName} "${formatOptions}")
-	
+
 	# Create a command to copy the package file to the html/Downloads directories
 	cpfGetLastBuildPackagesDir( packagesDir ${package})
 	set(outputFiles "${packagesDir}/${shortPackageFilename}")
