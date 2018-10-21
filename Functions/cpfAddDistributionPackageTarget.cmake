@@ -410,7 +410,9 @@ function( cpfGetBasePackageFilename nameWEOut package config version contentId p
         cpfExecuteProcess( architecture "\"${TOOL_DPKG}\" --print-architecture" "${CPF_ROOT_DIR}")
         
         set( nameWE "${lowerPackage}_${version}_${architecture}")
-    else()
+	elseif( ${contentId} STREQUAL src )
+		set( nameWE "${package}.${version}.${contentId}")
+	else()
         set( nameWE "${package}.${version}.${CMAKE_SYSTEM_NAME}.${contentId}.${config}")
     endif()
     
