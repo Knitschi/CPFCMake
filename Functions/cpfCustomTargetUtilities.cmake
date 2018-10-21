@@ -19,7 +19,7 @@ function( cpfAddStandardCustomCommand )
 	foreach(command ${ARG_COMMANDS})
 		separate_arguments(argumentList NATIVE_COMMAND ${command})
 		cpfListAppend( commandArguments COMMAND ${argumentList} )
-		string(APPEND comment "${command} &")
+		string(APPEND comment "${command} & ")
 	endforeach()
 	
 	add_custom_command(

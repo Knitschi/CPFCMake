@@ -452,8 +452,10 @@ function( cpfSetUpPackagingCommands
 	endif()
 
 	# use a stamp file instead of real output files so we do not need to polute the LastBuild dir with empty package files
-	set( stampFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/copyToHtml_${shortPackageFilename}.stamp")
+	set( stampFileDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}")
+	set( stampFile ${stampFileDir}/copyToHtml_${shortPackageFilename}.stamp)
 	set( touchStampCommand "cmake -E touch \"${stampFile}\"")
+	file(MAKE_DIRECTORY ${stampFileDir})
 
 	set(${packagingCommandOut} "${packagingCommand}" PARENT_SCOPE)
 	set(${copyToHtmlLastBuildCommandOut} "${copyToHtmlLastBuildCommand}" PARENT_SCOPE)
@@ -547,7 +549,7 @@ function( cpfGetArchivePackageCommand commandOut package config version contentI
 -D CPACK_PACKAGE_DIRECTORY=\"${packageOutputDir}\" \
 ${configOption} \
 -P ${package} \
-	")
+")
 	set( ${commandOut} ${command} PARENT_SCOPE)
 
 endfunction()
@@ -597,7 +599,7 @@ function( cpfGetDebianPackageCommand commandOut package config version contentId
 -D CPACK_DEBIAN_PACKAGE_HOMEPAGE=\"${homepage}\" \
 ${configOption} \
 -P ${package} \
-	")
+")
 	set( ${commandOut} ${command} PARENT_SCOPE)
 
 endfunction()
