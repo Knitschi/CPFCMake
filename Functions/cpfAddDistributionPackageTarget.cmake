@@ -199,9 +199,13 @@ function( cpfAddPackageContentTarget targetName package contentId contentType )
 
 	# set target properties
 	set_property(TARGET ${targetName} PROPERTY FOLDER "${package}/private")
-	foreach( configSuffix ${configSuffixes})
-		set_property(TARGET ${targetName} PROPERTY CPF_STAMP_FILE_${configSuffix} ${stampFile${configSuffix}})
-	endforeach()
+	if(configSuffixes)
+		foreach( configSuffix ${configSuffixes})
+			set_property(TARGET ${targetName} PROPERTY CPF_STAMP_FILE_${configSuffix} ${stampFile${configSuffix}})
+		endforeach()
+	else()
+		set_property(TARGET ${targetName} PROPERTY CPF_STAMP_FILE ${stampFile})
+	endif()
 
 endfunction()
 
@@ -341,7 +345,7 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 			""
 		)
 
-		get_property( contentStampFile TARGET ${contentTarget} PROPERTY CPF_STAMP_FILE_${configSuffix})
+		get_property( contentStampFile TARGET ${contentTarget} PROPERTY CPF_STAMP_FILE)
 		cpfAddStandardCustomCommand(
 			DEPENDS ${contentTarget} ${contentStampFile}
 			COMMANDS ${packagingCommand} ${copyToHtmlLastBuildCommand} ${copyToHtmlReleasesCommand} ${touchStampCommand}
