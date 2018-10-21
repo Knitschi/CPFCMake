@@ -266,7 +266,6 @@ function( cpfPrintTargetProperties target )
 		RUNTIME_OUTPUT_NAME
 		STATIC_LIBRARY_FLAGS
 		# CPF properties
-		CPF_INSTALLED_FILES
 		CPF_OUTPUT_FILES
 	)
 	

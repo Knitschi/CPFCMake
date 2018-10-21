@@ -215,38 +215,6 @@ function( cpfDefineProperties )
 	cpfGetConfigurations(configs)
 	foreach(config ${configs})
 
-		# A configuration dependent property that is set on all package main targets 
-		define_property(
-			TARGET
-			PROPERTY CPF_INSTALLED_FILES_runtime_${configSuffix}
-			BRIEF_DOCS "A list of files that belong to the runtime installation component. Paths are relative to the install prefix."
-			FULL_DOCS " "
-        )
-        
-        # A configuration dependent property that is set on all package main targets 
-		define_property(
-			TARGET
-			PROPERTY CPF_INSTALLED_FILES_runtime_dependencies_${configSuffix}
-			BRIEF_DOCS "A list of files that belong to the runtime_dependencies installation component. Paths are relative to the install prefix."
-			FULL_DOCS " "
-        )
-        
-        # A configuration dependent property that is set on all package main targets 
-		define_property(
-			TARGET
-			PROPERTY CPF_INSTALLED_FILES_developer_${configSuffix}
-			BRIEF_DOCS "A list of files that belong to the developer installation component. Paths are relative to the install prefix."
-			FULL_DOCS " "
-        )
-        
-        # A configuration dependent property that is set on all package main targets 
-		define_property(
-			TARGET
-			PROPERTY CPF_INSTALLED_FILES_sources_${configSuffix}
-			BRIEF_DOCS "A list of files that belong to the sources installation component. Paths are relative to the install prefix."
-			FULL_DOCS " "
-		)
-
 		# A configuration dependent property that is set on some targets (optimally it should be set on all to get a completely clean dependency chain)
 		define_property(
 			TARGET
@@ -264,8 +232,5 @@ function( cpfDefineProperties )
         )
 
 	endforeach()
-	
-	
 
-       
 endfunction()
