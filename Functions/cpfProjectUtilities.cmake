@@ -1013,7 +1013,6 @@ function( cpfReadCurrentCacheVariables variableNamesOut variableValuesOut variab
 		if( ${valueLength} GREATER 1) 
 			# for lists one escape level is needed to get a list of lists
 			cpfJoinString( escapedList "${value}" "\\\\;")
-			cpfListLength( length "${escapedList}") 
 			list(APPEND cacheValues "${escapedList}")
 		else()
 			list(APPEND cacheValues "${value}")
@@ -1083,6 +1082,63 @@ function( cpfClearAllCacheVariables )
 	foreach(variable ${cacheVariables})
 		unset(${variable} CACHE)
 	endforeach()
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Gets the names and values of all normal variables that are defined in the given file
+function( cpfReadVariablesFromFile variablesOut valuesOut absFilePath )
+
+	# Unset all variables so we can identify the ones that came from the include.
+	cpfClearAllVariablesExcept("variablesOut;valuesOut;absFilePath")
+
+	# Read the variables from the file.
+	include("${absFilePath}")
+	cpfReadCurrentVariables( variables values )
+
+	set(${variablesOut} "${variables}" PARENT_SCOPE)
+	set(${valuesOut} "${values}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Unsets all variables in the current scope.
+function( cpfClearAllVariablesExcept notClearedVariables )
+
+	get_cmake_property(variableNames VARIABLES)
+	foreach(variable ${variableNames})
+		cpfContains(isException "${notClearedVariables}" "${variable}" )
+		if(NOT isException)
+			unset(${variable} PARENT_SCOPE)
+		endif()
+	endforeach()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns the names, values, types and descriptions of the currently defined cache variabls.
+# For variable values that are lists, the function escapes the separation ; with on \
+function( cpfReadCurrentVariables variableNamesOut variableValuesOut )
+
+	set(values)
+
+	get_cmake_property(variableNames VARIABLES)
+	foreach(variable ${variableNames})
+
+		set(value ${${variable}})
+		cpfListLength(valueLength "${value}") 
+		if( ${valueLength} GREATER 1) 
+			# for lists one escape level is needed to get a list of lists
+			cpfJoinString( escapedList "${value}" "\\\\;")
+			list(APPEND values "${escapedList}")
+		else()
+			list(APPEND values "${value}")
+		endif()
+
+	endforeach()
+
+	set(${variableNamesOut} "${variableNames}" PARENT_SCOPE)
+	set(${variableValuesOut} "${values}" PARENT_SCOPE)
+
 endfunction()
 
 #---------------------------------------------------------------------------------------------
