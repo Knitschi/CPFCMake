@@ -1,10 +1,12 @@
 # This file bundles the cmake code file into a custom target to make them visible in the vs solution.
 
 include(cpfLocations)
-include(cpfAddCppPackage)
+include(cpfInitPackageProject)
+include(cpfAddFilePackage)
+include(cpfAddRunTestsTarget)
+
 
 cpfInitPackageProject(
-	PACKAGE_NAME
 	CPFCM
 )
 
@@ -43,6 +45,7 @@ set( files
 	Functions/cpfCustomTargetUtilities.cmake
 	Functions/cpfGitUtilities.cmake
 	Functions/cpfInit.cmake
+	Functions/cpfInitPackageProject.cmake
 	Functions/cpfListUtilities.cmake
 	Functions/cpfMiscUtilities.cmake
 	Functions/cpfNumericUtilities.cmake
@@ -74,7 +77,9 @@ set( files
 	Variables/cpfProperties.cmake
 )
 
-cpfAddFilePackage(${PACKAGE_NAME} "${files}")
+cpfAddFilePackage(
+    SOURCES ${files}
+)
 
 # Add a test target
-cpfAddRunCMakeTestScriptTarget( ${PACKAGE_NAME} "Tests/run_tests.cmake" "${TEST_FILES}" )
+cpfAddRunCMakeTestScriptTarget( "Tests/run_tests.cmake" "${TEST_FILES}" )

@@ -11,7 +11,7 @@ list( APPEND CMAKE_MODULE_PATH
 
 include(cpfProperties)
 include(cpfProjectUtilities)
-include(cpfAddDocumentationTarget)
+include(cpfAddDoxygenPackage)
 include(cpfAddClangTidyTarget)
 include(cpfAddAcyclicTarget)
 include(cpfAddPipelineTarget)
@@ -123,14 +123,6 @@ function( cpfAddPackages externalPackages globalFiles )
 		"${CMAKE_BINARY_DIR}/CMakeCache.txt"
 		"${CPF_OWNED_PACKAGES_FILE}"
 	)
-	
-	if(CPF_ENABLE_DOXYGEN_TARGET)
-		cpfListAppend( SOLUTION_FILES
-			${CPF_DOCUMENTATION_DIR}/DoxygenConfig.txt
-			${CPF_DOCUMENTATION_DIR}/DoxygenLayout.xml
-			${CPF_DOCUMENTATION_DIR}/DoxygenStylesheet.css
-		)
-	endif()
 
 	if(CPF_ENABLE_CLANG_TIDY_TARGET)
 		cpfListAppend( SOLUTION_FILES 
@@ -140,9 +132,6 @@ function( cpfAddPackages externalPackages globalFiles )
 
 	add_custom_target( globalFiles SOURCES ${SOLUTION_FILES})
 
-
-	# documentation
-	cpfAddDoxygenTarget( "${packages}" "${externalPackages}" )
 	# staticAnalysis
 	cpfAddGlobalClangTidyTarget("${packages}")
 	# acyclic

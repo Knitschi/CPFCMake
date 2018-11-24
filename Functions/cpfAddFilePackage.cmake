@@ -4,6 +4,8 @@
 include_guard(GLOBAL)
 
 include(cpfPathUtilities)
+include(cpfAddCppPackage)
+include(cpfInitPackageProject)
 
 #
 # Keyword Arguments:
@@ -20,9 +22,11 @@ function( cpfAddFilePackage )
         ${ARGN} 
     )
 
-    cpfGetParentDirectory( packageName "${CMAKE_CURRENT_SOURCE_DIR}")
+    
+    cpfGetPackageName(packageName)
 
     add_custom_target( ${packageName} SOURCES ${ARG_SOURCES} )
-    #set_property(TARGET ${packageName} FOLDER ${packageName} )    
+    set_property( TARGET ${packageName} PROPERTY FOLDER ${packageName} )
+	cpfSetIDEDirectoriesForTargetSources(${packageName})
 
 endfunction()

@@ -5,6 +5,8 @@ include(cpfProjectUtilities)
 include(cpfGitUtilities)
 include(cpfCustomTargetUtilities)
 include(cpfAddCompatibilityCheckTarget)
+include(cpfInitPackageProject)
+include(cpfAddCppPackage)
 
 #----------------------------------------------------------------------------------------
 # Adds a package that runs doxygen on the given packages in your ci-project.
@@ -39,7 +41,7 @@ function( cpfAddDoxygenPackage )
 		${ARGN} 
 	)
 
-	cpfGetParentDirectory( packageName "${CMAKE_CURRENT_SOURCE_DIR}")
+	cpfGetPackageName( packageName "${CMAKE_CURRENT_SOURCE_DIR}")
 
 	# Locations
 	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${packageName}" )
@@ -146,6 +148,8 @@ function( cpfAddDoxygenPackage )
 		DEPENDS ${doxyIndexerStampFile} ${targetDependencies}
 		SOURCES  ${ARG_SOURCES}
 	)
+	set_property( TARGET ${packageName} PROPERTY FOLDER ${packageName} )
+	cpfSetIDEDirectoriesForTargetSources(${packageName})
 
 endfunction()
 
