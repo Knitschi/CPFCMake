@@ -109,7 +109,8 @@ function( cpfAddCppPackage )
 	) 
 	
 	set( singleValueKeywords 
-		PACKAGE_NAME PACKAGE_NAMESPACE
+		PACKAGE_NAME
+		PACKAGE_NAMESPACE
 		TYPE
 		BRIEF_DESCRIPTION
 		LONG_DESCRIPTION
