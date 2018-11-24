@@ -3,23 +3,26 @@
 
 include_guard(GLOBAL)
 
+include(cpfPathUtilities)
 
 #
-# Keyword Arguments
-# PACKAGE_NAME
-# FILES
-
+# Keyword Arguments:
+#
+# SOURCES         The files that belong to the package.
+#
 function( cpfAddFilePackage )
 
     cmake_parse_arguments(
         ARG 
         "" 
-        "PACKAGE_NAME"
-        "FILES"
+        ""
+        "SOURCES"
         ${ARGN} 
     )
 
-    add_custom_target( ${ARG_PACKAGE_NAME} SOURCES ${ARG_FILES} )
-    set_property(TARGET ${ARG_PACKAGE_NAME} FOLDER ${ARG_PACKAGE_NAME} )    
+    cpfGetParentDirectory( packageName "${CMAKE_CURRENT_SOURCE_DIR}")
+
+    add_custom_target( ${packageName} SOURCES ${ARG_SOURCES} )
+    #set_property(TARGET ${packageName} FOLDER ${packageName} )    
 
 endfunction()

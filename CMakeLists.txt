@@ -31,7 +31,8 @@ set( files
 	Functions/cpfAddCompatibilityCheckTarget.cmake
 	Functions/cpfAddDeploySharedLibrariesTarget.cmake
 	Functions/cpfAddDistributionPackageTarget.cmake
-	Functions/cpfAddDocumentationTarget.cmake
+	Functions/cpfAddDoxygenPackage.cmake
+	Functions/cpfAddFilePackage.cmake
 	Functions/cpfAddInstallRules.cmake
 	Functions/cpfAddOpenCppCoverageTarget.cmake
 	Functions/cpfAddCppPackage.cmake

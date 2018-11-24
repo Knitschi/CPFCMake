@@ -6,22 +6,43 @@ include(cpfGitUtilities)
 include(cpfCustomTargetUtilities)
 include(cpfAddCompatibilityCheckTarget)
 
-
-
 #----------------------------------------------------------------------------------------
-# Adds a target that runs doxygen on the whole Source directory of the CPF project.
+# Adds a package that runs doxygen on the given packages in your ci-project.
+# The package can also contain global documentation that does not belong to
+# any other package in your ci-project.
 #
-# This function should be removed when the problems with the cpfAddGlobalDocumentationTarget() generation get fixed.
-function( cpfAddDoxygenTarget packages externalPackages )
+# Keyword arguments:
+#
+# SOURCES				Global documentation files. These files will be parsed by doxygen.
+# PACKAGES				The packages that will be parsed by doxygen.
+# EXCLUDED_PACKAGES		The packages that are not parsed by doxygen.
+#
+function( cpfAddDoxygenPackage )
 
-	if(NOT CPF_ENABLE_DOXYGEN_TARGET)
-		return()
-	endif()
+	set( optionKeywords
+	) 
 
-	set(targetName doxygen)
+	set( singleValueKeywords 
+	)
+
+	set( multiValueKeywords 
+		SOURCES
+		PACKAGES
+		EXCLUDED_PACKAGES
+	)
+
+	cmake_parse_arguments(
+		ARG 
+		"${optionKeywords}" 
+		"${singleValueKeywords}"
+		"${multiValueKeywords}"
+		${ARGN} 
+	)
+
+	cpfGetParentDirectory( packageName "${CMAKE_CURRENT_SOURCE_DIR}")
 
 	# Locations
-	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}" )
+	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${packageName}" )
 	set(tempDoxygenConfigFile "${targetBinaryDir}/tempDoxygenConfig.txt" )
 	set(reducedGraphFile "${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/CPFDependenciesTransitiveReduced.dot")
 	set(doxygenConfigFile "${CMAKE_SOURCE_DIR}/${CPF_DOCUMENTATION_DIR}/DoxygenConfig.txt")
@@ -41,7 +62,7 @@ function( cpfAddDoxygenTarget packages externalPackages )
 	set(fileDependencies)
 	set(targetDependencies)
 	set(hasGeneratedDocumentation FALSE)
-	foreach( package ${packages})
+	foreach( package ${ARG_PACKAGES})
 		cpfGetPackageDoxFilesTargetName( doxFilesTarget ${package} )
 		if( TARGET ${doxFilesTarget}) # not all packages may have the doxFilesTarget
 			list(APPEND targetDependencies ${doxFilesTarget})
@@ -79,8 +100,9 @@ function( cpfAddDoxygenTarget packages externalPackages )
 		cpfGetGeneratedDocumentationDirectory(docsDir)
 		list(APPEND appendedLines "INPUT += \"${docsDir}\"")
 	endif()
+
 	# Exclude external packges
-	foreach( externalPackage ${externalPackages})
+	foreach( externalPackage ${ARG_EXCLUDED_PACKAGES})
 		list(APPEND appendedLines "EXCLUDE += \"${CMAKE_SOURCE_DIR}/${externalPackage}\"")
 	endforeach()
 
@@ -99,7 +121,7 @@ function( cpfAddDoxygenTarget packages externalPackages )
 	# Add the command for running doxygen
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
 	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/searchdata.xml)
-	cpfGetAllNonGeneratedPackageSources(sourceFiles "${packages}")
+	cpfGetAllNonGeneratedPackageSources(sourceFiles "${ARG_PACKAGES}")
 	set( allDependedOnFiles ${tempDoxygenConfigFile} ${doxygenLayoutFile} ${doxygenStylesheetFile} ${copiedDependencyGraphFile} ${reducedGraphFile} ${sourceFiles} ${fileDependencies} ${globalFiles} )
 	cpfAddStandardCustomCommand(
 		OUTPUT ${searchDataXmlFile}
@@ -120,8 +142,9 @@ function( cpfAddDoxygenTarget packages externalPackages )
 
 	# Now add the target
 	add_custom_target(
-		${targetName}
+		${packageName}
 		DEPENDS ${doxyIndexerStampFile} ${targetDependencies}
+		SOURCES  ${ARG_SOURCES}
 	)
 
 endfunction()
@@ -179,10 +202,6 @@ endfunction()
 # 
 function( cpfAddPackageDocsTarget fileOut package packageNamespace briefDescription longDescription)
 
-	if(NOT CPF_ENABLE_DOXYGEN_TARGET)
-		return()
-	endif()
-
 	cpfGetGeneratedDocumentationDirectory(documentationDir)
 	file(MAKE_DIRECTORY ${documentationDir} )
 
@@ -213,6 +232,9 @@ endfunction()
 
 #-------------------------------------------------------------------------
 function( cpfAddPackageDocumentationDoxFileCommands fileOut package packageNamespace)
+
+	get_property( briefDescription TARGET ${package} PROPERTY CPF_BRIEF_PACKAGE_DESCRIPTION )
+	get_property( longDescription TARGET ${package} PROPERTY CPF_LONG_PACKAGE_DESCRIPTION )
 
 	set( fileContent "
 /// The namespace of the ${package} package.

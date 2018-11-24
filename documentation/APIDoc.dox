@@ -72,6 +72,7 @@ cpfAddCppPackage(
         [DISTRIBUTION_PACKAGE_CONTENT_TYPE ...] ...]
     [VERSION_COMPATIBILITY_SCHEME [ExactVersion] ]
     [ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS bool]
+    [GENERATE_PACKAGE_DOX_FILES]
 )
 \endcode
 
@@ -254,6 +255,13 @@ This is the most simple scheme and relieves developers from the burdon of keepin
 ####  [ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS bool] ####
 
 This option can be used to override the global CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS setting.
+
+
+####  [GENERATE_PACKAGE_DOX_FILES]  ####
+
+If this option is given, the package will generate a standard package documentation .dox file.
+The file contains the brief and long package description as well as some links to other generated
+html content like test-coverage reports or abi-compatibility reports.
 
 
 ### Example ###

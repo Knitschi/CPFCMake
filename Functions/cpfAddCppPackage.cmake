@@ -22,10 +22,10 @@ include(cpfAddDocumentationTarget)
 
 #-------------------------------------------------------------------------
 # Documentation in APIDocs.dox
-macro( cpfInitPackageProject packageNameOut packageNameSpace )
+macro( cpfInitPackageProject packageNameSpace )
 
 	# The package name is defined by the sub-directory name
-	cpfGetParentDirectory( packageName ${CMAKE_CURRENT_LIST_FILE})
+	cpfGetParentDirectory( packageName "${CMAKE_CURRENT_SOURCE_DIR}")
 
 	cpfConfigurePackageVersionFile( ${packageName} )
 
@@ -48,8 +48,6 @@ macro( cpfInitPackageProject packageNameOut packageNameSpace )
 	set(PROJECT_VERSION_MINOR ${minor})
 	set(PROJECT_VERSION_PATCH ${patch})
 	set(PROJECT_VERSION_TWEAK ${commitId})
-
-	set(${packageNameOut} ${packageName}) # this is a macro, so no PARENT_SCOPE
 
 endmacro()
 
@@ -105,11 +103,11 @@ endfunction()
 ]]
 function( cpfAddCppPackage )
 
-	set( optionKeywords 
+	set( optionKeywords
+		GENERATE_PACKAGE_DOX_FILES
 	) 
 	
 	set( singleValueKeywords 
-		PACKAGE_NAME
 		PACKAGE_NAMESPACE
 		TYPE
 		BRIEF_DESCRIPTION
@@ -215,8 +213,10 @@ function( cpfAddCppPackage )
 	cpfAddAbiCheckerTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" "${ARG_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS}" )
 	
 	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
-	cpfAddPackageDocsTarget( packageLinkFile ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
-	list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
+	if(${GENERATE_PACKAGE_DOX_FILES})
+		cpfAddPackageDocsTarget( packageLinkFile ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
+		list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
+	endif()
 
 	# Adds the install rules and the per package install targets.
 	cpfAddInstallRules( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${ARG_VERSION_COMPATIBILITY_SCHEME} )

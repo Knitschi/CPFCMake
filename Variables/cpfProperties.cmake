@@ -22,6 +22,14 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets.
     define_property(
         TARGET
+        PROPERTY CPF_LONG_PACKAGE_DESCRIPTION
+        BRIEF_DOCS "Contains a long description about what the package is good for."
+        FULL_DOCS " "
+    )
+
+	# A property that is set on all package main targets.
+    define_property(
+        TARGET
         PROPERTY CPF_PACKAGE_HOMEPAGE
         BRIEF_DOCS "A web address from where the source-code and/or the documentation of the package can be obtained."
         FULL_DOCS " "
