@@ -145,7 +145,7 @@ function( cpfAddPackages externalPackages globalFiles )
 
 
 	# documentation
-	cpfAddGlobalMonolithicDocumentationTarget( "${packages}" "${externalPackages}" )
+	cpfAddDoxygenTarget( "${packages}" "${externalPackages}" )
 	# staticAnalysis
 	cpfAddGlobalClangTidyTarget("${packages}")
 	# acyclic
