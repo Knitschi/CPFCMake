@@ -87,7 +87,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Note that the packages that are owned by the CPF CI-Project must be added via the
-# cpfOwnedPackages.cmake file.
+# cpfPackages.cmake file.
 function( cpfAddPackages globalFiles )
 
 	# set various flags non binary relevant flats like warnings as errors and higher warning levels.
