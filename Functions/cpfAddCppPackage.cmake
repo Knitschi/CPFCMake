@@ -30,7 +30,7 @@ function( cpfAddCppPackage )
 		GENERATE_PACKAGE_DOX_FILES
 	) 
 	
-	set( requiredSingleValueKeywords 
+	set( requiredSingleValueKeywords
 		PACKAGE_NAMESPACE
 		TYPE
 	)
@@ -44,7 +44,7 @@ function( cpfAddCppPackage )
 		ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS
 	)
 
-	set( requiredMultiValueKeywords 
+	set( requiredMultiValueKeywords
 		PRODUCTION_FILES
 	)
 
@@ -71,7 +71,7 @@ function( cpfAddCppPackage )
 	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddCppPackage()")
 
 	# parse argument sublists
-	set( allKeywords ${singleValueKeywords} ${multiValueKeywords})
+	set( allKeywords ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
 	cpfGetKeywordValueLists( pluginOptionLists PLUGIN_DEPENDENCIES "${allKeywords}" "${ARGN}" pluginOptions)
 	cpfGetKeywordValueLists( distributionPackageOptionLists DISTRIBUTION_PACKAGES "${allKeywords}" "${ARGN}" packagOptions)
 	
@@ -383,7 +383,7 @@ function(
     endif()
     
 	# Set some properties
-    set_property(TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS ${exeTarget} ${fixtureTarget} ${productionTarget} ${unitTestsTarget} )
+    set_property(TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS ${exeTarget} ${fixtureTarget} ${productionTarget} ${unitTestsTarget} )
     set_property(TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET ${productionTarget} )
 	set( ${outProductionLibrary} ${productionTarget} PARENT_SCOPE)
 

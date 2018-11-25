@@ -23,7 +23,7 @@ function( cpfAddGlobalClangTidyTarget packages)
 	endif()
 
     # add bundle target
-    cpfAddSubTargetBundleTarget( clang-tidy "${packages}" CPF_CLANG_TIDY_SUBTARGET "")
+    cpfAddSubTargetBundleTarget( clang-tidy "${packages}" INTERFACE_CPF_CLANG_TIDY_SUBTARGET "")
 
 endfunction()
 
@@ -109,7 +109,7 @@ function( cpfAddClangTidyTarget binaryTarget )
 			${targetName}
 			DEPENDS ${stampFiles} ${uicTarget}
 		)
-        set_property(TARGET ${binaryTarget} PROPERTY CPF_CLANG_TIDY_SUBTARGET ${targetName})
+        set_property(TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_CLANG_TIDY_SUBTARGET ${targetName})
 
     endif()
     

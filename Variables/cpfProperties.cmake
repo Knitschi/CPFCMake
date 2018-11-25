@@ -46,7 +46,7 @@ function( cpfDefineProperties )
     # A property that is set on all main targets that have the same name as their package.
     define_property(
         TARGET
-        PROPERTY CPF_BINARY_SUBTARGETS
+        PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS
         BRIEF_DOCS "A list of all binary targets that are associated with the package including the main target."
         FULL_DOCS " "
     )
@@ -94,7 +94,7 @@ function( cpfDefineProperties )
     # A property that is set on all binary targets when using the clang toolchain.
     define_property(
         TARGET
-        PROPERTY CPF_CLANG_TIDY_SUBTARGET
+        PROPERTY INTERFACE_CPF_CLANG_TIDY_SUBTARGET
         BRIEF_DOCS "A target that runs clang-tidy on all .cpp files of the binary target."
         FULL_DOCS " "
     )
@@ -102,7 +102,7 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets.
     define_property(
         TARGET
-        PROPERTY CPF_VALGRIND_SUBTARGET
+        PROPERTY INTERFACE_CPF_VALGRIND_SUBTARGET
         BRIEF_DOCS "Contains the name of a sub-target that runs Valgrind or OpenCppCoverage."
         FULL_DOCS " "
     )
@@ -110,7 +110,7 @@ function( cpfDefineProperties )
     # A property that is set on all package main targets.
     define_property(
         TARGET
-        PROPERTY CPF_OPENCPPCOVERAGE_SUBTARGET
+        PROPERTY INTERFACE_CPF_OPENCPPCOVERAGE_SUBTARGET
         BRIEF_DOCS "Contains the name of a sub-target that runs Valgrind or OpenCppCoverage."
         FULL_DOCS " "
     )
@@ -126,7 +126,7 @@ function( cpfDefineProperties )
     # A property that is set on some package main targets
     define_property(
         TARGET
-        PROPERTY CPF_RUN_CPP_TESTS_SUBTARGET
+        PROPERTY INTERFACE_CPF_RUN_CPP_TESTS_SUBTARGET
         BRIEF_DOCS "The name of the sub-target that runs a cpp executable with all automated tests."
         FULL_DOCS " "
     )
@@ -134,7 +134,7 @@ function( cpfDefineProperties )
     # A property that is set on some package main targets
     define_property(
         TARGET
-        PROPERTY CPF_RUN_TESTS_SUBTARGET
+        PROPERTY INTERFACE_RUN_TESTS_SUBTARGET
         BRIEF_DOCS "The name of the sub-target that runs all automated tests."
         FULL_DOCS " "
     )
@@ -142,7 +142,7 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets
     define_property(
         TARGET
-        PROPERTY CPF_RUN_FAST_TESTS_SUBTARGET
+        PROPERTY INTERFACE_CPF_RUN_FAST_TESTS_SUBTARGET
         BRIEF_DOCS "The name of the sub-target that runs only the fast tests."
         FULL_DOCS " "
     )
@@ -198,7 +198,7 @@ function( cpfDefineProperties )
     # A property that is set on shared library targets
 	define_property(
         TARGET
-        PROPERTY CPF_ABI_DUMP_SUBTARGET
+        PROPERTY INTERFACE_ABI_DUMP_SUBTARGET
         BRIEF_DOCS "The names of the custom sub-target that create the abi dumps."
         FULL_DOCS " "
     )
@@ -206,7 +206,7 @@ function( cpfDefineProperties )
     # A property that is set on all package main targets
     define_property(
 		TARGET
-		PROPERTY CPF_ABI_CHECK_SUBTARGETS
+		PROPERTY INTERFACE_CPF_ABI_CHECK_SUBTARGETS
 		BRIEF_DOCS "The names of all custom sub-target that call the abi-compliance-checker tool."
 		FULL_DOCS " "
     )

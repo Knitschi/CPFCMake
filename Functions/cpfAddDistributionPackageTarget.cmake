@@ -244,7 +244,7 @@ function( cpfGetContentProducingTargetsAndOutputFiles contentProducerTargetsOut 
 	cpfToConfigSuffix(configSuffix ${config})
 
 	# The content depends on the binary targets
-	get_property(binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
+	get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
 
 	# Get dumpfile target dependencies
 	set(abiDumpTargets)
@@ -254,7 +254,7 @@ function( cpfGetContentProducingTargetsAndOutputFiles contentProducerTargetsOut 
 		# Add target main output file.
 		cpfListAppend(files $<TARGET_FILE:${binaryTarget}>)
 
-		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY CPF_ABI_DUMP_SUBTARGET )
+		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY INTERFACE_ABI_DUMP_SUBTARGET )
 		if(abiDumpTarget)
 			# add target
 			cpfListAppend(abiDumpTargets ${abiDumpTarget})

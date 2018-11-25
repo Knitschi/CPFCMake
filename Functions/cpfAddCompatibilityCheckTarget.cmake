@@ -72,7 +72,7 @@ function( cpfAddAbiCheckerTargets package distributionPackageOptionLists enableO
 		# Add a target to bundle all abi check targets of one package into one and to remove old reports.
 		cpfGetPackageVersionCompatibilityCheckTarget( targetName ${package})
 		cpfAddCleanOutputDirsCommands( cleanStamps ${targetName} "${reportFiles};${reportFileApiCheck};${reportFileAbiCheck}" )
-		cpfAddSubTargetBundleTarget( ${targetName} ${package} CPF_ABI_CHECK_SUBTARGETS "${cleanStamps}")
+		cpfAddSubTargetBundleTarget( ${targetName} ${package} INTERFACE_CPF_ABI_CHECK_SUBTARGETS "${cleanStamps}")
 	endif()
 endfunction()
 
@@ -380,7 +380,7 @@ function( cpfAddAbiDumpTarget package binaryTarget headerListFile )
 	# set target properties
 	cpfToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} )
 	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES_${configSuffix} ${abiDumpFile} )
-	set_property(TARGET ${binaryTarget} PROPERTY CPF_ABI_DUMP_SUBTARGET ${targetName} )
+	set_property(TARGET ${binaryTarget} PROPERTY INTERFACE_ABI_DUMP_SUBTARGET ${targetName} )
 
 endfunction()
 
@@ -519,7 +519,7 @@ to ensure that abi dump files become available for following builds." )
 		DEPENDS ${abiDumpTarget} ${reportFile} ${stampFile}
 	)
 
-	set_property(TARGET ${package} APPEND PROPERTY CPF_ABI_CHECK_SUBTARGETS ${targetName} )
+	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_ABI_CHECK_SUBTARGETS ${targetName} )
 	
 	set(${reportFileOut} ${reportFile} PARENT_SCOPE)
 

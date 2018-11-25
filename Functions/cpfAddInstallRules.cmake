@@ -99,7 +99,7 @@ endfunction()
 #
 function( cpfInstallDebugFiles package )
 
-	get_property(targets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
+	get_property(targets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
 
 	cpfGetConfigurations( configs )
 	foreach( config ${configs})
@@ -272,9 +272,9 @@ function( cpfInstallAbiDumpFiles package )
 	set(installedPackageFiles)
 
 	# get files from abiDump targets
-	get_property( binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
+	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
 	foreach(binaryTarget ${binaryTargets})
-		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY CPF_ABI_DUMP_SUBTARGET )
+		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY INTERFACE_ABI_DUMP_SUBTARGET )
 		if(abiDumpTarget)
 
 			cpfGetCurrentDumpFile( dumpFile ${package} ${binaryTarget})
@@ -545,7 +545,7 @@ function( cpfInstallSources package )
 
 	# Install rules for production headers
 	set(packageSourceFiles)
-	get_property( binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS )
+	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
 	foreach(target ${binaryTargets})
 		get_target_sources_without_prefix_header( sources ${target})
 		cpfListAppend(packageSourceFiles ${sources})

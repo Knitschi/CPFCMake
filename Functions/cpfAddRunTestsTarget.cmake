@@ -9,7 +9,7 @@ include(cpfLocations)
 function( cpfAddGlobalRunAllTestsTarget packages)
 
 	if(CPF_ENABLE_RUN_TESTS_TARGET)
-		cpfAddSubTargetBundleTarget( runAllTests "${packages}" CPF_RUN_CPP_TESTS_SUBTARGET "")
+		cpfAddSubTargetBundleTarget( runAllTests "${packages}" INTERFACE_CPF_RUN_CPP_TESTS_SUBTARGET "")
 	endif()
 	
 endfunction()
@@ -22,7 +22,7 @@ endfunction()
 function( cpfAddGlobalRunUnitTestsTarget packages)
 
 	if(CPF_ENABLE_RUN_TESTS_TARGET)
-		cpfAddSubTargetBundleTarget( runFastTests "${packages}" CPF_RUN_FAST_TESTS_SUBTARGET "")
+		cpfAddSubTargetBundleTarget( runFastTests "${packages}" INTERFACE_CPF_RUN_FAST_TESTS_SUBTARGET "")
 	endif()
 	
 endfunction()
@@ -41,11 +41,11 @@ function( cpfAddRunCppTestsTargets package)
 		
 		# add target that runs all tests
 		cpfAddRunCppTestTarget( runTargetName ${package} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX} "*" )
-        set_property( TARGET ${package} PROPERTY CPF_RUN_CPP_TESTS_SUBTARGET ${runTargetName})
+        set_property( TARGET ${package} PROPERTY INTERFACE_CPF_RUN_CPP_TESTS_SUBTARGET ${runTargetName})
 
 		# add target that runs only the fast tests
 		cpfAddRunCppTestTarget( runTargetName ${package} runFastTests_ "*FastFixture*:*FastTests*" )
-        set_property( TARGET ${package} PROPERTY CPF_RUN_FAST_TESTS_SUBTARGET ${runTargetName})
+        set_property( TARGET ${package} PROPERTY INTERFACE_CPF_RUN_FAST_TESTS_SUBTARGET ${runTargetName})
 
 	endif()
 	
@@ -145,7 +145,7 @@ function( cpfAddCustomTestTarget runTestsCommand sourceFiles dependedOnExternalF
 	)
 
 	set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/pipeline")
-	set_property( TARGET ${package} PROPERTY CPF_RUN_TESTS_SUBTARGET ${runTargetName})
+	set_property( TARGET ${package} PROPERTY INTERFACE_RUN_TESTS_SUBTARGET ${runTargetName})
 
 endfunction()
 

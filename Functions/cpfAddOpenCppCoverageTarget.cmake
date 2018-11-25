@@ -19,7 +19,7 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
         #Locations
         set(htmlReportDir ${CPF_PROJECT_HTML_ABS_DIR}/${CPF_OPENCPPCOVERAGE_DIR})
 
-        cpfGetSubtargets(opencppcoverageTargets "${packages}" CPF_OPENCPPCOVERAGE_SUBTARGET)
+        cpfGetSubtargets(opencppcoverageTargets "${packages}" INTERFACE_CPF_OPENCPPCOVERAGE_SUBTARGET)
         if(opencppcoverageTargets)
 
             foreach( target ${opencppcoverageTargets})
@@ -123,7 +123,7 @@ function( cpfAddOpenCppCoverageTarget package)
 			)
 
 			# set properties related to the static analysis target
-			set_property( TARGET ${package} PROPERTY CPF_OPENCPPCOVERAGE_SUBTARGET ${targetName})
+			set_property( TARGET ${package} PROPERTY INTERFACE_CPF_OPENCPPCOVERAGE_SUBTARGET ${targetName})
 			set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
 			set_property( TARGET ${targetName} PROPERTY CPF_CPPCOVERAGE_OUTPUT ${coverageOutputFiles} )
 		endif()

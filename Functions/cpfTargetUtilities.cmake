@@ -31,7 +31,7 @@ endfunction()
 function( cpfGetSharedLibrarySubTargets librarySubTargetsOut package)
 
 	set(libraryTargets)
-	get_property( binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
+	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
 	foreach( binaryTarget ${binaryTargets})
 		cpfTargetIsDynamicLibrary( isDynamic ${binaryTarget})
 		if(isDynamic)

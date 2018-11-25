@@ -13,7 +13,7 @@ function( cpfAddGlobalValgrindTarget packages)
 
     cpfIsGccClangDebug(gccClangDebug)
     if(gccClangDebug)
-        cpfAddSubTargetBundleTarget( valgrind "${packages}" CPF_VALGRIND_SUBTARGET "")
+        cpfAddSubTargetBundleTarget( valgrind "${packages}" INTERFACE_CPF_VALGRIND_SUBTARGET "")
     endif()
 
 endfunction()
@@ -63,7 +63,7 @@ function( cpfAddValgrindTarget package)
 				DEPENDS ${productionLib} ${testTarget} ${stampFile}
 			)
 
-			set_property( TARGET ${package} PROPERTY CPF_VALGRIND_SUBTARGET ${targetName})
+			set_property( TARGET ${package} PROPERTY INTERFACE_CPF_VALGRIND_SUBTARGET ${targetName})
 			set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
 
 		endif()

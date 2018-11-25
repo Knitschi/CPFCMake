@@ -383,7 +383,7 @@ function( cpfGetSubtargets subTargetsOut packages subtargetProperty)
 			cpfListAppend( targets ${subTarget} )
 
 			# check for subtargets that belong to the binary targets
-			get_property(binaryTargets TARGET ${package} PROPERTY CPF_BINARY_SUBTARGETS)
+			get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
 			foreach(binaryTarget ${binaryTargets})
 				get_property(subTarget TARGET ${binaryTarget} PROPERTY ${subtargetProperty})
 				cpfListAppend( targets ${subTarget} )
