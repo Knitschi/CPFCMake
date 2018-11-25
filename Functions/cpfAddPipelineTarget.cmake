@@ -15,7 +15,6 @@ function( cpfAddPipelineTarget packages)
 	# A collection of the targets that should be contained in the pipeline.
 	set( targets
 		acyclic
-		doxygen
 		distributionPackages 	# Because of the global nature of the clearLastBuild command that is included in this target, we can not depend on the package targets directly.
 		opencppcoverage			# Because the global target assembles the OpenCppCoverage report from the individual reports, we can not use properties for this.
 	)
@@ -41,10 +40,12 @@ function( cpfAddPipelineTarget packages)
 	endif()
 	
 	cpfGetTargetsFromProperties( targetsFromProperties "${packages}" "${pipelineSubTargetProperties}" )
+	set(allTargets ${targetsFromProperties} ${targets} ${packages} )
+	list(REMOVE_DUPLICATES allTargets)
 
     # only use the custom targets that the user has enabled
     set(existingTargets)
-    foreach(target ${targetsFromProperties} ${targets})
+    foreach(target ${allTargets})
         if(TARGET ${target})
             cpfListAppend( existingTargets ${target})
         endif()

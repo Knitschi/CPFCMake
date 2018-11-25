@@ -11,7 +11,10 @@ include(cpfAddCppPackage)
 #----------------------------------------------------------------------------------------
 # Adds a package that runs doxygen on the given packages in your ci-project.
 # The package can also contain global documentation that does not belong to
-# any other package in your ci-project.
+# any other package in your ci-project. 
+#
+# All files specified with the key-word arguments are added to
+# the targets source files.
 #
 # Keyword arguments:
 #
@@ -171,7 +174,7 @@ function( cpfAddDoxygenPackage )
 	add_custom_target(
 		${package}
 		DEPENDS ${doxyIndexerStampFile} ${targetDependencies}
-		SOURCES  ${ARG_SOURCES}
+		SOURCES ${ARG_SOURCES} ${ARG_DOXYGEN_CONFIG_FILE} ${ARG_DOXYGEN_LAYOUT_FILE} ${ARG_DOXYGEN_STYLESHEET_FILE} ${ARG_HTML_HEADER} ${ARG_HTML_FOOTER} ${ARG_PROJECT_LOGO}
 	)
 	set_property( TARGET ${package} PROPERTY FOLDER ${package} )
 	cpfSetIDEDirectoriesForTargetSources(${package})
