@@ -1042,7 +1042,7 @@ function( cpfGetPackages allPackagesOut ownedPackagesOut externalPackagesOut roo
 	endforeach()
 
 	if(NOT packageList)
-		message(WARNING "File \"${fullOwnedPackagesFile}\" is missing a definition for cache variable CPF_PACKAGES")
+		message(WARNING "File \"${fullOwnedPackagesFile}\" is missing a definition for variable CPF_PACKAGES")
 	endif()
 
 	# parse the package list
