@@ -44,7 +44,7 @@ set( files
 	Functions/cpfAddValgrindTarget.cmake
 	Functions/cpfCustomTargetUtilities.cmake
 	Functions/cpfGitUtilities.cmake
-	Functions/cpfInit.cmake
+	Functions/cpfAddCIProject.cmake
 	Functions/cpfInitPackageProject.cmake
 	Functions/cpfListUtilities.cmake
 	Functions/cpfMiscUtilities.cmake

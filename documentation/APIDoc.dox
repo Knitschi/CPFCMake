@@ -46,13 +46,12 @@ documentation of that namespace.
 
 \code
 cpfAddCppPackage(
-    PACKAGE_NAME name
+    PACKAGE_NAMESPACE namespace
+    TYPE [GUI_APP|CONSOLE_APP|LIB]
     [BRIEF_DESCRIPTION description]
     [LONG_DESCRIPTION description]
     [HOMEPAGE url]
     [MAINTAINER_EMAIL address]
-    PACKAGE_NAMESPACE namespace
-    TYPE [GUI_APP|CONSOLE_APP|LIB]
     [PUBLIC_HEADER header1 [header2 ...]]
     PRODUCTION_FILES file1 [file2 ...]
     [PUBLIC_FIXTURE_HEADER header1 [header2 ...]]
@@ -88,11 +87,17 @@ documentation generation.
 
 ### Keyword Arguments ###
 
-#### PACKAGE_NAME ####
+#### PACKAGE_NAMESPACE ####
 
-The should be retrieved with the \ref cpfInitPackageProject function to make
-sure that it is the name of the current source directory.
-This will be used as the name of the main binary target of the package.
+\see cpfInitPackageProject
+
+#### TYPE ####
+
+The type of the main binary target of the package.
+
+\c GUI_APP = Executable with switched of console. Use this for Qt applications with GUI; 
+\c CONSOLE_APP = Console application; 
+\c LIB = Library
 
 #### [BRIEF_DESCRIPTION] ####
 
@@ -115,18 +120,6 @@ This is required for Debian packages.
 
 An email address under which the maintainers of the package can be reached.
 This is required for Debian packages.
-
-#### PACKAGE_NAMESPACE ####
-
-\see cpfInitPackageProject
-
-#### TYPE ####
-
-The type of the main binary target of the package.
-
-\c GUI_APP = Executable with switched of console. Use this for Qt applications with GUI; 
-\c CONSOLE_APP = Console application; 
-\c LIB = Library
 
 #### PUBLIC_HEADER ####
 

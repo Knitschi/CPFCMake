@@ -29,7 +29,7 @@ set( CPF_CONFIG_FILE_ENDING ".config.cmake")
 
 # other ci-project files
 set( CPF_CIBUILDCONFIGS_FILE "${CMAKE_SOURCE_DIR}/${CPF_PROJECT_CONFIGURATIONS_DIR}/cpfCIBuildConfigurations.json")
-set( CPF_OWNED_PACKAGES_FILE "cpfPackages.cmake")
+set( CPF_PACKAGES_FILE "cpfPackages.cmake")
 
 ###### Parameterized locations ######
 

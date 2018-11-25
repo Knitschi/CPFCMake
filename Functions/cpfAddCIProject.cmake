@@ -38,6 +38,73 @@ endif()
 cpfFindConfigFile(configFile "${CPF_CONFIG}")
 include("${configFile}")
 
+
+
+#----------------------------------------------------------------------------------------
+# Note that the packages that are owned by the CPF CI-Project must be added via the
+# cpfPackages.cmake file.
+#
+# Keyword Arguments:
+# [GLOBAL_FILES]		A list of files that will be added to the globalFiles file package.
+#
+function( cpfAddPackages )
+
+	cmake_parse_arguments( ARG "" "" "GLOBAL_FILES" ${ARGN})
+
+	cpfInit()
+
+	# set various flags non binary relevant flats like warnings as errors and higher warning levels.
+	cpfSetDynamicAndCosmeticCompilerOptions()
+
+	# We assume that the external packages are of lower level then the owned ones.
+	# Is that always true? If not, we must provide a way to add them sorted by level.
+	cpfGetAllPackages(packages)
+	foreach( package ${packages} ) 
+		add_subdirectory(${package})
+	endforeach()
+
+	# GlobalFiles
+	# A target that holds some project wide files
+	cpfGetFullConfigFilePath(configFile)
+	set( SOLUTION_FILES 
+		${ARG_GLOBAL_FILES}
+		CMakeLists.txt
+		"${configFile}"
+		"${CMAKE_BINARY_DIR}/CMakeCache.txt"
+		"${CPF_PACKAGES_FILE}"
+	)
+
+	if(CPF_ENABLE_CLANG_TIDY_TARGET)
+		cpfListAppend( SOLUTION_FILES 
+			"${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}"
+		)
+	endif()
+
+	add_custom_target( globalFiles SOURCES ${SOLUTION_FILES})
+
+	# staticAnalysis
+	cpfAddGlobalClangTidyTarget("${packages}")
+	# acyclic
+	cpfAddAcyclicTarget()
+	# runUnitTests
+	cpfAddGlobalRunUnitTestsTarget("${packages}")
+	# runAllTests
+	cpfAddGlobalRunAllTestsTarget("${packages}")
+	# valgrind
+	cpfAddGlobalValgrindTarget("${packages}")
+	# opencppcoverage
+	cpfAddGlobalOpenCppCoverageTarget("${packages}")
+	# distributionPackages
+	cpfAddGlobalCreatePackagesTarget("${packages}")
+	# abiComplianceCheck
+	cpfAddGlobalAbiCheckerTarget("${packages}")
+	# pipeline
+	cpfAddPipelineTarget("${packages}")
+
+
+endfunction()
+
+
 #----------------------------------------------------------------------------------------
 function( cpfInit )
 
@@ -85,61 +152,8 @@ function( cpfSetPolicies )
 	cmake_policy(SET CMP0007 NEW) # Do not ignore empty list elements
 endfunction()
 
-#----------------------------------------------------------------------------------------
-# Note that the packages that are owned by the CPF CI-Project must be added via the
-# cpfPackages.cmake file.
-function( cpfAddPackages globalFiles )
-
-	# set various flags non binary relevant flats like warnings as errors and higher warning levels.
-	cpfSetDynamicAndCosmeticCompilerOptions()
-
-	# We assume that the external packages are of lower level then the owned ones.
-	# Is that always true? If not, we must provide a way to add them sorted by level.
-	cpfGetAllPackages(packages)
-	foreach( package ${packages} ) 
-		add_subdirectory(${package})
-	endforeach()
-
-	# GlobalFiles
-	# A target that holds some project wide files
-	cpfGetFullConfigFilePath(configFile)
-	set( SOLUTION_FILES 
-		${globalFiles}
-		CMakeLists.txt
-		"${configFile}"
-		"${CMAKE_BINARY_DIR}/CMakeCache.txt"
-		"${CPF_OWNED_PACKAGES_FILE}"
-	)
-
-	if(CPF_ENABLE_CLANG_TIDY_TARGET)
-		cpfListAppend( SOLUTION_FILES 
-			"${CMAKE_BINARY_DIR}/${CPF_GRAPHVIZ_OPTIONS_FILE}"
-		)
-	endif()
-
-	add_custom_target( globalFiles SOURCES ${SOLUTION_FILES})
-
-	# staticAnalysis
-	cpfAddGlobalClangTidyTarget("${packages}")
-	# acyclic
-	cpfAddAcyclicTarget()
-	# runUnitTests
-	cpfAddGlobalRunUnitTestsTarget("${packages}")
-	# runAllTests
-	cpfAddGlobalRunAllTestsTarget("${packages}")
-	# valgrind
-	cpfAddGlobalValgrindTarget("${packages}")
-	# opencppcoverage
-	cpfAddGlobalOpenCppCoverageTarget("${packages}")
-	# distributionPackages
-	cpfAddGlobalCreatePackagesTarget("${packages}")
-	# abiComplianceCheck
-	cpfAddGlobalAbiCheckerTarget("${packages}")
-	# pipeline
-	cpfAddPipelineTarget("${packages}")
 
 
-endfunction()
 
 
 

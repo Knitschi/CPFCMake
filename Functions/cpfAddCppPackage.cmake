@@ -30,9 +30,12 @@ function( cpfAddCppPackage )
 		GENERATE_PACKAGE_DOX_FILES
 	) 
 	
-	set( singleValueKeywords 
+	set( requiredSingleValueKeywords 
 		PACKAGE_NAMESPACE
 		TYPE
+	)
+
+	set( optionalSingleValueKeywords
 		BRIEF_DESCRIPTION
 		LONG_DESCRIPTION
 		HOMEPAGE
@@ -41,9 +44,12 @@ function( cpfAddCppPackage )
 		ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS
 	)
 
-	set( multiValueKeywords 
-		PUBLIC_HEADER
+	set( requiredMultiValueKeywords 
 		PRODUCTION_FILES
+	)
+
+	set( optionalMultiValueKeywords
+		PUBLIC_HEADER
 		PUBLIC_FIXTURE_HEADER
 		FIXTURE_FILES
 		TEST_FILES
@@ -57,32 +63,36 @@ function( cpfAddCppPackage )
 	cmake_parse_arguments(
 		ARG 
 		"${optionKeywords}" 
-		"${singleValueKeywords}"
-		"${multiValueKeywords}"
+		"${requiredSingleValueKeywords};${optionalSingleValueKeywords}"
+		"${requiredMultiValueKeywords};${optionalMultiValueKeywords}"
 		${ARGN} 
 	)
+
+	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddCppPackage()")
 
 	# parse argument sublists
 	set( allKeywords ${singleValueKeywords} ${multiValueKeywords})
 	cpfGetKeywordValueLists( pluginOptionLists PLUGIN_DEPENDENCIES "${allKeywords}" "${ARGN}" pluginOptions)
 	cpfGetKeywordValueLists( distributionPackageOptionLists DISTRIBUTION_PACKAGES "${allKeywords}" "${ARGN}" packagOptions)
 	
-	cpfDebugMessage("Add Package ${ARG_PACKAGE_NAME}")
+	cpfGetPackageName(package)
+
+	cpfDebugMessage("Add package ${package}")
 	
 	# By default build test targets.
 	# Hunter sets this to off in order to skip test building.
-	if( NOT "${${ARG_PACKAGE_NAME}_BUILD_TESTS}" STREQUAL OFF )
-		set( ${ARG_PACKAGE_NAME}_BUILD_TESTS ON)
+	if( NOT "${${package}_BUILD_TESTS}" STREQUAL OFF )
+		set( ${package}_BUILD_TESTS ON)
 	endif()
 
 	# ASERT ARGUMENTS
 
 	# Make sure that linked targets have already been created.
-	cpfDebugAssertLinkedLibrariesExists( linkedLibraries ${ARG_PACKAGE_NAME} "${ARG_LINKED_LIBRARIES}")
-	cpfDebugAssertLinkedLibrariesExists( linkedTestLibraries ${ARG_PACKAGE_NAME} "${ARG_LINKED_TEST_LIBRARIES}")
+	cpfDebugAssertLinkedLibrariesExists( linkedLibraries ${package} "${ARG_LINKED_LIBRARIES}")
+	cpfDebugAssertLinkedLibrariesExists( linkedTestLibraries ${package} "${ARG_LINKED_TEST_LIBRARIES}")
 	# If a library does not have a public header, it must be a user mistake
 	if( (${ARG_TYPE} STREQUAL LIB) AND (NOT ARG_PUBLIC_HEADER) )
-		message(FATAL_ERROR "Library package ${ARG_PACKAGE_NAME} has no public headers. The library can not be used without public headers, so please add the PUBLIC_HEADER argument to the cpfAddCppPackage() call.")
+		message(FATAL_ERROR "Library package ${package} has no public headers. The library can not be used without public headers, so please add the PUBLIC_HEADER argument to the cpfAddCppPackage() call.")
 	endif()
 
 	if(NOT ARG_VERSION_COMPATIBILITY_SCHEME)
@@ -96,7 +106,7 @@ function( cpfAddCppPackage )
 	# Add the binary targets
 	cpfAddPackageBinaryTargets( 
 		productionLibrary 
-		${ARG_PACKAGE_NAME} 
+		${package} 
 		${ARG_PACKAGE_NAMESPACE} 
 		${ARG_TYPE} 
 		"${ARG_PUBLIC_HEADER}" 
@@ -110,42 +120,42 @@ function( cpfAddCppPackage )
 	)
 
 	#set some properties
-	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CPF_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
-	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CPF_PACKAGE_HOMEPAGE ${ARG_HOMEPAGE} )
-	set_property(TARGET ${ARG_PACKAGE_NAME} PROPERTY CPF_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
+	set_property(TARGET ${package} PROPERTY CPF_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
+	set_property(TARGET ${package} PROPERTY CPF_PACKAGE_HOMEPAGE ${ARG_HOMEPAGE} )
+	set_property(TARGET ${package} PROPERTY CPF_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
 	
 	
 	# add other custom targets
 
 	# add a target the will be build before the binary target and that will copy all 
 	# depended on shared libraries to the targets output directory.
-	cpfAddDeploySharedLibrariesTarget(${ARG_PACKAGE_NAME})
+	cpfAddDeploySharedLibrariesTarget(${package})
 
 	# Adds target that runs clang-tidy on the given files.
     # Currently this is only added for the production target because clang-tidy does not filter out warnings that come over the GTest macros from external code.
     # When clang-tidy resolves the problem, static analysis should be executed for all binary targets.
     cpfAddClangTidyTarget(${productionLibrary})
-    cpfAddRunCppTestsTargets(${ARG_PACKAGE_NAME})
-	cpfAddValgrindTarget(${ARG_PACKAGE_NAME})
-	cpfAddOpenCppCoverageTarget(${ARG_PACKAGE_NAME})
+    cpfAddRunCppTestsTargets(${package})
+	cpfAddValgrindTarget(${package})
+	cpfAddOpenCppCoverageTarget(${package})
 
 	# Plugins must be added before the install targets
-	cpfAddPlugins( ${ARG_PACKAGE_NAME} "${pluginOptionLists}" )
+	cpfAddPlugins( ${package} "${pluginOptionLists}" )
 	 
 	# Adds a target the creates abi-dumps when using clang or gcc with debug options.
-	cpfAddAbiCheckerTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" "${ARG_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS}" )
+	cpfAddAbiCheckerTargets( ${package} "${distributionPackageOptionLists}" "${ARG_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS}" )
 	
 	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
 	if(${GENERATE_PACKAGE_DOX_FILES})
-		cpfAddPackageDocsTarget( packageLinkFile ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
+		cpfAddPackageDocsTarget( packageLinkFile ${package} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
 		list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
 	endif()
 
 	# Adds the install rules and the per package install targets.
-	cpfAddInstallRules( ${ARG_PACKAGE_NAME} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${ARG_VERSION_COMPATIBILITY_SCHEME} )
+	cpfAddInstallRules( ${package} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${ARG_VERSION_COMPATIBILITY_SCHEME} )
 
 	# Adds the targets that create the distribution packages.
-	cpfAddDistributionPackageTargets( ${ARG_PACKAGE_NAME} "${distributionPackageOptionLists}" )
+	cpfAddDistributionPackageTargets( ${package} "${distributionPackageOptionLists}" )
 
 endfunction() 
 
