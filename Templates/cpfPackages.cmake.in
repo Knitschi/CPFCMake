@@ -1,0 +1,14 @@
+#[[
+# The CPF_PACKAGES variable must define the packages that are added to this CI-project.
+# Packages must be sorted by their level in the dependency graph. Lower level packages must come first.
+# Use the EXTERNAL and OWNED keywords to mark packages as external or owned.
+# 
+# OWNED means that this CI-project is responsible for verifying the CI-pipeline and handling
+# the versioning of this package.
+# EXTERNAL means that some other CI-project owns this package.
+#
+set( CPF_PACKAGES
+    EXTERNAL cotire
+    OWNED MyPackage
+)
+]]

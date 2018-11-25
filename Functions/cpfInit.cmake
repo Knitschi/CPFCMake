@@ -88,28 +88,15 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Note that the packages that are owned by the CPF CI-Project must be added via the
 # cpfOwnedPackages.cmake file.
-function( cpfAddPackages externalPackages globalFiles )
+function( cpfAddPackages globalFiles )
 
 	# set various flags non binary relevant flats like warnings as errors and higher warning levels.
 	cpfSetDynamicAndCosmeticCompilerOptions()
 
-	# Read owned packages from the file
-	cpfGetOwnedPackages( ownedPackages ${CPF_ROOT_DIR})
-	set(packages ${ownedPackages})
-
-	# Add optional CMakeProjectFramework packages.
-	set( cpfPackageDirs
-		${CPF_PROJECT_CONFIGURATIONS_DIR}
-	)
-	foreach( dir ${cpfPackageDirs})
-		if((EXISTS ${CMAKE_SOURCE_DIR}/${dir}) AND (EXISTS ${CMAKE_SOURCE_DIR}/${dir}/CMakeLists.txt))
-			cpfListAppend( packages ${dir})
-		endif()
-	endforeach()
-
 	# We assume that the external packages are of lower level then the owned ones.
 	# Is that always true? If not, we must provide a way to add them sorted by level.
-	foreach( package ${externalPackages} ${packages} ) 
+	cpfGetAllPackages(packages)
+	foreach( package ${packages} ) 
 		add_subdirectory(${package})
 	endforeach()
 

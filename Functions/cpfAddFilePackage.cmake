@@ -23,10 +23,10 @@ function( cpfAddFilePackage )
     )
 
     
-    cpfGetPackageName(packageName)
+    cpfGetPackageName(package)
 
-    add_custom_target( ${packageName} SOURCES ${ARG_SOURCES} )
-    set_property( TARGET ${packageName} PROPERTY FOLDER ${packageName} )
-	cpfSetIDEDirectoriesForTargetSources(${packageName})
+    add_custom_target( ${package} SOURCES ${ARG_SOURCES} )
+    set_property( TARGET ${package} PROPERTY FOLDER ${package} )
+	cpfSetIDEDirectoriesForTargetSources(${package})
 
 endfunction()

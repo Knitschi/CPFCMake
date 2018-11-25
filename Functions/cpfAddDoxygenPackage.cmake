@@ -15,56 +15,67 @@ include(cpfAddCppPackage)
 #
 # Keyword arguments:
 #
-# SOURCES				Global documentation files. These files will be parsed by doxygen.
-# PACKAGES				The packages that will be parsed by doxygen.
-# EXCLUDED_PACKAGES		The packages that are not parsed by doxygen.
+# SOURCES					Global documentation files. These files will be parsed by doxygen.
+# ADDITIONAL_PACKAGES		Packages that are not owned by this ci-project, but should also be parsed by doxygen.
+# DOXYGEN_CONFIG_FILE		Absolute path to the used DoxygenConfig.txt file
+# DOXYGEN_LAYOUT_FILE		Absolute path to the used DoxygenLayout.xml file
+# DOXYGEN_STYLESHEET_FILE	Absolute path to the used DoxygenStylesheet.css file
+# [HTML_HEADER]				The header.html file used by doxygen.
+# [HTML_FOOTER]				The footer.html file used by doxygen.
+# [PROJECT_LOGO]			The an .svg or .png file that is used as the projects logo in the header.
+# [PLANT_UML_JAR]			The absolute path to the plantuml.jar which will enable you to use doxygens \startuml command.
 #
 function( cpfAddDoxygenPackage )
 
 	set( optionKeywords
 	) 
 
-	set( singleValueKeywords 
+	set( requiredSingleValueKeywords
+		DOXYGEN_CONFIG_FILE
+		DOXYGEN_LAYOUT_FILE
+		DOXYGEN_STYLESHEET_FILE
 	)
 
-	set( multiValueKeywords 
+	set( optionalSingleValueKeywords
+		HTML_HEADER
+		HTML_FOOTER
+		PROJECT_LOGO
+		PLANT_UML_JAR
+	)
+
+	set( requiredMultiValueKeywords 
 		SOURCES
-		PACKAGES
-		EXCLUDED_PACKAGES
+	)
+
+	set( optionalMultiValueKeywords 
+		ADDITIONAL_PACKAGES
 	)
 
 	cmake_parse_arguments(
 		ARG 
 		"${optionKeywords}" 
-		"${singleValueKeywords}"
-		"${multiValueKeywords}"
-		${ARGN} 
+		"${requiredSingleValueKeywords};${optionalSingleValueKeywords}"
+		"${requiredMultiValueKeywords};${optionalMultiValueKeywords}"
+		${ARGN}
 	)
 
-	cpfGetPackageName( packageName "${CMAKE_CURRENT_SOURCE_DIR}")
+	cpfAssertKeywordArgumentsHaveValue( "${singleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddDoxygenPackage()")
+
+	cpfGetPackageName( package )
 
 	# Locations
-	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${packageName}" )
+	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${package}" )
 	set(tempDoxygenConfigFile "${targetBinaryDir}/tempDoxygenConfig.txt" )
 	set(reducedGraphFile "${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/CPFDependenciesTransitiveReduced.dot")
-	set(doxygenConfigFile "${CMAKE_SOURCE_DIR}/${CPF_DOCUMENTATION_DIR}/DoxygenConfig.txt")
-	set(doxygenLayoutFile "${CMAKE_SOURCE_DIR}/${CPF_DOCUMENTATION_DIR}/DoxygenLayout.xml")
-	set(doxygenStylesheetFile "${CMAKE_SOURCE_DIR}/${CPF_DOCUMENTATION_DIR}/DoxygenStylesheet.css")
 	set(htmlCgiBinDir "${CPF_PROJECT_HTML_ABS_DIR}/${CPF_CGI_BIN_DIR}" )
 
-	# Generate some doxygen config files on the first run.
-	# DoxygenConfig.txt
-	configureFileIfNotExists( "${CPF_ABS_TEMPLATE_DIR}/DoxygenConfig.txt.in" ${doxygenConfigFile})
-	# DoxygenLayout.xml
-	configureFileIfNotExists("${CPF_ABS_TEMPLATE_DIR}/DoxygenLayout.xml.in" ${doxygenLayoutFile})
-	# DoxygenStylesheet.css
-	configureFileIfNotExists( "${CPF_ABS_TEMPLATE_DIR}/DoxygenStylesheet.css.in" ${doxygenStylesheetFile})
-
 	# Get dependencies
+	cpfGetOwnedPackages( documentedPackages ${CPF_ROOT_DIR})
+	cpfListAppend(documentedPackages "${ARG_ADDITIONAL_PACKAGES}")
 	set(fileDependencies)
 	set(targetDependencies)
 	set(hasGeneratedDocumentation FALSE)
-	foreach( package ${ARG_PACKAGES})
+	foreach( package ${documentedPackages})
 		cpfGetPackageDoxFilesTargetName( doxFilesTarget ${package} )
 		if( TARGET ${doxFilesTarget}) # not all packages may have the doxFilesTarget
 			list(APPEND targetDependencies ${doxFilesTarget})
@@ -94,28 +105,42 @@ function( cpfAddDoxygenPackage )
 	list(APPEND appendedLines "PROJECT_NAME  = ${PROJECT_NAME}")
 	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}\"")
 	list(APPEND appendedLines "DOTFILE_DIRS = \"${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
-	list(APPEND appendedLines "LAYOUT_FILE = \"${doxygenLayoutFile}\"")
-	list(APPEND appendedLines "HTML_EXTRA_STYLESHEET = \"${doxygenStylesheetFile}\"")
+	list(APPEND appendedLines "LAYOUT_FILE = \"${ARG_DOXYGEN_LAYOUT_FILE}\"")
+	list(APPEND appendedLines "HTML_EXTRA_STYLESHEET = \"${ARG_DOXYGEN_STYLESHEET_FILE}\"")
+	if(ARG_HTML_HEADER)
+		list(APPEND appendedLines "HTML_HEADER = \"${ARG_HTML_HEADER}\"")
+	endif()
+	if(ARG_HTML_FOOTER)
+		list(APPEND appendedLines "HTML_FOOTER = \"${ARG_HTML_FOOTER}\"")
+	endif()
+	if(ARG_PROJECT_LOGO)
+		list(APPEND appendedLines "PROJECT_LOGO = \"${ARG_PROJECT_LOGO}\"")
+	endif()
+
 	# input files
 	list(APPEND appendedLines "INPUT = \"${CMAKE_SOURCE_DIR}\"")
 	if(hasGeneratedDocumentation)
-		cpfGetGeneratedDocumentationDirectory(docsDir)
+		cpfGetGeneratedDoxygenDirectory(docsDir)
 		list(APPEND appendedLines "INPUT += \"${docsDir}\"")
 	endif()
 
-	# Exclude external packges
-	foreach( externalPackage ${ARG_EXCLUDED_PACKAGES})
-		list(APPEND appendedLines "EXCLUDE += \"${CMAKE_SOURCE_DIR}/${externalPackage}\"")
+	# Exclude non-owned packages from the documentation unless they were not explicitly added to the documentation.
+	cpfGetAllPackages( allPackages )
+	foreach( package ${allPackages})
+		cpfContains( isDocumented "${documentedPackages}" ${package} )
+		if(NOT isDocumented)
+			list(APPEND appendedLines "EXCLUDE += \"${CMAKE_SOURCE_DIR}/${package}\"")
+		endif()
 	endforeach()
 
 	# TODO get plantuml.jar with hunter
-	if(CPF_PLANT_UML_JAR)
+	if(ARG_PLANT_UML_JAR)
 		message( STATUS "Enable UML diagrams in doxygen comments.")
-		list(APPEND appendedLines "PLANTUML_JAR_PATH = \"${CPF_PLANT_UML_JAR}\"")
+		list(APPEND appendedLines "PLANTUML_JAR_PATH = \"${ARG_PLANT_UML_JAR}\"")
 	endif()
 
 	cpfAddAppendLinesToFileCommands( 
-		INPUT ${doxygenConfigFile}
+		INPUT ${ARG_DOXYGEN_CONFIG_FILE}
 		OUTPUT ${tempDoxygenConfigFile}
 		ADDED_LINES ${appendedLines} 
 	)
@@ -124,7 +149,7 @@ function( cpfAddDoxygenPackage )
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
 	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/searchdata.xml)
 	cpfGetAllNonGeneratedPackageSources(sourceFiles "${ARG_PACKAGES}")
-	set( allDependedOnFiles ${tempDoxygenConfigFile} ${doxygenLayoutFile} ${doxygenStylesheetFile} ${copiedDependencyGraphFile} ${reducedGraphFile} ${sourceFiles} ${fileDependencies} ${globalFiles} )
+	set( allDependedOnFiles ${tempDoxygenConfigFile} ${ARG_DOXYGEN_LAYOUT_FILE} ${ARG_DOXYGEN_STYLESHEET_FILE} ${copiedDependencyGraphFile} ${reducedGraphFile} ${sourceFiles} ${fileDependencies} ${globalFiles} )
 	cpfAddStandardCustomCommand(
 		OUTPUT ${searchDataXmlFile}
 		DEPENDS ${allDependedOnFiles}
@@ -144,12 +169,12 @@ function( cpfAddDoxygenPackage )
 
 	# Now add the target
 	add_custom_target(
-		${packageName}
+		${package}
 		DEPENDS ${doxyIndexerStampFile} ${targetDependencies}
 		SOURCES  ${ARG_SOURCES}
 	)
-	set_property( TARGET ${packageName} PROPERTY FOLDER ${packageName} )
-	cpfSetIDEDirectoriesForTargetSources(${packageName})
+	set_property( TARGET ${package} PROPERTY FOLDER ${package} )
+	cpfSetIDEDirectoriesForTargetSources(${package})
 
 endfunction()
 
@@ -206,7 +231,7 @@ endfunction()
 # 
 function( cpfAddPackageDocsTarget fileOut package packageNamespace briefDescription longDescription)
 
-	cpfGetGeneratedDocumentationDirectory(documentationDir)
+	cpfGetGeneratedDoxygenDirectory(documentationDir)
 	file(MAKE_DIRECTORY ${documentationDir} )
 
 	cpfGetPackageDoxFilesTargetName( targetName ${package} )
@@ -230,8 +255,8 @@ function( cpfGetPackageDoxFilesTargetName targetNameOut package)
 endfunction()
 
 #-------------------------------------------------------------------------
-function( cpfGetGeneratedDocumentationDirectory dirOut )
-	set(${dirOut} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${CPF_GENERATED_DOCS_DIR}" PARENT_SCOPE)
+function( cpfGetGeneratedDoxygenDirectory dirOut )
+	set(${dirOut} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/doxygen" PARENT_SCOPE)
 endfunction()
 
 #-------------------------------------------------------------------------
@@ -284,14 +309,14 @@ endfunction()
 
 #-------------------------------------------------------------------------
 function( cpfGetPackageDocumentationFileName fileOut package )
-	cpfGetGeneratedDocumentationDirectory(documentationDir)
+	cpfGetGeneratedDoxygenDirectory(documentationDir)
 	set( ${fileOut} "${documentationDir}/${package}Documentation.dox" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
 function( cpfGetCompatiblityReportLinks linksOut package )
 		
-	cpfGetGeneratedDocumentationDirectory(documentationDir)
+	cpfGetGeneratedDoxygenDirectory(documentationDir)
 	set(doxFile "${documentationDir}/${package}CompatibilityReportLinks.dox" )
 
 	set(linkLines)

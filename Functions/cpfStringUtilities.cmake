@@ -5,6 +5,17 @@ include_guard(GLOBAL)
 include(cpfListUtilities)
 
 #----------------------------------------------------------------------------------------
+# Returns TRUE if the two strings are equal, otherwise FALSE
+#
+function( cpfStrequal equalOut string1 string2)
+	set(equal FALSE)
+	if(${string1} STREQUAL ${string2})
+		set(equal TRUE)
+	endif()
+	set(${equalOut} ${equal} PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # Splits the given string into substrings at the location of the separator char
 # The separator will not be contained in the returned substrings
 # 

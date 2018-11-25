@@ -36,7 +36,6 @@ Here is a list of targets that can exist once per CPF project.
 - \ref ALL_BUILD
 - \ref clang-tidy
 - \ref distributionPackages
-- \ref doxygen
 - \ref globalFiles
 - \ref install
 - \ref opencppcoverage
@@ -85,11 +84,6 @@ This target bundles the \ref clangtidy_package targets.
 \subsubsection distributionPackages distributionPackages
 
 This target bundles the \ref distributionPackages_package targets.
-
-\subsubsection doxygen doxygen
-
-This target runs doxygen to generate the documentation for all owned packages.
-It can be disabled with the \c CPF_ENABLE_DOXYGEN_TARGET variable.
 
 \subsubsection globalFiles globalFiles
 

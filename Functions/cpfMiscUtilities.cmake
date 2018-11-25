@@ -87,6 +87,20 @@ function( cpfAssertScriptArgumentDefined variableName )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# This function can be used to assert that key-word arguments were set.
+#
+function( cpfAssertKeywordArgumentsHaveValue keywords keywordPrefix function )
+
+	foreach(keyword ${keywords})
+		if(NOT ${keywordPrefix}_${keyword})
+			message(FATAL_ERROR "Function ${function} requires keyword argument ${keyword}")
+		endif()
+	endforeach()
+
+endfunction()
+
+
+#----------------------------------------------------------------------------------------
 # A version of the configure_file() function that asserts that all given variables have
 # values when the function is called. This is supposed to prevent errors where configure_file()
 # is broken because variables that are used in the configured file are renamed.
@@ -398,3 +412,6 @@ function( getAbsPathesForSourceFilesInDir absfilePathsOut target dir)
 	set( ${absfilePathsOut} "${subPaths}" PARENT_SCOPE)
 
 endfunction()
+
+
+

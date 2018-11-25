@@ -10,21 +10,21 @@ include(cpfMiscUtilities)
 macro( cpfInitPackageProject packageNameSpace )
 
 	# The package name is defined by the sub-directory name
-    cpfGetPackageName( packageName )
+    cpfGetPackageName( package )
 
-	cpfConfigurePackageVersionFile( ${packageName} )
+	cpfConfigurePackageVersionFile( ${package} )
 
 	# get the version number of the packages version file
-	cpfGetPackageVersionFromFile( packageVersion ${packageName} ${CMAKE_CURRENT_LIST_DIR})
-	message(STATUS "Package ${packageName} is now at version ${packageVersion}")
+	cpfGetPackageVersionFromFile( packageVersion ${package} ${CMAKE_CURRENT_LIST_DIR})
+	message(STATUS "Package ${package} is now at version ${packageVersion}")
 	# Configure the c++ header file with the version.
-	cpfConfigurePackageVersionHeader( ${packageName} ${packageVersion} ${packageNameSpace})
+	cpfConfigurePackageVersionHeader( ${package} ${packageVersion} ${packageNameSpace})
 
 	cpfSplitVersion( major minor patch commitId ${packageVersion})
 
 	# create a sub-project for the package
 	project( 
-		${packageName} 
+		${package} 
 		VERSION ${major}.${minor}.${patch}
 		LANGUAGES CXX C
     )
@@ -40,8 +40,8 @@ endmacro()
 #-----------------------------------------------------------
 # Returns the name of the current source directory.
 function( cpfGetPackageName packageNameOut )
-    cpfGetParentDirectory( packageName "${CMAKE_CURRENT_SOURCE_DIR}/blub")
-    set(${packageNameOut} "${packageName}" PARENT_SCOPE)
+    cpfGetParentDirectory( package "${CMAKE_CURRENT_SOURCE_DIR}/blub")
+    set(${packageNameOut} "${package}" PARENT_SCOPE)
 endfunction()
 
 #-----------------------------------------------------------

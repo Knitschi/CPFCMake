@@ -51,6 +51,7 @@ set( files
 	Functions/cpfNumericUtilities.cmake
 	Functions/cpfPathUtilities.cmake
 	Functions/cpfProjectUtilities.cmake
+	Functions/cpfReadVariablesFromFile.cmake
 	Functions/cpfStringUtilities.cmake
 	Functions/cpfTestUtilities.cmake
 	Functions/cpfTargetUtilities.cmake
@@ -63,7 +64,6 @@ set( files
 	Scripts/updateExistingWebPage.cmake
 	Templates/.gitignore.in
 	Templates/${CPF_GRAPHVIZ_OPTIONS_FILE}.in
-	Templates/DoxygenConfig.txt.in
 	Templates/packageVersion.cmake.in
 	Templates/packageVersion.h.in
 	Tests/cpfListUtilities_tests.cmake
