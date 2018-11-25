@@ -103,6 +103,12 @@ function( cpfAddCppPackage )
 	# make sure that the properties of the imported targets follow our assumptions
 	cpfNormalizeImportedTargetProperties( "${linkedLibraries};${linkedTestLibraries}" )
 
+	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
+	if(${ARG_GENERATE_PACKAGE_DOX_FILES})
+		cpfAddPackageDocsTarget( packageLinkFile ${package} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
+		list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
+	endif()
+
 	# Add the binary targets
 	cpfAddPackageBinaryTargets( 
 		productionLibrary 
@@ -145,12 +151,6 @@ function( cpfAddCppPackage )
 	# Adds a target the creates abi-dumps when using clang or gcc with debug options.
 	cpfAddAbiCheckerTargets( ${package} "${distributionPackageOptionLists}" "${ARG_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS}" )
 	
-	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
-	if(${ARG_GENERATE_PACKAGE_DOX_FILES})
-		cpfAddPackageDocsTarget( packageLinkFile ${package} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
-		list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
-	endif()
-
 	# Adds the install rules and the per package install targets.
 	cpfAddInstallRules( ${package} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${ARG_VERSION_COMPATIBILITY_SCHEME} )
 
