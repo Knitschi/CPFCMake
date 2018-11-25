@@ -242,6 +242,8 @@ function( cpfAddPackageDocsTarget fileOut package packageNamespace briefDescript
 	# Always create the basic package documentation page.	
 	cpfAddPackageDocumentationDoxFileCommands( documentationFile ${package} ${packageNamespace})
 
+	devMessage("${package}")
+
 	add_custom_target(
 		${targetName}
 		DEPENDS ${documentationFile} ${compatibilityReportLinksDoxFile} ${openCppCoverageLinksDoxFile} # ${stampFile}

@@ -71,7 +71,7 @@ function( cpfAddCppPackage )
 	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddCppPackage()")
 
 	# parse argument sublists
-	set( allKeywords ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
+	set( allKeywords ${optionKeywords} ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
 	cpfGetKeywordValueLists( pluginOptionLists PLUGIN_DEPENDENCIES "${allKeywords}" "${ARGN}" pluginOptions)
 	cpfGetKeywordValueLists( distributionPackageOptionLists DISTRIBUTION_PACKAGES "${allKeywords}" "${ARGN}" packagOptions)
 	
@@ -146,7 +146,7 @@ function( cpfAddCppPackage )
 	cpfAddAbiCheckerTargets( ${package} "${distributionPackageOptionLists}" "${ARG_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS}" )
 	
 	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
-	if(${GENERATE_PACKAGE_DOX_FILES})
+	if(${ARG_GENERATE_PACKAGE_DOX_FILES})
 		cpfAddPackageDocsTarget( packageLinkFile ${package} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
 		list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
 	endif()
