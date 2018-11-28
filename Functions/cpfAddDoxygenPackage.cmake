@@ -232,7 +232,7 @@ endfunction()
 # 
 # Despite all these problems, this solution seemed to be the most practical one.
 # 
-function( cpfAddPackageDocsTarget fileOut package packageNamespace briefDescription longDescription)
+function( cpfAddPackageDocsTarget package packageNamespace )
 
 	cpfGetGeneratedDoxygenDirectory(documentationDir)
 	file(MAKE_DIRECTORY ${documentationDir} )
@@ -244,11 +244,12 @@ function( cpfAddPackageDocsTarget fileOut package packageNamespace briefDescript
 
 	add_custom_target(
 		${targetName}
-		DEPENDS ${documentationFile} ${compatibilityReportLinksDoxFile} ${openCppCoverageLinksDoxFile} # ${stampFile}
+		DEPENDS ${documentationFile}
+		SOURCES ${documentationFile}
 	)
-	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${documentationFile} ${compatibilityReportLinksDoxFile} ${openCppCoverageLinksDoxFile} )
 
-	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/private" )
+	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${documentationFile}  )
+	set_property(TARGET ${targetName} PROPERTY FOLDER "${package}/private" )
 
 endfunction()
 
@@ -263,7 +264,7 @@ function( cpfGetGeneratedDoxygenDirectory dirOut )
 endfunction()
 
 #-------------------------------------------------------------------------
-function( cpfAddPackageDocumentationDoxFileCommands fileOut package packageNamespace)
+function( cpfAddPackageDocumentationDoxFileCommands fileOut package packageNamespace )
 
 	get_property( briefDescription TARGET ${package} PROPERTY CPF_BRIEF_PACKAGE_DESCRIPTION )
 	get_property( longDescription TARGET ${package} PROPERTY CPF_LONG_PACKAGE_DESCRIPTION )
@@ -305,6 +306,8 @@ ${longDescription}
 		${commands}
 		VERBATIM
 	)
+
+	source_group(Generated FILES ${fileName})
 
 	set(${fileOut} ${fileName} PARENT_SCOPE)
 
