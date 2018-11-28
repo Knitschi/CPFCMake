@@ -18,11 +18,11 @@ include(cpfAddCppPackage)
 #
 # Keyword arguments:
 #
-# SOURCES					Global documentation files. These files will be parsed by doxygen.
-# ADDITIONAL_PACKAGES		Packages that are not owned by this ci-project, but should also be parsed by doxygen.
 # DOXYGEN_CONFIG_FILE		Absolute path to the used DoxygenConfig.txt file
 # DOXYGEN_LAYOUT_FILE		Absolute path to the used DoxygenLayout.xml file
 # DOXYGEN_STYLESHEET_FILE	Absolute path to the used DoxygenStylesheet.css file
+# [SOURCES]					Additional files that will be parsed by doxygen and that can contain global documentation.
+# [ADDITIONAL_PACKAGES]		Packages that are not owned by this ci-project, but should also be parsed by doxygen.
 # [HTML_HEADER]				The header.html file used by doxygen.
 # [HTML_FOOTER]				The footer.html file used by doxygen.
 # [PROJECT_LOGO]			The an .svg or .png file that is used as the projects logo in the header.
@@ -47,10 +47,10 @@ function( cpfAddDoxygenPackage )
 	)
 
 	set( requiredMultiValueKeywords 
-		SOURCES
 	)
 
 	set( optionalMultiValueKeywords 
+		SOURCES
 		ADDITIONAL_PACKAGES
 	)
 
