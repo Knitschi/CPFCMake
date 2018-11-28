@@ -103,12 +103,6 @@ function( cpfAddCppPackage )
 	# make sure that the properties of the imported targets follow our assumptions
 	cpfNormalizeImportedTargetProperties( "${linkedLibraries};${linkedTestLibraries}" )
 
-	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
-	if(${ARG_GENERATE_PACKAGE_DOX_FILES})
-		cpfAddPackageDocsTarget( packageLinkFile ${package} ${ARG_PACKAGE_NAMESPACE} "${ARG_BRIEF_DESCRIPTION}" "${ARG_LONG_DESCRIPTION}")
-		list(APPEND ARG_PRODUCTION_FILES ${packageLinkFile} )
-	endif()
-
 	# Add the binary targets
 	cpfAddPackageBinaryTargets( 
 		productionLibrary 
@@ -127,6 +121,7 @@ function( cpfAddCppPackage )
 
 	#set some properties
 	set_property(TARGET ${package} PROPERTY CPF_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
+	set_property(TARGET ${package} PROPERTY CPF_LONG_PACKAGE_DESCRIPTION ${ARG_LONG_DESCRIPTION} )
 	set_property(TARGET ${package} PROPERTY CPF_PACKAGE_HOMEPAGE ${ARG_HOMEPAGE} )
 	set_property(TARGET ${package} PROPERTY CPF_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
 	
@@ -144,6 +139,11 @@ function( cpfAddCppPackage )
     cpfAddRunCppTestsTargets(${package})
 	cpfAddValgrindTarget(${package})
 	cpfAddOpenCppCoverageTarget(${package})
+
+	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
+	if(${ARG_GENERATE_PACKAGE_DOX_FILES})
+		cpfAddPackageDocsTarget( ${package} ${ARG_PACKAGE_NAMESPACE} )
+	endif()
 
 	# Plugins must be added before the install targets
 	cpfAddPlugins( ${package} "${pluginOptionLists}" )
