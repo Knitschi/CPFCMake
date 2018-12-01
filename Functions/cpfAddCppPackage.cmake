@@ -21,9 +21,9 @@ include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDoxygenPackage)
 
 
-#[[-----------------------------------------------------------
+#-----------------------------------------------------------
 # Documentation in APIDocs.dox
-]]
+#
 function( cpfAddCppPackage )
 
 	set( optionKeywords

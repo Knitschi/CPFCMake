@@ -28,6 +28,9 @@ include(cpfAddCppPackage)
 # [PROJECT_LOGO]			The an .svg or .png file that is used as the projects logo in the header.
 # [PLANT_UML_JAR]			The absolute path to the plantuml.jar which will enable you to use doxygens \startuml command.
 #
+#-----------------------------------------------------------
+# Documentation in APIDocs.dox
+#
 function( cpfAddDoxygenPackage )
 
 	set( optionKeywords

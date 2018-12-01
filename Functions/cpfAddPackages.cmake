@@ -51,7 +51,7 @@ function( cpfAddPackages )
 
 	cmake_parse_arguments( ARG "" "" "GLOBAL_FILES" ${ARGN})
 
-	cpfInit()
+	cpfInitGlobalState()
 
 	# set various flags non binary relevant flats like warnings as errors and higher warning levels.
 	cpfSetDynamicAndCosmeticCompilerOptions()
@@ -106,7 +106,7 @@ endfunction()
 
 
 #----------------------------------------------------------------------------------------
-function( cpfInit )
+function( cpfInitGlobalState )
 
 	# Generate a .gitignore file that contains the generated files of a CPFCMake project.
 	# We do not overwrite it if it already exists to make sure clients can change it.
@@ -124,7 +124,6 @@ function( cpfInit )
 	####################################### OTHER GLOBAL SETTINGS #########################################    
 	# Define properties that are used within the CPFCMake code.
 	cpfDefineProperties()
-	cpfSetPolicies()
 
 	# allow project folders
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -142,14 +141,6 @@ function( cpfInit )
 		message(FATAL_ERROR "CMAKE_BUILD_TYPE must be set when using a single-config generator.")
 	endif()
 
-endfunction()
-
-
-#----------------------------------------------------------------------------------------
-# Set policies to silence the warnings about changed cmake behavior.
-function( cpfSetPolicies )
-	cmake_policy(SET CMP0071 NEW)
-	cmake_policy(SET CMP0007 NEW) # Do not ignore empty list elements
 endfunction()
 
 
