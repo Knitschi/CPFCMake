@@ -8,25 +8,16 @@ include(cpfAddCompatibilityCheckTarget)
 include(cpfInitPackageProject)
 include(cpfAddCppPackage)
 
-#----------------------------------------------------------------------------------------
-# Adds a package that runs doxygen on the given packages in your ci-project.
-# The package can also contain global documentation that does not belong to
-# any other package in your ci-project. 
-#
-# All files specified with the key-word arguments are added to
-# the targets source files.
-#
-# Keyword arguments:
-#
-# DOXYGEN_CONFIG_FILE		Absolute path to the used DoxygenConfig.txt file
-# DOXYGEN_LAYOUT_FILE		Absolute path to the used DoxygenLayout.xml file
-# DOXYGEN_STYLESHEET_FILE	Absolute path to the used DoxygenStylesheet.css file
-# [SOURCES]					Additional files that will be parsed by doxygen and that can contain global documentation.
-# [ADDITIONAL_PACKAGES]		Packages that are not owned by this ci-project, but should also be parsed by doxygen.
-# [HTML_HEADER]				The header.html file used by doxygen.
-# [HTML_FOOTER]				The footer.html file used by doxygen.
-# [PROJECT_LOGO]			The an .svg or .png file that is used as the projects logo in the header.
-# [PLANT_UML_JAR]			The absolute path to the plantuml.jar which will enable you to use doxygens \startuml command.
+
+# DOXYGEN_CONFIG_FILE		
+# DOXYGEN_LAYOUT_FILE		
+# DOXYGEN_STYLESHEET_FILE	
+# [SOURCES]					
+# [ADDITIONAL_PACKAGES]		
+# [HTML_HEADER]				
+# [HTML_FOOTER]				
+# [PROJECT_LOGO]			
+# [PLANT_UML_JAR]			
 #
 #-----------------------------------------------------------
 # Documentation in APIDocs.dox
