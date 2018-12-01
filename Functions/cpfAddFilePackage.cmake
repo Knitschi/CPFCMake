@@ -7,10 +7,8 @@ include(cpfPathUtilities)
 include(cpfAddCppPackage)
 include(cpfInitPackageProject)
 
-#
-# Keyword Arguments:
-#
-# SOURCES         The files that belong to the package.
+#-----------------------------------------------------------
+# Documentation in APIDocs.dox
 #
 function( cpfAddFilePackage )
 
@@ -22,8 +20,10 @@ function( cpfAddFilePackage )
         ${ARGN} 
     )
 
-    
+    cpfAssertProjectVersionDefined()
+
     cpfGetPackageName(package)
+    message(STATUS "Add file package ${package} at version ${PROJECT_VERSION}")
 
     add_custom_target( ${package} SOURCES ${ARG_SOURCES} )
     set_property( TARGET ${package} PROPERTY FOLDER ${package} )

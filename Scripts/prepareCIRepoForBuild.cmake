@@ -12,11 +12,7 @@
 # RELEASED_PACKAGE: This option must hold the name of a package or be empty. It is only used when a release version
 #                   tag is created for the specified package. If the value is empty, the CI-project repository is tagged.
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../Variables)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../Functions)
-
-include(cpfConstants)
-cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
+include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 
 include(cpfMiscUtilities)
 include(cpfGitUtilities)

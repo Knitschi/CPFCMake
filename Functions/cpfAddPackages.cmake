@@ -42,10 +42,13 @@ include("${configFile}")
 
 #----------------------------------------------------------------------------------------
 # Note that the packages that are owned by the CPF CI-Project must be added via the
-# cpfPackages.cmake file.
+# packages.cmake file.
 #
 # Keyword Arguments:
 # [GLOBAL_FILES]		A list of files that will be added to the globalFiles file package.
+#
+#-----------------------------------------------------------
+# Documentation in APIDocs.dox
 #
 function( cpfAddPackages )
 

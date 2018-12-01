@@ -71,6 +71,13 @@ function( cpfAssertDefinedMessage variableName message )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Asserts the the variable PROJECT_VERSION is defined.
+#
+function( cpfAssertProjectVersionDefined )
+	cpfAssertDefinedMessage(PROJECT_VERSION "The variable PROJECT_VERSION is not defined. Did you forget to call cpfInitPackageProject() before adding the package?")
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # This function can be used at the beginning of a script to check whether a variable
 # was set as a script argument.
 function( cpfAssertScriptArgumentDefined variableName )

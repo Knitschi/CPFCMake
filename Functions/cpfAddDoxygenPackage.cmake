@@ -66,8 +66,10 @@ function( cpfAddDoxygenPackage )
 	)
 
 	cpfAssertKeywordArgumentsHaveValue( "${singleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddDoxygenPackage()")
+	cpfAssertProjectVersionDefined()
 
 	cpfGetPackageName( package )
+	message(STATUS "Add Doxygen package ${package} at version ${PROJECT_VERSION}")
 
 	# Locations
 	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${package}" )

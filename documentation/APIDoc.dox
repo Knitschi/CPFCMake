@@ -4,43 +4,68 @@
 This page holds the documentation of the *CMake* functions that are provided to the
 users of the *CPFCMake* package.
 
+\section cpfInit Module cpfInit.cmake
 
-\section cpfAddPackageModule Module cpfAddCppPackage.cmake
+This must be included at the top of your root CMakeLists.txt file. 
 
-This module provides the following functions.
+- It adds all CPF modules to the <code>CMAKE_MODULE_PATH</code> allows including them with their short filenames only.
+- It sets the global variable <code>CPF_MINIMUM_CMAKE_VERSION</code> and checks that the currently run CMake version meets the requirement.
+- Sets the CMake policies that are required for CPF projects.
+- It includes further CPF modules that are needed in the root CMakeLists.txt file.
+
+
+\section cpfAddPackagesModule Module cpfAddPackages.cmake
+
+This module provides the following function.
+
+- \ref cpfAddPackages
+
+\subsection cpfAddPackages cpfAddPackages()
+
+\code
+cpfAddPackages(
+    [GLOBAL_FILES file1 ...] 
+)
+\endcode
+
+The function is called in all CPF CI-projects.
+
+- This calls <code>add_subdirectory()</code> for all the packages that are defined in the <code>package.cmake</code>
+file. 
+- This adds the global custom targets. \see GlobalTargets
+- Initiates some global variables.
+
+#### GLOBAL_FILES ####
+
+This option can be used to add further files to the \ref globalFiles target.
+
+
+\section cpfInitPackageModule Module cpfInitPackageModule.cmake
+
+This module provides the following function.
 
 - \ref cpfInitPackageProject
-- \ref cpfAddCppPackage
-
 
 \subsection cpfInitPackageProject cpfInitPackageProject()
 
 \code 
-cpfInitPackageProject(
-    packageNameOut
-    packageNameSpace
-) 
+cpfInitPackageProject()
 \endcode
 
-This function is called at the beginning of a packages *CMakeLists.txt* file.
+This macro is called at the beginning of a cpf-packages *CMakeLists.txt* file.
 This function calls the \c project() function to create the package-level project.
 It automatically reads the version number of the package from the packages
-git repository or a provided version file. It also reads the directory name
-as the package name and returns it with parameter \c packageNameOut.
-
-Parameter \c packageNameSpace is used in the following ways:
-
-- CPFCMake assumes, that you use that namespace as the basic namespace for
-all your C++ files. 
-- The name is used as a namespace in the packages generated C++ version header file.
-- As a namespace for the packages cmake target names.
-- As a part of the packages export macro which must be 
-prepended to all exported classes and functions in a library.
-- The default package documentation page will generate a
-documentation of that namespace.
+git repository or a provided version file and uses it to initiated the cmake
+variables <code>PROJECT_VERSION</code> and <code>PROJECT_VERSION_<digit></code> variables.
 
 \see \ref CIProjectAndPackageProjects
 
+
+\section cpfAddCppPackageModule Module cpfAddCppPackage.cmake
+
+This module provides the following function.
+
+- \ref cpfAddCppPackage
 
 \subsection cpfAddCppPackage cpfAddCppPackage()
 
@@ -75,21 +100,29 @@ cpfAddCppPackage(
 )
 \endcode
 
-Adds a C++ package to a CPF project. The function provides a large list of options that allow 
-defining the features that the CPF package should provide. 
+Adds a C++ package to a CPF project. The name of the package is the same as the
+name of the directory in which the packages CMakeLists.txt file is located.
+The function provides a large list of options that allow defining the features that the package should provide.
 
-A package consists of a main binary target that has the same name as the package and some helper binary targets for tests and test utilities.
+A C++ package consists of a main binary target that has the same name as the package and some helper binary targets for tests and test utilities.
 Providing the function with optional arguments will switch on more of CPF's functionality like test-targets, code-analysis, packaging or
 documentation generation.
 
 \see \ref CPFCustomTargets
 
-
 ### Keyword Arguments ###
 
 #### PACKAGE_NAMESPACE ####
 
-\see cpfInitPackageProject
+The parameter is used in the following ways:
+
+- CPFCMake assumes, this is the C++ namespace that you use in the package.
+- The name is used as a namespace in the packages generated C++ version header file.
+- As a namespace for the packages cmake target names.
+- The value is used as a part of the packages generated export macro which must be 
+prepended to all exported classes and functions in a library.
+- If you use the <code>GENERATE_PACKAGE_DOX_FILES</code> option, the default package documentation 
+page will generate a documentation of that namespace.
 
 #### TYPE ####
 
@@ -359,5 +392,95 @@ cpfAddCppPackage(
 
 \endcode
 
+\section cpfAddFilePackageModule Module cpfAddFilePackage.cmake
+
+This module provides the following function.
+
+- \ref cpfAddCppPackage
+
+\subsection cpfAddFilePackage cpfAddFilePackage()
+
+\code
+cpfAddFilePackage(
+    SOURCES file1 ...    
+)
+\endcode
+
+This function creates a target that does nothing, but is only used as a file container.
+This makes sure that the files are included in a Visual Studio solution. 
+
+#### SOURCES ####
+
+A list of files that are added to the package. The paths must be relative to the
+current source directory or absolute.
+
+
+\section cpfAddDoxygenPackageModule Module cpfAddDoxygenPackage.cmake
+
+This module provides the following function.
+
+- \ref cpfAddDoxygenPackage
+
+\subsection cpfAddDoxygenPackage cpfAddDoxygenPackage()
+
+\code
+cpfAddFilePackage(
+    DOXYGEN_CONFIG_FILE file
+    DOXYGEN_LAYOUT_FILE file
+    DOXYGEN_STYLESHEET_FILE file
+    [SOURCES]
+    [ADDITIONAL_PACKAGES]
+    [HTML_HEADER]
+    [HTML_FOOTER]
+    [PROJECT_LOGO]
+    [PLANT_UML_JAR]
+)
+\endcode
+
+Adds a package that runs doxygen on the owned packages of your ci-project.
+The package can also contain global documentation that does not belong to
+any other package in your ci-project.
+
+All files specified with the key-word arguments are added to
+the targets source files.
+
+#### DOXYGEN_CONFIG_FILE ####
+
+Absolute path to the used DoxygenConfig.txt configuration file.
+
+#### DOXYGEN_LAYOUT_FILE ####
+
+Absolute path to the used DoxygenLayout.xml file.
+
+#### DOXYGEN_STYLESHEET_FILE ####
+
+Absolute path to the used DoxygenStylesheet.css file.
+
+#### SOURCES ####
+
+Additional files that will be parsed by doxygen and that can contain global documentation.
+
+#### ADDITIONAL_PACKAGES ####
+
+Packages that are not owned by this ci-project, but should also be parsed by doxygen in order
+to add them to the documentation.
+
+#### HTML_HEADER ####
+
+The header.html file used by doxygen.
+
+#### HTML_FOOTER ####
+
+The footer.html file used by doxygen.
+
+#### PROJECT_LOGO ####
+
+An .svg or .png file that is copied to the doxygen output directory and can then be used
+in the documentation.
+
+#### PLANT_UML_JAR ####
+
+The absolute path to the plantuml.jar which doxygen uses to generate UML-diagramms from
+plant-uml code in doxygen comments. Setting this enables you to use doxygens <code>startuml</code> command.
 
 */

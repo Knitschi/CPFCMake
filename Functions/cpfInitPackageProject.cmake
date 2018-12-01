@@ -7,7 +7,7 @@ include(cpfMiscUtilities)
 
 #-------------------------------------------------------------------------
 # Documentation in APIDocs.dox
-macro( cpfInitPackageProject packageNameSpace )
+macro( cpfInitPackageProject )
 
 	# The package name is defined by the sub-directory name
     cpfGetPackageName( package )
@@ -16,9 +16,6 @@ macro( cpfInitPackageProject packageNameSpace )
 
 	# get the version number of the packages version file
 	cpfGetPackageVersionFromFile( packageVersion ${package} ${CMAKE_CURRENT_LIST_DIR})
-	message(STATUS "Package ${package} is now at version ${packageVersion}")
-	# Configure the c++ header file with the version.
-	cpfConfigurePackageVersionHeader( ${package} ${packageVersion} ${packageNameSpace})
 
 	cpfSplitVersion( major minor patch commitId ${packageVersion})
 

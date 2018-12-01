@@ -1084,7 +1084,7 @@ function( cpfGetPackages allPackagesOut ownedPackagesOut externalPackagesOut roo
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# Returns all packages from the cpfPackages.cmake file
+# Returns all packages from the packages.cmake file
 #
 function( cpfGetAllPackages packagesOut )
 
@@ -1094,7 +1094,7 @@ function( cpfGetAllPackages packagesOut )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# Returns a list with the owned packages from the cpfPackages.cmake file
+# Returns a list with the owned packages from the packages.cmake file
 #
 function( cpfGetOwnedPackages packagesOut rootDir )
 

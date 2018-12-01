@@ -69,15 +69,15 @@ function( cpfAddCppPackage )
 	)
 
 	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddCppPackage()")
+	cpfAssertProjectVersionDefined()
 
 	# parse argument sublists
 	set( allKeywords ${optionKeywords} ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
 	cpfGetKeywordValueLists( pluginOptionLists PLUGIN_DEPENDENCIES "${allKeywords}" "${ARGN}" pluginOptions)
 	cpfGetKeywordValueLists( distributionPackageOptionLists DISTRIBUTION_PACKAGES "${allKeywords}" "${ARGN}" packagOptions)
-	
-	cpfGetPackageName(package)
 
-	cpfDebugMessage("Add package ${package}")
+	cpfGetPackageName(package)
+	message(STATUS "Add C++ package ${package} at version ${PROJECT_VERSION}")
 	
 	# By default build test targets.
 	# Hunter sets this to off in order to skip test building.
@@ -102,6 +102,9 @@ function( cpfAddCppPackage )
 
 	# make sure that the properties of the imported targets follow our assumptions
 	cpfNormalizeImportedTargetProperties( "${linkedLibraries};${linkedTestLibraries}" )
+
+	# Configure the c++ header file with the version.
+	cpfConfigurePackageVersionHeader( ${package} ${PROJECT_VERSION} ${ARG_PACKAGE_NAMESPACE})
 
 	# Add the binary targets
 	cpfAddPackageBinaryTargets( 

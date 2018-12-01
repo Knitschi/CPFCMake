@@ -1,12 +1,6 @@
 # This script can be used to print all the variables that are defined in another script.
 
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../Functions)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../Variables)
-
-include(cpfConstants)
-cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
-
+include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 include(cpfProjectUtilities)
 include(cpfMiscUtilities)
 
