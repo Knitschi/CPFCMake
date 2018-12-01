@@ -9,6 +9,7 @@ cpfInitPackageProject()
 
 # Files that define variables.
 set( files
+	cpfInit.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Clang.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Gcc.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Linux.config.cmake

@@ -2,13 +2,6 @@
 
 include_guard(GLOBAL)
 
-set( cpfCmakeDir "${CPF_ROOT_DIR}/Sources/CPFCMake" )
-list( APPEND CMAKE_MODULE_PATH 
-	"${cpfCmakeDir}/Functions"
-	"${cpfCmakeDir}/Variables"
-	"${cpfCmakeDir}/Tests"
-)
-
 include(cpfProperties)
 include(cpfProjectUtilities)
 include(cpfAddDoxygenPackage)
@@ -35,8 +28,10 @@ endif()
 
 
 # We include the config file here to retrigger the cmake generate step when the config changes.
-cpfFindConfigFile(configFile "${CPF_CONFIG}")
-include("${configFile}")
+if(DEFINED CPF_CONFIG)
+	cpfFindConfigFile(configFile "${CPF_CONFIG}")
+	include("${configFile}")
+endif()
 
 
 
