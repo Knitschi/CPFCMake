@@ -4,7 +4,17 @@
 This page holds the documentation of the *CMake* functions that are provided to the
 users of the *CPFCMake* package.
 
-\section cpfInit Module cpfInit.cmake
+\section cpfGlobalVariables Global variables and cache variables
+
+CPFCMake introduces some variables of global scope that may be of interest to the clients.
+
+#### CPF_MINIMUM_CMAKE_VERSION ####
+
+The minimum cmake version required by the CPF. This can be used by clients in their own
+calls to <a href="https://cmake.org/cmake/help/latest/command/add_subdirectory.html">cmake_minimum_required()</a>.
+
+
+\section cpfInitModule Module cpfInit.cmake
 
 This must be included at the top of your root CMakeLists.txt file. 
 

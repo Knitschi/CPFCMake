@@ -9,16 +9,6 @@ include(cpfInitPackageProject)
 include(cpfAddCppPackage)
 
 
-# DOXYGEN_CONFIG_FILE		
-# DOXYGEN_LAYOUT_FILE		
-# DOXYGEN_STYLESHEET_FILE	
-# [SOURCES]					
-# [ADDITIONAL_PACKAGES]		
-# [HTML_HEADER]				
-# [HTML_FOOTER]				
-# [PROJECT_LOGO]			
-# [PLANT_UML_JAR]			
-#
 #-----------------------------------------------------------
 # Documentation in APIDocs.dox
 #
@@ -58,6 +48,10 @@ function( cpfAddDoxygenPackage )
 
 	cpfAssertKeywordArgumentsHaveValue( "${singleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddDoxygenPackage()")
 	cpfAssertProjectVersionDefined()
+
+	cpfFindRequiredProgram( TOOL_DOXYGEN doxygen "A tool that generates documentation files by reading in-code comments")
+	cpfFindRequiredProgram( TOOL_DOXYINDEXER doxyindexer "A tool that generates search indexes for doxygen generated html files")
+	cpfFindRequiredProgram( TOOL_TRED tred "A tool from the graphviz library that creates a transitive reduced version of a graphviz graph")
 
 	cpfGetPackageName( package )
 	message(STATUS "Add Doxygen package ${package} at version ${PROJECT_VERSION}")
@@ -148,11 +142,11 @@ function( cpfAddDoxygenPackage )
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
 	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/searchdata.xml)
 	cpfGetAllNonGeneratedPackageSources(sourceFiles "${documentedPackages}")
-	set( allDependedOnFiles ${tempDoxygenConfigFile} ${ARG_DOXYGEN_LAYOUT_FILE} ${ARG_DOXYGEN_STYLESHEET_FILE} ${copiedDependencyGraphFile} ${reducedGraphFile} ${sourceFiles} ${fileDependencies} ${globalFiles} )
+	set( allDependedOnFiles ${tempDoxygenConfigFile} ${ARG_DOXYGEN_LAYOUT_FILE} ${ARG_DOXYGEN_STYLESHEET_FILE} ${copiedDependencyGraphFile} ${reducedGraphFile} ${ARG_SOURCES} ${fileDependencies} ${globalFiles} )
 	cpfAddStandardCustomCommand(
-		OUTPUT ${searchDataXmlFile}
 		DEPENDS ${allDependedOnFiles}
 		COMMANDS ${doxygenCommand}
+		OUTPUT ${searchDataXmlFile}
 	)
 
 	# Create the command for running the doxyindexer.

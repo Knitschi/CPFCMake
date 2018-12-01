@@ -578,12 +578,6 @@ endfunction()
 #
 function( cpfFindRequiredTools )
 
-	if(CPF_ENABLE_DOXYGEN_TARGET)
-		cpfFindRequiredProgram( TOOL_DOXYGEN doxygen "A tool that generates documentation files by reading in-code comments")
-		cpfFindRequiredProgram( TOOL_DOXYINDEXER doxyindexer "A tool that generates search indexes for doxygen generated html files")
-		cpfFindRequiredProgram( TOOL_TRED tred "A tool from the graphviz library that creates a transitive reduced version of a graphviz graph")
-	endif()
-	
 	if(CPF_ENABLE_CLANG_TIDY_TARGET)
 		cpfGetCompiler(compiler)
 		if( ${compiler} STREQUAL Clang)
