@@ -1,7 +1,7 @@
 
 # This script is used to generated ${CPF_CONFIG}.config.cmake files in the Configuration sub directory.
 # ARGUMENTS
-# CPF_CONFIG			- The base name of the generated file.
+# DERIVED_CONFIG			- The base name of the generated file.
 # PARENT_CONFIG			- The base name of an inherited config file.
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
@@ -12,7 +12,7 @@ include(cpfProjectUtilities)
 include(cpfLocations)
 include(cpfPathUtilities)
 
-cpfAssertScriptArgumentDefined(CPF_CONFIG)
+cpfAssertScriptArgumentDefined(DERIVED_CONFIG)
 cpfAssertScriptArgumentDefined(PARENT_CONFIG)
 
 # Find the location of the inherited configuration
@@ -35,14 +35,14 @@ cpfListAppend( fileContent "set( CPF_PARENT_CONFIG \"${PARENT_CONFIG}\" CACHE ST
 cpfListAppend( fileContent "" )
 cpfListAppend( fileContent "# internal variables" )
 cpfListAppend( fileContent "set( CPF_ROOT_DIR \"${CPF_ROOT_DIR}\" CACHE FILEPATH \"The path to the root directory of this CPF CI-project.\" FORCE)" )
-cpfListAppend( fileContent "set( CPF_CONFIG \"${CPF_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE)" )
+cpfListAppend( fileContent "set( CPF_CONFIG \"${DERIVED_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE)" )
 cpfListAppend( fileContent "" )
 
 
 # Add definitions for the variables that were set by using the "-D"-options.
 cpfListAppend( fileContent "# Overridden or new cache variables." )
 cpfGetScriptDOptionVariableNames( dVariables )
-list(REMOVE_ITEM dVariables CPF_CONFIG PARENT_CONFIG )
+list(REMOVE_ITEM dVariables DERIVED_CONFIG PARENT_CONFIG )
 foreach( variable ${dVariables})
 	cpfIsCacheVariable( isCacheVar ${variable})
 	if(isCacheVar) 
@@ -72,7 +72,7 @@ cpfListAppend( fileContent "" )
 
 
 # Write the lines in fileContent to the config file.
-cpfGetFullConfigFilePath(configFilename)
+cpfGetFullConfigFilePath(configFilename ${DERIVED_CONFIG})
 file(REMOVE "${configFilename}")
 
 set(commandList)

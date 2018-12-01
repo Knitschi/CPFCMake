@@ -50,8 +50,8 @@ function( cpfGetPackageVersionCppHeaderFileName filenameOut package )
 endfunction()
 
 # This function defines the full path to the currently used config file.
-function( cpfGetFullConfigFilePath filenameOut )
-	set( ${filenameOut} "${CPF_ROOT_DIR}/${CPF_CONFIG_DIR}/${CPF_CONFIG}${CPF_CONFIG_FILE_ENDING}" PARENT_SCOPE)
+function( cpfGetFullConfigFilePath filenameOut config)
+	set( ${filenameOut} "${CPF_ROOT_DIR}/${CPF_CONFIG_DIR}/${config}${CPF_CONFIG_FILE_ENDING}" PARENT_SCOPE)
 endfunction()
 
 # This function defines the relative dir from the html directory to the package release files of the last build
