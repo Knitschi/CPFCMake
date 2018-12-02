@@ -15,13 +15,13 @@ include(cpfAddValgrindTarget)
 include(cpfAddOpenCppCoverageTarget)
 
 # cotire must be included on the global scope or we get errors that target xyz already has a custom rule
-set(cotirePath "${CMAKE_SOURCE_DIR}/cotire/CMake/cotire.cmake")
-if(CPF_ENABLE_PRECOMPILED_HEADER)
+set(cotirePath "${CMAKE_CURRENT_LIST_DIR}/../../cotire/CMake/cotire.cmake")
+if(CPF_ENABLE_PRECOMPILED_HEADER AND ${CMAKE_SOURCE_DIR}) # do not enter this when included from scripts or pchs are disabled.
 	if(EXISTS ${cotirePath})
 		include(${cotirePath})
 		set( CPF_USE_PRECOMPILED_HEADERS TRUE )
 	else()
-		message(WARNING "Cotire not found! Add it as package to \"${CMAKE_SOURCE_DIR}/cotire\" to enable precompiled headers.")
+		message(WARNING "Cotire not found! Add it as package to \"Sources/cotire\" to enable precompiled headers.")
 		set( CPF_USE_PRECOMPILED_HEADERS FALSE )
 	endif()
 endif()
