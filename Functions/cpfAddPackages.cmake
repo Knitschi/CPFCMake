@@ -7,7 +7,7 @@ include(cpfProjectUtilities)
 include(cpfAddDoxygenPackage)
 include(cpfAddClangTidyTarget)
 include(cpfAddAcyclicTarget)
-include(cpfAddPipelineTarget)
+include(cpfAddPipelineTargetDependencies)
 include(cpfAddRunTestsTarget)
 include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDistributionPackageTarget)
@@ -54,6 +54,9 @@ function( cpfAddPackages )
 	# set various flags non binary relevant flats like warnings as errors and higher warning levels.
 	cpfSetDynamicAndCosmeticCompilerOptions()
 
+	# Add the pipeline target early so packages can add them self as dependencies to it.
+	add_custom_target(pipeline)
+
 	# We assume that the external packages are of lower level then the owned ones.
 	# Is that always true? If not, we must provide a way to add them sorted by level.
 	cpfGetAllPackages(packages)
@@ -97,7 +100,7 @@ function( cpfAddPackages )
 	# abiComplianceCheck
 	cpfAddGlobalAbiCheckerTarget("${packages}")
 	# pipeline
-	cpfAddPipelineTarget("${packages}")
+	cpfAddPipelineTargetDependencies("${packages}")
 
 
 endfunction()

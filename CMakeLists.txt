@@ -36,7 +36,7 @@ set( files
 	Functions/cpfAddInstallRules.cmake
 	Functions/cpfAddOpenCppCoverageTarget.cmake
 	Functions/cpfAddCppPackage.cmake
-	Functions/cpfAddPipelineTarget.cmake
+	Functions/cpfAddPipelineTargetDependencies.cmake
 	Functions/cpfAddRunTestsTarget.cmake
 	Functions/cpfAddRunUicTarget.cmake
 	Functions/cpfAddValgrindTarget.cmake

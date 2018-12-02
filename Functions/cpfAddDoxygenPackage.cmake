@@ -169,6 +169,8 @@ function( cpfAddDoxygenPackage )
 	set_property( TARGET ${package} PROPERTY FOLDER ${package} )
 	cpfSetIDEDirectoriesForTargetSources(${package})
 
+	add_dependencies(pipeline ${package})
+
 endfunction()
 
 #----------------------------------------------------------------------------------------

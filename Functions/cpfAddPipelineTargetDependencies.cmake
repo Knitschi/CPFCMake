@@ -8,7 +8,7 @@ include(cpfCustomTargetUtilities)
 # 
 # Arguments
 # Takes a list of all the packages that belong to the project
-function( cpfAddPipelineTarget packages)
+function( cpfAddPipelineTargetDependencies packages)
 
 	set( targetName pipeline)
 
@@ -50,8 +50,8 @@ function( cpfAddPipelineTarget packages)
             cpfListAppend( existingTargets ${target})
         endif()
     endforeach()
-       
-	cpfAddBundleTarget( ${targetName} "${existingTargets}")
+	   
+	add_dependencies(pipeline ${existingTargets})
 
 endfunction()
 
