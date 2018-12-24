@@ -141,8 +141,18 @@ function( cpfAddDoxygenPackage )
 	# Add the command for running doxygen
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
 	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/searchdata.xml)
-	cpfGetAllNonGeneratedPackageSources(sourceFiles "${documentedPackages}")
-	set( allDependedOnFiles ${tempDoxygenConfigFile} ${ARG_DOXYGEN_LAYOUT_FILE} ${ARG_DOXYGEN_STYLESHEET_FILE} ${copiedDependencyGraphFile} ${reducedGraphFile} ${ARG_SOURCES} ${fileDependencies} ${globalFiles} )
+	cpfGetAllNonGeneratedPackageSources(packagSourceFiles "${documentedPackages}")
+	set( allDependedOnFiles 
+		${tempDoxygenConfigFile}
+		${ARG_DOXYGEN_LAYOUT_FILE}
+		${ARG_DOXYGEN_STYLESHEET_FILE}
+		${ARG_SOURCES}
+		${copiedDependencyGraphFile}
+		${reducedGraphFile}
+		${fileDependencies}
+		${packagSourceFiles}
+		)
+	
 	cpfAddStandardCustomCommand(
 		DEPENDS ${allDependedOnFiles}
 		COMMANDS ${doxygenCommand}
