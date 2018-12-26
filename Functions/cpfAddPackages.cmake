@@ -142,6 +142,10 @@ function( cpfInitGlobalState )
 		message(FATAL_ERROR "CMAKE_BUILD_TYPE must be set when using a single-config generator.")
 	endif()
 
+	# We remember the name of the ci-project for cases where we need it
+	# after creating the package projects.
+	set(CPF_CI_PROJECT ${CMAKE_PROJECT_NAME} PARENT_SCOPE)
+
 endfunction()
 
 

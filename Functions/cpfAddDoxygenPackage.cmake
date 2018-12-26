@@ -24,6 +24,7 @@ function( cpfAddDoxygenPackage )
 	)
 
 	set( optionalSingleValueKeywords
+		PROJECT_NAME
 		HTML_HEADER
 		HTML_FOOTER
 		PROJECT_LOGO
@@ -52,6 +53,10 @@ function( cpfAddDoxygenPackage )
 	cpfFindRequiredProgram( TOOL_DOXYGEN doxygen "A tool that generates documentation files by reading in-code comments")
 	cpfFindRequiredProgram( TOOL_DOXYINDEXER doxyindexer "A tool that generates search indexes for doxygen generated html files")
 	cpfFindRequiredProgram( TOOL_TRED tred "A tool from the graphviz library that creates a transitive reduced version of a graphviz graph")
+
+	if(NOT ARG_PROJECT_NAME)
+		set(ARG_PROJECT_NAME ${CPF_CI_PROJECT})
+	endif()
 
 	cpfGetPackageName( package )
 	message(STATUS "Add Doxygen package ${package} at version ${PROJECT_VERSION}")
@@ -95,7 +100,7 @@ function( cpfAddDoxygenPackage )
 	cpfAddCustomCommandCopyFile(${CPF_TARGET_DEPENDENCY_GRAPH_FILE} ${copiedDependencyGraphFile} )
 
 	# The config file must contain the names of the depended on xml tag files of other doxygen sub-targets.
-	list(APPEND appendedLines "PROJECT_NAME  = ${PROJECT_NAME}")
+	list(APPEND appendedLines "PROJECT_NAME  = ${ARG_PROJECT_NAME}")
 	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}\"")
 	list(APPEND appendedLines "DOTFILE_DIRS = \"${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
 	list(APPEND appendedLines "LAYOUT_FILE = \"${ARG_DOXYGEN_LAYOUT_FILE}\"")

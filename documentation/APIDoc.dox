@@ -13,6 +13,11 @@ CPFCMake introduces some variables of global scope that may be of interest to th
 The minimum cmake version required by the CPF. This can be used by clients in their own
 calls to <a href="https://cmake.org/cmake/help/latest/command/add_subdirectory.html">cmake_minimum_required()</a>.
 
+#### CPF_CI_PROJECT ####
+
+This is set to name of the CI parent project and allows to use the name after calling
+\c cpfInitPackageProject() which overrides the \c CMAKE_PROJECT_NAME variable with the
+name of the package project.
 
 \section cpfInitModule Module cpfInit.cmake
 
@@ -44,6 +49,8 @@ The function is called in all CPF CI-projects.
 file. 
 - This adds the global custom targets. \see GlobalTargets
 - Initiates some global variables.
+
+\subsubsection cpfAddPackagesArguments Arguments
 
 #### GLOBAL_FILES ####
 
@@ -120,7 +127,7 @@ documentation generation.
 
 \see \ref CPFCustomTargets
 
-### Keyword Arguments ###
+\subsubsection cpfAddCppPackageArguments Arguments
 
 #### PACKAGE_NAMESPACE ####
 
@@ -402,6 +409,7 @@ cpfAddCppPackage(
 
 \endcode
 
+
 \section cpfAddFilePackageModule Module cpfAddFilePackage.cmake
 
 This module provides the following function.
@@ -419,6 +427,8 @@ cpfAddFilePackage(
 This function creates a target that does nothing, but is only used as a file container.
 This makes sure that the files are included in a Visual Studio solution. 
 
+\subsubsection cpfAddFilePackageArguments Arguments
+
 #### SOURCES ####
 
 A list of files that are added to the package. The paths must be relative to the
@@ -435,6 +445,7 @@ This module provides the following function.
 
 \code
 cpfAddFilePackage(
+    [PROJECT_NAME] name
     DOXYGEN_CONFIG_FILE file
     DOXYGEN_LAYOUT_FILE file
     DOXYGEN_STYLESHEET_FILE file
@@ -447,16 +458,31 @@ cpfAddFilePackage(
 )
 \endcode
 
-Adds a package that runs doxygen on the owned packages of your ci-project.
+Adds a package that runs doxygen on the owned packages of your CI-project.
 The package can also contain global documentation that does not belong to
 any other package in your ci-project.
 
 All files specified with the key-word arguments are added to
 the targets source files.
 
+More information about the documentation generation can be found in \ref CPFDocumentationGeneration.
+
+\subsubsection cpfAddDoxygenPackageArguments Arguments
+
+#### PROJECT_NAME ####
+
+The value of this argument is the name that appears in the header of the doxygen
+documentation. This is set to the name of the CI-project if no value is specified.
+Note that this overrides the value of the \c PROJECT_NAME variable in the 
+\c DOXYGEN_CONFIG_FILE.
+
 #### DOXYGEN_CONFIG_FILE ####
 
-Absolute path to the used DoxygenConfig.txt configuration file.
+Absolute path to the used DoxygenConfig.txt configuration file. Note that the file
+is not directly passed to Doxygen. In order to inject the values of cmake variables,
+the file is used as a template to generate the \c Generated/\<config\>/_CPF/documentation/tempDoxygenConfig.txt
+file which is used as the input for doxygen. At the bottom of this file you will see that it
+overwrites some of the variables.
 
 #### DOXYGEN_LAYOUT_FILE ####
 
@@ -491,6 +517,7 @@ in the documentation.
 #### PLANT_UML_JAR ####
 
 The absolute path to the plantuml.jar which doxygen uses to generate UML-diagramms from
-plant-uml code in doxygen comments. Setting this enables you to use doxygens <code>startuml</code> command.
+<a href="http://plantuml.com/">PlantUML</a> code in doxygen comments. 
+Setting this enables you to use doxygens <code>startuml</code> command.
 
 */

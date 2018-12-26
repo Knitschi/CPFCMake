@@ -2,10 +2,13 @@
 
 \page CPFDocumentationGeneration Documentation generation
 
-The CppCodeBase uses <a href="http://www.stack.nl/~dimitri/doxygen/download.html">Doxygen</a> to allow keeping the documentation right beside the code.
-Doxygen has <a href="http://plantuml.com/">PlanUml</a> enabled to allow embedding UML diagramms into to documentation.
+\section CPFDoxygenPackage The Doxygen Package
 
-### Searching ###
+Currently the CPF provides the \ref cpfAddDoxygenPackage function to integrate <a href="http://www.stack.nl/~dimitri/doxygen/download.html">Doxygen</a>
+based documentation generation into the CI-pipeline. Adding a doxygen package adds a custom
+target that runs doxygen with all the owned packages as input.
+
+\subsection CPFDoxygengSearching Searching
 
 The search functionality is configured to use the server-side search approach as described <a href="http://www.stack.nl/~dimitri/doxygen/manual/extsearch.html">here</a>.
 To make it work these points must be implemented.
@@ -26,18 +29,20 @@ docker cp /var/lib/jenkins/www/html docserver:/var/www
 \endcode
 
 
-### The Dependency Graph ###
+\subsection CPFDoxygenDependencyGraph Adding a dependency graph
 
-Building the documentation target will also create two graphviz .dot files for the dependency graph of the build C++ packages.
-These graphs can be added to the projects documentation by adding the lines.
+CMake allows to generate a dependency graph for the packages in a CI-project.
+This dependency graph can be integrated into your doxygen documentation. The doxygen target
+will also create a second *transitive reduced* version of the dependency graph.
+The transitive reduced graph does not show direct dependencies when an indirect dependency exists. 
+This resulst in a cleaner graph, which may sometimes be favoured to the complete graph.
+
+These graphs can be added to the documentation by adding the lines
 
 \code
 \dotfile CPFDependencies.dot The projects dependency graph
 \dotfile CPFDependenciesTransitiveReduced.dot The projects transitive reduced target dependency graph
 \endcode
 
-To the doxygen documentation. The transitive reduced graph does not show direct dependencies when an
-indirect dependency exists. This resulst in a cleaner graph, which may sometimes be favoured to the complete graph.
-
-
+to one of your doxygen comments. 
 */
