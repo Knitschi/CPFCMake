@@ -39,7 +39,7 @@ This module provides the following function.
 
 \code
 cpfAddPackages(
-    [GLOBAL_FILES file1 ...] 
+    [GLOBAL_FILES file1 [file2 ...]] 
 )
 \endcode
 
@@ -445,27 +445,28 @@ This module provides the following function.
 
 \code
 cpfAddFilePackage(
-    [PROJECT_NAME] name
-    DOXYGEN_CONFIG_FILE file
-    DOXYGEN_LAYOUT_FILE file
-    DOXYGEN_STYLESHEET_FILE file
-    [SOURCES]
-    [ADDITIONAL_PACKAGES]
-    [HTML_HEADER]
-    [HTML_FOOTER]
-    [PROJECT_LOGO]
-    [PLANT_UML_JAR]
+    [PROJECT_NAME name]
+    DOXYGEN_CONFIG_FILE relPath
+    DOXYGEN_LAYOUT_FILE relPath
+    DOXYGEN_STYLESHEET_FILE relPath
+    [SOURCES relPath1 [relPath2 ... ]]
+    [ADDITIONAL_PACKAGES externalPackage1 [externalPackage2 ...]]
+    [HTML_HEADER relPath]
+    [HTML_FOOTER relPath]
+    [PROJECT_LOGO relPath]
+    [PLANTUML_JAR_PATH absPath]
+    [RUN_DOXYINDEXER]
 )
 \endcode
 
 This function adds a package that runs the doxygen documentation generator on the owned packages of your CI-project.
 The package can also contain extra files containing global documentation that does not belong to
-any other package in your ci-project.
+any other package.
 
-All files specified with the key-word arguments are added to
-the targets source files.
+All files specified with the key-word arguments are added to the targets source files.
 
-More information about the documentation generation can be found in \ref CPFDocumentationGeneration.
+More information about the documentation generation can be found on the page \ref CPFDocumentationGeneration and in the 
+\ref CPFAddDoxygenPackage "tutorial".
 
 \subsubsection cpfAddDoxygenPackageArguments Arguments
 
@@ -478,11 +479,30 @@ Note that this overrides the value of the \c PROJECT_NAME variable in the
 
 #### DOXYGEN_CONFIG_FILE ####
 
-Absolute path to the used DoxygenConfig.txt configuration file. Note that the file
-is not directly passed to Doxygen. In order to inject the values of cmake variables,
-the file is used as a template to generate the \c Generated/\<config\>/_CPF/documentation/tempDoxygenConfig.txt
-file which is used as the input for doxygen. At the bottom of this file you will see that it
-overwrites some of the variables.
+This must be set to the absolute path of the Doxygen configuration file. You should be aware that the file
+is not directly passed to Doxygen. In order to inject the values of CMake variables into the Doxygen configuration,
+the file is used as a template to generate the file <code>Generated/\<config\>/_CPF/documentation/tempDoxygenConfig.txt</code>.
+This generated file is the one that is used as the input for the call of Doxygen. After building the new package for the first
+time you can open the file and see that it overwrites some values of the configuration variables at the bottom of the file.
+
+The following variables in the configuration file are overwritten.
+Changing them in the given template will have no effect.
+
+\code
+PROJECT_NAME                (set to the value of the PROJECT_NAME option)
+OUTPUT_DIRECTORY            (set to <code>Generated/\<config\>/html/doxygen</code>)
+HTML_OUTPUT                 (set to html)
+INPUT                       (set to <code>Sources</code> and the directories with the generated package documentation dox files)
+EXCLUDE                     (set to the external packages source directories that are not listed in ADDITIONAL_PACKAGES)
+DOTFILE_DIRS                (set to <code>Generated/\<config\>/html/doxygen/external</code>)
+LAYOUT_FILE                 (set to the path of the DOXYGEN_LAYOUT_FILE option)
+HTML_EXTRA_STYLESHEET       (set to the path of the DOXYGEN_STYLESHEET_FILE option)
+HTML_HEADER                 (only if HTML_HEADER option is set)
+HTML_FOOTER                 (only if HTML_FOOTER option is set)
+PROJECT_LOGO                (only if PROJECT_LOGO option is set)
+PLANTUML_JAR_PATH           (only if PLANTUML_JAR_PATH option is set)
+\endcode
+
 
 #### DOXYGEN_LAYOUT_FILE ####
 
@@ -518,6 +538,14 @@ in the documentation.
 
 The absolute path to the plantuml.jar which doxygen uses to generate UML-diagramms from
 <a href="http://plantuml.com/">PlantUML</a> code in doxygen comments. 
-Setting this enables you to use doxygens <code>startuml</code> command.
+Setting this enables you to use Doxygen's <code>startuml</code> command.
+
+
+#### RUN_DOXYINDEXER ####
+
+This option can be added to also run the doxyindexer tool to generate the \c searchdata.db
+directory that is required when using the server-side search feature of doxygen.
+The directory will be created in the <code>Generated/\<config\>/html/cgi-bin</code> directory.
+
 
 */
