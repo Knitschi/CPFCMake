@@ -104,7 +104,8 @@ function( cpfAddDoxygenPackage )
 	# The config file must contain the names of the depended on xml tag files of other doxygen sub-targets.
 	list(APPEND appendedLines "PROJECT_NAME  = ${ARG_PROJECT_NAME}")
 	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}\"")
-	list(APPEND appendedLines "HTML_OUTPUT = ${doxygenHtmlSubdir}")		
+	list(APPEND appendedLines "GENERATE_HTML = YES")
+	list(APPEND appendedLines "HTML_OUTPUT = ${doxygenHtmlSubdir}")	# We set a fixed location, so we can be sure were files are when copying the documentation on the build-server.	
 	list(APPEND appendedLines "DOTFILE_DIRS = \"${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
 	list(APPEND appendedLines "LAYOUT_FILE = \"${ARG_DOXYGEN_LAYOUT_FILE}\"")
 	list(APPEND appendedLines "HTML_EXTRA_STYLESHEET = \"${ARG_DOXYGEN_STYLESHEET_FILE}\"")
@@ -117,6 +118,10 @@ function( cpfAddDoxygenPackage )
 	if(ARG_PROJECT_LOGO)
 		list(APPEND appendedLines "PROJECT_LOGO = \"${ARG_PROJECT_LOGO}\"")
 	endif()
+
+	# Make sure the name of the searchdate.xml file is the one that we use here.
+	set(searchDataXmlShortName searchdata.xml)
+	list(APPEND appendedLines "SEARCHDATA_FILE = ${searchDataXmlShortName}")
 
 	# input files
 	list(APPEND appendedLines "INPUT = \"${CMAKE_SOURCE_DIR}\"")
@@ -140,6 +145,8 @@ function( cpfAddDoxygenPackage )
 		list(APPEND appendedLines "PLANTUML_JAR_PATH = \"${ARG_PLANT_UML_JAR}\"")
 	endif()
 
+
+
 	cpfAddAppendLinesToFileCommands( 
 		INPUT ${ARG_DOXYGEN_CONFIG_FILE}
 		OUTPUT ${tempDoxygenConfigFile}
@@ -148,7 +155,7 @@ function( cpfAddDoxygenPackage )
 
 	# Add the command for running doxygen
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
-	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/${doxygenHtmlSubdir}/searchdata.xml)
+	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/${searchDataXmlShortName})
 	cpfGetAllNonGeneratedPackageSources(packagSourceFiles "${documentedPackages}")
 	set( allDependedOnFiles 
 		${tempDoxygenConfigFile}

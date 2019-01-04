@@ -496,11 +496,13 @@ INPUT                       (set to <code>Sources</code> and the directories wit
 EXCLUDE                     (set to the external packages source directories that are not listed in ADDITIONAL_PACKAGES)
 DOTFILE_DIRS                (set to <code>Generated/\<config\>/html/doxygen/external</code>)
 LAYOUT_FILE                 (set to the path of the DOXYGEN_LAYOUT_FILE option)
+GENERATE_HTML               (set to YES)
 HTML_EXTRA_STYLESHEET       (set to the path of the DOXYGEN_STYLESHEET_FILE option)
 HTML_HEADER                 (only if HTML_HEADER option is set)
 HTML_FOOTER                 (only if HTML_FOOTER option is set)
 PROJECT_LOGO                (only if PROJECT_LOGO option is set)
 PLANTUML_JAR_PATH           (only if PLANTUML_JAR_PATH option is set)
+SEARCHDATA_FILE             (set to searchdata.xml)
 \endcode
 
 
