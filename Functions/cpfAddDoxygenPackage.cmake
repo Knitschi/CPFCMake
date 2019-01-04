@@ -14,7 +14,8 @@ include(cpfAddCppPackage)
 #
 function( cpfAddDoxygenPackage )
 
-	set( optionKeywords
+	set( optionalBoolKeywords
+		RUN_DOXYINDEXER
 	) 
 
 	set( requiredSingleValueKeywords
@@ -28,7 +29,7 @@ function( cpfAddDoxygenPackage )
 		HTML_HEADER
 		HTML_FOOTER
 		PROJECT_LOGO
-		PLANT_UML_JAR
+		PLANTUML_JAR_PATH
 	)
 
 	set( requiredMultiValueKeywords 
@@ -41,7 +42,7 @@ function( cpfAddDoxygenPackage )
 
 	cmake_parse_arguments(
 		ARG 
-		"${optionKeywords}" 
+		"${optionalBoolKeywords}" 
 		"${requiredSingleValueKeywords};${optionalSingleValueKeywords}"
 		"${requiredMultiValueKeywords};${optionalMultiValueKeywords}"
 		${ARGN}
@@ -66,6 +67,7 @@ function( cpfAddDoxygenPackage )
 	set(tempDoxygenConfigFile "${targetBinaryDir}/tempDoxygenConfig.txt" )
 	set(reducedGraphFile "${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/CPFDependenciesTransitiveReduced.dot")
 	set(htmlCgiBinDir "${CPF_PROJECT_HTML_ABS_DIR}/${CPF_CGI_BIN_DIR}" )
+	set(doxygenHtmlSubdir html)
 
 	# Get dependencies
 	cpfGetOwnedPackages( documentedPackages ${CPF_ROOT_DIR})
@@ -102,6 +104,7 @@ function( cpfAddDoxygenPackage )
 	# The config file must contain the names of the depended on xml tag files of other doxygen sub-targets.
 	list(APPEND appendedLines "PROJECT_NAME  = ${ARG_PROJECT_NAME}")
 	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}\"")
+	list(APPEND appendedLines "HTML_OUTPUT = ${doxygenHtmlSubdir}")		
 	list(APPEND appendedLines "DOTFILE_DIRS = \"${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
 	list(APPEND appendedLines "LAYOUT_FILE = \"${ARG_DOXYGEN_LAYOUT_FILE}\"")
 	list(APPEND appendedLines "HTML_EXTRA_STYLESHEET = \"${ARG_DOXYGEN_STYLESHEET_FILE}\"")
@@ -132,7 +135,7 @@ function( cpfAddDoxygenPackage )
 	endforeach()
 
 	# TODO get plantuml.jar with hunter
-	if(ARG_PLANT_UML_JAR)
+	if(ARG_PLANTUML_JAR_PATH)
 		message( STATUS "Enable UML diagrams in doxygen comments.")
 		list(APPEND appendedLines "PLANTUML_JAR_PATH = \"${ARG_PLANT_UML_JAR}\"")
 	endif()
@@ -145,7 +148,7 @@ function( cpfAddDoxygenPackage )
 
 	# Add the command for running doxygen
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
-	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/searchdata.xml)
+	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/${doxygenHtmlSubdir}/searchdata.xml)
 	cpfGetAllNonGeneratedPackageSources(packagSourceFiles "${documentedPackages}")
 	set( allDependedOnFiles 
 		${tempDoxygenConfigFile}
@@ -167,19 +170,32 @@ function( cpfAddDoxygenPackage )
 	# Create the command for running the doxyindexer.
 	# The doxyindexer creates the content of the doxysearch.dp directory which is used by the doxysearch.cgi script 
 	# when using the search function of the documentation
-	set(doxyIndexerCommand "\"${TOOL_DOXYINDEXER}\" -o \"${htmlCgiBinDir}\" \"${searchDataXmlFile}\"" )
-	set(doxyIndexerStampFile ${targetBinaryDir}/doxyindexer.stamp)
-	cpfAddStandardCustomCommand(
-		OUTPUT ${doxyIndexerStampFile}
-		DEPENDS ${searchDataXmlFile}
-		COMMANDS "cmake -E make_directory \"${htmlCgiBinDir}\"" ${doxyIndexerCommand} "cmake -E touch \"${doxyIndexerStampFile}\""
-	)
+	set(doxyIndexerStampFile)
+	if(ARG_RUN_DOXYINDEXER)
+		set(doxyIndexerCommand "\"${TOOL_DOXYINDEXER}\" -o \"${htmlCgiBinDir}\" \"${searchDataXmlFile}\"" )
+		set(doxyIndexerStampFile ${targetBinaryDir}/doxyindexer.stamp)
+		cpfAddStandardCustomCommand(
+			OUTPUT ${doxyIndexerStampFile}
+			DEPENDS ${searchDataXmlFile}
+			COMMANDS "cmake -E make_directory \"${htmlCgiBinDir}\"" ${doxyIndexerCommand} "cmake -E touch \"${doxyIndexerStampFile}\""
+		)
+	endif()
 
 	# Now add the target
 	add_custom_target(
 		${package}
-		DEPENDS ${doxyIndexerStampFile} ${targetDependencies}
-		SOURCES ${ARG_SOURCES} ${ARG_DOXYGEN_CONFIG_FILE} ${ARG_DOXYGEN_LAYOUT_FILE} ${ARG_DOXYGEN_STYLESHEET_FILE} ${ARG_HTML_HEADER} ${ARG_HTML_FOOTER} ${ARG_PROJECT_LOGO}
+		DEPENDS 
+			${targetDependencies}
+			${searchDataXmlFile}
+			${doxyIndexerStampFile}
+		SOURCES 
+			${ARG_SOURCES}
+			${ARG_DOXYGEN_CONFIG_FILE}
+			${ARG_DOXYGEN_LAYOUT_FILE}
+			${ARG_DOXYGEN_STYLESHEET_FILE}
+			${ARG_HTML_HEADER}
+			${ARG_HTML_FOOTER}
+			${ARG_PROJECT_LOGO}
 	)
 	set_property( TARGET ${package} PROPERTY FOLDER ${package} )
 	cpfSetIDEDirectoriesForTargetSources(${package})

@@ -10,6 +10,6 @@ set(compilerPath "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/
 set(CMAKE_CXX_COMPILER "${compilerPath}" CACHE FILEPATH "Microsoft cpp compiler" FORCE)
 set(CMAKE_C_COMPILER "${compilerPath}" CACHE FILEPATH "Microsoft c compiler" FORCE)
 
-# /EHsc sadly I can not remember why the /EHsc flag was introduced. (glaube Qt benötigt es)
+# /EHsc sadly I can not remember why the /EHsc flag was introduced. (Mabe because of Qt?)
 set(CMAKE_CXX_FLAGS "/EHsc" CACHE STRING "C++ compile flags" FORCE)
 
