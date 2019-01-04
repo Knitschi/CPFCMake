@@ -139,13 +139,11 @@ function( cpfAddDoxygenPackage )
 		endif()
 	endforeach()
 
-	# TODO get plantuml.jar with hunter
+	# Forward the path to the plantuml.jar
 	if(ARG_PLANTUML_JAR_PATH)
 		message( STATUS "Enable UML diagrams in doxygen comments.")
-		list(APPEND appendedLines "PLANTUML_JAR_PATH = \"${ARG_PLANT_UML_JAR}\"")
+		list(APPEND appendedLines "PLANTUML_JAR_PATH = \"${ARG_PLANTUML_JAR_PATH}\"")
 	endif()
-
-
 
 	cpfAddAppendLinesToFileCommands( 
 		INPUT ${ARG_DOXYGEN_CONFIG_FILE}

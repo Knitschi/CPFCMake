@@ -446,14 +446,14 @@ This module provides the following function.
 \code
 cpfAddFilePackage(
     [PROJECT_NAME name]
-    DOXYGEN_CONFIG_FILE relPath
-    DOXYGEN_LAYOUT_FILE relPath
-    DOXYGEN_STYLESHEET_FILE relPath
+    DOXYGEN_CONFIG_FILE absPath
+    DOXYGEN_LAYOUT_FILE absPath
+    DOXYGEN_STYLESHEET_FILE absPath
     [SOURCES relPath1 [relPath2 ... ]]
     [ADDITIONAL_PACKAGES externalPackage1 [externalPackage2 ...]]
-    [HTML_HEADER relPath]
-    [HTML_FOOTER relPath]
-    [PROJECT_LOGO relPath]
+    [HTML_HEADER absPath]
+    [HTML_FOOTER absPath]
+    [PROJECT_LOGO absPath]
     [PLANTUML_JAR_PATH absPath]
     [RUN_DOXYINDEXER]
 )
