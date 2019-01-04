@@ -458,8 +458,8 @@ cpfAddFilePackage(
 )
 \endcode
 
-Adds a package that runs doxygen on the owned packages of your CI-project.
-The package can also contain global documentation that does not belong to
+This function adds a package that runs the doxygen documentation generator on the owned packages of your CI-project.
+The package can also contain extra files containing global documentation that does not belong to
 any other package in your ci-project.
 
 All files specified with the key-word arguments are added to
