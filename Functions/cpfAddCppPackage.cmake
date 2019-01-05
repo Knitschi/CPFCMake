@@ -451,15 +451,19 @@ function( cpfAddBinaryTarget	)
 				${fileContainerTarget}
 				SOURCES ${allSources}
 			)
+			set_property( TARGET ${fileContainerTarget} PROPERTY FOLDER ${ARG_IDE_FOLDER})
+
 			set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET ${fileContainerTarget})
 
 			# Set the version to a special property
 			set_property( TARGET ${ARG_NAME} PROPERTY INTERFACE_CPF_VERSION ${PROJECT_VERSION} )
 
 		else()
+
 			add_library(${ARG_NAME} ${allSources} )
 			# Remove the lib prefix on Linux. We expect that to be part of the package name.
 			set_property(TARGET ${ARG_NAME} PROPERTY PREFIX "")
+
 		endif()
 
 		# make sure that clients have the /D <target>_IMPORTS compile option set.
@@ -473,10 +477,12 @@ function( cpfAddBinaryTarget	)
 	# Set include directories, that all header are included with #include <package/myheader.h>
 	# We do not use special directories for private or public headers. So the include directory is public.
 	if(isInterfaceLib)
+
 		set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_INCLUDE_DIRECTORIES  
 			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
 			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
 		)
+
 	else()
 
 		target_include_directories( ${ARG_NAME} PUBLIC 
