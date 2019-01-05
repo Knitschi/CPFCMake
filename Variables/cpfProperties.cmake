@@ -14,7 +14,7 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets.
     define_property(
         TARGET
-        PROPERTY CPF_BRIEF_PACKAGE_DESCRIPTION
+        PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION
         BRIEF_DOCS "Contains a short description about what the package is good for."
         FULL_DOCS " "
     )
@@ -22,7 +22,7 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets.
     define_property(
         TARGET
-        PROPERTY CPF_LONG_PACKAGE_DESCRIPTION
+        PROPERTY INTERFACE_CPF_LONG_PACKAGE_DESCRIPTION
         BRIEF_DOCS "Contains a long description about what the package is good for."
         FULL_DOCS " "
     )
@@ -30,7 +30,7 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets.
     define_property(
         TARGET
-        PROPERTY CPF_PACKAGE_HOMEPAGE
+        PROPERTY INTERFACE_CPF_PACKAGE_HOMEPAGE
         BRIEF_DOCS "A web address from where the source-code and/or the documentation of the package can be obtained."
         FULL_DOCS " "
     )
@@ -38,8 +38,16 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets.
     define_property(
         TARGET
-        PROPERTY CPF_PACKAGE_MAINTAINER_EMAIL
+        PROPERTY INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL
         BRIEF_DOCS "An email address under which the maintainers of the package can be reached."
+        FULL_DOCS " "
+    )
+
+    # A property that is set on interface library targets.
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_VERSION
+        BRIEF_DOCS "Duplicates the VERSION property to allow passing on the version for interface libraries."
         FULL_DOCS " "
     )
 
@@ -54,7 +62,7 @@ function( cpfDefineProperties )
 	# A property that is set on all main targets.
 	define_property(
         TARGET
-        PROPERTY CPF_PRODUCTION_LIB_SUBTARGET
+        PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET
         BRIEF_DOCS "For executables this contains the name of the helper implementation library target. For library targets this contains the name of the main target."
         FULL_DOCS " "
     )
@@ -62,7 +70,7 @@ function( cpfDefineProperties )
     # A property that is set on all main targets.
     define_property(
         TARGET
-        PROPERTY CPF_TEST_FIXTURE_SUBTARGET
+        PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET
         BRIEF_DOCS "The library the contains test utilities."
         FULL_DOCS " "
     )
@@ -70,15 +78,23 @@ function( cpfDefineProperties )
     # A property that is set on all main targets.
     define_property(
         TARGET
-        PROPERTY CPF_TESTS_SUBTARGET
+        PROPERTY INTERFACE_CPF_TESTS_SUBTARGET
         BRIEF_DOCS "The test-executable binary target."
+        FULL_DOCS " "
+    )
+
+    # A property that is set on interface library targets.
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET
+        BRIEF_DOCS "A custom target that is used to hold the files for interface library targets."
         FULL_DOCS " "
     )
 
 	# A property that is set on all binary targets.
 	define_property(
         TARGET
-        PROPERTY CPF_PUBLIC_HEADER
+        PROPERTY INTERFACE_CPF_PUBLIC_HEADER
         BRIEF_DOCS "The header files that need to be accessed by consumers that link to the target."
         FULL_DOCS " "
     )
@@ -190,7 +206,7 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets
 	define_property(
         TARGET
-        PROPERTY CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS
+        PROPERTY INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS
         BRIEF_DOCS "The names of the custom sub-target that create distribution-packages for the package."
         FULL_DOCS " "
     )
@@ -198,7 +214,7 @@ function( cpfDefineProperties )
     # A property that is set on shared library targets
 	define_property(
         TARGET
-        PROPERTY INTERFACE_ABI_DUMP_SUBTARGET
+        PROPERTY INTERFACE_CPF_ABI_DUMP_SUBTARGET
         BRIEF_DOCS "The names of the custom sub-target that create the abi dumps."
         FULL_DOCS " "
     )

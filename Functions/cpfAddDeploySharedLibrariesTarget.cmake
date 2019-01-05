@@ -44,7 +44,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 function( cpfGetSharedLibrariesRequiredByPackageProductionLib librariesOut package )
 
-	get_property( productionLib TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET )
+	get_property( productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET )
 	cpfGetRecursiveLinkedLibraries( linkedLibraries ${productionLib})
 	if(linkedLibraries)
 		list(REMOVE_DUPLICATES linkedLibraries)

@@ -76,7 +76,7 @@ endfunction()
 # The target also makes sure that old packages in LastBuild are deleted. 
 #
 function( cpfAddDistributionPackagesTarget package )
-	cpfGetSubtargets(createPackagesTargets "${package}" CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS)
+	cpfGetSubtargets(createPackagesTargets "${package}" INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS)
 	if(createPackagesTargets)
 		
 		cpfGetDistributionPackagesTargetName( targetName ${package})
@@ -103,7 +103,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfAddClearLastBuildDirCommand stampFileOut package distPackagesTarget )
 
-	cpfGetSubtargets(distPackageTargets "${package}" CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS)
+	cpfGetSubtargets(distPackageTargets "${package}" INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS)
 	cpfGetConfigVariableSuffixes(configSuffixes)
 
 	set(packageFiles)
@@ -186,7 +186,7 @@ function( cpfAddPackageContentTarget targetName package contentId contentType )
 			cpfAddConfigurationDependendCommand(
 				TARGET ${targetName}
 				OUTPUT ${stampFile${configSuffix}}
-				DEPENDS ${sourceTargets${configSuffix}} ${dependedOnFiles}
+				DEPENDS ${dependedOnFiles} # ${sourceTargets${configSuffix}}
 				COMMENT "Collect ${package} ${contentType} package files for config ${config}"
 				CONFIG ${config}
 				COMMANDS_CONFIG ${clearContentStageCommands} ${runInstallScriptCommands} ${touchCommmand}
@@ -252,9 +252,12 @@ function( cpfGetContentProducingTargetsAndOutputFiles contentProducerTargetsOut 
 	foreach(binaryTarget ${binaryTargets})
 		
 		# Add target main output file.
-		cpfListAppend(files $<TARGET_FILE:${binaryTarget}>)
+		cpfIsInterfaceLibrary( isIntLib ${binaryTarget})
+		if(NOT isIntLib)
+			cpfListAppend(files $<TARGET_FILE:${binaryTarget}>)
+		endif()
 
-		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY INTERFACE_ABI_DUMP_SUBTARGET )
+		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_ABI_DUMP_SUBTARGET )
 		if(abiDumpTarget)
 			# add target
 			cpfListAppend(abiDumpTargets ${abiDumpTarget})
@@ -405,7 +408,7 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 		DEPENDS ${contentTarget} ${allOutputFiles}
 	)
 
-	set_property( TARGET ${package} APPEND PROPERTY CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS ${targetName})
+	set_property( TARGET ${package} APPEND PROPERTY INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS ${targetName})
 	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/private")
 	
 	if(${contentType} STREQUAL CT_SOURCES)
@@ -438,7 +441,12 @@ function( cpfSetUpPackagingCommands
 	cpfGetDistributionPackageTargetName( targetName ${package} ${contentId} ${contentType} ${packageFormat})
 	cpfGetDistributionPackageExtension( extension ${packageFormat})
 
-	get_property( version TARGET ${package} PROPERTY VERSION )
+	cpfIsInterfaceLibrary( isIntLib ${package})
+	if(isIntLib)
+		get_property( version TARGET ${package} PROPERTY INTERFACE_CPF_VERSION )
+	else()
+		get_property( version TARGET ${package} PROPERTY VERSION )
+	endif()
 
 	# locations / files
 	cpfGetBasePackageFilename( basePackageFileName ${package} "${config}" ${version} ${contentId} ${packageFormat})
@@ -583,9 +591,9 @@ function( cpfGetDebianPackageCommand commandOut package config version contentId
 	# example "libc6 (>= 2.3.1-6), libc6 (< 2.4)"
 	# todo package description durchschl�usen
 
-	get_property( description TARGET ${package} PROPERTY CPF_BRIEF_PACKAGE_DESCRIPTION )
-	get_property( homepage TARGET ${package} PROPERTY CPF_PACKAGE_HOMEPAGE )
-	get_property( maintainer TARGET ${package} PROPERTY CPF_PACKAGE_MAINTAINER_EMAIL )
+	get_property( description TARGET ${package} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION )
+	get_property( homepage TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_HOMEPAGE )
+	get_property( maintainer TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL )
 	
 	set(configOption)
 	if(config)

@@ -186,6 +186,11 @@ endfunction()
 # reduce the warning level for files that are added over cmakes interface sources mechanism
 macro( cpfRemoveWarningFlagsForSomeExternalFiles targetName )
 
+	cpfIsInterfaceLibrary( isIntLib ${targetName})
+	if(isIntLib)
+		return()
+	endif()
+
     set( externalFiles 
         static_qt_plugins.cpp   # added when using staticly linked hunter-qt
     )
@@ -436,14 +441,14 @@ function( cpfPrintTargetProperties target )
 		XCODE_PRODUCT_TYPE
 		XCTEST
 		# CPF properties
-		CPF_BRIEF_PACKAGE_DESCRIPTION
-		CPF_PACKAGE_HOMEPAGE
-		CPF_PACKAGE_MAINTAINER_EMAIL
+		INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION
+		INTERFACE_CPF_PACKAGE_HOMEPAGE
+		INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL
 		INTERFACE_CPF_BINARY_SUBTARGETS
-		CPF_PRODUCTION_LIB_SUBTARGET
-		CPF_TEST_FIXTURE_SUBTARGET
-		CPF_TESTS_SUBTARGET
-		CPF_PUBLIC_HEADER
+		INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET
+		INTERFACE_CPF_TEST_FIXTURE_SUBTARGET
+		INTERFACE_CPF_TESTS_SUBTARGET
+		INTERFACE_CPF_PUBLIC_HEADER
 		CPF_UIC_SUBTARGET
 		CPF_UIC_SUBTARGET
 		INTERFACE_CPF_CLANG_TIDY_SUBTARGET
@@ -458,8 +463,8 @@ function( cpfPrintTargetProperties target )
 		CPF_DOXYGEN_CONFIG_SUBTARGET
 		CPF_DOXYGEN_CONFIG_FILE
 		CPF_INSTALL_PACKAGE_SUBTARGET
-		CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS
-		INTERFACE_ABI_DUMP_SUBTARGET
+		INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS
+		INTERFACE_CPF_ABI_DUMP_SUBTARGET
 		INTERFACE_CPF_ABI_CHECK_SUBTARGETS
 		CPF_OUTPUT_FILES
 	)
@@ -651,7 +656,7 @@ function( cpfGetTargetOutputFileNameForTargetType output target config targetTyp
 	get_property( version TARGET ${target} PROPERTY VERSION)
 	
 	cpfGetTargetTypeFileExtension( extension ${targetType})
-	cpfTargetIsDynamicLibrary( isDynamicLib ${target})
+	cpfIsDynamicLibrary( isDynamicLib ${target})
 	cpfIsExecutable( isExe ${target})
 
 	if(${CMAKE_SYSTEM_NAME} STREQUAL Linux AND isDynamicLib )
@@ -805,7 +810,7 @@ function( cpfGetPossiblySharedLibrarySubTargets librarySubTargetsOut package)
 		cpfListAppend( libraryTargets ${package})
 	endif()
 
-	get_property( fixtureTarget TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET)
+	get_property( fixtureTarget TARGET ${package} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET)
 	if(TARGET ${fixtureTarget})
 		cpfListAppend( libraryTargets ${fixtureTarget})
 	endif()
@@ -962,7 +967,7 @@ function( cpfGetExecutableTargets exeTargetsOut package )
 		cpfListAppend( exeTargets ${package})
 	endif()
 
-	get_property( testTarget TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET )
+	get_property( testTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET )
 	if(testTarget)
 		list(APPEND exeTargets ${testTarget})
 	endif()
@@ -978,7 +983,7 @@ function( cpfGetProductionTargets productionTargetsOut package)
 	
 	cpfIsExecutable(isExe ${package})
 	if(isExe)
-		get_property( prodLibTarget TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET )
+		get_property( prodLibTarget TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET )
 		cpfListAppend(targets ${prodLibTarget})
 	endif()
 
@@ -991,12 +996,12 @@ function( cpfGetTestTargets testTargetsOut package )
 
 	set(targets)
 
-	get_property( fixtureTarget TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET )
+	get_property( fixtureTarget TARGET ${package} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET )
 	if(fixtureTarget)
 		cpfListAppend(targets ${fixtureTarget})
 	endif()
 
-	get_property( testExeTarget TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET )
+	get_property( testExeTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET )
 	if(testExeTarget)
 		cpfListAppend(targets ${testExeTarget})
 	endif()

@@ -17,7 +17,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns true if the target is a SHARED_LIBRARY or MODULE_LIBRARY
-function( cpfTargetIsDynamicLibrary bOut target)
+function( cpfIsDynamicLibrary bOut target)
 	get_property( type TARGET ${target} PROPERTY TYPE )
 	if(${type} STREQUAL SHARED_LIBRARY OR ${type} STREQUAL MODULE_LIBRARY)
 		set(${bOut} TRUE PARENT_SCOPE)
@@ -33,7 +33,7 @@ function( cpfGetSharedLibrarySubTargets librarySubTargetsOut package)
 	set(libraryTargets)
 	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
 	foreach( binaryTarget ${binaryTargets})
-		cpfTargetIsDynamicLibrary( isDynamic ${binaryTarget})
+		cpfIsDynamicLibrary( isDynamic ${binaryTarget})
 		if(isDynamic)
 			cpfListAppend( libraryTargets ${binaryTarget})
 		endif()
@@ -43,4 +43,14 @@ function( cpfGetSharedLibrarySubTargets librarySubTargetsOut package)
 	
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# Returns true if the given target is an INTERFACE_LIBRARY
+function( cpfIsInterfaceLibrary isIntLibOut target )
+    get_property(type TARGET ${target} PROPERTY TYPE)
+    if(${type} STREQUAL INTERFACE_LIBRARY)
+        set(${isIntLibOut} TRUE PARENT_SCOPE)
+    else()
+        set(${isIntLibOut} FALSE PARENT_SCOPE)
+    endif()
+endfunction()
 

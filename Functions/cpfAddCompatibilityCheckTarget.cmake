@@ -326,7 +326,7 @@ function( cpfWritePublicHeaderListFile headerListFileOut package target )
 	cpfGetAbiDumpTargetName( abiDumpTarget ${target})
 	set(headerListFile "${CMAKE_BINARY_DIR}/${package}/${abiDumpTarget}/PublicHeaderList.txt")
 	
-	get_property( publicHeader TARGET ${target} PROPERTY CPF_PUBLIC_HEADER )
+	get_property( publicHeader TARGET ${target} PROPERTY INTERFACE_CPF_PUBLIC_HEADER )
 	set(fileContent)
 	foreach( header ${publicHeader} )
 		cpfIsAbsolutePath( isAbsPath ${header})
@@ -380,7 +380,7 @@ function( cpfAddAbiDumpTarget package binaryTarget headerListFile )
 	# set target properties
 	cpfToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} )
 	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES_${configSuffix} ${abiDumpFile} )
-	set_property(TARGET ${binaryTarget} PROPERTY INTERFACE_ABI_DUMP_SUBTARGET ${targetName} )
+	set_property(TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_ABI_DUMP_SUBTARGET ${targetName} )
 
 endfunction()
 

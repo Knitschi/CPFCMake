@@ -82,8 +82,8 @@ function( cpfAddOpenCppCoverageTarget package)
 	file(MAKE_DIRECTORY ${binaryDir})
 
 	# get related targets
-	get_property(productionLib TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET)
-	get_property(testTarget TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET)
+	get_property(productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
+	get_property(testTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
 	if(TARGET ${testTarget})
 
 		# add OpenCppCoverage commands if possible

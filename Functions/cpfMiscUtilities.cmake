@@ -391,10 +391,22 @@ endfunction()
 # and returns the list.
 function( getAbsPathsOfTargetSources absPathsOut target)
 
+	set(absPaths)
+
+	cpfIsInterfaceLibrary( isIntLib ${target})
+	if(isIntLib)
+		# Use the file container target to get the files.
+		get_property(target TARGET ${target} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET )
+	endif()
+
 	get_property(sourceDir TARGET ${target} PROPERTY SOURCE_DIR )
+	# debug
+	if(NOT	sourceDir)
+		message(FATAL_ERROR "blub")
+	endif()
+
 	get_property(sources TARGET ${target} PROPERTY SOURCES )
 	# sources can have relative or absolute pathes
-	set(absPaths)
 	foreach( file ${sources})
 		cpfIsAbsolutePath( isAbsPath ${file})
 		if(isAbsPath)
@@ -403,7 +415,7 @@ function( getAbsPathsOfTargetSources absPathsOut target)
 			cpfListAppend( absPaths "${sourceDir}/${file}")
 		endif()
 	endforeach()
-	
+
 	set(${absPathsOut} "${absPaths}" PARENT_SCOPE)
 
 endfunction()

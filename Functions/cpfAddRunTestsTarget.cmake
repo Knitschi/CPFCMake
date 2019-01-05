@@ -55,8 +55,8 @@ endfunction()
 function( cpfAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix testFilter )
 
 	# get related targets
-	get_property(productionLib TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET)
-    get_property(testTarget TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET)
+	get_property(productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
+    get_property(testTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
 	if(TARGET ${testTarget})
 
 		set(runTargetName ${runTargetNamePrefix}${package})

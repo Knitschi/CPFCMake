@@ -45,10 +45,10 @@ function( cpfAddCppPackage )
 	)
 
 	set( requiredMultiValueKeywords
-		PRODUCTION_FILES
 	)
 
 	set( optionalMultiValueKeywords
+		PRODUCTION_FILES
 		PUBLIC_HEADER
 		PUBLIC_FIXTURE_HEADER
 		FIXTURE_FILES
@@ -123,10 +123,10 @@ function( cpfAddCppPackage )
 	)
 
 	#set some properties
-	set_property(TARGET ${package} PROPERTY CPF_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
-	set_property(TARGET ${package} PROPERTY CPF_LONG_PACKAGE_DESCRIPTION ${ARG_LONG_DESCRIPTION} )
-	set_property(TARGET ${package} PROPERTY CPF_PACKAGE_HOMEPAGE ${ARG_HOMEPAGE} )
-	set_property(TARGET ${package} PROPERTY CPF_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
+	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
+	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_LONG_PACKAGE_DESCRIPTION ${ARG_LONG_DESCRIPTION} )
+	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_HOMEPAGE ${ARG_HOMEPAGE} )
+	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
 	
 	
 	# add other custom targets
@@ -248,8 +248,7 @@ endfunction()
 
 #---------------------------------------------------------------------
 #
-function( 
-	cpfAddPackageBinaryTargets 
+function( cpfAddPackageBinaryTargets 
 	outProductionLibrary 
 	package 
 	packageNamespace 
@@ -308,10 +307,15 @@ function(
 	###################### Create production library target ##############################
     if(productionFiles OR publicHeaderFiles)  
 
+		set( libType ${type} )
+		if(isExe)
+			set(libType LIB)
+		endif()
+
         cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}  
 			EXPORT_MACRO_PREFIX ${packageNamespace}
-			TARGET_TYPE LIB
+			TARGET_TYPE ${libType}
 			NAME ${productionTarget}
 			PUBLIC_HEADER ${publicHeaderFiles}
 			FILES ${productionFiles}
@@ -360,7 +364,7 @@ function(
 		if(${package}_BUILD_TESTS STREQUAL OFF )
 			set_property(TARGET ${fixtureTarget} PROPERTY EXCLUDE_FROM_ALL TRUE )
 		endif()
-		set_property(TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET ${fixtureTarget} )
+		set_property(TARGET ${package} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET ${fixtureTarget} )
         
     endif()
 
@@ -376,7 +380,7 @@ function(
 			IDE_FOLDER ${package}/${VSTestFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
         )
-		set_property(TARGET ${package} PROPERTY CPF_TESTS_SUBTARGET ${unitTestsTarget} )
+		set_property(TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET ${unitTestsTarget} )
 
 		# respect an option that is used by hunter to not compile test targets
 		if(${package}_BUILD_TESTS STREQUAL OFF)
@@ -387,7 +391,7 @@ function(
     
 	# Set some properties
     set_property(TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS ${exeTarget} ${fixtureTarget} ${productionTarget} ${unitTestsTarget} )
-    set_property(TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET ${productionTarget} )
+    set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET ${productionTarget} )
 	set( ${outProductionLibrary} ${productionTarget} PARENT_SCOPE)
 
 endfunction()
@@ -419,6 +423,11 @@ function( cpfAddBinaryTarget	)
 
 	cpfQt5AddUIAndQrcFiles( allSources )
 
+	set(isInterfaceLib FALSE)
+	if(${ARG_TARGET_TYPE} MATCHES INTERFACE_LIB)
+		set(isInterfaceLib TRUE)
+	endif()
+
     # Create Window application
     if( ${ARG_TARGET_TYPE} STREQUAL GUI_APP)
         add_executable(${ARG_NAME} WIN32 ${allSources} )
@@ -430,65 +439,89 @@ function( cpfAddBinaryTarget	)
     endif()
 
     # library
-    if( ${ARG_TARGET_TYPE} MATCHES LIB )
+    if( ${ARG_TARGET_TYPE} MATCHES LIB OR isInterfaceLib )
 		
-		add_library(${ARG_NAME} ${allSources} )
-		
+		if(isInterfaceLib)
+
+			add_library(${ARG_NAME} INTERFACE )
+
+			# We also add a custom target to hold the files so we can see them in Visual Studio
+			set(fileContainerTarget ${ARG_NAME}_files )
+			add_custom_target(
+				${fileContainerTarget}
+				SOURCES ${allSources}
+			)
+			set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET ${fileContainerTarget})
+
+			# Set the version to a special property
+			set_property( TARGET ${ARG_NAME} PROPERTY INTERFACE_CPF_VERSION ${PROJECT_VERSION} )
+
+		else()
+			add_library(${ARG_NAME} ${allSources} )
+			# Remove the lib prefix on Linux. We expect that to be part of the package name.
+			set_property(TARGET ${ARG_NAME} PROPERTY PREFIX "")
+		endif()
+
 		# make sure that clients have the /D <target>_IMPORTS compile option set.
 		if( ${BUILD_SHARED_LIBS} AND MSVC)
 			target_compile_definitions(${ARG_NAME} INTERFACE /D ${ARG_NAME}_IMPORTS )
 		endif()
-		
-		# Remove the lib prefix on Linux. We expect that to be part of the package name.
-		set_property(TARGET ${ARG_NAME} PROPERTY PREFIX "")
 		
     endif()
 
     # Set target properties
 	# Set include directories, that all header are included with #include <package/myheader.h>
 	# We do not use special directories for private or public headers. So the include directory is public.
-	target_include_directories( ${ARG_NAME} PUBLIC 
-		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
-		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
-	)
-	
-	# Hardcode c++ standard to 14 for now.
-	# This should be set by the user in the addPackage() method.
-	set_property(TARGET ${ARG_NAME} PROPERTY CXX_STANDARD 14)
-
-	# set the Visual Studio folder property
-	set_property( TARGET ${ARG_NAME} PROPERTY FOLDER ${ARG_IDE_FOLDER})
-	# public header
-	set_property( TARGET ${ARG_NAME} PROPERTY CPF_PUBLIC_HEADER ${ARG_PUBLIC_HEADER})
-	# Enable qt auto moc
-	# Note that we AUTOUIC and AUTORCC is not used because I was not able to get the names of
-	# the generated files at cmake time which is required when setting source groups and 
-	# adding the generated ui_*.h header to the targets interface include directories.
-	set_property( TARGET ${ARG_NAME} PROPERTY AUTOMOC ON)
-	# Set the target version
-	set_property( TARGET ${ARG_NAME} PROPERTY VERSION ${PROJECT_VERSION} )
-	if("${ARG_VERSION_COMPATIBILITY_SCHEME}" STREQUAL ExactVersion)
-		set_property( TARGET ${ARG_NAME} PROPERTY SOVERSION ${PROJECT_VERSION} )
+	if(isInterfaceLib)
+		set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_INCLUDE_DIRECTORIES  
+			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
+			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+		)
 	else()
-		message(FATAL_ERROR "Unexpected compatibility scheme!")
+
+		target_include_directories( ${ARG_NAME} PUBLIC 
+			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
+			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+		)
+
+		# set the Visual Studio folder property
+		set_property( TARGET ${ARG_NAME} PROPERTY FOLDER ${ARG_IDE_FOLDER})
+
+		# Enable qt auto moc
+		# Note that we AUTOUIC and AUTORCC is not used because I was not able to get the names of
+		# the generated files at cmake time which is required when setting source groups and 
+		# adding the generated ui_*.h header to the targets interface include directories.
+		set_property( TARGET ${ARG_NAME} PROPERTY AUTOMOC ON)
+
+		# Set the target version
+		set_property( TARGET ${ARG_NAME} PROPERTY VERSION ${PROJECT_VERSION} )
+		if("${ARG_VERSION_COMPATIBILITY_SCHEME}" STREQUAL ExactVersion)
+			set_property( TARGET ${ARG_NAME} PROPERTY SOVERSION ${PROJECT_VERSION} )
+		else()
+			message(FATAL_ERROR "Unexpected compatibility scheme!")
+		endif()
+
+		# Generate the header file with the dll export and import macros
+		cpfGenerateExportMacroHeader(${ARG_NAME} "${ARG_EXPORT_MACRO_PREFIX}")
+
+		# set target to use pre-compiled header
+		# compile flags can not be changed after this call
+		cpfAddPrecompiledHeader( ${ARG_NAME} )
+
 	endif()
+
+	# public header
+	set_property( TARGET ${ARG_NAME} PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${ARG_PUBLIC_HEADER})
 
 	# sets all the <bla>_OUTPUT_DIRECTORY_<config> options
 	cpfSetTargetOutputDirectoriesAndNames( ${ARG_PACKAGE_NAME} ${ARG_NAME})
 
     # link with other libraries
     target_link_libraries(${ARG_NAME} PUBLIC ${ARG_LINKED_LIBRARIES} )
-    cpfRemoveWarningFlagsForSomeExternalFiles(${ARG_NAME})
-
-	# Generate the header file with the dll export and import macros
-	cpfGenerateExportMacroHeader(${ARG_NAME} "${ARG_EXPORT_MACRO_PREFIX}")
-
-    # set target to use pre-compiled header
-    # compile flags can not be changed after this call
-    cpfAddPrecompiledHeader( ${ARG_NAME} )
+	cpfRemoveWarningFlagsForSomeExternalFiles(${ARG_NAME})
 
 	# sort files into folders in visual studio
-    cpfSetIDEDirectoriesForTargetSources(${ARG_NAME})
+	cpfSetIDEDirectoriesForTargetSources(${ARG_NAME})
 
 endfunction()
 
@@ -628,6 +661,12 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 function( cpfSetAllOutputDirectoriesAndNames target package config outputPrefixDir  )
 
+	# The output directory properties can not be set on interface libraries.
+	cpfIsInterfaceLibrary(isIntLib ${target})
+	if(isIntLib)
+		return()
+	endif()
+
 	cpfToConfigSuffix( configSuffix ${config})
 
 	# Delete the <config>_postfix property and handle things manually in cpfSetOutputDirAndName()
@@ -681,7 +720,7 @@ function( cpfGenerateExportMacroHeader target macroBaseName )
 		)
 		set(exportHeader "${CMAKE_CURRENT_BINARY_DIR}/${macroBaseNameLower}_export.h" )
 		set_property(TARGET ${target} APPEND PROPERTY SOURCES ${exportHeader} )
-		set_property(TARGET ${target} APPEND PROPERTY CPF_PUBLIC_HEADER ${exportHeader} )
+		set_property(TARGET ${target} APPEND PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${exportHeader} )
 		source_group(Generated FILES ${exportHeader})
 	endif()
 

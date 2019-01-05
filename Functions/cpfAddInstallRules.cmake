@@ -40,7 +40,10 @@ endfunction()
 function( cpfInstallTargetsForPackage package targets component versionCompatibilityScheme )
 
 	# Do not install the targets that have been removed from the ALL_BUILD target
-	cpfFilterOutTargetsWithProperty( targets "${targets}" EXCLUDE_FROM_ALL TRUE )
+	cpfFilterInTargetsWithProperty( interfaceLibs "${targets}" TYPE INTERFACE_LIBRARY )
+	cpfFilterOutTargetsWithProperty( noneInterfaceLibTargets "${targets}" TYPE INTERFACE_LIBRARY )
+	cpfFilterOutTargetsWithProperty( noneInterfaceLibTargets "${noneInterfaceLibTargets}" EXCLUDE_FROM_ALL TRUE )
+	set(targets ${interfaceLibs} ${noneInterfaceLibTargets})
 
 	cpfGetRelativeOutputDir( relRuntimeDir ${package} RUNTIME )
 	cpfGetRelativeOutputDir( relLibDir ${package} LIBRARY)
@@ -107,43 +110,48 @@ function( cpfInstallDebugFiles package )
 		cpfToConfigSuffix( suffix ${config})
 
 		foreach(target ${targets})
-    
-            # Install compiler generated pdb files
-            get_property( compilePdbName TARGET ${target} PROPERTY COMPILE_PDB_NAME_${suffix} )
-            get_property( compilePdbDir TARGET ${target} PROPERTY COMPILE_PDB_OUTPUT_DIRECTORY_${suffix} )
-            cpfGetRelativeOutputDir( relPdbCompilerDir ${package} COMPILE_PDB )
-            if(compilePdbName)
-                install(
-                    FILES ${compilePdbDir}/${compilePdbName}.pdb
-					DESTINATION "${relPdbCompilerDir}"
-					COMPONENT developer
-                    CONFIGURATIONS ${config}
-                )
-            endif()
+	
+			cpfIsInterfaceLibrary( isIntLib ${target})
+			if(NOT isIntLib)
 
-            # Install linker generated pdb files
-            get_property( linkerPdbName TARGET ${target} PROPERTY PDB_NAME_${suffix} )
-            get_property( linkerPdbDir TARGET ${target} PROPERTY PDB_OUTPUT_DIRECTORY_${suffix} )
-            cpfGetRelativeOutputDir( relPdbLinkerDir ${package} PDB)
-            if(linkerPdbName)
-                install(
-                    FILES ${linkerPdbDir}/${linkerPdbName}.pdb
-					DESTINATION "${relPdbLinkerDir}"
-					COMPONENT developer
-                    CONFIGURATIONS ${config}
-                )
-			endif()
-			
-			# Install source files for configurations that require them for debugging.
-			cpfProjectProducesPdbFiles( needsSourcesForDebugging ${config})
-			if(needsSourcesForDebugging)
+				# Install compiler generated pdb files
+				get_property( compilePdbName TARGET ${target} PROPERTY COMPILE_PDB_NAME_${suffix} )
+				get_property( compilePdbDir TARGET ${target} PROPERTY COMPILE_PDB_OUTPUT_DIRECTORY_${suffix} )
+				cpfGetRelativeOutputDir( relPdbCompilerDir ${package} COMPILE_PDB )
+				if(compilePdbName)
+					install(
+						FILES ${compilePdbDir}/${compilePdbName}.pdb
+						DESTINATION "${relPdbCompilerDir}"
+						COMPONENT developer
+						CONFIGURATIONS ${config}
+					)
+				endif()
 
-				get_target_sources_without_prefix_header( sources ${target} )
-				cpfGetFilepathsWithExtensions( cppSources "${sources}" "${CPF_CXX_SOURCE_FILE_EXTENSIONS}" )
-				cpfInstallSourceFiles( relFiles ${package} "${cppSources}" SOURCE developer ${config} )
+				# Install linker generated pdb files
+				get_property( linkerPdbName TARGET ${target} PROPERTY PDB_NAME_${suffix} )
+				get_property( linkerPdbDir TARGET ${target} PROPERTY PDB_OUTPUT_DIRECTORY_${suffix} )
+				cpfGetRelativeOutputDir( relPdbLinkerDir ${package} PDB)
+				if(linkerPdbName)
+					install(
+						FILES ${linkerPdbDir}/${linkerPdbName}.pdb
+						DESTINATION "${relPdbLinkerDir}"
+						COMPONENT developer
+						CONFIGURATIONS ${config}
+					)
+				endif()
+				
+				# Install source files for configurations that require them for debugging.
+				cpfProjectProducesPdbFiles( needsSourcesForDebugging ${config})
+				if(needsSourcesForDebugging)
 
-                # Add the installed files to the target property
-				cpfPrependMulti(relInstallPaths "${relSourceDir}/" "${shortSourceNames}" )
+					get_target_sources_without_prefix_header( sources ${target} )
+					cpfGetFilepathsWithExtensions( cppSources "${sources}" "${CPF_CXX_SOURCE_FILE_EXTENSIONS}" )
+					cpfInstallSourceFiles( relFiles ${package} "${cppSources}" SOURCE developer ${config} )
+
+					# Add the installed files to the target property
+					cpfPrependMulti(relInstallPaths "${relSourceDir}/" "${shortSourceNames}" )
+
+				endif()
 
 			endif()
 
@@ -159,14 +167,14 @@ function( cpfInstallHeaders package)
 	set(installComponent developer)
 
 	# Install rules for production headers
-	get_property( productionLib TARGET ${package} PROPERTY CPF_PRODUCTION_LIB_SUBTARGET)
-	get_property( header TARGET ${productionLib} PROPERTY CPF_PUBLIC_HEADER)
+	get_property( productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
+	get_property( header TARGET ${productionLib} PROPERTY INTERFACE_CPF_PUBLIC_HEADER)
 	cpfInstallSourceFiles( relBasicHeader ${package} "${header}" ${outputType} ${installComponent} "")
 	
 	# Install rules for test fixture library headers
-	get_property( fixtureTarget TARGET ${package} PROPERTY CPF_TEST_FIXTURE_SUBTARGET)
+	get_property( fixtureTarget TARGET ${package} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET)
 	if(TARGET ${fixtureTarget})
-		get_property( header TARGET ${fixtureTarget} PROPERTY CPF_PUBLIC_HEADER)
+		get_property( header TARGET ${fixtureTarget} PROPERTY INTERFACE_CPF_PUBLIC_HEADER)
 		cpfInstallSourceFiles( relfixtureHeader ${package} "${header}" ${outputType} ${installComponent} "")
 	endif()
 
@@ -274,7 +282,7 @@ function( cpfInstallAbiDumpFiles package )
 	# get files from abiDump targets
 	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
 	foreach(binaryTarget ${binaryTargets})
-		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY INTERFACE_ABI_DUMP_SUBTARGET )
+		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_ABI_DUMP_SUBTARGET )
 		if(abiDumpTarget)
 
 			cpfGetCurrentDumpFile( dumpFile ${package} ${binaryTarget})
@@ -557,11 +565,23 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( get_target_sources_without_prefix_header sourcesOut target )
 
-	get_property(sources TARGET ${target} PROPERTY SOURCES)
-	get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
-	if(sources AND prefixHeader)
-		list(REMOVE_ITEM sources "${prefixHeader}")
+	cpfIsInterfaceLibrary( isIntLib ${target})
+	if(NOT isIntLib)
+
+		get_property(sources TARGET ${target} PROPERTY SOURCES)
+		get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
+		if(sources AND prefixHeader)
+			list(REMOVE_ITEM sources "${prefixHeader}")
+		endif()
+
+	else()
+
+		# Interface libraries can only have public header files as sources.
+		get_property(filesTarget TARGET ${target} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET )
+		get_property(sources TARGET ${filesTarget} PROPERTY SOURCES)
+
 	endif()
+
 	set(${sourcesOut} ${sources} PARENT_SCOPE )
 
 endfunction()
