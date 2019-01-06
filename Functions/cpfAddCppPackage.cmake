@@ -517,7 +517,7 @@ function( cpfAddBinaryTarget	)
 	endif()
 
 	# public header
-	set_property( TARGET ${ARG_NAME} PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${ARG_PUBLIC_HEADER})
+	set_property( TARGET ${ARG_NAME} APPEND PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${ARG_PUBLIC_HEADER})
 
 	# sets all the <bla>_OUTPUT_DIRECTORY_<config> options
 	cpfSetTargetOutputDirectoriesAndNames( ${ARG_PACKAGE_NAME} ${ARG_NAME})
@@ -719,6 +719,7 @@ function( cpfGenerateExportMacroHeader target macroBaseName )
 
 	cpfIsExecutable(isExe ${target})
 	if(NOT isExe)
+
 		string(TOLOWER ${macroBaseName} macroBaseNameLower ) # the generate_export_header() function will create a file with lower case name.
 		generate_export_header( 
 			${target}
@@ -727,7 +728,9 @@ function( cpfGenerateExportMacroHeader target macroBaseName )
 		set(exportHeader "${CMAKE_CURRENT_BINARY_DIR}/${macroBaseNameLower}_export.h" )
 		set_property(TARGET ${target} APPEND PROPERTY SOURCES ${exportHeader} )
 		set_property(TARGET ${target} APPEND PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${exportHeader} )
+
 		source_group(Generated FILES ${exportHeader})
+
 	endif()
 
 endfunction()
