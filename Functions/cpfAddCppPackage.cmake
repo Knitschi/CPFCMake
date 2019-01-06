@@ -659,13 +659,13 @@ function( cpfSetTargetOutputDirectoriesAndNames package target )
 
 	cpfGetConfigurations( configs)
 	foreach(config ${configs})
-		cpfSetAllOutputDirectoriesAndNames(${target} ${package} ${config} "${CMAKE_BINARY_DIR}/BuildStage/${config}" )
+		cpfSetAllOutputDirectoriesAndNames(${target} ${package} ${config} )
 	endforeach()
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfSetAllOutputDirectoriesAndNames target package config outputPrefixDir  )
+function( cpfSetAllOutputDirectoriesAndNames target package config )
 
 	# The output directory properties can not be set on interface libraries.
 	cpfIsInterfaceLibrary(isIntLib ${target})
@@ -679,13 +679,13 @@ function( cpfSetAllOutputDirectoriesAndNames target package config outputPrefixD
 	string(TOUPPER ${config} uConfig)
 	set_property( TARGET ${target} PROPERTY ${uConfig}_POSTFIX "" )
 
-	cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} RUNTIME)
-	cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} LIBRARY)
-	cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} ARCHIVE)
+	cpfSetOutputDirAndName( ${target} ${package} ${config} RUNTIME)
+	cpfSetOutputDirAndName( ${target} ${package} ${config} LIBRARY)
+	cpfSetOutputDirAndName( ${target} ${package} ${config} ARCHIVE)
 
 	cpfProjectProducesPdbFiles(hasOutput ${config})
 	if(hasOutput)
-		cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} COMPILE_PDB)
+		cpfSetOutputDirAndName( ${target} ${package} ${config} COMPILE_PDB)
 		set_property(TARGET ${target} PROPERTY COMPILE_PDB_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX}-compiler) # we overwrite the filename to make it more meaningful
 	endif()
 
@@ -693,7 +693,7 @@ function( cpfSetAllOutputDirectoriesAndNames target package config outputPrefixD
 	if(hasOutput)
 		# Note that we use the same name and path for linker as are used for the dlls files.
 		# When consuming imported targets we guess that the pdb files have these locations. 
-		cpfSetOutputDirAndName( ${target} ${package} ${config} ${outputPrefixDir} PDB)
+		cpfSetOutputDirAndName( ${target} ${package} ${config} PDB)
 		set_property(TARGET ${target} PROPERTY PDB_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX})
 	endif()
 
@@ -703,11 +703,11 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # This function sets the output name property to make sure that the same target file names are
 # achieved across all platforms.
-function( cpfSetOutputDirAndName target package config prefixDir outputType )
+function( cpfSetOutputDirAndName target package config outputType )
 
-	cpfGetRelativeOutputDir( relativeDir ${package} ${outputType})
+	cpfGetAbsOutputDir(outputDir ${package} ${outputType} ${config})
 	cpfToConfigSuffix(configSuffix ${config})
-	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_DIRECTORY_${configSuffix} ${prefixDir}/${relativeDir})
+	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_DIRECTORY_${configSuffix} ${outputDir})
 	# use the config postfix for all target types
 	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX} )
 

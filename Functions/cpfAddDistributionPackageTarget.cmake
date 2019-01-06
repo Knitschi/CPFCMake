@@ -39,6 +39,16 @@ function( cpfAddDistributionPackageTargets package packageOptionLists )
 		# First we create targets that assemble the content of the desired contentType.
 		# We have extra targets for this so we can create multiple packages with the same content.
 		cpfGetCollectPackageContentTargetNameAnId( packageContentTarget contentId ${package} ${contentType} "${excludedTargets}")
+		
+		# Sanity check for the options
+		cpfIsInterfaceLibrary(isIntLib ${package})
+		if(isIntLib AND (${contentType} STREQUAL CT_RUNTIME OR ${contentType} STREQUAL CT_RUNTIME_PORTABLE))
+			message(FATAL_ERROR 
+"The interface library ${package} can not have a distribution package with DISTRIBUTION_PACKAGE_CONTENT_TYPE ${contentType} because it has no binary files. \
+Remove that distribution package configuration from the cpfAddCppPackage() call to fix the problem."
+			)
+		endif()
+		
 		if(NOT TARGET ${packageContentTarget})
 			cpfAddPackageContentTarget( ${packageContentTarget} ${package} ${contentId} ${contentType} )
 		endif()

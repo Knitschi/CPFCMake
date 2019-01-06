@@ -54,3 +54,15 @@ function( cpfIsInterfaceLibrary isIntLibOut target )
     endif()
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# Returns $<TARGET_FILE:<target>> if the target is not an interface library,
+# othervise it returns an empty string.
+function( cpfGetTargetFileGeneratorExpression expOut target)
+	set(file)
+	cpfIsInterfaceLibrary(isIntLib ${productionLib})
+	if(NOT isIntLib)
+		set(file "$<TARGET_FILE:${productionLib}>")
+	endif()
+	set(${expOut} "${file}" PARENT_SCOPE)
+endfunction()
+

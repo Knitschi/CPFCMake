@@ -313,8 +313,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 function( cpfAddDeployCommand outputsOut targetName package config outputSubDir lib libFile existingOutputs )
 
-	cpfToConfigSuffix( configSuffix ${config})
-	cpfGetSharedLibraryOutputDir( targetDir ${package} ${configSuffix} )
+	cpfGetSharedLibraryOutputDir( targetDir ${package} ${config} )
 
 	get_filename_component( shortName ${libFile} NAME)
 
@@ -388,12 +387,12 @@ endfunction()
 
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetSharedLibraryOutputDir outputDir target configSuffix )
-    
+function( cpfGetSharedLibraryOutputDir outputDir target config )
+
     if(${CMAKE_SYSTEM_NAME} STREQUAL Windows )
-        get_property( sourceDir TARGET ${target} PROPERTY RUNTIME_OUTPUT_DIRECTORY_${configSuffix})
+		cpfGetAbsOutputDir(sourceDir ${target} RUNTIME ${config})
     elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-        get_property( sourceDir TARGET ${target} PROPERTY LIBRARY_OUTPUT_DIRECTORY_${configSuffix})
+		cpfGetAbsOutputDir(sourceDir ${target} LIBRARY ${config})
     else()
         message(FATAL_ERROR "Function cpfGetSharedLibraryOutputDir() must be extended for system ${CMAKE_SYSTEM_NAME}")
     endif()

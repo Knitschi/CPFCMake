@@ -680,13 +680,19 @@ function( cpfGetTargetOutputBaseName nameOut target config)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
+function( cpfGetAbsOutputDir absDirOut package outputType config )
+	cpfGetRelativeOutputDir(relativeDir ${package} ${outputType})
+	set(${absDirOut} "${CMAKE_BINARY_DIR}/BuildStage/${config}/${relativeDir}" PARENT_SCOPE)
+endfunction()
+
+#---------------------------------------------------------------------------------------------
 # Note that this function defines a part of the directory structure of the deployed files
 #
-function( cpfGetRelativeOutputDir relativeDir package outputType )
+function( cpfGetRelativeOutputDir relativeDirOut package outputType )
 
 	cpfGetPackagePrefixOutputDir( packagePrefixDir ${package} )
 	cpfGetTypePartOfOutputDir(typeDir ${package} ${outputType})
-	set(${relativeDir} ${packagePrefixDir}/${typeDir} PARENT_SCOPE )
+	set(${relativeDirOut} ${packagePrefixDir}/${typeDir} PARENT_SCOPE )
 
 endfunction()
 

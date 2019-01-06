@@ -62,10 +62,12 @@ function( cpfAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix te
 		set(runTargetName ${runTargetNamePrefix}${package})
 		getRunTestStampFile( stampFile ${runTargetName} ${runTargetNamePrefix})
 
+		cpfGetTargetFileGeneratorExpression(prodLibFile ${productionLib})
+
 		# We need to add an explicit dependency to the production lib executable, because when using dynamic linkage,
 		# the test executable is not rebuild when we only change the .cpp files of the production lib.
 		cpfAddStandardCustomCommand(
-			DEPENDS "$<TARGET_FILE:${testTarget}>" "$<TARGET_FILE:${productionLib}>" ${productionLib} ${testTarget}
+			DEPENDS "$<TARGET_FILE:${testTarget}>" ${prodLibFile} ${productionLib} ${testTarget}
 			OUTPUT "${stampFile}" 
 			COMMANDS "$<TARGET_FILE:${testTarget}> -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/${runTargetName}\" --gtest_filter=${testFilter}" "cmake -E touch \"${stampFile}\""
 		)

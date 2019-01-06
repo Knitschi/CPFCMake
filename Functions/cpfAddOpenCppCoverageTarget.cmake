@@ -104,10 +104,12 @@ function( cpfAddOpenCppCoverageTarget package)
 			set(stampFile ${binaryDir}/OpenCppCoverage_${testTarget}.stamp )
 			set(stampFileCommand "cmake -E touch \"${stampFile}\"")
 
+			cpfGetTargetFileGeneratorExpression(prodLibFile ${productionLib})
+
 			cpfAddConfigurationDependendCommand(
 				TARGET ${targetName}
 				OUTPUT ${stampFile} ${coverageOutput}
-				DEPENDS "$<TARGET_FILE:${testTarget}>" "$<TARGET_FILE:${productionLib}>"
+				DEPENDS "$<TARGET_FILE:${testTarget}>" "${prodLibFile}"
 				COMMENT "Run OpenCppCoverage for ${testTarget}."
 				CONFIG ${msvcDebugConfig}
 				COMMANDS_CONFIG ${removeTempCovFileComand} ${runOpenCppCoverageCommand} ${cmakeRenameCommand} ${stampFileCommand}
