@@ -144,7 +144,7 @@ function( cpfInstallDebugFiles package )
 				cpfProjectProducesPdbFiles( needsSourcesForDebugging ${config})
 				if(needsSourcesForDebugging)
 
-					get_target_sources_without_prefix_header( sources ${target} )
+					cpfGetTargetSourcesWithoutPrefixHeader( sources ${target} )
 					cpfGetFilepathsWithExtensions( cppSources "${sources}" "${CPF_CXX_SOURCE_FILE_EXTENSIONS}" )
 					cpfInstallSourceFiles( relFiles ${package} "${cppSources}" SOURCE developer ${config} )
 
@@ -555,7 +555,7 @@ function( cpfInstallSources package )
 	set(packageSourceFiles)
 	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
 	foreach(target ${binaryTargets})
-		get_target_sources_without_prefix_header( sources ${target})
+		cpfGetTargetSourcesWithoutPrefixHeader( sources ${target})
 		cpfListAppend(packageSourceFiles ${sources})
 	endforeach()
 	cpfInstallSourceFiles( relFiles ${package} "${packageSourceFiles}" SOURCE sources "" )
@@ -563,7 +563,7 @@ function( cpfInstallSources package )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( get_target_sources_without_prefix_header sourcesOut target )
+function( cpfGetTargetSourcesWithoutPrefixHeader sourcesOut target )
 
 	cpfIsInterfaceLibrary( isIntLib ${target})
 	if(NOT isIntLib)
