@@ -66,20 +66,3 @@ function( cpfGetTargetFileGeneratorExpression expOut target)
 	set(${expOut} "${file}" PARENT_SCOPE)
 endfunction()
 
-
-#----------------------------------------------------------------------------------------
-# This reads the source files from the targets SOURCES property or in case of interface 
-# library targets from the targets file container target.
-#
-function( cpfGetTargetSourceFiles filesOut target)
-	cpfIsInterfaceLibrary( isIntLib ${target})
-	if(NOT isIntLib)
-		get_property(sources TARGET ${target} PROPERTY SOURCES)
-	else()
-		# Interface libraries can only have public header files as sources.
-		get_property(filesTarget TARGET ${target} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET )
-		get_property(sources TARGET ${filesTarget} PROPERTY SOURCES)
-	endif()
-	set(${filesOut} "${sources}" PARENT_SCOPE)
-endfunction()
-

@@ -565,14 +565,21 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfGetTargetSourcesWithoutPrefixHeader sourcesOut target )
 
-	cpfGetTargetSourceFiles(sources ${target})
-
 	cpfIsInterfaceLibrary( isIntLib ${target})
 	if(NOT isIntLib)
+
+		get_property(sources TARGET ${target} PROPERTY SOURCES)
 		get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
 		if(sources AND prefixHeader)
 			list(REMOVE_ITEM sources "${prefixHeader}")
 		endif()
+
+	else()
+
+		# Interface libraries can only have public header files as sources.
+		get_property(filesTarget TARGET ${target} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET )
+		get_property(sources TARGET ${filesTarget} PROPERTY SOURCES)
+
 	endif()
 
 	set(${sourcesOut} "${sources}" PARENT_SCOPE )
