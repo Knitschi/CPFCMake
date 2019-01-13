@@ -96,6 +96,7 @@ cpfAddCppPackage(
     [MAINTAINER_EMAIL address]
     [PUBLIC_HEADER header1 [header2 ...]]
     [PRODUCTION_FILES file1 [file2 ...]]
+	[EXE_FILES file1 [file2 ...]]
     [PUBLIC_FIXTURE_HEADER header1 [header2 ...]]
     [FIXTURE_FILES file1 [file2 ...]]
     [TEST_FILES file1 [file2 ...]]
@@ -183,6 +184,12 @@ are not included.
 
 All files that belong to the production target. If the target is an executable, 
 there should be a main.cpp that is used for the executable.
+
+#### PRODUCTION_FILES ####
+
+For packages of type \c GUI_APP or \c CONSOLE_APP, this variable that must be
+added to the executable itself. On windows this can be \c .rc files or the
+icon for the executable.
 
 #### PUBLIC_FIXTURE_HEADER ####
 

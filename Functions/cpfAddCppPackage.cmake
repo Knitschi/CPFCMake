@@ -50,6 +50,7 @@ function( cpfAddCppPackage )
 	set( optionalMultiValueKeywords
 		PRODUCTION_FILES
 		PUBLIC_HEADER
+		EXE_FILES
 		PUBLIC_FIXTURE_HEADER
 		FIXTURE_FILES
 		TEST_FILES
@@ -113,7 +114,8 @@ function( cpfAddCppPackage )
 		${ARG_PACKAGE_NAMESPACE} 
 		${ARG_TYPE} 
 		"${ARG_PUBLIC_HEADER}" 
-		"${ARG_PRODUCTION_FILES}" 
+		"${ARG_PRODUCTION_FILES}"
+		"${ARG_EXE_FILES}"
 		"${ARG_PUBLIC_FIXTURE_HEADER}" 
 		"${ARG_FIXTURE_FILES}" 
 		"${ARG_TEST_FILES}" 
@@ -255,6 +257,7 @@ function( cpfAddPackageBinaryTargets
 	type 
 	publicHeaderFiles 
 	productionFiles 
+	exeFiles
 	publicFixtureHeaderFiles 
 	fixtureFiles 
 	testFiles 
@@ -269,11 +272,6 @@ function( cpfAddPackageBinaryTargets
 		# main.cpp
 		if( "${file}" MATCHES "^main.cpp$" OR "${file}" MATCHES "(.*)/main.cpp$")
 			set(MAIN_CPP ${file})
-		endif()
-
-		# icon files (they must be added to the executable)
-		if( "${file}" MATCHES "(.*)${package}[.]ico$" OR "${file}" MATCHES "(.*)${package}[.]rc$")
-			list(APPEND iconFiles ${file})
 		endif()
 
 	endforeach()
@@ -301,6 +299,9 @@ function( cpfAddPackageBinaryTargets
 
 		set(isExe FALSE)
 		set(productionTarget ${package})
+		if(exeFiles)
+			message(FATAL_ERROR "Error! The option EXE_FILES in cpfAddCppPackage() is only relevant for packages of type GUI_APP or CONSOLE_APP.")
+		endif()
 
 	endif()
 	
@@ -334,7 +335,7 @@ function( cpfAddPackageBinaryTargets
 			PACKAGE_NAME ${package}
 			TARGET_TYPE ${type}
 			NAME ${exeTarget}
-			FILES ${MAIN_CPP} ${iconFiles}
+			FILES ${MAIN_CPP} ${exeFiles}
 			LINKED_LIBRARIES ${linkedLibraries} ${productionTarget}
 			IDE_FOLDER ${package}/exe
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
