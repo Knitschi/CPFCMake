@@ -582,6 +582,6 @@ function( cpfGetTargetSourcesWithoutPrefixHeader sourcesOut target )
 
 	endif()
 
-	set(${sourcesOut} ${sources} PARENT_SCOPE )
+	set(${sourcesOut} "${sources}" PARENT_SCOPE )
 
 endfunction()

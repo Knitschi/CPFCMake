@@ -308,7 +308,7 @@ function( cpfAddPackageBinaryTargets
     if(productionFiles OR publicHeaderFiles)  
 
 		set( libType ${type} )
-		if(isExe)
+		if(isExe)	# for executables the implementation lib is a normal lib.
 			set(libType LIB)
 		endif()
 
