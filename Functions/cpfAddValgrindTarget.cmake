@@ -52,9 +52,15 @@ function( cpfAddValgrindTarget package)
 			set(suppressionsFile "${CMAKE_CURRENT_SOURCE_DIR}/Other/${package}ValgrindSuppressions.supp")
 			set(valgrindCommand "\"${TOOL_VALGRIND}\" --leak-check=full --track-origins=yes --smc-check=all --error-exitcode=1 --gen-suppressions=all --suppressions=\"${suppressionsFile}\" \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")
 				
+			cpfIsInterfaceLibrary(isInterfaceLib ${productionLib})
+			set(productionLibFile)
+			if(NOT isInterfaceLib)
+				set(productionLibFile "$<TARGET_FILE:${productionLib}>")
+			endif()
+
 			cpfAddStandardCustomCommand(
 				OUTPUT ${stampFile}
-				DEPENDS "$<TARGET_FILE:${testTarget}>" "$<TARGET_FILE:${productionLib}>"
+				DEPENDS "$<TARGET_FILE:${testTarget}>" ${productionLibFile}
 				COMMANDS "${valgrindCommand}" "cmake -E touch \"${stampFile}\""
 			)
 
