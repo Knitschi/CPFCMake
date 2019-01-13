@@ -12,11 +12,11 @@ function( cpfAddRunUicTarget)
 
 	cmake_parse_arguments(ARG "" "BINARY_TARGET" "" ${ARGN} )
 
-    set(targetName ${ARG_BINARY_TARGET}_runUic)
+	set(targetName ${ARG_BINARY_TARGET}_runUic)
 
     # Create the commands for the uic calls
-	get_property(files TARGET ${ARG_BINARY_TARGET} PROPERTY SOURCES)
-    foreach( file ${files}  )
+	cpfGetTargetSourceFiles(files ${ARG_BINARY_TARGET})
+    foreach( file ${files} )
 
         get_filename_Component( extension ${file} EXT)
         if( ${extension} STREQUAL .ui )
@@ -44,7 +44,7 @@ function( cpfAddRunUicTarget)
 
 		get_property(baseFolder TARGET ${ARG_BINARY_TARGET} PROPERTY FOLDER )
 		set_property(TARGET ${targetName} PROPERTY FOLDER ${baseFolder}/private)
-		set_property(TARGET ${ARG_BINARY_TARGET} PROPERTY CPF_UIC_SUBTARGET ${targetName})
+		set_property(TARGET ${ARG_BINARY_TARGET} PROPERTY INTERFACE_CPF_UIC_SUBTARGET ${targetName})
 
 	endif()
 
