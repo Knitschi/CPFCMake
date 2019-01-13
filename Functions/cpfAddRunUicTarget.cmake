@@ -15,7 +15,7 @@ function( cpfAddRunUicTarget)
     set(targetName ${ARG_BINARY_TARGET}_runUic)
 
     # Create the commands for the uic calls
-	get_property(files TARGET ${ARG_BINARY_TARGET} PROPERTY SOURCES)
+	cpfGetTargetSourceFiles(files ${ARG_BINARY_TARGET})
     foreach( file ${files}  )
 
         get_filename_Component( extension ${file} EXT)
@@ -44,7 +44,7 @@ function( cpfAddRunUicTarget)
 
 		get_property(baseFolder TARGET ${ARG_BINARY_TARGET} PROPERTY FOLDER )
 		set_property(TARGET ${targetName} PROPERTY FOLDER ${baseFolder}/private)
-		set_property(TARGET ${ARG_BINARY_TARGET} PROPERTY CPF_UIC_SUBTARGET ${targetName})
+		set_property(TARGET ${ARG_BINARY_TARGET} PROPERTY INTERFACE_CPF_UIC_SUBTARGET ${targetName})
 
 	endif()
 

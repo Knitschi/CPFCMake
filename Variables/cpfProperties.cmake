@@ -102,7 +102,7 @@ function( cpfDefineProperties )
     # A property that is set on binary targets that have .ui fiels.
     define_property( 
         TARGET 
-        PROPERTY CPF_UIC_SUBTARGET 
+        PROPERTY INTERFACE_CPF_UIC_SUBTARGET 
         BRIEF_DOCS "A target that runs Qt's uic on all .ui files of the main-target in order to generate the ui_*.h files"
         FULL_DOCS " "
         )

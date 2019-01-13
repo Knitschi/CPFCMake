@@ -68,14 +68,18 @@ function( cpfAddClangTidyTarget binaryTarget )
         
         set(command "\"${TOOL_CLANG_TIDY}\" -checks=${includedChecks}${commaDeliberatelyExcludedChecks} -warnings-as-errors=* -p \"${CMAKE_BINARY_DIR}\"")
 
-        get_property( uicTarget TARGET ${binaryTarget} PROPERTY CPF_UIC_SUBTARGET )
+        get_property( uicTarget TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_UIC_SUBTARGET )
         if(uicTarget)
             get_property( uicStamp TARGET ${uicTarget} PROPERTY TARGET_STAMP_FILE )
         endif()
         
-        get_property( prefixHeader TARGET ${binaryTarget} PROPERTY COTIRE_CXX_PREFIX_HEADER)
-        
-		get_property(files TARGET ${binaryTarget} PROPERTY SOURCES)
+        set(prefixHeader)
+        cpfIsInterfaceLibrary(isIntLib ${binaryTarget})
+        if(NOT isIntLib)
+            get_property( prefixHeader TARGET ${binaryTarget} PROPERTY COTIRE_CXX_PREFIX_HEADER)
+        endif()
+
+        cpfGetTargetSourceFiles(files ${binaryTarget})
         foreach( file ${files}  )
 
 			get_filename_component( extension ${file} EXT)
