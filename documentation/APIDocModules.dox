@@ -100,7 +100,7 @@ cpfAddCppPackage(
             [SYSTEM_PACKAGES_DEB packageListString ]]
         [DISTRIBUTION_PACKAGE_CONTENT_TYPE ...] ...]
     [VERSION_COMPATIBILITY_SCHEME [ExactVersion] ]
-    [ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS bool]
+    [ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS bool]
     [ENABLE_PACKAGE_DOX_FILES_GENERATION]
 	[ENABLE_VERSION_RC_FILE_GENERATION]
 )
@@ -298,7 +298,7 @@ and the version.cmake files that are used to import the library.
 This is the most simple scheme and relieves developers from the burdon of keeping things compatible.
 
 
-####  [ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS bool] ####
+####  [ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS bool] ####
 
 This option can be used to override the global CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS setting.
 
