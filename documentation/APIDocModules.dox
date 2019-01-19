@@ -1,23 +1,9 @@
 /**
-\page CPFCMakeAPIDocs API Documentation
+\page CPFModules API Functions
 
 This page holds the documentation of the *CMake* functions that are provided to the
 users of the *CPFCMake* package.
 
-\section cpfGlobalVariables Global variables and cache variables
-
-CPFCMake introduces some variables of global scope that may be of interest to the clients.
-
-#### CPF_MINIMUM_CMAKE_VERSION ####
-
-The minimum cmake version required by the CPF. This can be used by clients in their own
-calls to <a href="https://cmake.org/cmake/help/latest/command/add_subdirectory.html">cmake_minimum_required()</a>.
-
-#### CPF_CI_PROJECT ####
-
-This is set to name of the CI parent project and allows to use the name after calling
-\c cpfInitPackageProject() which overrides the \c CMAKE_PROJECT_NAME variable with the
-name of the package project.
 
 \section cpfInitModule Module cpfInit.cmake
 
@@ -92,7 +78,8 @@ cpfAddCppPackage(
     TYPE [GUI_APP|CONSOLE_APP|LIB|INTERFACE_LIB]
     [BRIEF_DESCRIPTION description]
     [LONG_DESCRIPTION description]
-    [HOMEPAGE url]
+    [OWNER owner]
+    [WEBPAGE_URL url]
     [MAINTAINER_EMAIL address]
     [PUBLIC_HEADER header1 [header2 ...]]
     [PRODUCTION_FILES file1 [file2 ...]]
@@ -114,7 +101,8 @@ cpfAddCppPackage(
         [DISTRIBUTION_PACKAGE_CONTENT_TYPE ...] ...]
     [VERSION_COMPATIBILITY_SCHEME [ExactVersion] ]
     [ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS bool]
-    [GENERATE_PACKAGE_DOX_FILES]
+    [ENABLE_PACKAGE_DOX_FILES_GENERATION]
+	[ENABLE_VERSION_RC_FILE_GENERATION]
 )
 \endcode
 
@@ -139,7 +127,7 @@ The parameter is used in the following ways:
 - As a namespace for the packages cmake target names.
 - The value is used as a part of the packages generated export macro which must be 
 prepended to all exported classes and functions in a library.
-- If you use the <code>GENERATE_PACKAGE_DOX_FILES</code> option, the default package documentation 
+- If you use the <code>ENABLE_PACKAGE_DOX_FILES_GENERATION</code> option, the default package documentation 
 page will generate a documentation of that namespace.
 
 #### TYPE ####
@@ -155,7 +143,8 @@ The type of the main binary target of the package.
 
 A short description in one sentence about what the package does. This is included
 in the generated documentation page of the package and in some distribution package
-types.
+types. It is also displayed on the "Details" tab of the file-properties window of 
+the generated main binary file when compiling with MSVC.
 
 #### [LONG_DESCRIPTION] ####
 
@@ -163,7 +152,13 @@ A longer description of the package. This is included
 in the generated documentation page of the package and in some distribution package
 types.
 
-#### [HOMEPAGE] ####
+#### [OWNER] ####
+
+The value is only used when compiling with MSVC. It is than used in the copyright notice 
+that is displayed on the "Details" tab of the file-properties window of the generated binary
+files.
+
+#### [WEBPAGE_URL] ####
 
 A web address from where the source-code and/or the documentation of the package can be obtained.
 This is required for Debian packages.
@@ -305,14 +300,22 @@ This is the most simple scheme and relieves developers from the burdon of keepin
 
 ####  [ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS bool] ####
 
-This option can be used to override the global CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS setting.
+This option can be used to override the global CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS setting.
 
 
-####  [GENERATE_PACKAGE_DOX_FILES]  ####
+####  [ENABLE_PACKAGE_DOX_FILES_GENERATION]  ####
 
 If this option is given, the package will generate a standard package documentation .dox file.
 The file contains the brief and long package description as well as some links to other generated
 html content like test-coverage reports or abi-compatibility reports.
+
+
+####  [ENABLE_VERSION_RC_FILE_GENERATION]  ####
+
+By default the CPF generates a version.rc file for MSVC that is used
+to inject some version information into the binary files. If this
+version.rc file does not fit your needs, you can disable it's generation
+with this option and provide your custom made .rc file.
 
 
 ### Example ###
@@ -397,7 +400,7 @@ set( debianPackageOptions
 cpfAddCppPackage( 
 	PACKAGE_NAME			${PACKAGE_NAME}
 	PACKAGE_NAMESPACE		${PACKAGE_NAMESPACE}
-	HOMEPAGE				"http://www.awsomelib.com/index.html"
+	WEBPAGE_URL				"http://www.awsomelib.com/index.html"
 	MAINTAINER_EMAIL		"hans@awsomelib.com"
 	TYPE					LIB
 	BRIEF_DESCRIPTION		${briefDescription}
@@ -498,11 +501,11 @@ Changing them in the given template will have no effect.
 
 \code
 PROJECT_NAME                (set to the value of the PROJECT_NAME option)
-OUTPUT_DIRECTORY            (set to <code>Generated/\<config\>/html/doxygen</code>)
-HTML_OUTPUT                 (set to html)
-INPUT                       (set to <code>Sources</code> and the directories with the generated package documentation dox files)
+OUTPUT_DIRECTORY            (set to "Generated/<config>/html/doxygen")
+HTML_OUTPUT                 (set to "html")
+INPUT                       (set to Sources and the directories with the generated package documentation dox files)
 EXCLUDE                     (set to the external packages source directories that are not listed in ADDITIONAL_PACKAGES)
-DOTFILE_DIRS                (set to <code>Generated/\<config\>/html/doxygen/external</code>)
+DOTFILE_DIRS                (set to "Generated/<config>/html/doxygen/external")
 LAYOUT_FILE                 (set to the path of the DOXYGEN_LAYOUT_FILE option)
 GENERATE_HTML               (set to YES)
 HTML_EXTRA_STYLESHEET       (set to the path of the DOXYGEN_STYLESHEET_FILE option)
@@ -510,7 +513,7 @@ HTML_HEADER                 (only if HTML_HEADER option is set)
 HTML_FOOTER                 (only if HTML_FOOTER option is set)
 PROJECT_LOGO                (only if PROJECT_LOGO option is set)
 PLANTUML_JAR_PATH           (only if PLANTUML_JAR_PATH option is set)
-SEARCHDATA_FILE             (set to searchdata.xml)
+SEARCHDATA_FILE             (set to "searchdata.xml")
 \endcode
 
 

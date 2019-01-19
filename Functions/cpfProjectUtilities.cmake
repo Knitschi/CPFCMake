@@ -442,7 +442,7 @@ function( cpfPrintTargetProperties target )
 		XCTEST
 		# CPF properties
 		INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION
-		INTERFACE_CPF_PACKAGE_HOMEPAGE
+		INTERFACE_CPF_PACKAGE_WEBPAGE_URL
 		INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL
 		INTERFACE_CPF_BINARY_SUBTARGETS
 		INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET
@@ -642,17 +642,17 @@ endfunction()
 function( cpfGetTargetOutputFileName output target config )
 
 	cpfGetTargetOutputType( outputType ${target})
-	get_property( targetType TARGET ${target} PROPERTY TYPE)
-	cpfGetTargetOutputFileNameForTargetType( shortFilename ${target} ${config} ${targetType} ${outputType})
+	cpfGetTargetOutputFileNameForTargetType( shortFilename ${target} ${config} ${outputType})
 	set( ${output} ${shortFilename} PARENT_SCOPE )
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetTargetOutputFileNameForTargetType output target config targetType outputType)
+function( cpfGetTargetOutputFileNameForTargetType output target config outputType)
 
 	cpfToConfigSuffix(configSuffix ${config})
 	get_property( outputBaseName TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME_${configSuffix} )
+	get_property( targetType TARGET ${target} PROPERTY TYPE)
 	get_property( version TARGET ${target} PROPERTY VERSION)
 	
 	cpfGetTargetTypeFileExtension( extension ${targetType})

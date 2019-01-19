@@ -106,6 +106,14 @@ function( cpfAssertKeywordArgumentsHaveValue keywords keywordPrefix function )
 
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# This function will set the value of a variable if it is not already set.
+#
+function( cpfSetIfNotSet variable value )
+	if(NOT ${variable})
+		set(${variable} "${value}" PARENT_SCOPE)
+	endif()
+endfunction()
 
 #----------------------------------------------------------------------------------------
 # A version of the configure_file() function that asserts that all given variables have
@@ -285,13 +293,32 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns true if the version number misses the 4th commits number.
 # 
-function( cpfIsReleaseVersion isReleaseOut version)
+function( cpfIsReleaseVersion isReleaseOut version )
 	cpfSplitVersion( d d d commits ${version})
 	if("${commits}" STREQUAL "")
 		set( ${isReleaseOut} TRUE PARENT_SCOPE)
 	else()
 		set( ${isReleaseOut} FALSE PARENT_SCOPE)
 	endif()
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns true if the version is marked as dirty, which means there are local uncommitted changes.
+#
+function( cpfIsDirtyVersion isDirtyOut version )
+	cpfStringContains( isDirty "${version}")
+	set(${isDirtyOut} ${isDirty} PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns the part of the version number that contains the nummber of commits since the
+# last release version.
+#
+function( cpfGetCommitsSinceLastRelease commitNrOut version )
+	string(REGEX MATCH ".[0-9]*-" commitNr "${version}")
+	cpfStringRemoveRight( commitNr ${commitNr} 1)
+	cpfRightSideOfString( commitNr ${commitNr} 1)
+	set(${commitNrOut} ${commitNr} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------

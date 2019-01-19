@@ -14,6 +14,8 @@ function( cpfRunMiscUtilitiesTests )
     test_cpfSplitVersion()
     test_cpfIsReleaseVersion()
     test_cpfGetKeywordValueLists()
+    test_cpfGetCommitsSinceLastRelease()
+    test_cpfSetIfNotSet()
 
 endfunction()
 
@@ -107,5 +109,35 @@ function( test_cpfGetKeywordValueLists )
     list(GET valueListsOut 1 listName1 )
     cpfAssertStrEQ(${listName1} "multikeyArgs1")
     cpfAssertListsEqual( "${${listName1}}" "bar;;booze" )
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( test_cpfGetCommitsSinceLastRelease )
+
+	set( version 1.2.3.123-ab325-dirty )
+	cpfGetCommitsSinceLastRelease( commitNr ${version} )
+	cpfAssertStrEQ(${commitNr} "123")
+
+	set( version 1.2.3.4874-43325 )
+	cpfGetCommitsSinceLastRelease( commitNr ${version} )
+	cpfAssertStrEQ(${commitNr} "4874")
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( test_cpfSetIfNotSet )
+
+    set(var "blib")
+    cpfSetIfNotSet(var "blub")
+    cpfAssertStrEQ(${var} "blib")
+
+    set(var "")
+    cpfSetIfNotSet(var "blub")
+    cpfAssertStrEQ(${var} "blub")
+
+    set(var)
+    cpfSetIfNotSet(var "blub")
+    cpfAssertStrEQ(${var} "blub")
 
 endfunction()

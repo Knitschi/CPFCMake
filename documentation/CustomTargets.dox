@@ -62,6 +62,15 @@ Here is a list of targets that can exist once per CPF package.
 - \ref valgrind_package
 
 
+\subsection PrivateTargets Private targets
+
+Here is a list of targets that are used as implementation details for other targets.
+If everything works, they should be of no further interest, but more information
+about them may be of interest if you need to debug problems with the CPF.
+
+- \ref binarytarget_
+
+
 \subsection TargetAnnotations Target annotations
 
 \subsubsection abicompliancechecker abi-compliance-checker
@@ -135,12 +144,12 @@ a previous libray package version with the current one. The reporst are added to
 web-page. To enable this, the target must be able to download previously generated distribution 
 packages of that package from the project web-page, which must contain generated abi-dump files. 
 This complex requirement makes the target somewhat fragile. This functionality can be 
-disabled with the \c CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS config variable.
+disabled with the \c CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS config variable.
 
 #### Enforce compatibility ####
 You can also enable targets that will fail to build if abi or api compatibility is hurt
 by your current changes. This option can be switched on in stable branches. To do so
-use the \c CPF_CHECK_ABI_STABLE and \c CPF_CHECK_API_STABLE config variables.
+use the \c CPF_CHECK_ABI_STABLE and \c CPF_ENABLE_ABI_API_STABILITY_CHECK_TARGETS config variables.
 
 \subsubsection clangtidy_package clang-tidy_\&lt;package\&gt;
 

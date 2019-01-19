@@ -602,7 +602,7 @@ function( cpfGetDebianPackageCommand commandOut package config version contentId
 	# todo package description durchschl�usen
 
 	get_property( description TARGET ${package} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION )
-	get_property( homepage TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_HOMEPAGE )
+	get_property( homepage TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_WEBPAGE_URL )
 	get_property( maintainer TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL )
 	
 	set(configOption)

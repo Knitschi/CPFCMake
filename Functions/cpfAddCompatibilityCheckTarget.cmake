@@ -39,14 +39,16 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # This function adds custom targets which call the abi-compliance-checker tool.
-function( cpfAddAbiCheckerTargets package distributionPackageOptionLists enableOverride )
+function( cpfAddAbiCheckerTargets package distributionPackageOptionLists enableCompatibilityReportTargets enableStabilityCheckTargets )
 	
-	if(NOT ("${enableOverride}" STREQUAL ""))
-		set(CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS ${enableOverride})
-	endif()
-
-	cpfAssertUserSettingsForCompatibilityChecksMakeSense( ${package} "${distributionPackageOptionLists}" )
-	if( CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS )
+	cpfAssertUserSettingsForCompatibilityChecksMakeSense( 
+		${package}
+		"${distributionPackageOptionLists}"
+		${enableCompatibilityReportTargets}
+		${enableStabilityCheckTargets} 
+	)
+	
+	if( enableCompatibilityReportTargets )
 
 		cpfGetLastBuildAndLastReleaseVersion( lastBuildVersion lastReleaseVersion)
 		cpfHasDevBinDistributionPackage( unused packageFormat "${distributionPackageOptionLists}" )
@@ -64,8 +66,10 @@ function( cpfAddAbiCheckerTargets package distributionPackageOptionLists enableO
 			cpfAddCompatibilityReportTargets( reportFiles ${package} ${libraryTarget} ${packageFormat} "${comparedToVersions}" )
 			
 			# Add the abi-compliance-checker targets that enforce the compatibility when the configuration options are set.
-			cpfAddApiCompatibilityCheckTarget( reportFileApiCheck ${package} ${libraryTarget} ${packageFormat} ${lastReleaseVersion})
-			cpfAddAbiCompatibilityCheckTarget( reportFileAbiCheck ${package} ${libraryTarget} ${packageFormat} ${lastReleaseVersion})
+			if(enableStabilityCheckTargets)
+				cpfAddApiCompatibilityCheckTarget( reportFileApiCheck ${package} ${libraryTarget} ${packageFormat} ${lastReleaseVersion})
+				cpfAddAbiCompatibilityCheckTarget( reportFileAbiCheck ${package} ${libraryTarget} ${packageFormat} ${lastReleaseVersion})
+			endif()
 
 		endforeach()
 
@@ -77,15 +81,15 @@ function( cpfAddAbiCheckerTargets package distributionPackageOptionLists enableO
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAssertUserSettingsForCompatibilityChecksMakeSense package distributionPackageOptionLists )
+function( cpfAssertUserSettingsForCompatibilityChecksMakeSense package distributionPackageOptionLists enableCompatibilityReportTargets enableStabilityCheckTargets )
 
 	# If user requests compatibility checks, the compiler settings must support it. 
-	if(CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS)
+	if(enableCompatibilityReportTargets)
 		cpfCompileSettingsSupportAbiDumper( abiDumperSupported )
 		if(NOT abiDumperSupported )
 			set(errorMessage "\
-Error with project settings!\n\
-Option CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS was set to ON while the compiler settings do not support the abi-dumper tool. \
+Error with C++ package settings!\n\
+Option [CPF_]ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS was set to ON while the compiler settings do not support the abi-dumper tool. \
 This option can only be enabled when using \"g++ -g -Og\" or \"clang -g -O0\" compiler settings.\n\
 			")
 			message(FATAL_ERROR ${errorMessage} )
@@ -97,10 +101,10 @@ This option can only be enabled when using \"g++ -g -Og\" or \"clang -g -O0\" co
 		cpfFindRequiredProgram( TOOL_VTABLE_DUMPER vtable-dumper "A tool required by the abi-dumper tool")
 
 		# check that previous builds have been made available through the webpage
-		if( NOT CPF_WEBPAGE_URL )
+		if( NOT CPF_WEBSERVER_BASE_DIR )
 			set(errorMessage "\
-Error with project settings!\n\
-Option CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS was set to ON but variable CPF_WEBPAGE_URL was not set. \
+Error with C++ package settings!\n\
+Option [CPF_]ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS was set to ON but variable CPF_WEBSERVER_BASE_DIR was not set. \
 In order to check the compliance with previously released packages, the script must be able to download previous build results from the web-page.\n\
 			")
 			message(FATAL_ERROR ${errorMessage} )
@@ -109,8 +113,8 @@ In order to check the compliance with previously released packages, the script m
 		# currently we the abi-compliance-checker tool needs shared libs
 		if( NOT BUILD_SHARED_LIBS )
 			set(errorMessage "\
-Error with project settings!\n\
-Option CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS was set to ON but variable BUILD_SHARED_LIBS was not set. \
+Error with C++ package settings!\n\
+Option [CPF_]ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS was set to ON but variable BUILD_SHARED_LIBS was not set to TRUE. \
 The compatibility check targets currently only work for shared libraries.\n\
 			")
 			message(FATAL_ERROR ${errorMessage} )
@@ -121,8 +125,8 @@ The compatibility check targets currently only work for shared libraries.\n\
 		cpfIsGitRepositoryDir( isRepoDirOut "${CMAKE_CURRENT_SOURCE_DIR}")
 		if(NOT isRepoDirOut)
 			set(errorMessage "\
-Error with project settings!\n\
-Option CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS was set to ON but the sources were not retrieved by cloning the Git repository. \
+Error with C++ package settings!\n\
+Option [CPF_]ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS was set to ON but the sources were not retrieved by cloning the Git repository. \
 The compatibility check targets require the version information from to repository in order to download previously build versions.\n\
 			")
 			message(FATAL_ERROR ${errorMessage} )
@@ -133,7 +137,7 @@ The compatibility check targets require the version information from to reposito
 		if(NOT hasDevBinPackage)
 			set(errorMessage "\
 Error with project settings!\n\
-Option CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS was set to ON but package ${package} does not create a distribution package with content type CT_DEVELOPER. \
+Option [CPF_]ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS was set to ON but package ${package} does not create a distribution package with content type CT_DEVELOPER. \
 The packages with content type CT_DEVELOPER contain the abi dump files for previously build libraries which are needed to compare the abi-compliance. \
 You need to add an DISTRIBUTION_PACKAGES to your call of cpfAddCppPackage() with the DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_DEVELOPER sub-option to remove this error.\n\
 			")
@@ -142,23 +146,12 @@ You need to add an DISTRIBUTION_PACKAGES to your call of cpfAddCppPackage() with
 		
 	endif()
 	
-	# CPF_CHECK_API_STABLE requires CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS option.
-	if( CPF_CHECK_API_STABLE )
-		if( NOT CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS )
+	# enableStabilityCheckTargets requires enableCompatibilityReportTargets option.
+	if( enableStabilityCheckTargets )
+		if( NOT enableCompatibilityReportTargets )
 			set(errorMessage "\
 Error with project settings!\n\
-The activation of the CPF_CHECK_API_STABLE option requires the activation of the CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS option.\n\
-			")
-			message(FATAL_ERROR ${errorMessage} )
-		endif()
-	endif()
-
-	# CPF_CHECK_ABI_STABLE requires CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS option.
-	if( CPF_CHECK_ABI_STABLE )
-		if( NOT CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS )
-			set(errorMessage "\
-Error with project settings!\n\
-The activation of the CPF_CHECK_API_STABLE option requires the activation of the CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS option.\n\
+The activation of the [CPF_]ENABLE_ABI_API_STABILITY_CHECK_TARGETS option requires the activation of the [CPF_]ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS option.\n\
 			")
 			message(FATAL_ERROR ${errorMessage} )
 		endif()
@@ -249,14 +242,14 @@ function( cpfDownloadOldAbiDumps package packageFormat lastBuildVersion lastRele
 	if(NOT lastBuildIsRelease)
 		cpfGetShortDevBinPackageName( packageLastBuild ${package} ${CMAKE_BUILD_TYPE} ${lastBuildVersion} ${packageFormat} )
 		cpfGetRelLastBuildPackagesDir( lastBuildPackageDir ${package})
-		set( urlLastBuild "${CPF_WEBPAGE_URL}/${lastBuildPackageDir}/${packageLastBuild}")
+		set( urlLastBuild "${CPF_WEBSERVER_BASE_DIR}/${lastBuildPackageDir}/${packageLastBuild}")
 		cpfDownloadAndExtractPackage( ${package} ${packageFormat} ${urlLastBuild})
 	endif()
 
 	# get url of last release package
 	cpfGetShortDevBinPackageName( packageLastRelease ${package} ${CMAKE_BUILD_TYPE} ${lastReleaseVersion} ${packageFormat} )
 	cpfGetRelReleasePackagesDir( releasePackageDir ${package} ${lastReleaseVersion})
-	set( urlLastRelease "${CPF_WEBPAGE_URL}/${releasePackageDir}/${packageLastRelease}")
+	set( urlLastRelease "${CPF_WEBSERVER_BASE_DIR}/${releasePackageDir}/${packageLastRelease}")
 	cpfDownloadAndExtractPackage( ${package} ${packageFormat} ${urlLastRelease})
 
 endfunction()
@@ -309,7 +302,7 @@ function( cpfDownloadAndExtractPackage package packageFormat packageUrl  )
 	list(GET resultValues 0 returnCode )
 	if( NOT ${returnCode} EQUAL 0)
 		# We only issue a warning here to not break builds when the packages are not available.
-		# This can happen when the variable CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS has been switched ON, or parts of the build have
+		# This can happen when the variable CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS has been switched ON, or parts of the build have
 		# been disabled during maintanance.
 		message( "Warning: Could not download released distribution package from ${packageUrl}. Comparing the current ABI/API with that package will not be possible.")
  	else()
@@ -480,15 +473,15 @@ function( cpfAddAbiComplianceCheckerTarget reportFileOut package binaryTarget pa
 			# We have to allow missing previous old dumps, because that will happen if we switch the compatibility report target on.
 			message( "Warning: The abi dump-file \"${oldVersionDumpFile}\" is missing. \
 This means that either the old package could not be downloaded, or that the package did not contain an abi dump file. \
-You can ignore this message if you just switched ON the CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS option, and the old package does not yet contain an abi dump file. \
+You can ignore this message if you just switched ON the CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS option, and the old package does not yet contain an abi dump file. \
 The abi/api compatibility report will not be created for this build." )
 		return()
 		else()
 			# When stability shall be enforced, we have to insist on the old dump files.
 			message( FATAL_ERROR "The abi dump-file \"${oldVersionDumpFile}\" is missing. \
 This means that either the old package could not be downloaded, or that the package did not contain an abi dump file. \
-This is the case when the old package was compiled with the CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS option set to OFF. \
-In this case you first have to build a release with the CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS option set to ON, \
+This is the case when the old package was compiled with the CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS option set to OFF. \
+In this case you first have to build a release with the CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS option set to ON, \
 to ensure that abi dump files become available for following builds." )
 		endif()
 	endif()
@@ -547,10 +540,8 @@ endfunction()
 function( cpfAddApiCompatibilityCheckTarget reportFileOut package binaryTarget packageFormat lastReleaseVersion )
 	
 	set(reportFile)
-	if(CPF_CHECK_API_STABLE)
-		set(targetName checkApiCompatibility_${binaryTarget} )
-		cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}" API)
-	endif()
+	set(targetName checkApiCompatibility_${binaryTarget} )
+	cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}" API)
 	set(${reportFileOut} "${reportFile}" PARENT_SCOPE)
 	
 endfunction()
@@ -559,10 +550,8 @@ endfunction()
 function( cpfAddAbiCompatibilityCheckTarget reportFileOut package binaryTarget packageFormat lastReleaseVersion )
 	
 	set(reportFile)
-	if(CPF_CHECK_ABI_STABLE)
-		set(targetName checkAbiCompatibility_${binaryTarget} )
-		cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}" ABI)
-	endif()
+	set(targetName checkAbiCompatibility_${binaryTarget} )
+	cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}" ABI)
 	set(${reportFileOut} "${reportFile}" PARENT_SCOPE)
 	
 endfunction()

@@ -7,7 +7,7 @@ include(cpfMiscUtilities)
 # Set arguments by variable name, not by value.
 function( cpfAssertStrEQ var1 var2 )
     if( NOT "${var1}" STREQUAL "${var2}")
-        message( FATAL_ERROR "Test assertion failed! Values not equal. Left: ${var1}, Right: ${var2}." )
+        message( FATAL_ERROR "Test assertion failed! Values not equal. Left: ${var1}, Right: ${var2}" )
     endif()
 endfunction()
 

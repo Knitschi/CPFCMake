@@ -365,7 +365,7 @@ function( cpfGetCompatiblityReportLinks linksOut package )
 	
 		string(APPEND linkLines "\n")
 		string(APPEND linkLines "#### ABI/API Compatibility Reports ${libraryTarget} ####\n")
-		string(APPEND linkLines "The links will work if the package has a test target and the CPF_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS option is set for a Linux debug configuration.\n")
+		string(APPEND linkLines "The links will work if the package has a test target and the CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS option is set for a Linux debug configuration.\n")
 		string(APPEND linkLines "\n")
 
 		cpfGetPossiblyAvailableCompatibilityReports( reports titles ${package} ${libraryTarget} )
@@ -419,7 +419,7 @@ function( cpfGetPossiblyAvailableCompatibilityReports reportsOut titlesOut packa
 
 			cpfGetReportBaseNamesAndOutputDirs( reportDir reportBaseName ${package} ${binaryTarget} ${youngerVersion} ${version} )
 			set( relReportPath "${reportDir}/${reportBaseName}.html" )
-			set( reportWebUrl "${CPF_WEBPAGE_URL}/${relReportPath}")
+			set( reportWebUrl "${CPF_WEBSERVER_BASE_DIR}/${relReportPath}")
 				
 		endif()
 		set(youngerVersion ${version})

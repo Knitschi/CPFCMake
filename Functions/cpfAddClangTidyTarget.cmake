@@ -9,10 +9,6 @@ include(cpfLocations)
 #
 function( cpfAddGlobalClangTidyTarget packages)
 
-	if(NOT CPF_ENABLE_CLANG_TIDY_TARGET)
-		return()
-	endif()
-
     set(targetName clang-tidy)
 
 	# Create the .json compile command file.
@@ -23,7 +19,7 @@ function( cpfAddGlobalClangTidyTarget packages)
 	endif()
 
     # add bundle target
-    cpfAddSubTargetBundleTarget( clang-tidy "${packages}" INTERFACE_CPF_CLANG_TIDY_SUBTARGET "")
+    cpfAddSubTargetBundleTarget( ${targetName} "${packages}" INTERFACE_CPF_CLANG_TIDY_SUBTARGET "")
 
 endfunction()
 
@@ -35,10 +31,6 @@ endfunction()
 #
 function( cpfAddClangTidyTarget binaryTarget )
 
-	if(NOT CPF_ENABLE_CLANG_TIDY_TARGET)
-		return()
-	endif()
-	
 	cpfGetCompiler(compiler)
     if( ${compiler} STREQUAL Clang)
     

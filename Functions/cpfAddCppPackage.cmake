@@ -19,6 +19,19 @@ include(cpfAddInstallRules)
 include(cpfAddDistributionPackageTarget)
 include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDoxygenPackage)
+include(cpfAddVersionRcPreBuildEvent)
+
+# cotire must be included on the global scope or we get errors that target xyz already has a custom rule
+set(cotirePath "${CMAKE_CURRENT_LIST_DIR}/../../cotire/CMake/cotire.cmake")
+if(CPF_ENABLE_PRECOMPILED_HEADER AND ${CMAKE_SOURCE_DIR}) # do not enter this when included from scripts or pchs are disabled.
+	if(EXISTS ${cotirePath})
+		include(${cotirePath})
+		set( CPF_COTIRE_AVAILABLE TRUE )
+	else()
+		message(WARNING "Cotire not found! Add it as package to \"Sources/cotire\" to enable precompiled headers.")
+		set( CPF_COTIRE_AVAILABLE FALSE )
+	endif()
+endif()
 
 
 #-----------------------------------------------------------
@@ -27,7 +40,6 @@ include(cpfAddDoxygenPackage)
 function( cpfAddCppPackage )
 
 	set( optionKeywords
-		GENERATE_PACKAGE_DOX_FILES
 	) 
 	
 	set( requiredSingleValueKeywords
@@ -38,10 +50,19 @@ function( cpfAddCppPackage )
 	set( optionalSingleValueKeywords
 		BRIEF_DESCRIPTION
 		LONG_DESCRIPTION
-		HOMEPAGE
+		OWNER
+		WEBPAGE_URL
 		MAINTAINER_EMAIL
 		VERSION_COMPATIBILITY_SCHEME
-		ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS
+		ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS
+		ENABLE_ABI_API_STABILITY_CHECK_TARGETS
+		ENABLE_CLANG_TIDY_TARGET
+		ENABLE_OPENCPPCOVERAGE_TARGET
+		ENABLE_PACKAGE_DOX_FILES_GENERATION
+		ENABLE_PRECOMPILED_HEADER
+		ENABLE_RUN_TESTS_TARGET
+		ENABLE_VALGRIND_TARGET
+		ENABLE_VERSION_RC_FILE_GENERATION
 	)
 
 	set( requiredMultiValueKeywords
@@ -71,6 +92,20 @@ function( cpfAddCppPackage )
 
 	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddCppPackage()")
 	cpfAssertProjectVersionDefined()
+
+	# Use values of global variables for unset arguments.
+	cpfSetIfNotSet( ARG_OWNER "${CPF_OWNER}")
+	cpfSetIfNotSet( ARG_WEBPAGE_URL "${CPF_PROJECT_WEBPAGE_URL}")
+	cpfSetIfNotSet( ARG_MAINTAINER_EMAIL "${CPF_MAINTAINER_EMAIL}")
+	cpfSetIfNotSet( ARG_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS "${CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS}")
+	cpfSetIfNotSet( ARG_ENABLE_ABI_API_STABILITY_CHECK_TARGETS "${CPF_ENABLE_ABI_API_STABILITY_CHECK_TARGETS}")
+	cpfSetIfNotSet( ARG_ENABLE_CLANG_TIDY_TARGET "${CPF_ENABLE_CLANG_TIDY_TARGET}")
+	cpfSetIfNotSet( ARG_ENABLE_OPENCPPCOVERAGE_TARGET "${CPF_ENABLE_OPENCPPCOVERAGE_TARGET}")
+	cpfSetIfNotSet( ARG_ENABLE_PACKAGE_DOX_FILES_GENERATION "${CPF_ENABLE_PACKAGE_DOX_FILES_GENERATION}")
+	cpfSetIfNotSet( ARG_ENABLE_PRECOMPILED_HEADER "${CPF_ENABLE_PRECOMPILED_HEADER}")
+	cpfSetIfNotSet( ARG_ENABLE_RUN_TESTS_TARGET "${CPF_ENABLE_RUN_TESTS_TARGET}")
+	cpfSetIfNotSet( ARG_ENABLE_VALGRIND_TARGET "${CPF_ENABLE_VALGRIND_TARGET}")
+	cpfSetIfNotSet( ARG_ENABLE_VERSION_RC_FILE_GENERATION "${CPF_ENABLE_VERSION_RC_FILE_GENERATION}")
 
 	# parse argument sublists
 	set( allKeywords ${optionKeywords} ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
@@ -111,6 +146,8 @@ function( cpfAddCppPackage )
 	cpfAddPackageBinaryTargets( 
 		productionLibrary 
 		${package} 
+		"${ARG_BRIEF_DESCRIPTION}"
+		"${ARG_OWNER}"
 		${ARG_PACKAGE_NAMESPACE} 
 		${ARG_TYPE} 
 		"${ARG_PUBLIC_HEADER}" 
@@ -122,12 +159,14 @@ function( cpfAddCppPackage )
 		"${ARG_LINKED_LIBRARIES}" 
 		"${ARG_LINKED_TEST_LIBRARIES}"
 		${ARG_VERSION_COMPATIBILITY_SCHEME}
+		${ARG_ENABLE_PRECOMPILED_HEADER}
+		${ARG_ENABLE_VERSION_RC_FILE_GENERATION}
 	)
 
 	#set some properties
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_LONG_PACKAGE_DESCRIPTION ${ARG_LONG_DESCRIPTION} )
-	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_HOMEPAGE ${ARG_HOMEPAGE} )
+	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_WEBPAGE_URL ${ARG_WEBPAGE_URL} )
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
 	
 	
@@ -140,13 +179,24 @@ function( cpfAddCppPackage )
 	# Adds target that runs clang-tidy on the given files.
     # Currently this is only added for the production target because clang-tidy does not filter out warnings that come over the GTest macros from external code.
     # When clang-tidy resolves the problem, static analysis should be executed for all binary targets.
-    cpfAddClangTidyTarget(${productionLibrary})
-    cpfAddRunCppTestsTargets(${package})
-	cpfAddValgrindTarget(${package})
-	cpfAddOpenCppCoverageTarget(${package})
+	if(${ARG_ENABLE_CLANG_TIDY_TARGET})
+		cpfAddClangTidyTarget(${productionLibrary})
+	endif()
+	
+	if(${ARG_ENABLE_RUN_TESTS_TARGET})
+		cpfAddRunCppTestsTargets(${package})
+	endif()
+
+	if(${ARG_ENABLE_VALGRIND_TARGET})
+		cpfAddValgrindTarget(${package})
+	endif()
+
+	if(${ARG_ENABLE_OPENCPPCOVERAGE_TARGET})
+		cpfAddOpenCppCoverageTarget(${package})
+	endif()
 
 	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
-	if(${ARG_GENERATE_PACKAGE_DOX_FILES})
+	if(${ARG_ENABLE_PACKAGE_DOX_FILES_GENERATION})
 		cpfAddPackageDocsTarget( ${package} ${ARG_PACKAGE_NAMESPACE} )
 	endif()
 
@@ -154,7 +204,12 @@ function( cpfAddCppPackage )
 	cpfAddPlugins( ${package} "${pluginOptionLists}" )
 	 
 	# Adds a target the creates abi-dumps when using clang or gcc with debug options.
-	cpfAddAbiCheckerTargets( ${package} "${distributionPackageOptionLists}" "${ARG_ENABLE_ABI_API_COMPATIBILITY_CHECK_TARGETS}" )
+	cpfAddAbiCheckerTargets( 
+		${package}
+		"${distributionPackageOptionLists}"
+		${ARG_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS}
+		${ARG_ENABLE_ABI_API_STABILITY_CHECK_TARGETS}
+	)
 	
 	# Adds the install rules and the per package install targets.
 	cpfAddInstallRules( ${package} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${ARG_VERSION_COMPATIBILITY_SCHEME} )
@@ -252,7 +307,9 @@ endfunction()
 #
 function( cpfAddPackageBinaryTargets 
 	outProductionLibrary 
-	package 
+	package
+	shortDescription
+	owner
 	packageNamespace 
 	type 
 	publicHeaderFiles 
@@ -264,6 +321,8 @@ function( cpfAddPackageBinaryTargets
 	linkedLibraries 
 	linkedTestLibraries
 	versionCompatibilityScheme
+	enablePrecompiledHeader
+	enableVersionRcGeneration
 )
 
 	# filter some files
@@ -286,6 +345,7 @@ function( cpfAddPackageBinaryTargets
 
 	# Modify variables if the package creates an executable
 	if("${type}" STREQUAL GUI_APP OR "${type}" STREQUAL CONSOLE_APP)
+
 		set(isExe TRUE)
 		set( productionTarget lib${package})
 		#remove main.cpp from the files
@@ -294,6 +354,8 @@ function( cpfAddPackageBinaryTargets
 		foreach( iconFile ${iconFiles})
 			list(REMOVE_ITEM productionFiles ${iconFile})
 		endforeach()
+		set(fileDescriptionExe ${shortDescription})
+		set(fileDescriptionLib "Contains the functionality of the ${package} application.")
 
 	else()
 
@@ -302,6 +364,7 @@ function( cpfAddPackageBinaryTargets
 		if(exeFiles)
 			message(FATAL_ERROR "Error! The option EXE_FILES in cpfAddCppPackage() is only relevant for packages of type GUI_APP or CONSOLE_APP.")
 		endif()
+		set(fileDescriptionLib ${shortDescription})
 
 	endif()
 	
@@ -323,6 +386,10 @@ function( cpfAddPackageBinaryTargets
 			LINKED_LIBRARIES ${linkedLibraries}
 			IDE_FOLDER ${package}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
+			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
+			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
+			BRIEF_DESCRIPTION ${fileDescriptionLib}
+			OWNER ${owner}
 	    )
 
     endif()
@@ -339,6 +406,10 @@ function( cpfAddPackageBinaryTargets
 			LINKED_LIBRARIES ${linkedLibraries} ${productionTarget}
 			IDE_FOLDER ${package}/exe
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
+			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
+			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
+			BRIEF_DESCRIPTION ${fileDescriptionExe}
+			OWNER ${owner}
 	    )
 
 	endif()
@@ -359,6 +430,10 @@ function( cpfAddPackageBinaryTargets
 			LINKED_LIBRARIES ${productionTarget} ${linkedTestLibraries}
 			IDE_FOLDER ${package}/${VSTestFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
+			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
+			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
+			BRIEF_DESCRIPTION "A library that contains utilities for tests of the ${productionTarget} library."
+			OWNER ${owner}
         )
 
 		# respect an option that is used by hunter to not compile test targets
@@ -380,6 +455,10 @@ function( cpfAddPackageBinaryTargets
 			LINKED_LIBRARIES ${productionTarget} ${fixtureTarget} ${linkedTestLibraries}
 			IDE_FOLDER ${package}/${VSTestFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
+			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
+			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
+			BRIEF_DESCRIPTION "Runs tests of the ${productionTarget} library."
+			OWNER ${owner}
         )
 		set_property(TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET ${unitTestsTarget} )
 
@@ -411,12 +490,12 @@ endfunction()
 # FILES						All files that belong to the target.
 # LINKED_LIBRARIES			Other targets on which this target depends.
 # 
-function( cpfAddBinaryTarget	)
+function( cpfAddBinaryTarget )
 
 	cmake_parse_arguments(
 		ARG 
 		"" 
-		"PACKAGE_NAME;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME" 
+		"PACKAGE_NAME;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME;ENABLE_PRECOMPILED_HEADER;ENABLE_VERSION_RC_FILE_GENERATION;BRIEF_DESCRIPTION;OWNER" 
 		"PUBLIC_HEADER;FILES;LINKED_LIBRARIES" 
 		${ARGN} 
 	)
@@ -513,7 +592,20 @@ function( cpfAddBinaryTarget	)
 
 		# set target to use pre-compiled header
 		# compile flags can not be changed after this call
-		cpfAddPrecompiledHeader( ${ARG_NAME} )
+		if(${ARG_ENABLE_PRECOMPILED_HEADER})
+			cpfAddPrecompiledHeader(${ARG_NAME})
+		endif()
+
+		# Setup automatic creation of a version.rc file on windows
+		if(NOT ARG_DISABLE_VERSION_RC_GENERATION)
+			cpfAddVersionRcPreBuildEvent(
+				PACKAGE	${ARG_PACKAGE_NAME}
+				BINARY_TARGET ${ARG_NAME}
+				VERSION ${PROJECT_VERSION}
+				BRIEF_DESCRIPTION ${ARG_BRIEF_DESCRIPTION}
+				OWNER ${ARG_OWNER}
+			)
+		endif()
 
 	endif()
 
@@ -537,11 +629,11 @@ endfunction()
 # this was copied from https://gist.github.com/larsch/573926
 # this might be an alternative if this does not work well enough: https://github.com/sakra/cotire
 function(cpfAddPrecompiledHeader target )
-    
-    # add the precompiled header (targets and compile flags)
-    set_target_properties(${target} PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)  # prevent the generation of unity build targets
+	if(CPF_COTIRE_AVAILABLE) 
+		
+		# add the precompiled header (targets and compile flags)
+		set_target_properties(${target} PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)  # prevent the generation of unity build targets
 	
-	if(CPF_ENABLE_PRECOMPILED_HEADER AND CPF_USE_PRECOMPILED_HEADERS ) 
 		cotire( ${target})
 		cpfReAddInheritedCompileOptions( ${target})
 
@@ -551,7 +643,8 @@ function(cpfAddPrecompiledHeader target )
 
 		# do not run moc for the generated prefix header, it will cause build errors.
 		set_property(SOURCE ${prefixHeader} PROPERTY SKIP_AUTOMOC ON)
-    endif()
+
+	endif()
 endfunction()
 
 #---------------------------------------------------------------------------------------------
@@ -623,33 +716,6 @@ function( cpfQt5AddUIAndQrcFiles filesOut )
 	endif()
 
 	set( ${filesOut} ${files} ${uiHeaders} ${qrcFiles} PARENT_SCOPE)
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# Sorts the source files of the target into various folders for Visual Studio.
-# 
-# Remarks
-# I failed to add the cotire prefix header to the generated files because
-# it does not belong to the target.
-# The ui_*.h files could also not be added to the generated files because they do not exist when the target is created.
-function( cpfSetIDEDirectoriesForTargetSources targetName )
-
-    # get the source files in the Sources directory
-	get_target_property( sourceDir ${targetName} SOURCE_DIR)
-	getAbsPathesForSourceFilesInDir( sourcesFiles ${targetName} ${sourceDir})
-	# get the generated source files in the binary directory
-	get_target_property( binaryDir ${targetName} BINARY_DIR)
-	getAbsPathesForSourceFilesInDir( generatedFiles ${targetName} ${binaryDir})
-	# manually add a file that is generated by automoc and not visible here
-	list(APPEND generatedFiles ${CMAKE_CURRENT_BINARY_DIR}/${targetName}_autogen/moc_compilation.cpp) 
-	
-	# set source groups for generated files that do exist
-	source_group(Generated FILES ${generatedFiles})
-	
-	# set the file groups of the files in the Source directory to follow the directory structure
-	cpfGetRelativePaths( sourcesFiles "${sourceDir}" "${sourcesFiles}")
-	cpfSourceGroupTree("${sourcesFiles}")
 
 endfunction()
 
@@ -763,4 +829,7 @@ function( cpfAddPlugins package pluginOptionLists )
 	endforeach()
 
 endfunction()
+
+
+
 

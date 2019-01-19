@@ -93,6 +93,18 @@ function( cpfGetShorterString stringOut string1 string2 )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+function( cpfStringContains containsOut string )
+
+	string(FIND "${string}" -dirty index)
+	if(${index} EQUAL -1)
+		set(${containsOut} FALSE PARENT_SCOPE)
+	else()
+		set(${containsOut} TRUE PARENT_SCOPE)
+	endif()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # returns true if the given string contains a generator expression which is defined by the $<...> bracket.
 #
 function( cpfContainsGeneratorExpressions output string )

@@ -10,16 +10,17 @@ cpfInitPackageProject()
 # Files that define variables.
 set( files
 	cpfInit.cmake
+	LICENSE
+	README.md
 	${CPF_DEFAULT_CONFIGS_DIR}/Clang.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Gcc.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Linux.config.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/MSVC2017.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/PlatformIndependent.config.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Windows.config.cmake
-	${CPF_PACKAGE_CONFIG_TEMPLATE}
-	documentation/APIDoc.dox
+	documentation/APIDocGlobalVariables.dox
+	documentation/APIDocModules.dox
 	documentation/Configuration.dox
-	documentation/CPFCMake.dox
 	documentation/CPFCMake.dox
 	documentation/CustomTargets.dox
 	documentation/DistributionPackages.dox
@@ -40,6 +41,7 @@ set( files
 	Functions/cpfAddRunTestsTarget.cmake
 	Functions/cpfAddRunUicTarget.cmake
 	Functions/cpfAddValgrindTarget.cmake
+	Functions/cpfAddVersionRcPreBuildEvent.cmake
 	Functions/cpfCustomTargetUtilities.cmake
 	Functions/cpfGitUtilities.cmake
 	Functions/cpfAddPackages.cmake
@@ -54,16 +56,23 @@ set( files
 	Functions/cpfTestUtilities.cmake
 	Functions/cpfTargetUtilities.cmake
 	Scripts/addVersionTag.cmake
+	Scripts/appendLineToFile.cmake
 	Scripts/clearDirExcept.cmake
+	Scripts/configureFile.cmake
 	Scripts/createConfigFile.cmake
 	Scripts/executeCommandForConfig.cmake
+	Scripts/getVersionFromRepository.cmake
 	Scripts/prepareCIRepoForBuild.cmake
+	Scripts/printScriptFileVariables.cmake
 	Scripts/runAbiComplianceChecker.cmake
 	Scripts/updateExistingWebPage.cmake
 	Templates/.gitignore.in
 	Templates/${CPF_GRAPHVIZ_OPTIONS_FILE}.in
+	${CPF_PACKAGE_CONFIG_TEMPLATE}
+	Templates/cpfPackages.cmake.in
 	Templates/packageVersion.cmake.in
 	Templates/packageVersion.h.in
+	Templates/version.rc.in
 	Tests/cpfListUtilities_tests.cmake
 	Tests/cpfMiscUtilities_tests.cmake
 	Tests/cpfNumericUtilities_tests.cmake

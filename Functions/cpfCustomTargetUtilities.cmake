@@ -346,6 +346,22 @@ function( cpfAddClearDirExceptCommand stampFileOut directory notDeletedEntries t
 
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# Adds a custom command that executes cmake in script mode handing it the given D-options
+# 
+# dOptions must be a list in the form "ARG1=blub;OTHER_ARG=blab;THIRD_ARG=bleb".
+#
+function( cpfGetRunCMakeScriptCommand commandOut script dOptions )
+
+	set(runScriptCommand "\"${CMAKE_COMMAND}\"")
+	foreach(option ${dOptions})
+		string(APPEND runScriptCommand " -D ${option}")
+	endforeach()
+	string(APPEND runScriptCommand " -P \"${script}\"")
+
+	set(${commandOut} ${runScriptCommand} PARENT_SCOPE)
+
+endfunction()
 
 #----------------------------------------------------------------------------------------
 # Adds a bundle-target that bundles all the subtargets from the package property
@@ -355,7 +371,6 @@ function( cpfAddSubTargetBundleTarget targetName packages subtargetProperty addi
 		cpfAddBundleTarget( ${targetName} "${dependedOnTargets};${additionalDependencies}" )
 	endif()
 endfunction()
-
 
 #----------------------------------------------------------------------------------------
 # This function adds a target that does nothing for it self, but only makes sure that
@@ -370,29 +385,5 @@ function( cpfAddBundleTarget targetName dependedOnTargets )
 	endif()
 endfunction()
 
-
-#----------------------------------------------------------------------------------------
-function( cpfGetSubtargets subTargetsOut packages subtargetProperty)
-
-	set(targets)
-	foreach(package ${packages})
-		if(TARGET ${package}) # not all packages have targets
-			
-			# check for subtargets that belong to the package
-			get_property(subTarget TARGET ${package} PROPERTY ${subtargetProperty})
-			cpfListAppend( targets ${subTarget} )
-
-			# check for subtargets that belong to the binary targets
-			get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
-			foreach(binaryTarget ${binaryTargets})
-				get_property(subTarget TARGET ${binaryTarget} PROPERTY ${subtargetProperty})
-				cpfListAppend( targets ${subTarget} )
-			endforeach()
-			
-		endif()
-	endforeach()
-	set(${subTargetsOut} "${targets}" PARENT_SCOPE)
-
-endfunction()
 
 

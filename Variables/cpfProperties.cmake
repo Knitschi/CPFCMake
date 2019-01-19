@@ -30,7 +30,7 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets.
     define_property(
         TARGET
-        PROPERTY INTERFACE_CPF_PACKAGE_HOMEPAGE
+        PROPERTY INTERFACE_CPF_PACKAGE_WEBPAGE_URL
         BRIEF_DOCS "A web address from where the source-code and/or the documentation of the package can be obtained."
         FULL_DOCS " "
     )
