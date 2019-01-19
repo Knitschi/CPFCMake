@@ -315,10 +315,18 @@ endfunction()
 # last release version.
 #
 function( cpfGetCommitsSinceLastRelease commitNrOut version )
+	
+	cpfIsReleaseVersion(isRelease ${version})
+	if(isRelease)
+		set(${commitNrOut} 0 PARENT_SCOPE)
+		return()
+	endif()
+
 	string(REGEX MATCH ".[0-9]*-" commitNr "${version}")
 	cpfStringRemoveRight( commitNr ${commitNr} 1)
 	cpfRightSideOfString( commitNr ${commitNr} 1)
 	set(${commitNrOut} ${commitNr} PARENT_SCOPE)
+
 endfunction()
 
 #----------------------------------------------------------------------------------------

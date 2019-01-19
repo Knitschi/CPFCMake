@@ -135,6 +135,13 @@ function( cpfAddCustomTestTarget runTestsCommand sourceFiles dependedOnExternalF
 	getRunTestStampFile( stampFile ${runTargetName} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX})
 	set( touchCommand "cmake -E touch \"${stampFile}\"" )
 
+	foreach(file ${sourceFiles} ${dependedOnExternalFiles})
+		cpfIsAbsolutePath(isAbsPath ${file})
+		if(NOT isAbsPath)
+			message(FATAL_ERROR "DEPENDS requires absolute paths. The recived path was \"${file}\"")
+		endif()
+	endforeach()
+
 	cpfAddStandardCustomCommand(
 		DEPENDS ${sourceFiles} ${dependedOnExternalFiles}
 		OUTPUT "${stampFile}"
@@ -155,8 +162,22 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Adds a run-tests target that runs a cmake script
 function( cpfAddRunCMakeTestScriptTarget testScript sourceFiles)
+	
+	# turn into absolute paths
+	set(absSourceFiles)
+	foreach(file ${sourceFiles})
+		cpfIsAbsolutePath( isAbsPath ${file})
+		if(isAbsPath)
+			cpfListAppend(absSourceFiles ${file})
+		else()
+			cpfListAppend(absSourceFiles ${CMAKE_CURRENT_SOURCE_DIR}/${file})
+		endif()
+	endforeach()
+	
 	set( runTestsCommand "cmake -P \"${CMAKE_CURRENT_SOURCE_DIR}/${testScript}\"")
-	cpfAddCustomTestTarget(${runTestsCommand} "${sourceFiles}" "")
+
+	cpfAddCustomTestTarget(${runTestsCommand} "${absSourceFiles}" "")
+
 endfunction()
 
 

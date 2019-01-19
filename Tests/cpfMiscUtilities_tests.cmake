@@ -123,6 +123,10 @@ function( test_cpfGetCommitsSinceLastRelease )
 	cpfGetCommitsSinceLastRelease( commitNr ${version} )
 	cpfAssertStrEQ(${commitNr} "4874")
 
+	set( version 1.0.0 )
+	cpfGetCommitsSinceLastRelease( commitNr ${version} )
+	cpfAssertStrEQ(${commitNr} "0")
+
 endfunction()
 
 #----------------------------------------------------------------------------------------

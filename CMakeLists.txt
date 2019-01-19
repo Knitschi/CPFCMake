@@ -89,4 +89,4 @@ cpfAddFilePackage(
 )
 
 # Add a test target
-cpfAddRunCMakeTestScriptTarget( "Tests/run_tests.cmake" "${TEST_FILES}" )
+cpfAddRunCMakeTestScriptTarget( "Tests/run_tests.cmake" "${files}" )
