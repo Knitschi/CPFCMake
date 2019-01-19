@@ -386,46 +386,51 @@ endfunction()
 #-------------------------------------------------------------------------
 function( cpfGetPossiblyAvailableCompatibilityReports reportsOut titlesOut package binaryTarget)
 
-	set(reports)
-	set(titles)
-		
-	# first we create a list of reports that could possibly exist
-		
-	# Handle the two reports that compare the current version to the last build and last release.
-	# We always add links for those because they will be created with this build.
-	get_property( currentVersion TARGET ${binaryTarget} PROPERTY VERSION )
-	cpfGetLastBuildAndLastReleaseVersion( lastBuildVersion lastReleaseVersion)
-	cpfGetReportBaseNamesAndOutputDirs( reportDirs reportBaseNames ${package} ${binaryTarget} ${currentVersion} "${lastBuildVersion};${lastReleaseVersion}")
-	set( thisBuildReportsTitles "Last build to current build" "Last release to current build" )
-		
-	set(index 0)
-	foreach( reportDir ${reportDirs} )
-		list(GET reportBaseNames ${index} baseName)
-		list(GET thisBuildReportsTitles ${index} title)
-			
-		list(APPEND reports "${reportDir}/${baseName}.html")
-		list(APPEND titles ${title} )
-			
-		cpfIncrement(index)
-	endforeach()
-		
-	# Now handle the reports for between old releases.
-	# They may not exist anymore, so we check on the web-page which are
-	# still available.
-	cpfGetReleaseVersionTags( releaseVersions ${CMAKE_CURRENT_SOURCE_DIR})
-	set(youngerVersion)
-	foreach( version ${releaseVersions})
-		if(youngerVersion)
+	cpfIsInterfaceLibrary(isIntLib ${binaryTarget})
+	if(NOT isIntLib) # Currently interface libs have no compatibility reports.
 
-			cpfGetReportBaseNamesAndOutputDirs( reportDir reportBaseName ${package} ${binaryTarget} ${youngerVersion} ${version} )
-			set( relReportPath "${reportDir}/${reportBaseName}.html" )
-			set( reportWebUrl "${CPF_WEBSERVER_BASE_DIR}/${relReportPath}")
+		set(reports)
+		set(titles)
+			
+		# first we create a list of reports that could possibly exist
+			
+		# Handle the two reports that compare the current version to the last build and last release.
+		# We always add links for those because they will be created with this build.
+		get_property( currentVersion TARGET ${binaryTarget} PROPERTY VERSION )
+		cpfGetLastBuildAndLastReleaseVersion( lastBuildVersion lastReleaseVersion)
+		cpfGetReportBaseNamesAndOutputDirs( reportDirs reportBaseNames ${package} ${binaryTarget} ${currentVersion} "${lastBuildVersion};${lastReleaseVersion}")
+		set( thisBuildReportsTitles "Last build to current build" "Last release to current build" )
+			
+		set(index 0)
+		foreach( reportDir ${reportDirs} )
+			list(GET reportBaseNames ${index} baseName)
+			list(GET thisBuildReportsTitles ${index} title)
 				
-		endif()
-		set(youngerVersion ${version})
-	endforeach()
+			list(APPEND reports "${reportDir}/${baseName}.html")
+			list(APPEND titles ${title} )
+				
+			cpfIncrement(index)
+		endforeach()
+			
+		# Now handle the reports for between old releases.
+		# They may not exist anymore, so we check on the web-page which are
+		# still available.
+		cpfGetReleaseVersionTags( releaseVersions ${CMAKE_CURRENT_SOURCE_DIR})
+		set(youngerVersion)
+		foreach( version ${releaseVersions})
+			if(youngerVersion)
 
-	set( ${reportsOut} ${reports} PARENT_SCOPE )
-	set( ${titlesOut} ${titles} PARENT_SCOPE)
+				cpfGetReportBaseNamesAndOutputDirs( reportDir reportBaseName ${package} ${binaryTarget} ${youngerVersion} ${version} )
+				set( relReportPath "${reportDir}/${reportBaseName}.html" )
+				set( reportWebUrl "${CPF_WEBSERVER_BASE_DIR}/${relReportPath}")
+					
+			endif()
+			set(youngerVersion ${version})
+		endforeach()
+
+	endif()
+
+	set( ${reportsOut} "${reports}" PARENT_SCOPE )
+	set( ${titlesOut} "${titles}" PARENT_SCOPE)
 
 endfunction()
