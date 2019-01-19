@@ -101,7 +101,7 @@ cpfAddCppPackage(
         [DISTRIBUTION_PACKAGE_CONTENT_TYPE ...] ...]
     [VERSION_COMPATIBILITY_SCHEME [ExactVersion] ]
     [ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS bool]
-    [ENABLE_PACKAGE_DOX_FILES_GENERATION]
+    [ENABLE_PACKAGE_DOX_FILE_GENERATION]
 	[ENABLE_VERSION_RC_FILE_GENERATION]
 )
 \endcode
@@ -127,7 +127,7 @@ The parameter is used in the following ways:
 - As a namespace for the packages cmake target names.
 - The value is used as a part of the packages generated export macro which must be 
 prepended to all exported classes and functions in a library.
-- If you use the <code>ENABLE_PACKAGE_DOX_FILES_GENERATION</code> option, the default package documentation 
+- If you use the <code>ENABLE_PACKAGE_DOX_FILE_GENERATION</code> option, the default package documentation 
 page will generate a documentation of that namespace.
 
 #### TYPE ####
@@ -303,7 +303,7 @@ This is the most simple scheme and relieves developers from the burdon of keepin
 This option can be used to override the global CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS setting.
 
 
-####  [ENABLE_PACKAGE_DOX_FILES_GENERATION]  ####
+####  [ENABLE_PACKAGE_DOX_FILE_GENERATION]  ####
 
 If this option is given, the package will generate a standard package documentation .dox file.
 The file contains the brief and long package description as well as some links to other generated
