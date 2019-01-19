@@ -156,6 +156,13 @@ function( cpfAddPackageContentTarget targetName package contentId contentType )
 	set(configSuffixes)
 	if(${contentType} STREQUAL CT_SOURCES) # source packages need special treatment because the do not depend on the config.
 
+		# Wenn using MSVC, the source package depends on the generated version.rc file
+		# so it must depend on the binary target to make sure that it is produced.
+		set(dependedOnTargets)
+		if(MSVC)
+			get_property(dependedOnTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
+		endif()
+
 		# commands for clearing the package stage
 		cpfGetPackageContentStagingDir( destDir ${package} "" ${contentId})
 		cpfGetClearDirectoryCommands( clearContentStageCommands "${destDir}")
@@ -167,7 +174,7 @@ function( cpfAddPackageContentTarget targetName package contentId contentType )
 		set( stampFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/install_${contentId}.stamp")
 		cpfGetTouchFileCommands( touchCommmand "${stampFile}")
 		cpfAddStandardCustomCommand(
-			DEPENDS ${ARG_DEPENDS}
+			DEPENDS ${dependedOnTargets}
 			COMMANDS ${clearContentStageCommands} ${runInstallScriptCommands} ${touchCommmand}
 			OUTPUT "${stampFile}"
 		)
@@ -175,6 +182,7 @@ function( cpfAddPackageContentTarget targetName package contentId contentType )
 		cpfListAppend( allStampFiles ${stampFile} )
 
 	else()
+
 		cpfGetConfigurations(configs)
 		foreach( config ${configs})
 			cpfToConfigSuffix( configSuffix ${config})
@@ -206,6 +214,7 @@ function( cpfAddPackageContentTarget targetName package contentId contentType )
 			cpfListAppend( allStampFiles ${stampFile${configSuffix}} )
 
 		endforeach()
+
 	endif()
 
 	# add a target
