@@ -57,8 +57,11 @@ function( cpfAddVersionRcPreBuildEvent )
 	cpfIsDirtyVersion( isDirty ${ARG_VERSION})
 	if(isDirty)
 		cpfListAppend(fileflags "VS_FF_PRIVATEBUILD")
-	endif()
+	endif() 
 	cpfJoinString( fileFlagsString "${fileflags}" " | ")
+	if(NOT fileFlagsString)
+		set(fileFlagsString "0x0L")	# The build files if no flag is given. This is the null flag.
+	endif()
 
     # Add a pre-build event to run the configure file script
 	# Note that we can not use a custom-command + custom-target 
@@ -74,10 +77,11 @@ function( cpfAddVersionRcPreBuildEvent )
         "BRIEF_DESCRIPTION=\"${ARG_BRIEF_DESCRIPTION}\""
         "TARGET=${ARG_BINARY_TARGET}"
         "FILE_NAME=$<TARGET_FILE_NAME:${ARG_BINARY_TARGET}>"
-        "FILE_TYPE=${FILE_TYPE}"
+		"FILE_TYPE=${FILE_TYPE}"
 		"FILE_FLAGS=\"${fileFlagsString}\""
         "COPY_RIGHT=\"${COPY_RIGHT}\""
     )
+
 	cpfGetRunCMakeScriptCommand( createRcFileCommand "${configureScript}" "${dOptions}")
 	separate_arguments(commandList NATIVE_COMMAND ${createRcFileCommand})
 
