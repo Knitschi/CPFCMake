@@ -18,7 +18,8 @@ a handfull of CMake functions. This removes implementation details from the `CMa
 
 # Index #
 
-- \subpage CPFCMakeAPIDocs
+- \subpage CPFModules
+- \subpage CPFGlobalVariables
 - \subpage CPFConfiguration
 - \subpage CPFCustomTargets
 - \subpage CPFCMakeTestTargets

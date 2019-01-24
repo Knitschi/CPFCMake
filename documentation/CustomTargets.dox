@@ -68,7 +68,7 @@ Here is a list of targets that are used as implementation details for other targ
 If everything works, they should be of no further interest, but more information
 about them may be of interest if you need to debug problems with the CPF.
 
-- \ref binarytarget_
+
 
 
 \subsection TargetAnnotations Target annotations
