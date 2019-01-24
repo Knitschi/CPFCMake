@@ -14,3 +14,5 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3" CACHE STRING "Additional C++ compile flags whe
 # -g and -o1 are needed for valgrind. -g adds debug information and -o1 is the optimization level which can not be too high.
 set(CMAKE_C_FLAGS_DEBUG "-g -Og" CACHE STRING "Additional C compile flags when building the Debug configuration.")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -Og" CACHE STRING "Additional C++ compile flags when building the Debug configuration.")
+
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "Platform independent activation of the required C++ standard.")
