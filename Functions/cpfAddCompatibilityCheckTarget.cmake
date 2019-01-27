@@ -379,7 +379,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 function( cpfGetCurrentDumpFile dumpFileOut package binaryTarget )
-	get_property( currentVersion TARGET ${package} PROPERTY VERSION )
+	get_property( currentVersion TARGET ${binaryTarget} PROPERTY VERSION )
 	cpfGetAbiDumpTargetName( abiDumpTarget ${binaryTarget})
 	cpfGetAbiDumpFileName( dumpFile ${binaryTarget} ${currentVersion})
 	set( ${dumpFileOut} "${CMAKE_BINARY_DIR}/${package}/${abiDumpTarget}/${dumpFile}" PARENT_SCOPE)
@@ -393,7 +393,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 function( cpfGetDumpFilePathRelativeToPackageDir pathOut package binaryTarget )
-	get_property( version TARGET ${package} PROPERTY VERSION )
+	get_property( version TARGET ${binaryTarget} PROPERTY VERSION )
 	cpfGetAbiDumpFileName( dumpFile ${binaryTarget} ${version})
 	cpfGetRelativeOutputDir( relativeDir ${package} OTHER )
 	set( ${pathOut} ${relativeDir}/${dumpFile} PARENT_SCOPE)

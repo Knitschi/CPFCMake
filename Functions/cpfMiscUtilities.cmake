@@ -110,7 +110,7 @@ endfunction()
 # This function will set the value of a variable if it is not already set.
 #
 function( cpfSetIfNotSet variable value )
-	if(NOT ${variable})
+	if("${${variable}}" STREQUAL "")
 		set(${variable} "${value}" PARENT_SCOPE)
 	endif()
 endfunction()
