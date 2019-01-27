@@ -15,6 +15,7 @@ VS_VERSION_INFO VERSIONINFO
 	BEGIN
 	BLOCK "040904b0"
 	BEGIN
+	VALUE "CompanyName", "@OWNER@" "\0"
 	VALUE "FileDescription", "@BRIEF_DESCRIPTION@" "\0"
 	VALUE "FileVersion", "@PACKAGE_VERSION@" "\0"
 	VALUE "InternalName", "@TARGET@" "\0"

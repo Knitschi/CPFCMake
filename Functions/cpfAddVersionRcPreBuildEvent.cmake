@@ -70,7 +70,8 @@ function( cpfAddVersionRcPreBuildEvent )
 	# on the binary target.
     set( dOptions 
         "ABS_SOURCE_PATH=\"${versionRcTemplate}\""
-        "ABS_DEST_PATH=\"${versionRcGenerated}\""
+		"ABS_DEST_PATH=\"${versionRcGenerated}\""
+		"OWNER=\"${ARG_OWNER}\""
         "PACKAGE=${ARG_PACKAGE}"
         "PACKAGE_VERSION=${ARG_VERSION}"
 		"PACKAGE_VERSION_SHORT=\"${major}, ${minor}, ${patch}, ${commitNr}\""
