@@ -27,9 +27,11 @@ function( cpfAddVersionRcPreBuildEvent )
     cmake_parse_arguments( ARG "" "${requiredSingleValueKeywords};${optionalSingleValueKeywords}" "" ${ARGN} )
     cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords}" ARG "cpfAddVersionRcPreBuildEvent()")
 
-    # Interface libs have no binary file to which we could write version information.
+	# Interface libs have no binary file to which we could write version information.
+	# Static libraries do not seem to have the version info attributes.
 	cpfIsInterfaceLibrary(isIntLib ${ARG_BINARY_TARGET})
-	if(isIntLib)
+	cpfIsStaticLibrary(isStaticLib ${ARG_BINARY_TARGET})
+	if(isIntLib OR isStaticLib)
 		return()
 	endif()
 
