@@ -93,7 +93,7 @@ function( cpfAddDoxygenPackage )
 	cpfAddStandardCustomCommand(
 		OUTPUT ${reducedGraphFile}
 		DEPENDS ${CPF_TARGET_DEPENDENCY_GRAPH_FILE}
-		COMMANDS "cmake -E make_directory \"${reducedDepGraphDir}\"" ${tredCommand}
+		COMMANDS "\"${CMAKE_COMMAND}\" -E make_directory \"${reducedDepGraphDir}\"" ${tredCommand}
 	)
 
 	# add a command to copy the full dependency graph to the doxygen output dir
@@ -151,6 +151,9 @@ function( cpfAddDoxygenPackage )
 		ADDED_LINES ${appendedLines} 
 	)
 
+	# Add a command to clear the output directory.
+	set( clearDoxygenDirCommand "\"${CMAKE_COMMAND}\" -E remove_directory \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}/html\"" )
+
 	# Add the command for running doxygen
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
 	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/${searchDataXmlShortName})
@@ -168,7 +171,7 @@ function( cpfAddDoxygenPackage )
 	
 	cpfAddStandardCustomCommand(
 		DEPENDS ${allDependedOnFiles}
-		COMMANDS ${doxygenCommand}
+		COMMANDS ${clearDoxygenDirCommand} ${doxygenCommand}
 		OUTPUT ${searchDataXmlFile}
 	)
 
@@ -182,7 +185,7 @@ function( cpfAddDoxygenPackage )
 		cpfAddStandardCustomCommand(
 			OUTPUT ${doxyIndexerStampFile}
 			DEPENDS ${searchDataXmlFile}
-			COMMANDS "cmake -E make_directory \"${htmlCgiBinDir}\"" ${doxyIndexerCommand} "cmake -E touch \"${doxyIndexerStampFile}\""
+			COMMANDS "\"${CMAKE_COMMAND}\" -E make_directory \"${htmlCgiBinDir}\"" ${doxyIndexerCommand} "cmake -E touch \"${doxyIndexerStampFile}\""
 		)
 	endif()
 

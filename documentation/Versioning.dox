@@ -59,11 +59,11 @@ For C++ packages, the *CPF* will automatically generate a header file that
 contains the current version number. The version can be obtained in the C++
 code by using:
 
-\code{.cpp}
+\verbatim
 #include <MyPackage/cpfPackageVersion_MyPackage.h>
 
 std::string version = mp::getPackageVersion();
-\endcode
+\endverbatim
 
 assuming that you have a package \c MyPackage with namespace \c mp.
 

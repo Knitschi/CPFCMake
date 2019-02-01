@@ -24,9 +24,9 @@ The Dockerfile makes sure the file is copied into the container.
 - The help generation needs to execute the \c doxyindexer.exe to create the \c doxysearch.db serach-index for the \c doxysearch.cgi. This is done in
 the python script \c 7_GenerateDocumentation.py
 - The generated files must be copied to the documentation server container with the command
-\code{.sh}
+\verbatim{.sh}
 docker cp /var/lib/jenkins/www/html docserver:/var/www
-\endcode
+\endverbatim
 
 
 \subsection CPFDoxygenDependencyGraph Adding a dependency graph
@@ -39,10 +39,10 @@ This resulst in a cleaner graph, which may sometimes be favoured to the complete
 
 These graphs can be added to the documentation by adding the lines
 
-\code
+\verbatim
 \dotfile CPFDependencies.dot The projects dependency graph
 \dotfile CPFDependenciesTransitiveReduced.dot The projects transitive reduced target dependency graph
-\endcode
+\endverbatim
 
 to one of your doxygen comments. 
 */
