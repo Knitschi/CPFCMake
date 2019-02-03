@@ -587,13 +587,17 @@ function( cpfFindRequiredTools )
 		cpfGetCompiler(compiler)
 		if( ${compiler} STREQUAL Clang)
 			set(CLANG_TIDY clang-tidy-3.9) # We should get this from hunter some day.
-			cpfFindRequiredProgram(TOOL_CLANG_TIDY ${CLANG_TIDY} "A tool from the LLVM project that performs static analysis of cpp code")
+			cpfFindRequiredProgram(TOOL_CLANG_TIDY ${CLANG_TIDY} "A tool from the LLVM project that performs static analysis of cpp code" "")
 		endif()
-		cpfFindRequiredProgram( TOOL_ACYCLIC acyclic "A tool from the graphviz library that can check if a graphviz graph is acyclic")
+		cpfFindRequiredProgram( TOOL_ACYCLIC acyclic "A tool from the graphviz library that can check if a graphviz graph is acyclic" "")
 	endif()
 
 	if(Qt5Gui_FOUND )
-		cpfFindRequiredProgram( TOOL_UIC uic "A tool from the Qt framework that generates ui_*.h files from *.ui GUI defining xml files")
+		cpfFindRequiredProgram( 
+			TOOL_UIC uic.exe
+			"A tool from the Qt framework that generates ui_*.h files from *.ui GUI defining xml files"
+			"${Qt5_DIR}/../../../bin"
+			)
 	endif()
 
 	# python is optional

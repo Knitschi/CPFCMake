@@ -45,7 +45,7 @@ function( cpfAddValgrindTarget package)
 		cpfIsGccClangDebug(gccClangDebug)
 		if(gccClangDebug) # muss auf gcc mit debug symbolen testen
 
-			cpfFindRequiredProgram( TOOL_VALGRIND valgrind "A tool for dynamic analysis.")
+			cpfFindRequiredProgram( TOOL_VALGRIND valgrind "A tool for dynamic analysis." "")
 			
 			# add valgrind commands
 			set(stampFile "${binaryDir}/Valgrind_${testTarget}.stamp")

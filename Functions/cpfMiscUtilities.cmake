@@ -18,9 +18,14 @@ endmacro()
 
 #----------------------------------------------------------------------------------------
 # calls find_programm and triggers an fatal assertion if the program is not found
-function( cpfFindRequiredProgram VAR name comment)
+function( cpfFindRequiredProgram VAR name comment hints)
 
-    find_program(${VAR} ${name} DOC ${comment})
+	find_program(
+		${VAR} ${name} 
+		HINTS ${hints}
+		DOC ${comment}
+		)
+	
     if( ${${VAR}} STREQUAL ${VAR}-NOTFOUND )
         message( FATAL_ERROR "The required program \"${name}\" could not be found." )
     endif()

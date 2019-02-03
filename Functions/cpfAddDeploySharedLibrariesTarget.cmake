@@ -131,7 +131,6 @@ function ( cpfGetVisibleLinkedLibraries linkedLibsOut target )
 	
 	set(allLibs)
 	cpfGetLinkLibraries( linkedLibs ${target})
-	
 	list(APPEND allLibs ${linkedLibs})
 	foreach( lib ${linkedLibs} )
 		cpfGetRecursiveLinkedInterfaceLibraries( libs ${lib} )

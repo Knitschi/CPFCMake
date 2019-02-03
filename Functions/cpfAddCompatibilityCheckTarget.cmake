@@ -96,9 +96,9 @@ This option can only be enabled when using \"g++ -g -Og\" or \"clang -g -O0\" co
 		endif()
 		
 		# check the tools are available
-		cpfFindRequiredProgram( TOOL_ABI_DUMPER abi-dumper "A tool that creates abi dump files from shared libraries." )
-		cpfFindRequiredProgram( TOOL_ABI_COMPLIANCE_CHECKER abi-compliance-checker "A tool that compares two abi dump files and checks whether the ABIs are compliant." )
-		cpfFindRequiredProgram( TOOL_VTABLE_DUMPER vtable-dumper "A tool required by the abi-dumper tool")
+		cpfFindRequiredProgram( TOOL_ABI_DUMPER abi-dumper "A tool that creates abi dump files from shared libraries." "")
+		cpfFindRequiredProgram( TOOL_ABI_COMPLIANCE_CHECKER abi-compliance-checker "A tool that compares two abi dump files and checks whether the ABIs are compliant." "")
+		cpfFindRequiredProgram( TOOL_VTABLE_DUMPER vtable-dumper "A tool required by the abi-dumper tool" "")
 
 		# check that previous builds have been made available through the webpage
 		if( NOT CPF_WEBSERVER_BASE_DIR )

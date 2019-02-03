@@ -522,7 +522,7 @@ function( cpfGetBasePackageFilename nameWEOut package config version contentId p
 	
 	if( ${packageFormat} STREQUAL DEB)
         
-        cpfFindRequiredProgram( TOOL_DPKG dpkg "The debian package manager.")
+        cpfFindRequiredProgram( TOOL_DPKG dpkg "The debian package manager." "")
 
         # Debian packages need to follow a certain naming scheme.
         # Note that the filename of the created package is not influenced by what is returned here.

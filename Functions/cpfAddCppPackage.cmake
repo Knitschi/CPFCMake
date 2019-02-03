@@ -21,9 +21,12 @@ include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDoxygenPackage)
 include(cpfAddVersionRcPreBuildEvent)
 
+
+
 # cotire must be included on the global scope or we get errors that target xyz already has a custom rule
 set(cotirePath "${CMAKE_CURRENT_LIST_DIR}/../../cotire/CMake/cotire.cmake")
-if(CPF_ENABLE_PRECOMPILED_HEADER AND ${CMAKE_SOURCE_DIR}) # do not enter this when included from scripts or pchs are disabled.
+#if(CPF_ENABLE_PRECOMPILED_HEADER AND NOT ("${CMAKE_SOURCE_DIR}" STREQUAL "")) # do not enter this when included from scripts or pchs are disabled.
+if(CPF_ENABLE_PRECOMPILED_HEADER AND CMAKE_SOURCE_DIR) # do not enter this when included from scripts or pchs are disabled.
 	if(EXISTS ${cotirePath})
 		include(${cotirePath})
 		set( CPF_COTIRE_AVAILABLE TRUE )
@@ -553,6 +556,12 @@ function( cpfAddBinaryTarget )
 		
     endif()
 
+	
+    # Link with other libraries
+	# This must be done before setting up the precompiled headers.
+    target_link_libraries(${ARG_NAME} PUBLIC ${ARG_LINKED_LIBRARIES} )
+	cpfRemoveWarningFlagsForSomeExternalFiles(${ARG_NAME})
+
     # Set target properties
 	# Set include directories, that all header are included with #include <package/myheader.h>
 	# We do not use special directories for private or public headers. So the include directory is public.
@@ -615,10 +624,6 @@ function( cpfAddBinaryTarget )
 	# sets all the <bla>_OUTPUT_DIRECTORY_<config> options
 	cpfSetTargetOutputDirectoriesAndNames( ${ARG_PACKAGE_NAME} ${ARG_NAME})
 
-    # link with other libraries
-    target_link_libraries(${ARG_NAME} PUBLIC ${ARG_LINKED_LIBRARIES} )
-	cpfRemoveWarningFlagsForSomeExternalFiles(${ARG_NAME})
-
 	# sort files into folders in visual studio
 	cpfSetIDEDirectoriesForTargetSources(${ARG_NAME})
 
@@ -629,12 +634,12 @@ endfunction()
 # this was copied from https://gist.github.com/larsch/573926
 # this might be an alternative if this does not work well enough: https://github.com/sakra/cotire
 function(cpfAddPrecompiledHeader target )
-	if(CPF_COTIRE_AVAILABLE) 
+	if(${CPF_COTIRE_AVAILABLE}) 
 		
 		# add the precompiled header (targets and compile flags)
 		set_target_properties(${target} PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)  # prevent the generation of unity build targets
 	
-		cotire( ${target})
+		cotire(${target})
 		cpfReAddInheritedCompileOptions( ${target})
 
 		# Add the prefix header to the target files to make sure it appears in the visual studio solution.

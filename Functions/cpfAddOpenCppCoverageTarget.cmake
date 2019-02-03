@@ -90,7 +90,7 @@ function( cpfAddOpenCppCoverageTarget package)
 		cpfGetFirstMSVCDebugConfig( msvcDebugConfig )
 		if(msvcDebugConfig) 
 				
-			cpfFindRequiredProgram( TOOL_OPENCPPCOVERAGE OpenCppCoverage "A tool that creates coverage reports for C++ binaries.")
+			cpfFindRequiredProgram( TOOL_OPENCPPCOVERAGE OpenCppCoverage "A tool that creates coverage reports for C++ binaries." "")
 
 			# add OpenCppCoverage commands
 			set(coverageOutputTemp "${binaryDir}/${testTarget}_temp.cov")
