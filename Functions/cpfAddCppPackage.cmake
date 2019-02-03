@@ -586,7 +586,7 @@ function( cpfAddBinaryTarget )
 		# Note that we AUTOUIC and AUTORCC is not used because I was not able to get the names of
 		# the generated files at cmake time which is required when setting source groups and 
 		# adding the generated ui_*.h header to the targets interface include directories.
-		set_property( TARGET ${ARG_NAME} PROPERTY AUTOMOC ON)
+		# set_property( TARGET ${ARG_NAME} PROPERTY AUTOMOC ON)
 
 		# Set the target version
 		set_property( TARGET ${ARG_NAME} PROPERTY VERSION ${PROJECT_VERSION} )
