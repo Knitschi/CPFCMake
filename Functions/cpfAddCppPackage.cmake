@@ -25,8 +25,10 @@ include(cpfAddVersionRcPreBuildEvent)
 
 # cotire must be included on the global scope or we get errors that target xyz already has a custom rule
 set(cotirePath "${CMAKE_CURRENT_LIST_DIR}/../../cotire/CMake/cotire.cmake")
-#if(CPF_ENABLE_PRECOMPILED_HEADER AND NOT ("${CMAKE_SOURCE_DIR}" STREQUAL "")) # do not enter this when included from scripts or pchs are disabled.
-if(CPF_ENABLE_PRECOMPILED_HEADER AND CMAKE_SOURCE_DIR) # do not enter this when included from scripts or pchs are disabled.
+
+cpfPrintVariables()
+
+if(CPF_ENABLE_PRECOMPILED_HEADER AND NOT CMAKE_SCRIPT_MODE_FILE) # do not enter this when included from scripts or pchs are disabled.
 	if(EXISTS ${cotirePath})
 		include(${cotirePath})
 		set( CPF_COTIRE_AVAILABLE TRUE )
