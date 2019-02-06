@@ -26,5 +26,6 @@ a handfull of CMake functions. This removes implementation details from the `CMa
 - \subpage CPFDistributionPackages
 - \subpage CPFDocumentationGeneration
 - \subpage CPFVersioning
+- \subpage CPFCMakeKnownProblems
 
 */

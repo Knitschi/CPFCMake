@@ -110,6 +110,7 @@ variables <code>PROJECT_VERSION</code> and <code>PROJECT_VERSION_<digit></code> 
 This module provides the following function.
 
 - \ref cpfAddCppPackage
+- \ref cpfQt5AddUIAndQrcFiles
 
 \subsection cpfAddCppPackage cpfAddCppPackage()
 
@@ -533,6 +534,44 @@ cpfAddCppPackage(
 	DISTRIBUTION_PACKAGES 	${debianPackageOptions}
 )
 
+\endverbatim
+
+
+\subsection cpfQt5AddUIAndQrcFiles cpfQt5AddUIAndQrcFiles()
+
+\verbatim
+cpfQt5AddUIAndQrcFiles( sources )
+\endverbatim
+
+Parameter \c sources must be passed by name. The function calls
+the \c qt5_wrap_ui() and \c qt5_add_resources() for all files
+in the given source files that have the \c .ui or \c .qrc file extension.
+It adds the generated files to the list. It may be necessary to call this
+function when Qt is used in combination with pre-compiled headers. See \ref CotireQtIncompatibility
+
+The function can be used like this before calling \ref cpfAddCppPackage.
+
+\verbatim
+# CMakeLists.txt
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC OFF)
+set(CMAKE_AUTORCC OFF)
+
+set( sources
+    ...
+    myui.ui
+    myresources.qrc
+    ...
+)
+
+cpfQt5AddUIAndQrcFiles( sources )
+
+cpfAddCppPackage( 
+    ...
+    PRODUCTION_FILES ${sources}
+    ...
+)
 \endverbatim
 
 

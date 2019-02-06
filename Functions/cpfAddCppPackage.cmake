@@ -503,7 +503,6 @@ function( cpfAddBinaryTarget )
 	)
 	set( allSources ${ARG_PUBLIC_HEADER} ${ARG_FILES})
 
-	cpfQt5AddUIAndQrcFiles( allSources )
 
 	set(isInterfaceLib FALSE)
 	if(${ARG_TARGET_TYPE} MATCHES INTERFACE_LIB)
@@ -581,11 +580,6 @@ function( cpfAddBinaryTarget )
 		# set the Visual Studio folder property
 		set_property( TARGET ${ARG_NAME} PROPERTY FOLDER ${ARG_IDE_FOLDER})
 
-		# Enable qt auto moc
-		# Note that we AUTOUIC and AUTORCC is not used because I was not able to get the names of
-		# the generated files at cmake time which is required when setting source groups and 
-		# adding the generated ui_*.h header to the targets interface include directories.
-		# set_property( TARGET ${ARG_NAME} PROPERTY AUTOMOC ON)
 
 		# Set the target version
 		set_property( TARGET ${ARG_NAME} PROPERTY VERSION ${PROJECT_VERSION} )
@@ -701,7 +695,7 @@ function( cpfQt5AddUIAndQrcFiles filesOut )
 	# There were problems with the AUTOUIC option because
 	# when using it, the names of the generated files are
 	# not available here to add them to the include directories.
-	foreach( file ${ARG_FILES})
+	foreach( file ${files})
 		get_filename_component( extension ${file} EXT)
 		if("${extension}" STREQUAL ".ui")
 			list(APPEND uiFiles ${file})
