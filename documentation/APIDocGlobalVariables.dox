@@ -141,18 +141,18 @@ CPFCMake sets some target properties to its own values. Resetting those
 properties to other values after calling \ref cpfAddCppPackage may cause
 errors.
 
-- \c <CONFIG>_OUTPUT_NAME
-- \c <CONFIG>_POSTFIX
-- \c COMPILE_PDB_OUTPUT_DIRECTORY_<CONFIG>
-- \c COMPILE_PDB_NAME_<CONFIG>
-- \c ARCHIVE_OUTPUT_NAME_<CONFIG>
-- \c ARCHIVE_OUTPUT_DIRECTORY_<CONFIG>
-- \c LIBRARY_OUTPUT_NAME_<CONFIG>
-- \c LIBRARY_OUTPUT_DIRECTORY_<CONFIG>
-- \c PDB_OUTPUT_DIRECTORY_<CONFIG>
-- \c PDB_NAME_<CONFIG>
-- \c RUNTIME_OUTPUT_NAME_<CONFIG>
-- \c RUNTIME_OUTPUT_DIRECTORY_<CONFIG>
+- \c &ltCONFIG&gt_OUTPUT_NAME
+- \c &ltCONFIG&gt_POSTFIX
+- \c COMPILE_PDB_OUTPUT_DIRECTORY_&ltCONFIG&gt
+- \c COMPILE_PDB_NAME_&ltCONFIG&gt
+- \c ARCHIVE_OUTPUT_NAME_&ltCONFIG&gt
+- \c ARCHIVE_OUTPUT_DIRECTORY_&ltCONFIG&gt
+- \c LIBRARY_OUTPUT_NAME_&ltCONFIG&gt
+- \c LIBRARY_OUTPUT_DIRECTORY_&ltCONFIG&gt
+- \c PDB_OUTPUT_DIRECTORY_&ltCONFIG&gt
+- \c PDB_NAME_&ltCONFIG&gt
+- \c RUNTIME_OUTPUT_NAME_&ltCONFIG&gt
+- \c RUNTIME_OUTPUT_DIRECTORY_&ltCONFIG&gt
 
 All the binary output locations are fixed by CPFCMake. This is because
 some functionality relies on those locations.
