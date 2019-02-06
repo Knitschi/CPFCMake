@@ -370,6 +370,7 @@ function( cpfAddPackageBinaryTargets
 
 	endif()
 	
+
 	###################### Create production library target ##############################
     if(productionFiles OR publicHeaderFiles)  
 
@@ -555,9 +556,10 @@ function( cpfAddBinaryTarget )
     endif()
 
 	
+
     # Link with other libraries
 	# This must be done before setting up the precompiled headers.
-    target_link_libraries(${ARG_NAME} PUBLIC ${ARG_LINKED_LIBRARIES} )
+	target_link_libraries(${ARG_NAME} PUBLIC ${ARG_LINKED_LIBRARIES} )
 	cpfRemoveWarningFlagsForSomeExternalFiles(${ARG_NAME})
 
     # Set target properties
@@ -579,7 +581,6 @@ function( cpfAddBinaryTarget )
 
 		# set the Visual Studio folder property
 		set_property( TARGET ${ARG_NAME} PROPERTY FOLDER ${ARG_IDE_FOLDER})
-
 
 		# Set the target version
 		set_property( TARGET ${ARG_NAME} PROPERTY VERSION ${PROJECT_VERSION} )

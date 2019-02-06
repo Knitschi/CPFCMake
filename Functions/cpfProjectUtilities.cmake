@@ -184,16 +184,18 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # reduce the warning level for files that are added over cmakes interface sources mechanism
-macro( cpfRemoveWarningFlagsForSomeExternalFiles targetName )
+function( cpfRemoveWarningFlagsForSomeExternalFiles targetName )
 
 	cpfIsInterfaceLibrary( isIntLib ${targetName})
 	if(isIntLib)
 		return()
 	endif()
 
+	#[[
     set( externalFiles 
         static_qt_plugins.cpp   # added when using staticly linked hunter-qt
-    )
+	)
+	]]
     
     get_target_property( linkedLibraries ${targetName} LINK_LIBRARIES )
     
@@ -210,7 +212,7 @@ macro( cpfRemoveWarningFlagsForSomeExternalFiles targetName )
                 
                     get_filename_component(shortName ${source} NAME)
                     
-                    if( ${shortName} IN_LIST externalFiles)
+                    #if( ${shortName} IN_LIST externalFiles)
                         
                         get_source_file_property( flags ${shortName} COMPILE_FLAGS)
                         if( ${flags} STREQUAL NOTFOUND)
@@ -219,14 +221,14 @@ macro( cpfRemoveWarningFlagsForSomeExternalFiles targetName )
 
                         set_source_files_properties(${source} PROPERTIES COMPILE_FLAGS "-w ${flags}")
                         
-                    endif()
+                    #endif()
                     
                 endforeach()
             
             endif()
         endif()
     endforeach()
-endmacro()
+endfunction()
 
 #----------------------------------------------------------------------------------------
 # This function reads some properties from a target and prints the value if it is set.

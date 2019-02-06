@@ -126,6 +126,11 @@ endfunction()
 # The ui_*.h files could also not be added to the generated files because they do not exist when the target is created.
 function( cpfSetIDEDirectoriesForTargetSources targetName )
 
+	cpfIsInterfaceLibrary(isInterfaceLib ${targetName})
+	if(isInterfaceLib)
+		return()
+	endif()
+
     # get the source files in the Sources directory
 	get_target_property( sourceDir ${targetName} SOURCE_DIR)
 	getAbsPathesForSourceFilesInDir( sourcesFiles ${targetName} ${sourceDir})
