@@ -594,7 +594,7 @@ function( cpfFindRequiredTools )
 
 	if(Qt5Gui_FOUND )
 		cpfFindRequiredProgram( 
-			TOOL_UIC uic.exe
+			TOOL_UIC uic
 			"A tool from the Qt framework that generates ui_*.h files from *.ui GUI defining xml files"
 			"${Qt5_DIR}/../../../bin"
 			)
