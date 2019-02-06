@@ -25,6 +25,7 @@ set( files
 	documentation/CustomTargets.dox
 	documentation/DistributionPackages.dox
 	documentation/DocumentationTargets.dox
+	documentation/KnownProblems.dox
 	documentation/TestTargets.dox
 	documentation/Versioning.dox
 	Functions/cpfAddAcyclicTarget.cmake

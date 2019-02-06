@@ -141,18 +141,18 @@ CPFCMake sets some target properties to its own values. Resetting those
 properties to other values after calling \ref cpfAddCppPackage may cause
 errors.
 
-- \c &ltCONFIG&gt_OUTPUT_NAME
-- \c &ltCONFIG&gt_POSTFIX
-- \c COMPILE_PDB_OUTPUT_DIRECTORY_&ltCONFIG&gt
-- \c COMPILE_PDB_NAME_&ltCONFIG&gt
-- \c ARCHIVE_OUTPUT_NAME_&ltCONFIG&gt
-- \c ARCHIVE_OUTPUT_DIRECTORY_&ltCONFIG&gt
-- \c LIBRARY_OUTPUT_NAME_&ltCONFIG&gt
-- \c LIBRARY_OUTPUT_DIRECTORY_&ltCONFIG&gt
-- \c PDB_OUTPUT_DIRECTORY_&ltCONFIG&gt
-- \c PDB_NAME_&ltCONFIG&gt
-- \c RUNTIME_OUTPUT_NAME_&ltCONFIG&gt
-- \c RUNTIME_OUTPUT_DIRECTORY_&ltCONFIG&gt
+- <b>\&ltCONFIG\&gt_OUTPUT_NAME</b>
+- <b>\&ltCONFIG\&gt_POSTFIX</b>
+- <b>COMPILE_PDB_OUTPUT_DIRECTORY_\&ltCONFIG\&gt</b>
+- <b>COMPILE_PDB_NAME_\&ltCONFIG\&gt</b>
+- <b>ARCHIVE_OUTPUT_NAME_\&ltCONFIG\&gt</b>
+- <b>ARCHIVE_OUTPUT_DIRECTORY_\&ltCONFIG\&gt</b>
+- <b>LIBRARY_OUTPUT_NAME_\&ltCONFIG\&gt</b>
+- <b>LIBRARY_OUTPUT_DIRECTORY_\&ltCONFIG\&gt</b>
+- <b>PDB_OUTPUT_DIRECTORY_\&ltCONFIG\&gt</b>
+- <b>PDB_NAME_\&ltCONFIG\&gt</b>
+- <b>RUNTIME_OUTPUT_NAME_\&ltCONFIG\&gt</b>
+- <b>RUNTIME_OUTPUT_DIRECTORY_\&ltCONFIG\&gt</b>
 
 All the binary output locations are fixed by CPFCMake. This is because
 some functionality relies on those locations.
