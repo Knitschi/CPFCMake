@@ -183,46 +183,6 @@ function( cpfIsVisualStudioGenerator isVSOut )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Reduce the warning level for files that are added over cmakes interface sources mechanism.
-# Does this only work for linux? Should this be removed from 
-#
-function( cpfRemoveWarningFlagsForDependedOnInterfaceSources targetName )
-
-	cpfIsInterfaceLibrary( isIntLib ${targetName})
-	if(isIntLib)
-		return()
-	endif()
-
-    get_target_property( linkedLibraries ${targetName} LINK_LIBRARIES )
-    
-    foreach(library ${linkedLibraries})
-        
-        if( TARGET ${library}) # prevent errors with get_property call on our own targets.
-        
-            get_target_property( isImported ${library} IMPORTED)
-            if( ${isImported})      # prevent errors with get_property call on our own targets.
-            
-                get_property( sources TARGET ${library} PROPERTY INTERFACE_SOURCES )
-                
-                foreach(source ${sources})
-                
-                    get_filename_component(shortName ${source} NAME)
-                    
-					get_source_file_property( flags ${shortName} COMPILE_FLAGS)
-					if( ${flags} STREQUAL NOTFOUND)
-						set(flags "")
-					endif()
-
-					set_source_files_properties(${source} PROPERTIES COMPILE_FLAGS "-w ${flags}")
-                    
-                endforeach()
-            
-            endif()
-        endif()
-    endforeach()
-endfunction()
-
-#----------------------------------------------------------------------------------------
 # This function reads some properties from a target and prints the value if it is set.
 #
 function( cpfPrintTargetProperties target )
