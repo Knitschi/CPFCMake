@@ -153,7 +153,7 @@ function( cpfAddDoxygenPackage )
 	)
 
 	# Add a command to clear the output directory.
-	set( clearDoxygenDirCommand "\"${CMAKE_COMMAND}\" -E remove_directory \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}/html\"" )
+	#set( clearDoxygenDirCommand "\"${CMAKE_COMMAND}\" -E remove_directory \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}/html\"" )
 
 	# Add the command for running doxygen
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
