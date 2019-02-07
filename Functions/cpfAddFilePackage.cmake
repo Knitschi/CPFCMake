@@ -20,11 +20,11 @@ function( cpfAddFilePackage )
         ${ARGN} 
     )
 
+    cpfPrintAddPackageStatusMessage("file")
+
     cpfAssertProjectVersionDefined()
 
     cpfGetPackageName(package)
-    message(STATUS "Add file package ${package} at version ${PROJECT_VERSION}")
-
     add_custom_target( ${package} SOURCES ${ARG_SOURCES} )
     set_property( TARGET ${package} PROPERTY FOLDER ${package} )
 	cpfSetIDEDirectoriesForTargetSources(${package})

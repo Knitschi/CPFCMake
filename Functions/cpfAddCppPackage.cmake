@@ -92,6 +92,8 @@ function( cpfAddCppPackage )
 		${ARGN} 
 	)
 
+	cpfPrintAddPackageStatusMessage("C++")
+
 	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddCppPackage()")
 	cpfAssertProjectVersionDefined()
 
@@ -114,16 +116,14 @@ function( cpfAddCppPackage )
 	cpfGetKeywordValueLists( pluginOptionLists PLUGIN_DEPENDENCIES "${allKeywords}" "${ARGN}" pluginOptions)
 	cpfGetKeywordValueLists( distributionPackageOptionLists DISTRIBUTION_PACKAGES "${allKeywords}" "${ARGN}" packagOptions)
 
-	cpfGetPackageName(package)
-	message(STATUS "Add C++ package ${package} at version ${PROJECT_VERSION}")
-	
 	# By default build test targets.
 	# Hunter sets this to off in order to skip test building.
+	cpfGetPackageName(package)
 	if( NOT "${${package}_BUILD_TESTS}" STREQUAL OFF )
 		set( ${package}_BUILD_TESTS ON)
 	endif()
 
-	# ASERT ARGUMENTS
+	# ASSERT ARGUMENTS
 
 	# Make sure that linked targets have already been created.
 	cpfDebugAssertLinkedLibrariesExists( linkedLibraries ${package} "${ARG_LINKED_LIBRARIES}")

@@ -1206,6 +1206,20 @@ function( cpfSourceGroupTree relfiles)
 
 endfunction()
 
+#--------------------------------------------------------------------------------------------
+function( cpfPrintAddPackageStatusMessage packageType )
+
+	cpfGetPackageName(package)
+	cpfGetTagsOfHEAD( tags "${CMAKE_CURRENT_SOURCE_DIR}" )
+	set(tagged)
+	if(tags)
+		set(tagged "tagged ")
+	endif()
+	
+	message(STATUS "Add C++ package ${package} at ${tagged}version ${PROJECT_VERSION}")
+
+endfunction()
+
 
 
 
