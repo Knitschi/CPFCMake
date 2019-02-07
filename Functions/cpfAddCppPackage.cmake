@@ -560,7 +560,7 @@ function( cpfAddBinaryTarget )
     # Link with other libraries
 	# This must be done before setting up the precompiled headers.
 	target_link_libraries(${ARG_NAME} PUBLIC ${ARG_LINKED_LIBRARIES} )
-	cpfRemoveWarningFlagsForSomeExternalFiles(${ARG_NAME})
+	cpfRemoveWarningFlagsForDependedOnInterfaceSources(${ARG_NAME})
 
     # Set target properties
 	# Set include directories, that all header are included with #include <package/myheader.h>

@@ -183,20 +183,16 @@ function( cpfIsVisualStudioGenerator isVSOut )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# reduce the warning level for files that are added over cmakes interface sources mechanism
-function( cpfRemoveWarningFlagsForSomeExternalFiles targetName )
+# Reduce the warning level for files that are added over cmakes interface sources mechanism.
+# Does this only work for linux? Should this be removed from 
+#
+function( cpfRemoveWarningFlagsForDependedOnInterfaceSources targetName )
 
 	cpfIsInterfaceLibrary( isIntLib ${targetName})
 	if(isIntLib)
 		return()
 	endif()
 
-	#[[
-    set( externalFiles 
-        static_qt_plugins.cpp   # added when using staticly linked hunter-qt
-	)
-	]]
-    
     get_target_property( linkedLibraries ${targetName} LINK_LIBRARIES )
     
     foreach(library ${linkedLibraries})
@@ -212,16 +208,12 @@ function( cpfRemoveWarningFlagsForSomeExternalFiles targetName )
                 
                     get_filename_component(shortName ${source} NAME)
                     
-                    #if( ${shortName} IN_LIST externalFiles)
-                        
-                        get_source_file_property( flags ${shortName} COMPILE_FLAGS)
-                        if( ${flags} STREQUAL NOTFOUND)
-                            set(flags "")
-                        endif()
+					get_source_file_property( flags ${shortName} COMPILE_FLAGS)
+					if( ${flags} STREQUAL NOTFOUND)
+						set(flags "")
+					endif()
 
-                        set_source_files_properties(${source} PROPERTIES COMPILE_FLAGS "-w ${flags}")
-                        
-                    #endif()
+					set_source_files_properties(${source} PROPERTIES COMPILE_FLAGS "-w ${flags}")
                     
                 endforeach()
             
@@ -1215,7 +1207,7 @@ function( cpfPrintAddPackageStatusMessage packageType )
 	if(tags)
 		set(tagged "tagged ")
 	endif()
-	
+
 	message(STATUS "Add C++ package ${package} at ${tagged}version ${PROJECT_VERSION}")
 
 endfunction()
