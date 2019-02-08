@@ -153,7 +153,7 @@ function( cpfAddDoxygenPackage )
 	)
 
 	# Add a command to remove a file that causes errors on incremental doxygen builds with doxygen 1.8.15
-	set( clearDoxygenDirCommand "\"${CMAKE_COMMAND}\" -E remove \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}/html/graph_legend.png\"" )
+	#set( clearDoxygenDirCommand "\"${CMAKE_COMMAND}\" -E remove \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}/html/graph_legend.png\"" )
 
 	# Add the command for running doxygen
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
