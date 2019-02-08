@@ -19,7 +19,6 @@ in your projects default configuration files in the \c CIBuildConfigurations dir
 - \ref CPF_CI_PROJECT
 - \ref CPF_WEBSERVER_BASE_DIR
 - \ref CPF_MINIMUM_CMAKE_VERSION
-- \ref CPF_WARNINGS_AS_ERRORS
 - \ref CPF_VERBOSE
 - \ref CPF_ENABLE_ACYCLIC_TARGET
 
@@ -47,12 +46,6 @@ enabled, to allow downloading old binary files from the web-server.
 The variable is set to the minimum CMake version that is required for the cmake code
 in CPFCMake. This is not supposed to be set by clients. Your project can require a younger CMake version,
 but you can not use an older one when using CPFCMake.
-
-
-\subsubsection CPF_WARNINGS_AS_ERRORS
-
-Currently this can be used to globally enable compilation with warning-as-errors
-flags. This is a legacy functionality that will be changed.
 
 
 \subsubsection CPF_VERBOSE
@@ -90,6 +83,7 @@ Here is a list of the variables.
 - CPF_\ref cpfArgEnableRunTestsTarget
 - CPF_\ref cpfArgEnableValgrindTarget
 - CPF_\ref cpfArgEnableVersionRCFileGeneration
+- CPF_\ref cpfArgCompileOptions
 
 
 \subsection cpfAllowedCMakeVariables Allowed CMake Variables

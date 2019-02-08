@@ -10,76 +10,33 @@ include(cpfPathUtilities)
 include(cpfReadVariablesFromFile)
 
 #---------------------------------------------------------------------------------------------
-# Sets the warning level to high and forces the global include of the SwitchOffWarningsMacro file.
-#
-# Make sure to only set compiler options here that do not need to be passed to the static
-# library dependencies upstream. Those must be specified in the cmake toolchain files.
-macro( cpfSetDynamicAndCosmeticCompilerOptions )
-    
-	cpfGetCompiler(compiler)
-    if( ${compiler} STREQUAL Vc) # VC flags
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") # the /MP flag saved on my 4 core machine 25 % compile time
-    endif()
-    
-	cpfSetHighWarningLevel()
+function( cpfGetHighWarningLevelFlags flagsOut )
 
-    if( CPF_WARNINGS_AS_ERRORS )
-		cpfSetWarningsAsErrors()
-	endif()
-
-endmacro()
-
-#----------------------------------------- set warning level to 4 and set warnings as errors --------------------------------
-macro(cpfSetHighWarningLevel)
-    
 	cpfGetCompiler(compiler)
     if(${compiler} STREQUAL Vc)
-        # Use the highest warning level for visual studio.
-        set(CMAKE_CXX_WARNING_LEVEL 4)
-        if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-            string(REGEX REPLACE "/W[0-4]" "/W4"
-                CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-        else(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-        endif(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-       
+        set(${flagsOut} "/W4" PARENT_SCOPE)       
     elseif(${compiler} STREQUAL Gcc )
-    
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -Wall -Wextra" )
-        
+		set(${flagsOut} -Wpedantic -Wall -Wextra PARENT_SCOPE)   
     elseif(${compiler} STREQUAL Clang)
-    
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -Wall -Wextra -Wthread-safety" )
-       
+		set(${flagsOut} -Wpedantic -Wall -Wextra -Wthread-safety PARENT_SCOPE)   
     endif()
 
-endmacro()
+endfunction()
 
-#----------------------------------------------------------------------------------------
-macro( cpfSetWarningsAsErrors )
+#---------------------------------------------------------------------------------------------
+function( cpfGetWarningsAsErrorFlag flagOut )
 
 	cpfGetCompiler(compiler)
     if(${compiler} STREQUAL Vc)
-        # Treat warnings as errors
-        # TODO only do this optionally when user sets a variable
-        if(CMAKE_CXX_FLAGS MATCHES "/WX-" )
-            string(REGEX REPLACE "/WX-" "/WX"
-                CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-        else(CMAKE_CXX_FLAGS MATCHES "/WX-")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")                
-        endif(CMAKE_CXX_FLAGS MATCHES "/WX-")
-    
+		set(${flagOut} "/WX" PARENT_SCOPE)
     elseif(${compiler} STREQUAL Gcc)
-        
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")  
-        
+        set(${flagOut} "-Werror" PARENT_SCOPE)
     elseif(${compiler} STREQUAL Clang)
-    
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")  
-        
+		set(${flagOut} "-Werror" PARENT_SCOPE)
     endif()
 
-endmacro()
+endfunction()
+
 
 #----------------------------------------------------------------------------------------
 # Returns Vc, Clang, Gcc, or UNKNOWN

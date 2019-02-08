@@ -38,9 +38,6 @@ function( cpfAddPackages )
 
 	cpfInitGlobalState()
 
-	# set various flags non binary relevant flats like warnings as errors and higher warning levels.
-	cpfSetDynamicAndCosmeticCompilerOptions()
-
 	# Add the pipeline target early so packages can add them self as dependencies to it.
 	add_custom_target(pipeline)
 

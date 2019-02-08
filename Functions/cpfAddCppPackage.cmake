@@ -81,6 +81,7 @@ function( cpfAddCppPackage )
 		LINKED_TEST_LIBRARIES
 		PLUGIN_DEPENDENCIES
 		DISTRIBUTION_PACKAGES
+		COMPILE_OPTIONS
 	)
 
 	# parse level 0 keywords
@@ -110,6 +111,7 @@ function( cpfAddCppPackage )
 	cpfSetIfNotSet( ARG_ENABLE_RUN_TESTS_TARGET "${CPF_ENABLE_RUN_TESTS_TARGET}")
 	cpfSetIfNotSet( ARG_ENABLE_VALGRIND_TARGET "${CPF_ENABLE_VALGRIND_TARGET}")
 	cpfSetIfNotSet( ARG_ENABLE_VERSION_RC_FILE_GENERATION "${CPF_ENABLE_VERSION_RC_FILE_GENERATION}")
+	cpfSetIfNotSet( ARG_COMPILE_OPTIONS "${CPF_COMPILE_OPTIONS}")
 
 	# parse argument sublists
 	set( allKeywords ${optionKeywords} ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
@@ -163,9 +165,10 @@ function( cpfAddCppPackage )
 		${ARG_VERSION_COMPATIBILITY_SCHEME}
 		${ARG_ENABLE_PRECOMPILED_HEADER}
 		${ARG_ENABLE_VERSION_RC_FILE_GENERATION}
+		"${ARG_COMPILE_OPTIONS}"
 	)
 
-	#set some properties
+	#set some package properties
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_LONG_PACKAGE_DESCRIPTION ${ARG_LONG_DESCRIPTION} )
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_WEBPAGE_URL ${ARG_WEBPAGE_URL} )
@@ -325,6 +328,7 @@ function( cpfAddPackageBinaryTargets
 	versionCompatibilityScheme
 	enablePrecompiledHeader
 	enableVersionRcGeneration
+	compileOptions
 )
 
 	# filter some files
@@ -393,6 +397,7 @@ function( cpfAddPackageBinaryTargets
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 			BRIEF_DESCRIPTION ${fileDescriptionLib}
 			OWNER ${owner}
+			COMPILE_OPTIONS ${compileOptions}
 	    )
 
     endif()
@@ -413,6 +418,7 @@ function( cpfAddPackageBinaryTargets
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 			BRIEF_DESCRIPTION ${fileDescriptionExe}
 			OWNER ${owner}
+			COMPILE_OPTIONS ${compileOptions}
 	    )
 
 	endif()
@@ -437,6 +443,7 @@ function( cpfAddPackageBinaryTargets
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 			BRIEF_DESCRIPTION "A library that contains utilities for tests of the ${productionTarget} library."
 			OWNER ${owner}
+			COMPILE_OPTIONS ${compileOptions}
         )
 
 		# respect an option that is used by hunter to not compile test targets
@@ -462,6 +469,7 @@ function( cpfAddPackageBinaryTargets
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 			BRIEF_DESCRIPTION "Runs tests of the ${productionTarget} library."
 			OWNER ${owner}
+			COMPILE_OPTIONS ${compileOptions}
         )
 		set_property(TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET ${unitTestsTarget} )
 
@@ -499,7 +507,7 @@ function( cpfAddBinaryTarget )
 		ARG 
 		"" 
 		"PACKAGE_NAME;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME;ENABLE_PRECOMPILED_HEADER;ENABLE_VERSION_RC_FILE_GENERATION;BRIEF_DESCRIPTION;OWNER" 
-		"PUBLIC_HEADER;FILES;LINKED_LIBRARIES" 
+		"PUBLIC_HEADER;FILES;LINKED_LIBRARIES;COMPILE_OPTIONS" 
 		${ARGN} 
 	)
 	set( allSources ${ARG_PUBLIC_HEADER} ${ARG_FILES})
@@ -559,12 +567,28 @@ function( cpfAddBinaryTarget )
 
     # Link with other libraries
 	# This must be done before setting up the precompiled headers.
-	target_link_libraries(${ARG_NAME} PUBLIC ${ARG_LINKED_LIBRARIES} )
+	target_link_libraries(${ARG_NAME} PUBLIC ${ARG_LINKED_LIBRARIES})
+	
 
     # Set target properties
 	# Set include directories, that all header are included with #include <package/myheader.h>
 	# We do not use special directories for private or public headers. So the include directory is public.
 	if(isInterfaceLib)
+
+		# only use the interface compile options for interface targets
+		cmake_parse_arguments(
+			ARG 
+			"" 
+			"" 
+			"INTERFACE" 
+			${ARG_COMPILE_OPTIONS} 
+		)
+		cpfContains(hasBefore "${ARG_COMPILE_OPTIONS}" BEFORE)
+		set(beforeOption)
+		if(hasBefore)
+			set(beforeOption BEFORE)
+		endif()
+		target_compile_options(${ARG_NAME} ${beforeOption} INTERFACE ${ARG_INTERFACE})
 
 		set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_INCLUDE_DIRECTORIES  
 			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
@@ -572,6 +596,8 @@ function( cpfAddBinaryTarget )
 		)
 
 	else()
+
+		target_compile_options(${ARG_NAME} ${ARG_COMPILE_OPTIONS})
 
 		target_include_directories( ${ARG_NAME} PUBLIC 
 			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
@@ -624,8 +650,7 @@ endfunction()
 
 
 #----------------------------------------- macro from Lars Christensen to use precompiled headers --------------------------------
-# this was copied from https://gist.github.com/larsch/573926
-# this might be an alternative if this does not work well enough: https://github.com/sakra/cotire
+#
 function(cpfAddPrecompiledHeader target )
 	if(${CPF_COTIRE_AVAILABLE}) 
 		
