@@ -588,8 +588,11 @@ function( cpfAddBinaryTarget )
 		if(hasBefore)
 			set(beforeOption BEFORE)
 		endif()
-		target_compile_options(${ARG_NAME} ${beforeOption} INTERFACE ${ARG_INTERFACE})
+		if(ARG_INTERFACE)
+			target_compile_options(${ARG_NAME} ${beforeOption} INTERFACE ${ARG_INTERFACE})
+		endif()
 
+		# set include directories
 		set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_INCLUDE_DIRECTORIES  
 			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
 			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
@@ -597,8 +600,11 @@ function( cpfAddBinaryTarget )
 
 	else()
 
-		target_compile_options(${ARG_NAME} ${ARG_COMPILE_OPTIONS})
+		if(ARG_COMPILE_OPTIONS)
+			target_compile_options(${ARG_NAME} ${ARG_COMPILE_OPTIONS})
+		endif()
 
+		# set include directories
 		target_include_directories( ${ARG_NAME} PUBLIC 
 			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
 			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
