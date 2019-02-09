@@ -41,12 +41,8 @@ function( cpfAddPackages )
 	# Add the pipeline target early so packages can add them self as dependencies to it.
 	add_custom_target(pipeline)
 
-	# We assume that the external packages are of lower level then the owned ones.
-	# Is that always true? If not, we must provide a way to add them sorted by level.
-	cpfGetAllPackages(packages)
-	foreach( package ${packages} ) 
-		add_subdirectory(${package})
-	endforeach()
+	# Add the package projects
+	cpfAddPackageSubdirectories()
 
 	# GlobalFiles
 	# A target that holds some project wide files

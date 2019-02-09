@@ -934,9 +934,9 @@ endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Reads the value of the CPF_PACKAGES variable from the ci-projects owned packages file
-# and returns the list of packages.
+# and returns the list of packages. Each package in the list can be prepended with a linkage keyword SHARED or STATIC.
 # 
-function( cpfGetPackages allPackagesOut ownedPackagesOut externalPackagesOut rootDir )
+function( cpfGetPackagesWithLinkage allPackagesOut ownedPackagesOut externalPackagesOut rootDir )
 	
 	set(fullOwnedPackagesFile "${rootDir}/${CPF_SOURCE_DIR}/${CPF_PACKAGES_FILE}")
 	# create an owned packages file if none exists
@@ -984,13 +984,20 @@ function( cpfGetPackages allPackagesOut ownedPackagesOut externalPackagesOut roo
 		endif()
 
 		cpfIncrement(index)
-		list(GET packageList ${index} package )
+		list(GET packageList ${index} packageOrLinkage )
+		set( packageMaybeWithLinkage ${packageOrLinkage} )
+		# Add the linkage keyword if it is given.
+		if( (${packageOrLinkage} STREQUAL SHARED) OR (${packageOrLinkage} STREQUAL STATIC) )
+			cpfIncrement(index)
+			list(GET packageList ${index} package )
+			cpfListAppend(packageMaybeWithLinkage ${package})
+		endif()
 
-		cpfListAppend(allPackages ${package})
+		cpfListAppend(allPackages ${packageMaybeWithLinkage})
 		if(isOwned)
-			cpfListAppend(ownedPackages ${package})
+			cpfListAppend(ownedPackages ${packageMaybeWithLinkage})
 		else()
-			cpfListAppend(externalPackages ${package})
+			cpfListAppend(externalPackages ${packageMaybeWithLinkage})
 		endif()
 
 		cpfIncrement(index)
@@ -1006,9 +1013,52 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Returns all packages from the packages.cmake file
 #
+function( cpfGetAllPackagesWithLinkage packagesOut )
+
+	cpfGetPackagesWithLinkage( allPackages ownedPackages externalPackages ${CPF_ROOT_DIR})
+	set(${packagesOut} "${allPackages}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+#
+function( cpfAddPackageSubdirectories )
+
+	set(globalyUseSharedLinkage ${BUILD_SHARED_LIBS})
+
+	cpfGetAllPackagesWithLinkage(packages)
+	cpfListLength( length "${packages}")
+	set(index 0)
+	while(${index} LESS ${length})
+
+		set(useSharedLinkage ${globalyUseSharedLinkage})
+		list(GET packages ${index} packageOrLinkage )
+		if( (${packageOrLinkage} STREQUAL SHARED) OR (${packageOrLinkage} STREQUAL STATIC) )
+			if(${packageOrLinkage} STREQUAL SHARED)
+				set(useSharedLinkage ON)
+			else()
+				set(useSharedLinkage OFF)
+			endif()
+			cpfIncrement(index)
+			list(GET packages ${index} packageOrLinkage )
+		endif()
+
+		set(BUILD_SHARED_LIBS ${useSharedLinkage})
+		add_subdirectory(${packageOrLinkage})
+
+		cpfIncrement(index)
+
+	endwhile()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns all packages from the packages.cmake file
+#
 function( cpfGetAllPackages packagesOut )
 
-	cpfGetPackages( allPackages ownedPackages externalPackages ${CPF_ROOT_DIR})
+	cpfGetPackagesWithLinkage( allPackages ownedPackages externalPackages ${CPF_ROOT_DIR})
+	list(REMOVE_ITEM allPackages STATIC SHARED)
 	set(${packagesOut} "${allPackages}" PARENT_SCOPE)
 
 endfunction()
@@ -1018,7 +1068,8 @@ endfunction()
 #
 function( cpfGetOwnedPackages packagesOut rootDir )
 
-	cpfGetPackages( allPackages ownedPackages externalPackages ${rootDir})
+	cpfGetPackagesWithLinkage( allPackages ownedPackages externalPackages ${rootDir})
+	list(REMOVE_ITEM ownedPackages STATIC SHARED)
 	set(${packagesOut} "${ownedPackages}" PARENT_SCOPE)
 
 endfunction()
