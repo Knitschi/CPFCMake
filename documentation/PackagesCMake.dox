@@ -8,6 +8,8 @@ The file must be located parallel to the root \c CMakeLists.txt file.
 The content looks something like this.
 
 \verbatim
+# File packages.cmake
+
 set( CPF_PACKAGES 
 	EXTERNAL ExternalLib1
 	EXTERNAL STATIC ExternalLib2
