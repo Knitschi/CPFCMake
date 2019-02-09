@@ -22,6 +22,7 @@ a handfull of CMake functions. This removes implementation details from the `CMa
 - \subpage CPFGlobalVariables
 - \subpage CPFConfiguration
 - \subpage CPFCustomTargets
+- \subpage CPFPackagesCMakeFile
 - \subpage CPFCMakeTestTargets
 - \subpage CPFDistributionPackages
 - \subpage CPFDocumentationGeneration

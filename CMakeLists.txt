@@ -28,6 +28,7 @@ set( files
 	documentation/KnownProblems.dox
 	documentation/TestTargets.dox
 	documentation/Versioning.dox
+	documentation/PackagesCMake.dox
 	Functions/cpfAddAcyclicTarget.cmake
 	Functions/cpfAddClangTidyTarget.cmake
 	Functions/cpfAddCompatibilityCheckTarget.cmake

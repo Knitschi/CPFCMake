@@ -1,0 +1,30 @@
+/**
+\page CPFPackagesCMakeFile Packages.cmake
+
+The \c packages.cmake file defines which sub-directories are added to CI-project. It is read when calling the
+\ref cpfAddPackages function. The file must define the CMake variable \c CPF_PACKAGES.
+The file must be located parallel to the root \c CMakeLists.txt file.
+
+The content looks something like this.
+
+\verbatim
+set( CPF_PACKAGES 
+	EXTERNAL ExternalLib1
+	EXTERNAL STATIC ExternalLib2
+    OWNED CPackage
+    OWNED SHARED EPackage
+    OWNED APackage
+    OWNED documentation
+)
+\endverbatim
+
+The list should contain some keywords and the package directories that belong to your CI-project.
+The order of the packages is important. The lower-level packages must be listed first to make sure
+they exist when they are linked to the higher-level packages that come later in the list.
+The \c EXTERNAL and \c OWNED keywords determine if the package belongs to this CI-project or another one.
+See \ref PackageOwnership. It is also possible to add the \c SHARED and \c STATIC keywords to force
+a certain kind of linkage for a package. If no linkage keyword is specified, the package will use
+value from the global \c BUILD_SHARED_LIBS variable.
+
+
+*/
