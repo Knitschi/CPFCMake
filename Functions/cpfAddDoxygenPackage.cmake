@@ -159,7 +159,7 @@ function( cpfAddDoxygenPackage )
 	if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
 		# The build on the buildsever failed because some files were blocked when using the cmake delete function.
 		# With the native command, the problems do not occurr.
-		set( clearDoxygenDirCommand "del \"${problematicFile}\" /f /q" )
+		# set( clearDoxygenDirCommand "del \"${problematicFile}\" /f /q" ) # This 
 	else()
 		set( clearDoxygenDirCommand "\"${CMAKE_COMMAND}\" -E remove \"${problematicFile}\"" )
 	endif()
