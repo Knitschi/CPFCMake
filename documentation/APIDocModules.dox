@@ -129,8 +129,8 @@ cpfAddCppPackage(
     [PUBLIC_FIXTURE_HEADER header1 [header2 ...]]
     [FIXTURE_FILES file1 [file2 ...]]
     [TEST_FILES file1 [file2 ...]]
-    [LINKED_LIBRARIES target1 [target2 ...]]
-    [LINKED_TEST_LIBRARIES target1 [target2 ...]]
+    [LINKED_LIBRARIES <PRIVATE|PUBLIC|INTERFACE> target1 ... [ <PRIVATE|PUBLIC|INTERFACE> targetX ...]]
+    [LINKED_TEST_LIBRARIES <PRIVATE|PUBLIC|INTERFACE> target1 ... [ <PRIVATE|PUBLIC|INTERFACE> targetX ...]]
 	[COMPILE_OPTIONS [BEFORE] <INTERFACE|PUBLIC|PRIVATE>]
     [PLUGIN_DEPENDENCIES 
         PLUGIN_DIRECTORY dir
@@ -267,16 +267,18 @@ All files that belong to the test fixtures target.
 All files that belong to the test executable target.
 
 
-\paragraph cpfCompileOptions COMPILE_OPTIONS
+\paragraph cpfArgCompileOptions COMPILE_OPTIONS
 
 The values of this argument are simply piped through to a call of the CMake function 
 <a href="https://cmake.org/cmake/help/latest/command/target_compile_options.html">target_compile_options()</a> 
-for each generated binary target. For further informations about the possible values refer to the CMake documentation.
+for each generated binary target. For further information about the possible values refer to the CMake documentation.
 
 
 #### LINKED_LIBRARIES ####
 
 The names of the library targets that are linked to the main binary target.
+Just like in CMakes <a href="https://cmake.org/cmake/help/latest/command/target_link_libraries.html">target_link_libraries()</a> 
+function you can use the PUBLIC, PRIVATE and INTERFACE keywords.
 
 
 #### LINKED_TEST_LIBRARIES ####
