@@ -1,5 +1,5 @@
 /**
-\page CPFPackagesCMakeFile Packages.cmake
+\page CPFPackagesCMakeFile The packages.cmake file
 
 The \c packages.cmake file defines which sub-directories are added to CI-project. It is read when calling the
 \ref cpfAddPackages function. The file must define the CMake variable \c CPF_PACKAGES.
