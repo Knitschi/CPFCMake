@@ -63,6 +63,8 @@ function( cpfAddPackages )
 
 	add_custom_target( globalFiles SOURCES ${SOLUTION_FILES})
 
+	cpfGetAllPackages(packages)
+
 	# staticAnalysis
 	cpfAddGlobalClangTidyTarget("${packages}")
 	# acyclic

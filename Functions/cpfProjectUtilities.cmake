@@ -1027,6 +1027,7 @@ function( cpfAddPackageSubdirectories )
 	set(globalyUseSharedLinkage ${BUILD_SHARED_LIBS})
 
 	cpfGetAllPackagesWithLinkage(packages)
+
 	cpfListLength( length "${packages}")
 	set(index 0)
 	while(${index} LESS ${length})

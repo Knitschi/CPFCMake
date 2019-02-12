@@ -50,7 +50,7 @@ function( cpfAddPipelineTargetDependencies packages)
             cpfListAppend( existingTargets ${target})
         endif()
     endforeach()
-	   
+
 	add_dependencies(pipeline ${existingTargets})
 
 endfunction()
