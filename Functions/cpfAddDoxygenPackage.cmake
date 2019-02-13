@@ -155,13 +155,14 @@ function( cpfAddDoxygenPackage )
 	# Add a command to remove a file that causes errors on incremental doxygen builds with doxygen 1.8.15
 	# I created an issue for this, maybe it will be fixed and this code here can be removed.
 	# https://github.com/doxygen/doxygen/issues/6830
+	# Because of the file access problems that are caused by deleting the files we got back to using doxygen 1.8.14
 	set( problematicFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/html/graph_legend.png)
 	if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
 		# The build on the buildsever failed because some files were blocked when using the cmake delete function.
 		# With the native command, the problems do not occurr.
 		# set( clearDoxygenDirCommand "del \"${problematicFile}\" /f /q" ) # This 
 	else()
-		set( clearDoxygenDirCommand "\"${CMAKE_COMMAND}\" -E remove \"${problematicFile}\"" )
+		# set( clearDoxygenDirCommand "\"${CMAKE_COMMAND}\" -E remove \"${problematicFile}\"" )
 	endif()
 	
 
