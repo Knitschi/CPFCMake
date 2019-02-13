@@ -3,11 +3,6 @@
 
 # LOCATIONS
 set( CPF_WEBSERVER_BASE_DIR "" CACHE STRING "The url of the html base directory of the web-server to which the updateExistingWebPage.cmake script copies the html build-output." )
-set( CPF_PROJECT_WEBPAGE_URL "" CACHE STRING "The url of the entry page of the CI-projects documentation." )
-
-# MAINTAINER
-set( CPF_OWNER "" CACHE STRING "The name of the entity that owns the CI-project." )
-set( CPF_MAINTAINER_EMAIL "" CACHE STRING "An e-mail address under which a project maintainer can be reached." )
 
 # OUTPUT NAMES
 set( CMAKE_DEBUG_POSTFIX "-debug" CACHE STRING "Postfix for libraries build with Debug configuration." FORCE)

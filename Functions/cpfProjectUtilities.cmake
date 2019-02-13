@@ -931,13 +931,71 @@ function( cpfGetTestTargets testTargetsOut package )
 
 endfunction()
 
+#---------------------------------------------------------------------------------------------
+# Returns all packages from the packages.cmake file
+#
+function( cpfGetAllPackages packagesOut )
+
+	set(packages)
+
+	cpfGetPackageVariableLists( listNames ${CPF_ROOT_DIR} packageVariables)
+	foreach(listName ${listNames})
+		cmake_parse_arguments(ARG "" "OWNED" "" ${${listName}})
+		cmake_parse_arguments(ARG "" "EXTERNAL" "" ${${listName}})
+
+		if(ARG_OWNED)
+			cpfListAppend(packages ${ARG_OWNED})
+		elseif(ARG_EXTERNAL)
+			cpfListAppend(packages ${ARG_EXTERNAL})
+		else()
+			message(FATAL_ERROR "Error! Unexpected case when parsing CPF_PACKAGES lists.")
+		endif()
+
+	endforeach()
+
+	set(${packagesOut} "${packages}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetPackageVariableLists packageVariableListsOut rootDir outputListBaseName )
+
+	cpfReadPackagesVariable(packages "${rootDir}")
+
+	# Assert the list starts with the OWNED or EXTERNAL keyword.
+	list(GET packages 0 firstElement)
+	isOwnedOrExternal( isFittingKeyword ${firstElement} )
+	if(NOT isFittingKeyword)
+		message(FATAL_ERROR "Error! The first element in the CPF_PACKAGES variable in the packages.cmake file must be either OWNED or EXTERNAL.")
+	endif()
+
+	set(packageIndex -1)
+	set(currentVariableList)
+	foreach(element ${packages})
+		
+		isOwnedOrExternal( isNewPackageKeyword ${element} )
+		if(isNewPackageKeyword)
+			cpfIncrement(packageIndex)
+			set(currentVariableList ${outputListBaseName}${packageIndex})
+			cpfListAppend(packageVariableLists ${currentVariableList})
+		endif()
+
+		cpfListAppend(${currentVariableList} ${element})
+
+	endforeach()
+
+	set( ${packageVariableListsOut} "${packageVariableLists}" PARENT_SCOPE)
+	foreach( subList ${packageVariableLists})
+		set( ${subList} "${${subList}}" PARENT_SCOPE )
+	endforeach()
+
+endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Reads the value of the CPF_PACKAGES variable from the ci-projects owned packages file
-# and returns the list of packages. Each package in the list can be prepended with a linkage keyword SHARED or STATIC.
-# 
-function( cpfGetPackagesWithLinkage allPackagesOut ownedPackagesOut externalPackagesOut rootDir )
-	
+# and returns its value.
+function( cpfReadPackagesVariable packagesOut rootDir )
+
 	set(fullOwnedPackagesFile "${rootDir}/${CPF_SOURCE_DIR}/${CPF_PACKAGES_FILE}")
 	# create an owned packages file if none exists
 	if(NOT EXISTS ${fullOwnedPackagesFile} )
@@ -946,6 +1004,8 @@ function( cpfGetPackagesWithLinkage allPackagesOut ownedPackagesOut externalPack
 	endif()
 
 	cpfReadVariablesFromFile( variableNames variableValues ${fullOwnedPackagesFile})
+
+	set(packageList)
 
 	set(index 0)
 	foreach( variable ${variableNames} )
@@ -965,115 +1025,94 @@ function( cpfGetPackagesWithLinkage allPackagesOut ownedPackagesOut externalPack
 		message(WARNING "File \"${fullOwnedPackagesFile}\" is missing a definition for variable CPF_PACKAGES")
 	endif()
 
-	# parse the package list
-	set(allPackages)
-	set(ownedPackages)
-	set(externalPackages)
-
-	cpfListLength( length "${packageList}")
-	set(index 0)
-	while(${index} LESS ${length})
-
-		list(GET packageList ${index} keyWord )
-
-		cpfStrequal( isOwned ${keyWord} OWNED)
-		cpfStrequal( isExternal ${keyWord} EXTERNAL)
-
-		if( (NOT isOwned) AND (NOT isExternal) )
-			message(FATAL_ERROR "The list defined by CPF_PACKAGES in file \"${fullOwnedPackagesFile}\" must be a sequence of [ OWNED|EXTERNAL <package> ] pairs.")
-		endif()
-
-		cpfIncrement(index)
-		list(GET packageList ${index} packageOrLinkage )
-		set( packageMaybeWithLinkage ${packageOrLinkage} )
-		# Add the linkage keyword if it is given.
-		if( (${packageOrLinkage} STREQUAL SHARED) OR (${packageOrLinkage} STREQUAL STATIC) )
-			cpfIncrement(index)
-			list(GET packageList ${index} package )
-			cpfListAppend(packageMaybeWithLinkage ${package})
-		endif()
-
-		cpfListAppend(allPackages ${packageMaybeWithLinkage})
-		if(isOwned)
-			cpfListAppend(ownedPackages ${packageMaybeWithLinkage})
-		else()
-			cpfListAppend(externalPackages ${packageMaybeWithLinkage})
-		endif()
-
-		cpfIncrement(index)
-
-	endwhile()
-
-	set(${allPackagesOut} "${allPackages}" PARENT_SCOPE)
-	set(${ownedPackagesOut} "${ownedPackages}" PARENT_SCOPE)
-	set(${externalPackagesOut} "${externalPackages}" PARENT_SCOPE)
+	set(${packagesOut} "${packageList}" PARENT_SCOPE )
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# Returns all packages from the packages.cmake file
-#
-function( cpfGetAllPackagesWithLinkage packagesOut )
-
-	cpfGetPackagesWithLinkage( allPackages ownedPackages externalPackages ${CPF_ROOT_DIR})
-	set(${packagesOut} "${allPackages}" PARENT_SCOPE)
-
+function( isOwnedOrExternal isOut var )
+	if(("${var}" STREQUAL OWNED) OR ("${var}" STREQUAL EXTERNAL))
+		set(${isOut} TRUE PARENT_SCOPE)
+	else()
+		set(${isOut} FALSE PARENT_SCOPE)
+	endif()
 endfunction()
 
-#---------------------------------------------------------------------------------------------
-#
-function( cpfAddPackageSubdirectories )
-
-	set(globalyUseSharedLinkage ${BUILD_SHARED_LIBS})
-
-	cpfGetAllPackagesWithLinkage(packages)
-
-	cpfListLength( length "${packages}")
-	set(index 0)
-	while(${index} LESS ${length})
-
-		set(useSharedLinkage ${globalyUseSharedLinkage})
-		list(GET packages ${index} packageOrLinkage )
-		if( (${packageOrLinkage} STREQUAL SHARED) OR (${packageOrLinkage} STREQUAL STATIC) )
-			if(${packageOrLinkage} STREQUAL SHARED)
-				set(useSharedLinkage ON)
-			else()
-				set(useSharedLinkage OFF)
-			endif()
-			cpfIncrement(index)
-			list(GET packages ${index} packageOrLinkage )
-		endif()
-
-		set(BUILD_SHARED_LIBS ${useSharedLinkage})
-		add_subdirectory(${packageOrLinkage})
-
-		cpfIncrement(index)
-
-	endwhile()
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# Returns all packages from the packages.cmake file
-#
-function( cpfGetAllPackages packagesOut )
-
-	cpfGetPackagesWithLinkage( allPackages ownedPackages externalPackages ${CPF_ROOT_DIR})
-	list(REMOVE_ITEM allPackages STATIC SHARED)
-	set(${packagesOut} "${allPackages}" PARENT_SCOPE)
-
-endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Returns a list with the owned packages from the packages.cmake file
 #
 function( cpfGetOwnedPackages packagesOut rootDir )
 
-	cpfGetPackagesWithLinkage( allPackages ownedPackages externalPackages ${rootDir})
-	list(REMOVE_ITEM ownedPackages STATIC SHARED)
-	set(${packagesOut} "${ownedPackages}" PARENT_SCOPE)
+	set(packages)
+
+	cpfGetPackageVariableLists( listNames ${rootDir} packageVariables)
+	foreach(listName ${listNames})
+		
+		cmake_parse_arguments(ARG "" "OWNED" "" ${${listName}})
+		if(ARG_OWNED)
+			cpfListAppend(packages ${ARG_OWNED})
+		endif()
+
+	endforeach()
+
+	set(${packagesOut} "${packages}" PARENT_SCOPE)
 
 endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Reads the packages and overridden variables from the packages.cmake file and adds
+# the packages as subdirectories.
+#
+function( cpfAddPackageSubdirectories )
+
+	cpfGetPackageDefaultValueVariables(overridableVariables)
+
+	cpfGetPackageVariableLists( listNames ${CPF_ROOT_DIR} packageVariables)
+	foreach(listName ${listNames})
+		
+		# The second element must be the package name.
+		list(GET ${listName} 1 package )
+		cmake_parse_arguments(ARG "" "${overridableVariables}" "" ${${listName}})
+
+		# Override the global variables with the values from the list.
+		foreach(variable ${overridableVariables})
+			if(NOT "${ARG_${variable}}" STREQUAL "")
+				set(${variable} ${ARG_${variable}})
+				cpfDebugMessage("Override ${variable} with \"${ARG_${variable}}\"")
+			endif()
+		endforeach()
+
+		# Now add the subdirectory.
+		add_subdirectory(${package})
+
+	endforeach()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns the names of the variables that can be overridden in the packages.cmake file.
+function( cpfGetPackageDefaultValueVariables variablesOut )
+
+	set( variables 
+		BUILD_SHARED_LIBS
+		CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS
+		CPF_ENABLE_ABI_API_STABILITY_CHECK_TARGETS
+		CPF_ENABLE_CLANG_TIDY_TARGET
+		CPF_ENABLE_OPENCPPCOVERAGE_TARGET
+		CPF_ENABLE_PACKAGE_DOX_FILE_GENERATION
+		CPF_ENABLE_PRECOMPILED_HEADER
+		CPF_ENABLE_RUN_TESTS_TARGET
+		CPF_ENABLE_VALGRIND_TARGET
+		CPF_ENABLE_VERSION_RC_FILE_GENERATION
+		CPF_COMPILE_OPTIONS
+	)
+
+	set(${variablesOut} "${variables}" PARENT_SCOPE)
+
+endfunction()
+
+
 
 #---------------------------------------------------------------------------------------------
 # Returns the owned packages that are not in the same repository as the CI-project.

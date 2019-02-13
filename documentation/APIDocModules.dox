@@ -212,15 +212,23 @@ types.
 
 The value is only used when compiling with MSVC. It is than used in the copyright notice 
 that is displayed on the "Details" tab of the file-properties window of the generated binary
-files.
-Setting this argument overrides the value of the global \c CPF_OWNER variable for this package.
+files. 
+
+If you plan to allow using a package as \c EXTERNAL package in some other CI-project,
+you have to hard-code this value in the packages CMakeLists file. Using a variable from the
+CI-project in order to remove duplication between your packages will not work, because clients
+will not have the value of that variable.
 
 
 \paragraph cpfArgWebpageUrl WEBPAGE_URL
 
 A web address from where the source-code and/or the documentation of the package can be obtained.
 This is required for Debian packages.
-Setting this argument overrides the value of the global \c CPF_WEBPAGE_URL variable for this package.
+
+If you plan to allow using a package as \c EXTERNAL package in some other CI-project,
+you have to hard-code this value in the packages CMakeLists file. Using a variable from the
+CI-project in order to remove duplication between your packages will not work, because clients
+will not have the value of that variable.
 
 
 \paragraph cpfArgMaintainerEmail MAINTAINER_EMAIL
@@ -228,6 +236,11 @@ Setting this argument overrides the value of the global \c CPF_WEBPAGE_URL varia
 An email address under which the maintainers of the package can be reached.
 This is required for Debian packages.
 Setting this argument overrides the value of the global \c CPF_MAINTAINER_EMAIL variable for this package.
+
+If you plan to allow using a package as \c EXTERNAL package in some other CI-project,
+you have to hard-code this value in the packages CMakeLists file. Using a variable from the
+CI-project in order to remove duplication between your packages will not work, because clients
+will not have the value of that variable.
 
 
 #### PUBLIC_HEADER ####

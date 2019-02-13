@@ -71,9 +71,6 @@ argument in the local function call. Each variable overrides the
 respective argument without the \c CPF_ prefix.
 Here is a list of the variables.
 
-- CPF_\ref cpfArgOwner
-- CPF_PROJECT_\ref cpfArgWebpageUrl
-- CPF_\ref cpfArgMaintainerEmail
 - CPF_\ref cpfArgEnableAbiApiCompatibilityReportTargets
 - CPF_\ref cpfArgEnableAbiApiStablilityCheckTargets
 - CPF_\ref cpfArgEnableClangTidyTarget
