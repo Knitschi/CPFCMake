@@ -162,6 +162,27 @@ name of the directory in which the packages CMakeLists.txt file is located.
 The function provides a large list of options that allow defining the features that the package should provide.
 
 A C++ package consists of a main binary target that has the same name as the package and some helper binary targets for tests and test utilities.
+The names of the created targets are:
+
+\verbatim
+# Binary Targets of MyPackage
+
+MyPackage				# The executable or library
+libMyPackage			# The implementation library that is created for packages of TYPE GUI_APP or CONSOLE_APP.
+MyPackage_fixtures		# A library for test test utility code that is created when the FIXTURE_FILES option is given.
+MyPackage_tests			# A text executable that is created when the TEST_FILES option is given.
+
+# Alias Targets of MyPackage with PACKAGE_NAMESPACE mypckg
+mypckg::MyPackage
+mypckg::libMyPackage
+mypckg::MyPackage_fixtures
+mypckg::MyPackage_tests
+\endverbatim
+
+The function will create alias targets for all binary targets that have the package namespace prepended.
+It is recommended to use the alias names in other packages, which enables to smoothly switch between inlined
+and imported packages.
+
 Providing the function with optional arguments will switch on more of CPF's functionality like test-targets, code-analysis, packaging or
 documentation generation.
 

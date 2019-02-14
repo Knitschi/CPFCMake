@@ -382,6 +382,7 @@ function( cpfAddPackageBinaryTargets
 
         cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}  
+			PACKAGE_NAMESPACE ${packageNamespace}
 			EXPORT_MACRO_PREFIX ${packageNamespace}
 			TARGET_TYPE ${libType}
 			NAME ${productionTarget}
@@ -405,6 +406,7 @@ function( cpfAddPackageBinaryTargets
 		set( exeTarget ${package})
 		cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}
+			PACKAGE_NAMESPACE ${packageNamespace}
 			TARGET_TYPE ${type}
 			NAME ${exeTarget}
 			FILES ${MAIN_CPP} ${exeFiles}
@@ -428,6 +430,7 @@ function( cpfAddPackageBinaryTargets
         set( fixtureTarget ${productionTarget}${CPF_FIXTURE_TARGET_ENDING})
 	    cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}
+			PACKAGE_NAMESPACE ${packageNamespace}
 			EXPORT_MACRO_PREFIX ${packageNamespace}_TESTS
 			TARGET_TYPE LIB
 			NAME ${fixtureTarget}
@@ -456,6 +459,7 @@ function( cpfAddPackageBinaryTargets
         set( unitTestsTarget ${productionTarget}${CPF_TESTS_TARGET_ENDING})
         cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}
+			PACKAGE_NAMESPACE ${packageNamespace}
 			TARGET_TYPE CONSOLE_APP
 			NAME ${unitTestsTarget}
 			FILES ${testFiles}
@@ -485,25 +489,14 @@ function( cpfAddPackageBinaryTargets
 endfunction()
 
 #---------------------------------------------------------------------
-#
 # Adds a binary target 
-# 
-# Arguments:
-# PACKAGE_NAME				The name of the package to which the target belongs.
-# PACKAGE_NAMESPACE			The namespace of the package
-# TARGET_TYPE				GUI_APP = executable with switched of console (use for QApplications with ui); CONSOLE_APP = console application; LIB = library (use to create a static or shared libraries )
-# NAME						The name of the added binary target.
-# LINKAGE					Only relevant when adding a library. This takes STATIC or SHARED
-# PUBLIC_HEADER				The header files that are required by clients that link to the target.
-# FILES						All files that belong to the target.
-# LINKED_LIBRARIES			Other targets on which this target depends.
-# 
+#
 function( cpfAddBinaryTarget )
 
 	cmake_parse_arguments(
 		ARG 
 		"" 
-		"PACKAGE_NAME;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME;ENABLE_PRECOMPILED_HEADER;ENABLE_VERSION_RC_FILE_GENERATION;BRIEF_DESCRIPTION;OWNER" 
+		"PACKAGE_NAME;PACKAGE_NAMESPACE;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME;ENABLE_PRECOMPILED_HEADER;ENABLE_VERSION_RC_FILE_GENERATION;BRIEF_DESCRIPTION;OWNER" 
 		"PUBLIC_HEADER;FILES;LINKED_LIBRARIES;COMPILE_OPTIONS" 
 		${ARGN} 
 	)
@@ -648,6 +641,8 @@ function( cpfAddBinaryTarget )
 
 	# sort files into folders in visual studio
 	cpfSetIDEDirectoriesForTargetSources(${ARG_NAME})
+
+	cpfAddAliasTarget(${ARG_NAME} ${ARG_PACKAGE_NAMESPACE})
 
 endfunction()
 

@@ -149,3 +149,16 @@ function( cpfSetIDEDirectoriesForTargetSources targetName )
 
 endfunction()
 
+#---------------------------------------------------------------------------------------------
+function( cpfAddAliasTarget target packageNamespace )
+
+	cpfIsExecutable(isExe ${target})
+	if(isExe)
+		add_executable(${packageNamespace}::${target} ALIAS ${target})
+	else()
+		add_library(${packageNamespace}::${target} ALIAS ${target})
+	endif()
+
+
+endfunction()
+
