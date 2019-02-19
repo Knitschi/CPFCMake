@@ -122,6 +122,10 @@ function( cpfAddCppPackage )
 		set( ${package}_BUILD_TESTS ON)
 	endif()
 
+		# Replace alias targets with the original names, because they can cause trouble with custom targets.
+	cpfStripTargetAliases(ARG_LINKED_LIBRARIES "${ARG_LINKED_LIBRARIES}")
+	cpfStripTargetAliases(ARG_LINKED_TEST_LIBRARIES "${ARG_LINKED_TEST_LIBRARIES}")
+
 	# ASSERT ARGUMENTS
 
 	# Make sure that linked targets have already been created.
@@ -837,6 +841,7 @@ function( cpfAddPlugins package pluginOptionLists )
 	endif()
 
 	cpfGetPluginTargetDirectoryPairLists( pluginTargets pluginDirectories "${pluginOptionLists}" )
+	cpfStripTargetAliases(pluginTargets "${pluginTargets}")
 
 	# add deploy and install targets for the plugins
 	set(index 0)

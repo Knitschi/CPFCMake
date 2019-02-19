@@ -159,6 +159,23 @@ function( cpfAddAliasTarget target packageNamespace )
 		add_library(${packageNamespace}::${target} ALIAS ${target})
 	endif()
 
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Goes through the given targets and in case that a target is an alias target replaces them
+# with the name of the original target.
+function( cpfStripTargetAliases deAliasedTargetsOut targets)
+	
+	set(deAliasedTargets)
+	foreach(target ${targets})
+		get_property(aliasedTarget TARGET ${target} PROPERTY ALIASED_TARGET)
+		if(aliasedTarget)
+			cpfListAppend(deAliasedTargets ${aliasedTarget})
+		else()
+			cpfListAppend(deAliasedTargets ${target})
+		endif()
+	endforeach()
+	set(${deAliasedTargetsOut} "${deAliasedTargets}" PARENT_SCOPE)
 
 endfunction()
 
