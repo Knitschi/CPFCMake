@@ -122,15 +122,16 @@ function( cpfAddCppPackage )
 		set( ${package}_BUILD_TESTS ON)
 	endif()
 
-		# Replace alias targets with the original names, because they can cause trouble with custom targets.
-	cpfStripTargetAliases(ARG_LINKED_LIBRARIES "${ARG_LINKED_LIBRARIES}")
-	cpfStripTargetAliases(ARG_LINKED_TEST_LIBRARIES "${ARG_LINKED_TEST_LIBRARIES}")
-
 	# ASSERT ARGUMENTS
 
-	# Make sure that linked targets have already been created.
+	# Print debug output if linked targets do not exist.
 	cpfDebugAssertLinkedLibrariesExists( linkedLibraries ${package} "${ARG_LINKED_LIBRARIES}")
 	cpfDebugAssertLinkedLibrariesExists( linkedTestLibraries ${package} "${ARG_LINKED_TEST_LIBRARIES}")
+
+	# Replace alias targets with the original names, because they can cause trouble with custom targets.
+	cpfStripTargetAliases(linkedLibraries "${linkedLibraries}")
+	cpfStripTargetAliases(linkedTestLibraries "${linkedTestLibraries}")
+
 	# If a library does not have a public header, it must be a user mistake
 	if( (${ARG_TYPE} STREQUAL LIB) AND (NOT ARG_PUBLIC_HEADER) )
 		message(FATAL_ERROR "Library package ${package} has no public headers. The library can not be used without public headers, so please add the PUBLIC_HEADER argument to the cpfAddCppPackage() call.")
@@ -229,9 +230,9 @@ endfunction()
 #---------------------------------------------------------------------
 # This function only returns the libraries from the input that actually exist.
 # Lower level packages must be added first.
-# For others a warning is issued when CPF_VERBOSE is ON.
+# For non existing target a warning is issued when CPF_VERBOSE is ON.
 # We allow adding dependencies to non existing targets so we can link to targets that may only be available
-# on certain platforms.
+# for some configurations.
 #
 function( cpfDebugAssertLinkedLibrariesExists linkedLibrariesOut package linkedLibrariesIn )
 
