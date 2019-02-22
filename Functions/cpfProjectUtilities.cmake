@@ -879,6 +879,21 @@ function( cpfFindConfigFile absFilePathOut configName )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
+function( cpfGetConfigurationsInDirectory configsOut absDirPath )
+
+	set(configs)
+	file(GLOB configFiles LIST_DIRECTORIES false "${absDirPath}/*${CPF_CONFIG_FILE_ENDING}")
+	foreach(file ${configFiles})
+		get_filename_component(config ${file} NAME_WE)
+		cpfListAppend(configs ${config})
+	endforeach()
+
+	set(${configsOut} "${configs}" PARENT_SCOPE)
+
+endfunction()
+
+
+#---------------------------------------------------------------------------------------------
 function( cpfGetExecutableTargets exeTargetsOut package )
 	
 	set(exeTargets)
