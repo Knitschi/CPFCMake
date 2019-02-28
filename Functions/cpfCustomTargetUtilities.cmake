@@ -306,7 +306,7 @@ function( cpfGetTouchFileCommands commandsOut absFilePaths )
 		cpfListAppend( commands "cmake -E make_directory \"${dir}\"")
 	endforeach()
 
-	# add commands for copying the files
+	# add commands for touching the files
 	foreach( file ${absFilePaths})
 		cpfListAppend( commands "cmake -E touch \"${file}\" ")
 	endforeach()

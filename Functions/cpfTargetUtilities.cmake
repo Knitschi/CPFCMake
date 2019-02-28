@@ -82,15 +82,65 @@ endfunction()
 # library targets from the targets file container target.
 #
 function( cpfGetTargetSourceFiles filesOut target)
+	cpfGetTargetSourceFilesAndSourceDir(files unused ${target})
+	set(${filesOut} "${files}" PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetTargetSourceFilesAndSourceDir filesOut dirOut target )
+
 	cpfIsInterfaceLibrary( isIntLib ${target})
-	if(NOT isIntLib)
-		get_property(sources TARGET ${target} PROPERTY SOURCES)
-	else()
-		# Interface libraries can only have public header files as sources.
-		get_property(filesTarget TARGET ${target} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET )
-		get_property(sources TARGET ${filesTarget} PROPERTY SOURCES)
+	if(isIntLib)
+		# Use the file container target to get the files.
+		get_property(target TARGET ${target} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET )
 	endif()
-	set(${filesOut} "${sources}" PARENT_SCOPE)
+	get_property(sourceDir TARGET ${target} PROPERTY SOURCE_DIR )
+	get_property(sources TARGET ${target} PROPERTY SOURCES )
+
+	set(${dirOut} ${sourceDir} PARENT_SCOPE)
+	set(${filesOut} ${sources} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Gets all files from the targets SOURCES property, turns them into abs pathes if needed
+# and returns the list.
+function( getAbsPathsOfTargetSources absPathsOut target)
+
+	cpfGetTargetSourceFilesAndSourceDir(sources sourceDir ${target})
+
+	# sources can have relative or absolute pathes
+	set(absPaths)
+	foreach( file ${sources})
+		cpfToAbsSourcePath( absPath ${file} ${sourceDir})
+		cpfListAppend( absPaths ${absPath})
+	endforeach()
+
+	set(${absPathsOut} "${absPaths}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns a list with all files from target property SOURCES that are below the given
+# directory, relative to the given directory.
+function( getAbsPathesForSourceFilesInDir absfilePathsOut target dir)
+
+	getAbsPathsOfTargetSources( absSources ${target})
+	# get only files that are in the sources directory
+	cpfGetSubPaths( subPaths ${dir} "${absSources}")
+	set( ${absfilePathsOut} "${subPaths}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Assumes that the given path is either relative to CMAKE_CURRENT_SOURCE dir or an absolute
+# path and prepends CMAKE_CURRENT_SCOURDE dir if it is relative.
+function( cpfToAbsSourcePath absPathOut sourceFile sourceDir)
+	cpfIsAbsolutePath( isAbsPath ${sourceFile})
+	if(NOT isAbsPath )
+		set(sourceFile ${sourceDir}/${sourceFile} )
+	endif()
+	set(${absPathOut} "${sourceFile}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------

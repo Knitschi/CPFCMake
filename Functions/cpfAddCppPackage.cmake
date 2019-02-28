@@ -58,6 +58,7 @@ function( cpfAddCppPackage )
 		VERSION_COMPATIBILITY_SCHEME
 		ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS
 		ENABLE_ABI_API_STABILITY_CHECK_TARGETS
+		ENABLE_CLANG_FORMAT_TARGETS
 		ENABLE_CLANG_TIDY_TARGET
 		ENABLE_OPENCPPCOVERAGE_TARGET
 		ENABLE_PACKAGE_DOX_FILE_GENERATION
@@ -101,6 +102,7 @@ function( cpfAddCppPackage )
 	# Use values of global variables for unset arguments.
 	cpfSetIfNotSet( ARG_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS "${CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS}")
 	cpfSetIfNotSet( ARG_ENABLE_ABI_API_STABILITY_CHECK_TARGETS "${CPF_ENABLE_ABI_API_STABILITY_CHECK_TARGETS}")
+	cpfSetIfNotSet( ARG_ENABLE_CLANG_FORMAT_TARGETS "${CPF_ENABLE_CLANG_FORMAT_TARGETS}")
 	cpfSetIfNotSet( ARG_ENABLE_CLANG_TIDY_TARGET "${CPF_ENABLE_CLANG_TIDY_TARGET}")
 	cpfSetIfNotSet( ARG_ENABLE_OPENCPPCOVERAGE_TARGET "${CPF_ENABLE_OPENCPPCOVERAGE_TARGET}")
 	cpfSetIfNotSet( ARG_ENABLE_PACKAGE_DOX_FILE_GENERATION "${CPF_ENABLE_PACKAGE_DOX_FILE_GENERATION}")
@@ -165,6 +167,7 @@ function( cpfAddCppPackage )
 		"${linkedLibraries}" 
 		"${linkedTestLibraries}"
 		${ARG_VERSION_COMPATIBILITY_SCHEME}
+		${ARG_ENABLE_CLANG_FORMAT_TARGETS}
 		${ARG_ENABLE_PRECOMPILED_HEADER}
 		${ARG_ENABLE_VERSION_RC_FILE_GENERATION}
 		"${ARG_COMPILE_OPTIONS}"
@@ -328,6 +331,7 @@ function( cpfAddPackageBinaryTargets
 	linkedLibraries 
 	linkedTestLibraries
 	versionCompatibilityScheme
+	enableClangFormatTargets
 	enablePrecompiledHeader
 	enableVersionRcGeneration
 	compileOptions
@@ -396,6 +400,7 @@ function( cpfAddPackageBinaryTargets
 			LINKED_LIBRARIES ${linkedLibraries}
 			IDE_FOLDER ${package}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
+			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 			BRIEF_DESCRIPTION ${fileDescriptionLib}
@@ -418,6 +423,7 @@ function( cpfAddPackageBinaryTargets
 			LINKED_LIBRARIES ${linkedLibraries} ${productionTarget}
 			IDE_FOLDER ${package}/exe
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
+			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 			BRIEF_DESCRIPTION ${fileDescriptionExe}
@@ -444,6 +450,7 @@ function( cpfAddPackageBinaryTargets
 			LINKED_LIBRARIES ${productionTarget} ${linkedTestLibraries}
 			IDE_FOLDER ${package}/${VSTestFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
+			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 			BRIEF_DESCRIPTION "A library that contains utilities for tests of the ${productionTarget} library."
@@ -471,6 +478,7 @@ function( cpfAddPackageBinaryTargets
 			LINKED_LIBRARIES ${productionTarget} ${fixtureTarget} ${linkedTestLibraries}
 			IDE_FOLDER ${package}/${VSTestFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
+			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 			BRIEF_DESCRIPTION "Runs tests of the ${productionTarget} library."
@@ -501,7 +509,7 @@ function( cpfAddBinaryTarget )
 	cmake_parse_arguments(
 		ARG 
 		"" 
-		"PACKAGE_NAME;PACKAGE_NAMESPACE;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME;ENABLE_PRECOMPILED_HEADER;ENABLE_VERSION_RC_FILE_GENERATION;BRIEF_DESCRIPTION;OWNER" 
+		"PACKAGE_NAME;PACKAGE_NAMESPACE;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME;ENABLE_CLANG_FORMAT_TARGETS;ENABLE_PRECOMPILED_HEADER;ENABLE_VERSION_RC_FILE_GENERATION;BRIEF_DESCRIPTION;OWNER" 
 		"PUBLIC_HEADER;FILES;LINKED_LIBRARIES;COMPILE_OPTIONS" 
 		${ARGN} 
 	)
@@ -642,12 +650,18 @@ function( cpfAddBinaryTarget )
 	set_property( TARGET ${ARG_NAME} APPEND PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${ARG_PUBLIC_HEADER})
 
 	# sets all the <bla>_OUTPUT_DIRECTORY_<config> options
-	cpfSetTargetOutputDirectoriesAndNames( ${ARG_PACKAGE_NAME} ${ARG_NAME})
+	cpfSetTargetOutputDirectoriesAndNames(${ARG_PACKAGE_NAME} ${ARG_NAME})
 
 	# sort files into folders in visual studio
 	cpfSetIDEDirectoriesForTargetSources(${ARG_NAME})
 
+	# Add an alias target to allow using namespaced names for inlined packages.
 	cpfAddAliasTarget(${ARG_NAME} ${ARG_PACKAGE_NAMESPACE})
+
+	# Adds a clang-format target
+	if(ARG_ENABLE_CLANG_FORMAT_TARGETS)
+		cpfAddClangFormatTarget(${ARG_PACKAGE_NAME} ${ARG_NAME})
+	endif()
 
 endfunction()
 

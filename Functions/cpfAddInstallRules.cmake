@@ -191,13 +191,7 @@ function( cpfInstallSourceFiles installedFilesOut package sources outputType ins
 	set(installedFiles)
 	foreach( file ${sources})
 		
-		cpfIsAbsolutePath( cpfIsAbsolutePath ${file})
-
-		if(NOT cpfIsAbsolutePath)	# The file is located in the source directory
-			set(absFile "${${package}_SOURCE_DIR}/${file}" )
-		else()
-			set(absFile ${file})
-		endif()
+		cpfToAbsSourcePath(absFile ${file} ${${package}_SOURCE_DIR})
 
 		# When building, the include directories are the packages binary and source directory.
 		# This means we need the path of the header relative to one of the two in order to get the

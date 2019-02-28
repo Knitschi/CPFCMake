@@ -311,7 +311,7 @@ endfunction()
 # Returns true if the version is marked as dirty, which means there are local uncommitted changes.
 #
 function( cpfIsDirtyVersion isDirtyOut version )
-	cpfStringContains( isDirty "${version}")
+	cpfStringContains( isDirty "${version}" -dirty)
 	set(${isDirtyOut} ${isDirty} PARENT_SCOPE)
 endfunction()
 
@@ -426,51 +426,6 @@ function( cpfGetKeywordValueLists valueListsOut valueListsKeyword otherKeywords 
 
 endfunction()
 
-#----------------------------------------------------------------------------------------
-# Gets all files from the targets SOURCES property, turns them into abs pathes if needed
-# and returns the list.
-function( getAbsPathsOfTargetSources absPathsOut target)
-
-	set(absPaths)
-
-	cpfIsInterfaceLibrary( isIntLib ${target})
-	if(isIntLib)
-		# Use the file container target to get the files.
-		get_property(target TARGET ${target} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET )
-	endif()
-	get_property(sourceDir TARGET ${target} PROPERTY SOURCE_DIR )
-
-	# debug
-	if(NOT	sourceDir)
-		message(FATAL_ERROR "blub")
-	endif()
-
-	get_property(sources TARGET ${target} PROPERTY SOURCES )
-	# sources can have relative or absolute pathes
-	foreach( file ${sources})
-		cpfIsAbsolutePath( isAbsPath ${file})
-		if(isAbsPath)
-			cpfListAppend( absPaths ${file})
-		else()
-			cpfListAppend( absPaths "${sourceDir}/${file}")
-		endif()
-	endforeach()
-
-	set(${absPathsOut} "${absPaths}" PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns a list with all files from target property SOURCES that are below the given
-# directory, relative to the given directory.
-function( getAbsPathesForSourceFilesInDir absfilePathsOut target dir)
-
-	getAbsPathsOfTargetSources( absSources ${target})
-	# get only files that are in the sources directory
-	cpfGetSubPaths( subPaths ${dir} "${absSources}")
-	set( ${absfilePathsOut} "${subPaths}" PARENT_SCOPE)
-
-endfunction()
 
 
 

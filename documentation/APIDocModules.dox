@@ -147,6 +147,7 @@ cpfAddCppPackage(
     [VERSION_COMPATIBILITY_SCHEME [ExactVersion] ]
     [ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS bool]
     [ENABLE_ABI_API_STABILITY_CHECK_TARGETS bool]
+	[ENABLE_CLANG_FORMAT_TARGETS bool]
     [ENABLE_CLANG_TIDY_TARGET bool]
     [ENABLE_OPENCPPCOVERAGE_TARGET bool]
     [ENABLE_PACKAGE_DOX_FILE_GENERATION bool]
@@ -427,9 +428,15 @@ and the last release version. It requires option (CPF_)ENABLE_ABI_API_COMPATIBIL
 Setting this argument overrides the value of the global \c CPF_ENABLE_ABI_API_STABILITY_CHECK_TARGETS variable for this package.
 
 
+\paragraph cpfArgEnableClangFormatTargets ENABLE_CLANG_FORMAT_TARGETS
+
+This option can be used to enable/disable the \ref clang-format_package target.
+Setting this argument overrides the value of the global \c CPF_ENABLE_CLANG_FORMAT_TARGETS variable for this package.
+Note that you have to make sure the clang-format is available if you enable this option.
+
 \paragraph cpfArgEnableClangTidyTarget ENABLE_CLANG_TIDY_TARGET
 
-This option can be used to enable/disable the \ref clangtidy_package target.
+This option can be used to enable/disable the \ref clang-tidy_package target.
 This option is ignored if the compiler is not clang.
 Setting this argument overrides the value of the global \c CPF_ENABLE_CLANG_TIDY_TARGET variable for this package.
 

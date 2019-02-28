@@ -128,7 +128,7 @@ function( cpfGetFilepathsWithExtensions pathsOut filePaths extensions)
 	# Prepare a regular expression that matches the extensions.
 	cpfPrependMulti( extensionMatcher "\\" "${extensions}")
 	cpfJoinString( oredExtensionMatcher "${extensionMatcher}" "|" )
-	set(regExp ".*(${oredExtensionMatcher})$")
+	set(regExp ".*\\.(${oredExtensionMatcher})$")
 
 	# Get the files and return them.
 	cpfGetElementsMatching( list "${filePaths}" ${regExp} )

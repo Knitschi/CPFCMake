@@ -114,7 +114,15 @@ function( cpfDefineProperties )
         BRIEF_DOCS "A target that runs clang-tidy on all .cpp files of the binary target."
         FULL_DOCS " "
     )
-    
+
+    # A property that is set on all binary targets when CPF_ENABLE_CLANG_FORMAT_TARGETS is set to on.
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_CLANG_FORMAT_SUBTARGET
+        BRIEF_DOCS "A target that runs clang-format on all C/C++ source files of the target."
+        FULL_DOCS " "
+    )
+
 	# A property that is set on all package main targets.
     define_property(
         TARGET

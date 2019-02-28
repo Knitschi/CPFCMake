@@ -16,6 +16,7 @@ set( BUILD_SHARED_LIBS OFF CACHE BOOL "Set this to ON to create all production t
 set( CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS OFF CACHE BOOL "Enables targets that create ABI/API compatibility reports and checking." FORCE)
 set( CPF_ENABLE_ABI_API_STABILITY_CHECK_TARGETS OFF CACHE BOOL "If this is set to ON, the pipeline will fail if the current build results contain changes that hurt API compatibility." FORCE)
 set( CPF_ENABLE_ACYCLIC_TARGET ON CACHE BOOL "Activates a custom target that checks that the projects target dependency graph is acyclic." FORCE)
+set( CPF_ENABLE_CLANG_FORMAT_TARGETS OFF CACHE BOOL "Activates custom targets that run clang-format." FORCE)
 set( CPF_ENABLE_CLANG_TIDY_TARGET ON CACHE BOOL "Activates custom targets that run clang-tidy." FORCE)
 set( CPF_ENABLE_OPENCPPCOVERAGE_TARGET ON CACHE BOOL "Activates custom targets that run OpenCppCoverage. The targets are only available when compiling with msvc in debug configuration." FORCE)
 set( CPF_ENABLE_PACKAGE_DOX_FILE_GENERATION OFF CACHE BOOL "If this is set to ON, the CPF will generate a file that contains a basic documentation page for C++ packages in the doxygen format." FORCE )

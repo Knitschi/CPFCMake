@@ -38,9 +38,9 @@ endfunction()
 # Joins the elements of the given list into one string were the elements are separated
 # by separator
 # 
-function( cpfJoinString VAR list separator )
+function( cpfJoinString joinedStringOut list separator )
 	string(REPLACE ";" "${separator}" joinedString "${list}")
-	set(${VAR} ${joinedString} PARENT_SCOPE)
+	set(${joinedStringOut} ${joinedString} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -93,9 +93,9 @@ function( cpfGetShorterString stringOut string1 string2 )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfStringContains containsOut string )
+function( cpfStringContains containsOut string substring)
 
-	string(FIND "${string}" -dirty index)
+	string(FIND "${string}" "substring" index)
 	if(${index} EQUAL -1)
 		set(${containsOut} FALSE PARENT_SCOPE)
 	else()

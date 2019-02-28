@@ -503,6 +503,12 @@ function( cpfFindRequiredTools )
 		cpfFindRequiredProgram( TOOL_ACYCLIC acyclic "A tool from the graphviz library that can check if a graphviz graph is acyclic" "")
 	endif()
 
+	if(CPF_ENABLE_CLANG_FORMAT_TARGETS)
+		# Find clang-tidy
+		cpfGetClangFormatSearchPath(clangFormatPath)
+		cpfFindRequiredProgram( TOOL_CLANG_FORMAT clang-format "A tool that formats .cpp and .c files." "${clangFormatPath}")
+	endif()
+
 	if(Qt5Gui_FOUND )
 		cpfFindRequiredProgram( 
 			TOOL_UIC uic
@@ -519,6 +525,20 @@ function( cpfFindRequiredTools )
 
 endfunction()
 
+#--------------------------------------------------------------------------------------
+function( cpfGetClangFormatSearchPath pathOut )
+
+    if(MSVC)
+        cpfNormalizeAbsPath( vswherePath "$ENV{ProgramFiles\(x86\)}/Microsoft Visual Studio/Installer")
+        cpfFindRequiredProgram( TOOL_VSWHERE vswhere "A tool that finds visual studio installations." "${vswherePath}")
+		execute_process( COMMAND "${vswherePath}/vswhere.exe" -property installationPath OUTPUT_VARIABLE vsInstallPath)
+		string(STRIP ${vsInstallPath} vsInstallPath)
+		cpfNormalizeAbsPath( clangTidyPath "${vsInstallPath}/Common7/IDE/VC/VCPackages")
+    endif()
+
+    set(${pathOut} "${clangTidyPath}" PARENT_SCOPE)
+
+endfunction()
 
 #---------------------------------------------------------------------------------------------
 function( cpfGetTargetProperties outputValues targets properties )

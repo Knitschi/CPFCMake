@@ -5,6 +5,7 @@ include_guard(GLOBAL)
 include(cpfProperties)
 include(cpfProjectUtilities)
 include(cpfAddDoxygenPackage)
+include(cpfAddClangFormatTarget)
 include(cpfAddClangTidyTarget)
 include(cpfAddAcyclicTarget)
 include(cpfAddPipelineTargetDependencies)
@@ -64,8 +65,11 @@ function( cpfAddPackages )
 	add_custom_target( globalFiles SOURCES ${SOLUTION_FILES})
 
 	cpfGetAllPackages(packages)
+	cpfGetOwnedPackages(ownedPackages "${CPF_ROOT_DIR}")
 
-	# staticAnalysis
+	# clang format
+	cpfAddGlobalClangFormatTarget("${ownedPackages}" )
+	# clang-tidy
 	cpfAddGlobalClangTidyTarget("${packages}")
 	# acyclic
 	cpfAddAcyclicTarget()

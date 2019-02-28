@@ -31,6 +31,7 @@ set( files
 	documentation/PackagesCMake.dox
 	Functions/cpfAddAcyclicTarget.cmake
 	Functions/cpfAddClangTidyTarget.cmake
+	Functions/cpfAddClangFormatTarget.cmake
 	Functions/cpfAddCompatibilityCheckTarget.cmake
 	Functions/cpfAddDeploySharedLibrariesTarget.cmake
 	Functions/cpfAddDistributionPackageTarget.cmake
