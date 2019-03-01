@@ -79,7 +79,7 @@ file.
 
 \subsubsection cpfAddPackagesArguments Arguments
 
-#### GLOBAL_FILES ####
+\paragraph cpfAddPackagesGlobalFilesArg GLOBAL_FILES 
 
 This option can be used to add further files to the \ref globalFiles target.
 
@@ -432,7 +432,18 @@ Setting this argument overrides the value of the global \c CPF_ENABLE_ABI_API_ST
 
 This option can be used to enable/disable the \ref clang-format_package target.
 Setting this argument overrides the value of the global \c CPF_ENABLE_CLANG_FORMAT_TARGETS variable for this package.
-Note that you have to make sure the clang-format is available if you enable this option.
+Enabling the clang-format target requires two dependencies.
+
+1. Clang-format must be available in the PATH on Linux platforms.
+If you use Visual Studio 2017 or later you should choose to install clang-format in the
+Visual Studio installer.
+
+2. You need to add the a <code>Sources/.clang-format</code> file to your project.
+This file defines the formatting rules.
+You can also add this file with the \ref cpfAddPackagesGlobalFilesArg
+argument to your project to make it visible in the Visual Studio solution. 
+Read the <a href="https://clang.llvm.org/docs/ClangFormatStyleOptions.html">clang-format documentation</a>
+to see what you have to put into that file.
 
 \paragraph cpfArgEnableClangTidyTarget ENABLE_CLANG_TIDY_TARGET
 
