@@ -52,7 +52,7 @@ function( cpfAddClangFormatTarget package target )
 
     add_custom_target( ${targetName} DEPENDS ${stampFile} )
     set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/pipeline )
-    set_property(TARGET ${targetName} PROPERTY INTERFACE_CPF_CLANG_FORMAT_SUBTARGET ${targetName} )
+    set_property(TARGET ${target} PROPERTY INTERFACE_CPF_CLANG_FORMAT_SUBTARGET ${targetName} )
 
 endfunction()
 
