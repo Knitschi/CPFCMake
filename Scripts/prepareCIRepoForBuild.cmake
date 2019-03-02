@@ -132,8 +132,8 @@ else()
 
         # Update the owned packages
         set(updatedPackages)
-        cpfGetOwnedLoosePackages( ownedPackages ${ROOT_DIR})
-        foreach( package ${ownedPackages} )
+        cpfGetOwnedLoosePackages( ownedLoosePackages ${ROOT_DIR})
+        foreach( package ${ownedLoosePackages} )
             message( STATUS "Check package ${package}")
 
             cpfGetAbsPackageDirectory( packageDir ${package} ${ROOT_DIR})
@@ -167,6 +167,17 @@ else()
                 message(STATUS "Run clang-format")
                 cpfExecuteProcess( unused "python3 Sources/CPFBuildscripts/0_CopyScripts.py" ${ROOT_DIR})
                 cpfExecuteProcess( unused "python3 3_Make.py ${CONFIG} --target clang-format" ${ROOT_DIR})
+
+                # Commit the changes made to the packges.
+                foreach(package ${ownedLoosePackages})
+                    cpfGetAbsPackageDirectory( packageDir ${package} ${ROOT_DIR})
+                    cpfWorkingDirectoryIsDirty(isDirty "${packageDir}")
+                    if(isDirty)
+                        cpfExecuteProcess( unused "git commit . -m\"clang-format\"" "${packageDir}")
+                        cpfTryPushCommitsAndNotes( unused origin "${packageDir}")
+                    endif()
+                endforeach()
+
             endif()
         endif()
 
@@ -177,7 +188,7 @@ else()
         if(isDirty) # we actually updated a package
             # Explicitly fetch the notes. Normal pull does not do it.
             cpfExecuteProcess( unused "git fetch origin refs/notes/*:refs/notes/*" "${ROOT_DIR}")
-            cpfExecuteProcess( unused "git commit . -m\"Update package(s): ${updatedPackages}\"" "${ROOT_DIR}")
+            cpfExecuteProcess( unused "git commit . -m\"clang-format and updates package(s): ${updatedPackages}\"" "${ROOT_DIR}")
             cpfExecuteProcess( unused "git notes append -m\"${CPF_DONT_TRIGGER_NOTE}\" HEAD" "${ROOT_DIR}")
         else() 
             # no package updates were done. We do not need to wait for a successful push
