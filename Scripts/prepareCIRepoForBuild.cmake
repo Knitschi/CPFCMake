@@ -18,7 +18,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 include(cpfMiscUtilities)
 include(cpfGitUtilities)
 include(cpfProjectUtilities)
-include(FindPython3)
 
 cpfAssertScriptArgumentDefined(ROOT_DIR)
 cpfAssertScriptArgumentDefined(GIT_REF)
@@ -154,10 +153,6 @@ else()
 
         # Format the owned packags if the project has a .clang-tidy file.
         if(EXISTS "${ROOT_DIR}/Sources/.clang-format")
-            find_package(Python3 COMPONENTS Interpreter)
-            if(NOT Python3_Interpreter_FOUND)
-                message(FATAL_ERROR "Could not find Python 3 which is needed to build the clang-format target.")
-            endif()
             # Currently the build-job from CPFMachines will pass in an empty config if the project
             # has no configuration that builds on the debian node. The problem is that we need to set
             # know the node-label for the prepare step before we can read the configurations.
@@ -167,7 +162,9 @@ else()
                 message(WARNING "Running clang-format is not possible since the CIBuildConfigurations.json file does not contain any configuration for the Debian build-slave.")
             else()
                 # Execute clang-tidy by building the clang-format target.
-                cpfExecuteProcess( unused "\"${Python3_EXECUTABLE}\" 3_Make.py ${CONFIG} --target clang-format" ${ROOT_DIR})
+                # As long as we only do this on Linux we can use the python3 command directly.
+                # I failed to do this using the FindPython3 module, because it does not work in script mode.
+                cpfExecuteProcess( unused "python3 3_Make.py ${CONFIG} --target clang-format" ${ROOT_DIR})
             endif()
         endif()
 
