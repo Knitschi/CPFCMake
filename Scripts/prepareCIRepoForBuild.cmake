@@ -11,18 +11,20 @@
 #                   It must be one of incrementMajor, incrementMinor, incrementPatch. Other values are ignored.
 # RELEASED_PACKAGE: This option must hold the name of a package or be empty. It is only used when a release version
 #                   tag is created for the specified package. If the value is empty, the CI-project repository is tagged.
+# CONFIG:           The configuration that is used to build the clang-format target.
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 
 include(cpfMiscUtilities)
 include(cpfGitUtilities)
 include(cpfProjectUtilities)
+include(FindPython3)
 
 cpfAssertScriptArgumentDefined(ROOT_DIR)
 cpfAssertScriptArgumentDefined(GIT_REF)
 cpfAssertScriptArgumentDefined(TAGGING_OPTION)
 cpfAssertScriptArgumentDefined(RELEASED_PACKAGE)
-
+cpfAssertScriptArgumentDefined(CONFIG)
 
 # Checkout the requested reference of the CI-repository
 # This is necessary because the GitSCM step always
@@ -150,9 +152,24 @@ else()
             endif()
         endforeach()
 
-        # At this point we could execute a formatting script on all owned packages.
-        # After that we would have to commit and push all owned packages with the dontTrigger note.
-
+        # Format the owned packags if the project has a .clang-tidy file.
+        if(EXISTS "${ROOT_DIR}/Sources/.clang-format")
+            find_package(Python3 COMPONENTS Interpreter)
+            if(NOT Python3_Interpreter_FOUND)
+                message(FATAL_ERROR "Could not find Python 3 which is needed to build the clang-format target.")
+            endif()
+            # Currently the build-job from CPFMachines will pass in an empty config if the project
+            # has no configuration that builds on the debian node. The problem is that we need to set
+            # know the node-label for the prepare step before we can read the configurations.
+            # A possible solution would be to add another option to the buildjob to set a label for the
+            # prepare stage. See Knitschi/CPFMachines#10
+            if(NOT CONFIG)
+                message(WARNING "Running clang-format is not possible since the CIBuildConfigurations.json file does not contain any configuration for the Debian build-slave.")
+            else()
+                # Execute clang-tidy by building the clang-format target.
+                cpfExecuteProcess( unused "\"${Python3_EXECUTABLE}\" 3_Make.py ${CONFIG} --target clang-format" ${ROOT_DIR})
+            endif()
+        endif()
 
         # Commit the update
         # We need to explicitly check if we need to make commmits because it is possible that we
