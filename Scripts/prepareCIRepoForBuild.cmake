@@ -164,6 +164,7 @@ else()
                 # Execute clang-tidy by building the clang-format target.
                 # As long as we only do this on Linux we can use the python3 command directly.
                 # I failed to do this using the FindPython3 module, because it does not work in script mode.
+                cpfExecuteProcess( unused "python3 Sources/CPFBuildscripts/0_CopyScripts.py" ${ROOT_DIR})
                 cpfExecuteProcess( unused "python3 3_Make.py ${CONFIG} --target clang-format" ${ROOT_DIR})
             endif()
         endif()
