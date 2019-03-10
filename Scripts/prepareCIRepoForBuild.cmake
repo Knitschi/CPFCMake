@@ -173,11 +173,17 @@ else()
                 foreach(package ${ownedLoosePackages})
                     cpfGetAbsPackageDirectory( packageDir ${package} "${ROOT_DIR}")
 
-                    cpfExecuteProcess( status "git status" "${packageDir}")
-                    devMessage("-- ${status}")
-
                     cpfWorkingDirectoryIsDirty(isDirty "${packageDir}")
                     if(isDirty)
+
+                        cpfExecuteProcess( status "git status" "${packageDir}")
+                        devMessage("status in ${packageDir}:")
+                        devMessage("${status}")
+
+                        cpfExecuteProcess( diffIndex "git diff-index HEAD" "${packageDir}")
+                        devMessage("diff index:")
+                        devMessage("${diffIndex}")
+
                         cpfExecuteProcess( unused "git commit . -m\"clang-format\"" "${packageDir}")
                         cpfTryPushCommitsAndNotes( unused origin "${packageDir}")
                         cpfListAppend( updatedPackages ${package})
