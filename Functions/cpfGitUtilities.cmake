@@ -303,8 +303,8 @@ endfunction()
 function( cpfGitStatus repositoryDir )
 
 	cpfExecuteProcess( status "git status" "${repositoryDir}")
-	devMessage("status in ${repositoryDir}:")
-	devMessage("${status}")
+	#devMessage("status in ${repositoryDir}:")
+	#devMessage("${status}")
 
 endfunction()
 

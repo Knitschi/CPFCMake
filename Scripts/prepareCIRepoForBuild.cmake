@@ -172,7 +172,7 @@ else()
                 # Commit the changes made to the packges.
                 foreach(package ${ownedLoosePackages})
                     cpfGetAbsPackageDirectory( packageDir ${package} "${ROOT_DIR}")
-                    cpfGitStatus("${packageDir}")
+                    cpfGitStatus("${packageDir}") # This call fixed some strange problems where cpfWorkingDirectoryIsDirty() returned incorrect values.
                     cpfWorkingDirectoryIsDirty(isDirty "${packageDir}")
                     if(isDirty)
                         cpfExecuteProcess( unused "git commit . -m\"clang-format\"" "${packageDir}")
@@ -191,8 +191,8 @@ else()
         # Commit the update
         # We need to explicitly check if we need to make commmits because it is possible that we
         # update the packages to the revision that is stored in the host repo.
-        cpfGitStatus("${ROOT_DIR}")
-        cpfWorkingDirectoryIsDirty(isDirty "${ROOT_DIR}")
+        cpfGitStatus("${ROOT_DIR}")  # This call fixed some strange problems where cpfWorkingDirectoryIsDirty() returned incorrect values.
+        cpfWorkingDirectoryIsDirty(isDirty "${ROOT_DIR}") 
         if(isDirty) # we actually updated a package
             # Explicitly fetch the notes. Normal pull does not do it.
             cpfExecuteProcess( unused "git fetch origin refs/notes/*:refs/notes/*" "${ROOT_DIR}")
