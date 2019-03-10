@@ -172,15 +172,6 @@ else()
                 # Commit the changes made to the packges.
                 foreach(package ${ownedLoosePackages})
                     cpfGetAbsPackageDirectory( packageDir ${package} "${ROOT_DIR}")
-
-                    cpfExecuteProcess( status "git status" "${packageDir}")
-                    devMessage("status in ${packageDir}:")
-                    devMessage("${status}")
-
-                    cpfExecuteProcess( diffIndex "git diff-index HEAD" "${packageDir}")
-                    devMessage("diff index:")
-                    devMessage("${diffIndex}")
-
                     cpfWorkingDirectoryIsDirty(isDirty "${packageDir}")
                     if(isDirty)
                         cpfExecuteProcess( unused "git commit . -m\"clang-format\"" "${packageDir}")
@@ -195,6 +186,15 @@ else()
         if(updatedPackages)
             list(REMOVE_DUPLICATES updatedPackages)
         endif()
+
+
+        cpfExecuteProcess( status "git status" "${ROOT_DIR}")
+        devMessage("status in ${ROOT_DIR}:")
+        devMessage("${status}")
+
+        cpfExecuteProcess( diffIndex "git diff-index HEAD" "${ROOT_DIR}")
+        devMessage("diff index:")
+        devMessage("${diffIndex}")
 
         # Commit the update
         # We need to explicitly check if we need to make commmits because it is possible that we
