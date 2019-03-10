@@ -290,6 +290,15 @@ function( cpfWorkingDirectoryIsDirty isDirtyOut repositoryDir)
 	if( ${result} EQUAL 0 )
 		set(${isDirtyOut} FALSE PARENT_SCOPE)
 	else()
+
+		cpfExecuteProcess( status "git status" "${repositoryDir}")
+		devMessage("status in ${repositoryDir}:")
+		devMessage("${status}")
+
+		cpfExecuteProcess( diffIndex "git diff-index HEAD" "${repositoryDir}")
+		devMessage("diff index:")
+		devMessage("${diffIndex}")
+
 		set(${isDirtyOut} TRUE PARENT_SCOPE)
 	endif()
 

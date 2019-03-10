@@ -187,15 +187,6 @@ else()
             list(REMOVE_DUPLICATES updatedPackages)
         endif()
 
-
-        cpfExecuteProcess( status "git status" "${ROOT_DIR}")
-        devMessage("status in ${ROOT_DIR}:")
-        devMessage("${status}")
-
-        cpfExecuteProcess( diffIndex "git diff-index HEAD" "${ROOT_DIR}")
-        devMessage("diff index:")
-        devMessage("${diffIndex}")
-
         # Commit the update
         # We need to explicitly check if we need to make commmits because it is possible that we
         # update the packages to the revision that is stored in the host repo.
