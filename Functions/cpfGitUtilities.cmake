@@ -285,6 +285,8 @@ function( cpfWorkingDirectoryIsDirty isDirtyOut repositoryDir)
 		RESULT_VARIABLE result
 	)
 
+	devMessage("is dirty result: ${result}")
+
 	if( ${result} EQUAL 0 )
 		set(${isDirtyOut} FALSE PARENT_SCOPE)
 	else()
