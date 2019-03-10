@@ -279,6 +279,7 @@ endfunction()
 # Returns FALSE if there are no changes in the current working directory
 function( cpfWorkingDirectoryIsDirty isDirtyOut repositoryDir)
 
+	#[[
 	cpfExecuteProcess( status "git status" "${repositoryDir}")
 	devMessage("status in ${repositoryDir}:")
 	devMessage("${status}")
@@ -286,6 +287,7 @@ function( cpfWorkingDirectoryIsDirty isDirtyOut repositoryDir)
 	cpfExecuteProcess( diffIndex "git diff-index HEAD" "${repositoryDir}")
 	devMessage("diff index:")
 	devMessage("${diffIndex}")
+	]]
 
 	execute_process(
 		COMMAND git;diff-index;--quiet;HEAD
@@ -293,7 +295,7 @@ function( cpfWorkingDirectoryIsDirty isDirtyOut repositoryDir)
 		RESULT_VARIABLE result
 	)
 
-	devMessage("is dirty result ${repositoryDir}: ${result}")
+	#devMessage("is dirty result ${repositoryDir}: ${result}")
 
 	if( ${result} EQUAL 0 )
 		set(${isDirtyOut} FALSE PARENT_SCOPE)

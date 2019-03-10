@@ -497,8 +497,12 @@ function( cpfFindRequiredTools )
 	if(CPF_ENABLE_CLANG_TIDY_TARGET)
 		cpfGetCompiler(compiler)
 		if( ${compiler} STREQUAL Clang)
-			set(CLANG_TIDY clang-tidy-3.9) # We should get this from hunter some day.
-			cpfFindRequiredProgram(TOOL_CLANG_TIDY ${CLANG_TIDY} "A tool from the LLVM project that performs static analysis of cpp code" "")
+			
+			if(NOT CPF_CLANG_TIDY_EXE)
+				set(CPF_CLANG_TIDY_EXE clang-tidy)
+			endif()
+			cpfFindRequiredProgram(TOOL_CLANG_TIDY ${CPF_CLANG_TIDY_EXE} "A tool from the LLVM project that performs static analysis of cpp code" "")
+		
 		endif()
 		cpfFindRequiredProgram( TOOL_ACYCLIC acyclic "A tool from the graphviz library that can check if a graphviz graph is acyclic" "")
 	endif()
