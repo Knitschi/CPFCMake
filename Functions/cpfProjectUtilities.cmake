@@ -504,9 +504,14 @@ function( cpfFindRequiredTools )
 	endif()
 
 	if(CPF_ENABLE_CLANG_FORMAT_TARGETS)
-		# Find clang-tidy
+
+		if(NOT CPF_CLANG_FORMAT_EXE)
+			set(CPF_CLANG_FORMAT_EXE clang-format)
+		endif()
+
+		# Find clang-format
 		cpfGetClangFormatSearchPath(clangFormatPath)
-		cpfFindRequiredProgram( TOOL_CLANG_FORMAT clang-format "A tool that formats .cpp and .c files." "${clangFormatPath}")
+		cpfFindRequiredProgram( TOOL_CLANG_FORMAT ${CPF_CLANG_FORMAT_EXE} "A tool that formats .cpp and .c files." "${clangFormatPath}")
 	endif()
 
 	if(Qt5Gui_FOUND )
