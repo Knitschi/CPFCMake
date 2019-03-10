@@ -175,10 +175,15 @@ else()
                     if(isDirty)
                         cpfExecuteProcess( unused "git commit . -m\"clang-format\"" "${packageDir}")
                         cpfTryPushCommitsAndNotes( unused origin "${packageDir}")
+                        cpfListAppend( updatedPackages ${package})
                     endif()
                 endforeach()
 
             endif()
+        endif()
+
+        if(updatedPackages)
+            list(REMOVE_DUPLICATES updatedPackages)
         endif()
 
         # Commit the update
