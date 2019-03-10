@@ -171,6 +171,7 @@ else()
                 # Commit the changes made to the packges.
                 foreach(package ${ownedLoosePackages})
                     cpfGetAbsPackageDirectory( packageDir ${package} ${ROOT_DIR})
+                    devMessage("${packageDir}")
                     cpfWorkingDirectoryIsDirty(isDirty "${packageDir}")
                     if(isDirty)
                         cpfExecuteProcess( unused "git commit . -m\"clang-format\"" "${packageDir}")

@@ -278,6 +278,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns FALSE if there are no changes in the current working directory
 function( cpfWorkingDirectoryIsDirty isDirtyOut repositoryDir)
+
 	execute_process(
 		COMMAND git;diff-index;--quiet;HEAD
 		WORKING_DIRECTORY "${repositoryDir}"
@@ -289,6 +290,7 @@ function( cpfWorkingDirectoryIsDirty isDirtyOut repositoryDir)
 	else()
 		set(${isDirtyOut} TRUE PARENT_SCOPE)
 	endif()
+
 endfunction()
 
 #----------------------------------------------------------------------------------------
