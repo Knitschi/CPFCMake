@@ -1,8 +1,8 @@
 # A toolchain file to compile the project on Linux with the clang compiler
 
 
-set(CMAKE_C_COMPILER clang-3.9 CACHE STRING "C compiler" FORCE)
-set(CMAKE_CXX_COMPILER clang++-3.9 CACHE STRING "C++ compiler" FORCE)
+set(CMAKE_C_COMPILER clang-4-0 CACHE STRING "C compiler" FORCE)
+set(CMAKE_CXX_COMPILER clang++-4-0 CACHE STRING "C++ compiler" FORCE)
 
 # -fPic: I can not remember why this flag (generate position independent code) was added. Probably to fix link errors with some underlying package.
 # I think -fPic is needed when building shared libraries.
