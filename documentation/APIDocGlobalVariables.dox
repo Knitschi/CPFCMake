@@ -17,6 +17,8 @@ in your projects default configuration files in the \c CIBuildConfigurations dir
 
 
 - \ref CPF_CI_PROJECT
+- \ref CPF_CLANG_FORMAT_EXE
+- \ref CPF_CLANG_TIDY_EXE
 - \ref CPF_WEBSERVER_BASE_DIR
 - \ref CPF_MINIMUM_CMAKE_VERSION
 - \ref CPF_VERBOSE
@@ -28,6 +30,20 @@ in your projects default configuration files in the \c CIBuildConfigurations dir
 It holds the name of the top-level CI-project that is created in the root \c CMakeLists.txt file.
 The variable is set in the \ref cpfAddPackages function and can then be read from clients in
 the packages \c CMakeLists.txt files.
+
+
+\subsubsection CPF_CLANG_FORMAT_EXE
+
+Setting this may only be required when setting \ref cpfArgEnableClangFormatTargets true.
+The value is used when the CPF looks for the clang-format tool. For example you may set it to
+\c clang-format-6.0 if the executable has that name on your system.
+
+
+\subsubsection CPF_CLANG_TIDY_EXE
+
+Setting this may only be required when setting \ref cpfArgEnableClangTidyTarget true.
+The value is used when the CPF looks for the clang-tidy tool. For example you can set it to
+\c clang-tidy-6.0 if the executable has that name on your system.
 
 
 \subsubsection CPF_WEBSERVER_BASE_DIR
