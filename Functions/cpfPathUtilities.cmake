@@ -126,8 +126,7 @@ endfunction()
 function( cpfGetFilepathsWithExtensions pathsOut filePaths extensions)
 
 	# Prepare a regular expression that matches the extensions.
-	cpfPrependMulti( extensionMatcher "\\" "${extensions}")
-	cpfJoinString( oredExtensionMatcher "${extensionMatcher}" "|" )
+	cpfJoinString( oredExtensionMatcher "${extensions}" "|" )
 	set(regExp ".*\\.(${oredExtensionMatcher})$")
 
 	# Get the files and return them.

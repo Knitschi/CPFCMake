@@ -13,7 +13,7 @@ set( CPF_RUN_ALL_TESTS_TARGET_PREFIX runAllTests_)
 
 #### misc ####
 set( CPF_DONT_TRIGGER_NOTE "dontTr1gger" )                  # We use the 1 as i to minimize risc of clashing with a random use of the word in a commit message.
-set( CPF_CXX_SOURCE_FILE_EXTENSIONS ".c;.cpp;.h;.hpp" )     # These are used by the cpf to identify files that contain source code.
+set( CPF_CXX_SOURCE_FILE_EXTENSIONS "c;cpp;h;hpp" )     # These are used by the cpf to identify files that contain source code.
 
 ###### functions to define combined strings ######
 
