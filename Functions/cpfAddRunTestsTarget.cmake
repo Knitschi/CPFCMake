@@ -105,34 +105,61 @@ endfunction()
 function( cpfAddRunPython3TestTarget testScript args sourceFiles dependedOnPackages dependedOnExternalFiles)
 	if(TOOL_PYTHON3)
 
-		cpfPrependMulti( sourceFiles "${CMAKE_CURRENT_SOURCE_DIR}/" "${sourceFiles}")
-
-		# Get the sources from the depended on packages.
-		foreach( package ${dependedOnPackages})
-			getAbsPathsOfTargetSources( absSources ${package})
-			cpfListAppend( sourceFiles "${absSources}")
-		endforeach()
-
-		# derive the python module path from the script path
-		file( RELATIVE_PATH pathToTestScript ${CPF_ROOT_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/${testScript}")
-		string(REPLACE "/" "." pythonModulePath "${pathToTestScript}" )
-		# remove the .py ending
-		cpfStringRemoveRight( pythonModulePath ${pythonModulePath} 3)
-
-		set( runTestsCommand "\"${TOOL_PYTHON3}\" -u -m ${pythonModulePath} ${args}")
+		# Since there is no generated file for the depended on cmake packages, we get there source files instead
+		# to make the out-of-date mechanism work.
+		cpfGetAllDependedOnSourceFiles(sourceFiles "${sourceFiles}" "${dependedOnPackages}")
+		# Get the basic command for running a python script in module mode
+		cpfGetRunPythonModuleCommand( runScriptCommand "${CMAKE_CURRENT_SOURCE_DIR}/${testScript}")
+		set( runTestsCommand "${runScriptCommand} ${args}")
 		cpfAddCustomTestTarget(${runTestsCommand} "${sourceFiles}" "${dependedOnExternalFiles}" )
 
 	endif()
 endfunction()
 
+#----------------------------------------------------------------------------------------
+function( cpfGetAllDependedOnSourceFiles filesOut sourceFiles dependedOnPackages )
+
+	cpfPrependMulti( absSourceFiles "${CMAKE_CURRENT_SOURCE_DIR}/" "${sourceFiles}")
+
+	# Get the sources from the depended on packages.
+	foreach( package ${dependedOnPackages})
+		getAbsPathsOfTargetSources( absSources ${package})
+		cpfListAppend( absSourceFiles ${absSources})
+	endforeach()
+
+	set(${filesOut} "${absSourceFiles}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetRunPythonModuleCommand commandOut fullScriptPath )
+
+	# derive the python module path from the script path
+	file( RELATIVE_PATH pathToTestScript ${CPF_ROOT_DIR} "${fullScriptPath}")
+	string(REPLACE "/" "." pythonModulePath "${pathToTestScript}" )
+	# remove the .py ending
+	cpfStringRemoveRight( pythonModulePath ${pythonModulePath} 3)
+	set(${commandOut} "\"${TOOL_PYTHON3}\" -u -m ${pythonModulePath}" PARENT_SCOPE)
+
+endfunction()
 
 #----------------------------------------------------------------------------------------
 function( cpfAddCustomTestTarget runTestsCommand sourceFiles dependedOnExternalFiles )
 
 	cpfGetPackageName(package)
-
 	set(runTargetName ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${package})
-	getRunTestStampFile( stampFile ${runTargetName} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX})
+
+	cpfAddCustomTestTargetWithName(${runTargetName} ${runTestsCommand} "${sourceFiles}" "${dependedOnExternalFiles}")
+
+	set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/pipeline")
+	set_property( TARGET ${package} PROPERTY INTERFACE_RUN_TESTS_SUBTARGET ${runTargetName})
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfAddCustomTestTargetWithName targetName runTestsCommand sourceFiles dependedOnExternalFiles )
+
+	getRunTestStampFile( stampFile ${targetName} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX})
 	set( touchCommand "cmake -E touch \"${stampFile}\"" )
 
 	foreach(file ${sourceFiles} ${dependedOnExternalFiles})
@@ -149,12 +176,9 @@ function( cpfAddCustomTestTarget runTestsCommand sourceFiles dependedOnExternalF
 	)
 
 	add_custom_target(
-		${runTargetName}
+		${targetName}
 		DEPENDS "${stampFile}"
 	)
-
-	set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/pipeline")
-	set_property( TARGET ${package} PROPERTY INTERFACE_RUN_TESTS_SUBTARGET ${runTargetName})
 
 endfunction()
 
@@ -174,6 +198,47 @@ function( cpfAddRunCMakeTestScriptTarget testScript sourceFiles)
 
 	cpfAddCustomTestTarget(${runTestsCommand} "${absSourceFiles}" "")
 
+endfunction()
+
+
+#----------------------------------------------------------------------------------------
+# This function adds a target for each of the given test modules so they can be run in parallel.
+# It is the clients responsibility to ensure that there is no interaction between the test-cases of two
+# different modules.
+function( cpfAddRunPython3TestTargetForEachModule testScript modules args sourceFiles dependedOnPackages dependedOnExternalFiles)
+	if(TOOL_PYTHON3)
+
+		cpfGetPackageName(package)
+		set(runModuleTestsTargets)
+
+		# Add one run target for each test module
+		foreach(moduleFile ${modules})
+
+			# remove the .py ending
+			cpfStringRemoveRight( module ${moduleFile} 3)
+
+			# Since there is no generated file for the depended on cmake packages, we get there source files instead
+			# to make the out-of-date mechanism work.
+			set(sourceFilesPlusModule)
+			cpfGetAllDependedOnSourceFiles(sourceFilesPlusModule "${sourceFiles};${moduleFile}" "${dependedOnPackages}")
+			# Get the basic command for running a python script in module mode
+			cpfGetRunPythonModuleCommand( runScriptCommand "${CMAKE_CURRENT_SOURCE_DIR}/${testScript}")
+			set( runTestsCommand "${runScriptCommand} ${args} module=${module}")
+
+			set(runTargetName run_${module})
+			cpfListAppend(runModuleTestsTargets ${runTargetName})
+			cpfAddCustomTestTargetWithName( ${runTargetName} ${runTestsCommand} "${sourceFilesPlusModule}" "${dependedOnExternalFiles}")
+			set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/private")
+
+		endforeach()
+
+		# Add a bundle target to run all module test targets.
+		set(bundleTestTarget ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${package})
+		cpfAddBundleTarget(${bundleTestTarget} "${runModuleTestsTargets}")
+		set_property( TARGET ${bundleTestTarget} PROPERTY FOLDER "${package}/pipeline")
+		set_property( TARGET ${package} PROPERTY INTERFACE_RUN_TESTS_SUBTARGET ${bundleTestTarget})
+
+	endif()
 endfunction()
 
 
