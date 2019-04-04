@@ -27,7 +27,7 @@ function( cpfFindRequiredProgram VAR name comment hints)
 		)
 	
     if( ${${VAR}} STREQUAL ${VAR}-NOTFOUND )
-        message( FATAL_ERROR "The required program \"${name}\" could not be found." )
+        message( FATAL_ERROR "The required program \"${name}\" could not be found.\nThe following search-paths were given: ${hints}" )
     endif()
 
 endfunction()

@@ -540,9 +540,17 @@ function( cpfGetClangFormatSearchPath pathOut )
     if(MSVC)
         cpfNormalizeAbsPath( vswherePath "$ENV{ProgramFiles\(x86\)}/Microsoft Visual Studio/Installer")
         cpfFindRequiredProgram( TOOL_VSWHERE vswhere "A tool that finds visual studio installations." "${vswherePath}")
-		execute_process( COMMAND "${vswherePath}/vswhere.exe" -property installationPath OUTPUT_VARIABLE vsInstallPath)
-		string(STRIP ${vsInstallPath} vsInstallPath)
+		execute_process( 
+			COMMAND "${vswherePath}/vswhere.exe" -property installationPath 
+			OUTPUT_VARIABLE vswhereOutput
+			)
+		string(STRIP "${vswhereOutput}" vswhereOutput)
+		
+		# Use the latest installation, which is the last element in the output.
+		cpfSplitString( outputList "${vswhereOutput}" "\n")
+		cpfPopBack(vsInstallPath dummy "${outputList}")
 		cpfNormalizeAbsPath( clangTidyPath "${vsInstallPath}/Common7/IDE/VC/VCPackages")
+
     endif()
 
     set(${pathOut} "${clangTidyPath}" PARENT_SCOPE)
