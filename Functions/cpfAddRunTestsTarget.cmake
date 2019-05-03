@@ -187,12 +187,7 @@ endfunction()
 # Adds a run-tests target that runs a cmake script
 function( cpfAddRunCMakeTestScriptTarget testScript sourceFiles)
 	
-	# turn into absolute paths
-	set(absSourceFiles)
-	foreach(file ${sourceFiles})
-		cpfToAbsSourcePath( absFile ${file} ${CMAKE_CURRENT_SOURCE_DIR})
-		cpfListAppend(absSourceFiles ${absFile})
-	endforeach()
+	cpfToAbsSourcePaths( absSourceFiles "${sourceFiles}" ${CMAKE_CURRENT_SOURCE_DIR})
 	
 	set( runTestsCommand "cmake -P \"${CMAKE_CURRENT_SOURCE_DIR}/${testScript}\"")
 

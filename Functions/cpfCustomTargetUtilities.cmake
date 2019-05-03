@@ -12,7 +12,11 @@ include(cpfTestUtilities)
 # 
 function( cpfAddStandardCustomCommand )
 
-	cmake_parse_arguments(ARG "" "" "COMMANDS;DEPENDS;OUTPUT" ${ARGN} )
+	cmake_parse_arguments(ARG "" "WORKING_DIRECTORY" "COMMANDS;DEPENDS;OUTPUT" ${ARGN} )
+
+	if(NOT ARG_WORKING_DIRECTORY)
+		set(ARG_WORKING_DIRECTORY ${CPF_ROOT_DIR})
+	endif()
 
 	set(commandArguments)
 	set(comment)
@@ -26,12 +30,25 @@ function( cpfAddStandardCustomCommand )
 		OUTPUT ${ARG_OUTPUT}
 		DEPENDS ${ARG_DEPENDS}
 		${commandArguments}
-		WORKING_DIRECTORY ${CPF_ROOT_DIR}
+		WORKING_DIRECTORY ${ARG_WORKING_DIRECTORY}
 		COMMENT ${comment}
 		VERBATIM
 	)
 	
 	set_source_files_properties(${ARG_OUTPUT} PROPERTIES GENERATED TRUE)
+
+endfunction()
+
+#-----------------------------------------------------------
+function( cpfAddStandardCustomTarget package target sources depends )
+
+    add_custom_target( 
+        ${target}
+        SOURCES ${sources}
+        DEPENDS ${depends}
+    )
+    set_property( TARGET ${target} PROPERTY FOLDER ${package} )
+    cpfSetIDEDirectoriesForTargetSources(${target})
 
 endfunction()
 

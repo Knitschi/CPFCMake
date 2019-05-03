@@ -134,13 +134,24 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Assumes that the given path is either relative to CMAKE_CURRENT_SOURCE dir or an absolute
-# path and prepends CMAKE_CURRENT_SCOURDE dir if it is relative.
+# path and prepends CMAKE_CURRENT_SCOURCE dir if it is relative.
 function( cpfToAbsSourcePath absPathOut sourceFile sourceDir)
 	cpfIsAbsolutePath( isAbsPath ${sourceFile})
 	if(NOT isAbsPath )
 		set(sourceFile ${sourceDir}/${sourceFile} )
 	endif()
 	set(${absPathOut} "${sourceFile}" PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Calls cpfToAbsSourcePath() for multiple files.
+function( cpfToAbsSourcePaths absPathsOut sourceFiles sourceDir)
+	set(absFiles)
+	foreach(file ${sourceFiles})
+		cpfToAbsSourcePath( absFile ${file} ${sourceDir})
+		cpfListAppend(absFiles ${absFile})
+	endforeach()
+	set(${absPathsOut} "${absFiles}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------

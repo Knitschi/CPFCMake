@@ -25,8 +25,7 @@ function( cpfAddFilePackage )
     cpfAssertProjectVersionDefined()
 
     cpfGetPackageName(package)
-    add_custom_target( ${package} SOURCES ${ARG_SOURCES} )
-    set_property( TARGET ${package} PROPERTY FOLDER ${package} )
-	cpfSetIDEDirectoriesForTargetSources(${package})
+    cpfAddStandardCustomTarget(${package} ${package} "${ARG_SOURCES}" "")
 
 endfunction()
+

@@ -777,4 +777,38 @@ directory that is required when using the server-side search feature of doxygen.
 The directory will be created in the <code>Generated/\<config\>/html/cgi-bin</code> directory.
 
 
+\section cpfAddSphinxPackageModule Module cpfAddSphinxPackage.cmake
+
+This module provides the following function.
+
+- \ref cpfAddSphinxPackage
+
+\subsection cpfAddSphinxPackage cpfAddSphinxPackage()
+
+\verbatim
+cpfAddSphinxPackage(
+    [CONFIG_FILE_DIR]               dir
+    [OTHER_FILES]                   file1 ...
+    [ADDITIONAL_SPHINX_ARGUMENTS]   arg1 val1 arg2 val2 ...
+)
+\endverbatim
+
+This function creates a target that runs the python based sphinx documentation generator
+using a given configuration file.
+
+\subsubsection cpfAddSphinxPackageArguments Arguments
+
+#### CONFIG_FILE_DIR ####
+
+A relative path to the directory that holds the <code>conf.py</code> file that configures your
+sphinx project. When not given, the source directory of the package is used.
+
+#### OTHER_FILES ####
+
+All other files that belong to the documentation package.
+
+#### ADDITIONAL_SPHINX_ARGUMENTS ####
+
+A list of command line arguments that are passed on to the sphinx tool.
+
 */

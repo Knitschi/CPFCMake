@@ -18,17 +18,17 @@ set( files
 	${CPF_DEFAULT_CONFIGS_DIR}/MSVC2017.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/PlatformIndependent.config.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Windows.config.cmake
-	documentation/APIDocGlobalVariables.dox
-	documentation/APIDocModules.dox
-	documentation/Configuration.dox
-	documentation/CPFCMake.dox
-	documentation/CustomTargets.dox
-	documentation/DistributionPackages.dox
-	documentation/DocumentationTargets.dox
-	documentation/KnownProblems.dox
-	documentation/TestTargets.dox
-	documentation/Versioning.dox
-	documentation/PackagesCMake.dox
+	documentation/APIDocGlobalVariables.rst
+	documentation/APIDocModules.rst
+	documentation/Configuration.rst
+	documentation/CPFCMake.rst
+	documentation/CustomTargets.rst
+	documentation/DistributionPackages.rst
+	documentation/DocumentationTargets.rst
+	documentation/KnownProblems.rst
+	documentation/TestTargets.rst
+	documentation/Versioning.rst
+	documentation/PackagesCMake.rst
 	Functions/cpfAddAcyclicTarget.cmake
 	Functions/cpfAddClangTidyTarget.cmake
 	Functions/cpfAddClangFormatTarget.cmake
@@ -43,6 +43,7 @@ set( files
 	Functions/cpfAddPipelineTargetDependencies.cmake
 	Functions/cpfAddRunTestsTarget.cmake
 	Functions/cpfAddRunUicTarget.cmake
+	Functions/cpfAddSphinxPackage.cmake
 	Functions/cpfAddValgrindTarget.cmake
 	Functions/cpfAddVersionRcPreBuildEvent.cmake
 	Functions/cpfCustomTargetUtilities.cmake
