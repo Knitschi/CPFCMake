@@ -1,8 +1,9 @@
-/**
 
-\page CPFCustomTargets Custom targets
+Custom targets
+==============
 
-\section CustomTargetsInACPFProject The custom targets in a CPF project
+The custom targets in a CPF project
+-----------------------------------
 
 The build pipeline of a CPF project is implemented with CMake *custom-targets*. In order to execute
 one of those tasks separately from the whole pipeline, one has to build that *target* with the
@@ -21,7 +22,8 @@ The following sections contain lists with the names of available custom targets.
 The lists do not contain some private targets of the CPF that are only created as sub-steps of the
 targets that are of interest to the user.
 
-\subsection GlobalTargets Global targets
+Global targets
+^^^^^^^^^^^^^^
 
 A CPF project contains some targets that operate on the global level.
 They either execute operations that can not be done for each package
@@ -31,123 +33,147 @@ per-package targets of that kind.
 
 Here is a list of targets that can exist once per CPF project.
 
-- \ref abicompliancechecker
-- \ref acyclic
-- \ref ALL_BUILD
-- \ref clang-format
-- \ref clang-tidy
-- \ref distributionPackages
-- \ref globalFiles
-- \ref install
-- \ref opencppcoverage
-- \ref pipeline
-- \ref runAllTests
-- \ref runFastTests
-- \ref valgrind
-- \ref ZERO_CHECK
+- `abi-compliance-checker`_
+- `acyclic`_
+- `ALL_BUILD (Visual Studio) / all (Makefiles)`_
+- `clang-format`_
+- `clang-tidy`_
+- `distributionPackages`_
+- `globalFiles`_
+- `install`_
+- `opencppcoverage`_
+- `pipeline`_
+- `runAllTests`_
+- `runFastTests`_
+- `valgrind`_
+- `ZERO_CHECK (Visual Studio)`_
 
 
-\subsection PackageTargets Package targets
+Package targets
+^^^^^^^^^^^^^^^
 
 Here is a list of targets that can exist once per CPF package.
 
-- \ref abicompliancechecker_package
-- \ref clang-format_package
-- \ref clang-tidy_package
-- \ref distributionPackages_package
-- \ref opencppcoverage_package
-- \ref package
-- \ref package_fixtures
-- \ref package_tests
-- \ref runAllTests_package
-- \ref runFastTests_package
-- \ref valgrind_package
+- :ref:`abicompliancechecker_package`
+- :ref:`clang-format_package`
+- :ref:`clang-tidy_package`
+- :ref:`distributionPackages_package`
+- :ref:`opencppcoverage_package`
+- :ref:`package`
+- :ref:`package_fixtures`
+- :ref:`package_tests`
+- :ref:`runAllTests_package`
+- :ref:`runFastTests_package`
+- :ref:`valgrind_package`
 
 
-\subsection PrivateTargets Private targets
+Private targets
+^^^^^^^^^^^^^^^
 
 Here is a list of targets that are used as implementation details for other targets.
 If everything works, they should be of no further interest, but more information
 about them may be of interest if you need to debug problems with the CPF.
 
 
+Target annotations
+^^^^^^^^^^^^^^^^^^
 
 
-\subsection TargetAnnotations Target annotations
-
-\subsubsection abicompliancechecker abi-compliance-checker
+abi-compliance-checker
+""""""""""""""""""""""
 
 This target bundles the \ref abicompliancechecker_package targets.
 
-\subsubsection acyclic acyclic
+
+acyclic
+"""""""
 
 The target checks that the projects target dependency graph is acyclic.
 This target can be disabled with the \c CPF_ENABLE_ACYCLIC_TARGET variable.
 
-\subsubsection ALL_BUILD ALL_BUILD (Visual Studio) / all (Makefiles)
+.. _ALL_BUILD:
+
+ALL_BUILD (Visual Studio) / all (Makefiles)
+"""""""""""""""""""""""""""""""""""""""""""
 
 This target builds all binary targets. Note that the name depends on the
 CMake generator in use.
 
-\subsubsection clang-format clang-format
+
+clang-format
+""""""""""""
 
 This target bundles the \ref clang-format_package targets.
 Note that this target is not included in the pipeline target.
 
-\subsubsection clang-tidy clang-tidy
+
+clang-tidy
+""""""""""
 
 This target bundles the \ref clang-tidy_package targets.
 
-\subsubsection distributionPackages distributionPackages
+distributionPackages
+""""""""""""""""""""
 
 This target bundles the \ref distributionPackages_package targets.
 
-\subsubsection globalFiles globalFiles
+globalFiles
+"""""""""""
 
 This is only a file container target that does not execute any commands.
 It holds all source files that are of global scope like tool configuration
 files, global documentation, etc..
 
-\subsubsection install install
+install
+"""""""
 
 This CMake standard target copies all installed files to the directory specified
 with CMAKE_INSTALL_PREFIX. Not that this includes runtime files, developer files,
 external shared library dependencies and source files.
 
-\subsubsection opencppcoverage opencppcoverage
+opencppcoverage
+"""""""""""""""
 
 This target bundles the \ref opencppcoverage_package targets. It also
 combines the temporary output of the \ref opencppcoverage_package targets
 into the final html report that can be found in the html output directory.
 
-\subsubsection pipeline pipeline
+pipeline
+""""""""
 
 The top-level bundle target that will make sure that all other targets are built.
 
-\subsubsection runAllTests runAllTests
+runAllTests
+"""""""""""
 
 This target bundles the \ref runAllTests_package targets.
 
-\subsubsection runFastTests runFastTests
+runFastTests
+""""""""""""
 
 This target bundles the \ref runFastTests_package targets. This target is not
 contained in the \ref pipeline target which always builds the \ref runAllTests target.
 
-\subsubsection valgrind valgrind
+valgrind
+""""""""
 
 This target bundles the \ref valgrind_package targets.
 
-\subsubsection ZERO_CHECK ZERO_CHECK (Visual Studio)
+ZERO_CHECK (Visual Studio)
+""""""""""""""""""""""""""
 
 A CMake default target that runs the CMake generate step. This is only available for
 when using Visual Studio.
 
-\subsubsection abicompliancechecker_package abi-compliance-checker_\&lt;package\&gt;
+.. _abicompliancechecker_package:
+
+abi-compliance-checker_\&lt;package\&gt;
+""""""""""""""""""""""""""""""""""""""""
 
 This is a bundle target that runs the Abi-Compliance-Checker tool. The target only exists for
 project configurations that use *Gcc* with debug flags and for shared library packages.
 
-#### Report compatibility ####
+**Report compatibility**
 The basic functionality is to create html reports that compare the abi/api-compatibility of
 a previous libray package version with the current one. The reporst are added to the project
 web-page. To enable this, the target must be able to download previously generated distribution 
@@ -155,19 +181,23 @@ packages of that package from the project web-page, which must contain generated
 This complex requirement makes the target somewhat fragile. This functionality can be 
 disabled with the \c CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS config variable.
 
-#### Enforce compatibility ####
+**Enforce compatibility**
 You can also enable targets that will fail to build if abi or api compatibility is hurt
 by your current changes. This option can be switched on in stable branches. To do so
 use the \c CPF_CHECK_ABI_STABLE and \c CPF_ENABLE_ABI_API_STABILITY_CHECK_TARGETS config variables.
 
-\subsubsection clang-format_package clang-format_\&lt;binary-target\&gt;
+.. _clang-format_package:
 
+clang-format_\&lt;binary-target\&gt;
+""""""""""""""""""""""""""""""""""""
 This target runs clang-format on the source files of a binary target.
 The targets are only created for the binary targets of *owned* packages.
-The target can be enabled with the CPF_\ref cpfArgEnableClangFormatTargets variable.
+The target can be enabled with the CPF\_:ref:`cpfArgEnableClangFormatTargets` variable.
 
+.. _clang-tidy_package:
 
-\subsubsection clang-tidy_package clang-tidy_\&lt;package\&gt;
+clang-tidy_\&lt;package\&gt;
+""""""""""""""""""""""""""""
 
 This target only exists when compiling on Linux with the clang compiler.
 It runs the \c clang-tidy tool on the source files of the packages production
@@ -175,14 +205,20 @@ library target.
 
 The target can be disabled with the \c CPF_ENABLE_CLANG_TIDY_TARGET config variable.
 
-\subsubsection distributionPackages_package distributionPackages_\&lt;package\&gt;
+.. _distributionPackages_package:
+
+distributionPackages_\&lt;package\&gt;
+""""""""""""""""""""""""""""""""""""""
 
 Creates all *distribution packages* of the package. A *distribution package* is a file that is
 distributed to users of the package. This can be a zip file that contains the binaries or sources or 
 an installer. The target is only created if the \c addPackage() function has the \c DISTRIBUTION_PACKAGES
 argument set.
 
-\subsubsection opencppcoverage_package opencppcoverage_\&lt;package\&gt;
+.. _opencppcoverage_package:
+
+opencppcoverage_\&lt;package\&gt;
+"""""""""""""""""""""""""""""""""
 
 This target runs the test executable with OpenCppCoverage tool in order to create
 an html report that shows the code lines that are hit while running the tests.
@@ -191,28 +227,47 @@ only run the tool when compiling in *Debug* configuration.
 
 The target can be disabled with the \c CPF_ENABLE_OPENCPPCOVERAGE_TARGET config variable.
 
-\subsubsection package \&lt;package\&gt;
+.. _package:
+
+\&lt;package\&gt;
+"""""""""""""""""
 
 The main binary target of the package.
 
-\subsubsection package_fixtures \&lt;package\&gt;_fixtures
+
+.. _package_fixtures:
+
+\&lt;package\&gt;_fixtures
+""""""""""""""""""""""""""
 
 An additional library that can be used to share test utility code between packages.
 It is only created if the \c addPackage() function has the \c FIXTURE_FILES and \c PUBLIC_FIXTURE_HEADER arguments set.
 
-\subsubsection package_tests \&lt;package\&gt;_tests
+
+.. _package_tests:
+
+\&lt;package\&gt;_tests
+"""""""""""""""""""""""
 
 The test executable that belongs to the package. This target is only created
 if the \c addPackage() function has the \c TEST_FILES argument set. The executable
 should run automated tests when executed.
 
-\subsubsection runAllTests_package runAllTests_\&lt;package\&gt;
+
+.. _runAllTests_package:
+
+
+runAllTests_\&lt;package\&gt;
+"""""""""""""""""""""""""""""
 
 This target runs all the tests in the \ref package_tests executable.
 
 The target can be disabled with the \c CPF_ENABLE_RUN_TESTS_TARGET config variable.
 
-\subsubsection runFastTests_package runFastTests_\&lt;package\&gt;
+.. _runFastTests_package:
+
+runFastTests_\&lt;package\&gt;
+""""""""""""""""""""""""""""""
 
 This target runs all the tests in the \ref package_tests executable that have either
 the word *FastFixture* or *FastTests* included in their name. It is the the users
@@ -223,7 +278,11 @@ an which are therefor useful when working in a tight test-driven development cyc
 
 The target can be disabled with the \c CPF_ENABLE_RUN_TESTS_TARGET config variable.
 
-\subsubsection valgrind_package valgrind_\&lt;package\&gt;
+
+.. _valgrind_package:
+
+valgrind_\&lt;package\&gt;
+""""""""""""""""""""""""""
 
 This target runs the test executable with the *Valgrind* tool, which
 can help to detect memory leaks or undifined behavior. The target
@@ -235,14 +294,3 @@ issues that are found by *Valgrind*.
 
 The target can be disabled with the \c CPF_ENABLE_VALGRIND_TARGET config variable.
 
-
-
-
-
-
-
-
-
-
-
-*/

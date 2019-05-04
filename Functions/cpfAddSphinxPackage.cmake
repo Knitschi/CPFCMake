@@ -48,9 +48,10 @@ function( cpfAddSphinxPackage )
 		set(outputDir ${outputDir}/${ARG_OUTPUT_SUBDIR})
 	endif()
 
-	# Assert that the index.rst file exists
-	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/index.rst )
-		message(FATAL_ERROR "Error! The Sphinx package requires an index.rst file to be present in the packages source directory.")
+    # Assert that the index.rst file exists
+    set(sphinxSourceDir ${CMAKE_SOURCE_DIR})
+	if(NOT EXISTS ${sphinxSourceDir}/index.rst )
+		message(FATAL_ERROR "Error! The Sphinx package requires an index.rst file to be present in the build projects source directory.")
 	endif()
 
     # locations
@@ -58,7 +59,7 @@ function( cpfAddSphinxPackage )
     cpfToAbsSourcePaths(sourceFiles "${ARG_OTHER_FILES}" ${CMAKE_CURRENT_SOURCE_DIR})
     set(stampFile ${CMAKE_CURRENT_BINARY_DIR}/sphinx.stamp)
 
-    set(sphinxCommand "\"${TOOL_SPHINX-BUILD}\" -c \"${absConfigDir}\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"${outputDir}\" -j auto ${ARG_ADDITIONAL_SPHINX_ARGUMENTS}")
+    set(sphinxCommand "\"${TOOL_SPHINX-BUILD}\" -c \"${absConfigDir}\" \"${sphinxSourceDir}\" \"${outputDir}\" -j auto ${ARG_ADDITIONAL_SPHINX_ARGUMENTS}")
     # We create a stampfile here for outdating the target because we do not know what the users shpinx configuration will produce.
     set(stampCommand "\"${CMAKE_COMMAND}\" -E touch \"${stampFile}\"")
 

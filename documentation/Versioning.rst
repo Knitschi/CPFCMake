@@ -1,9 +1,11 @@
-/**
-\page CPFVersioning Versioning
+
+Versioning
+==========
 
 This page contains information on how the versioning problem is handled in the CPF.
 
-\section CPFVersionTags Version Tags
+Version Tags
+------------
 
 The source of a version number is the Git repository that contains the package or CI-repository. During the *generate step*, The CPF
 determines the current version number of each package by reading the release version tags of the repository.
@@ -18,7 +20,8 @@ work.
 \see \ref PackageOwnership
 
 
-\subsection CPFReleaseVersion Release version format
+Release version format
+----------------------
 
 <b>Format:</b>    &lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;
 <b>Examples:</b>   \c 1.0.1, \c 0.0.99
@@ -30,7 +33,8 @@ when the developer deems a commit worthy to be published. This can also be done 
 that is provided by the CPFMachines package.
 
 
-\subsection CPFInternalVersion Internal version format
+Internal version format
+-----------------------
 
 <b>Format:</b>     &lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;.&lt;commit-nr.&gt;-&lt;hash&gt;
 <b>Examples:</b>   \c 1.0.1.13-af4d, \c 0.0.99.1-3h9k0s
@@ -46,24 +50,27 @@ version number. For this reason the version number also contains the first digit
 This part will be as long as is needed to make it unique.
 
 
-\subsection CPFDirtyVersions Dirty versions
+Dirty versions
+--------------
 
 If the repository has local changes that have not yet been committed, the optional \c -dirty postfix
 is added to the version number. Dirty versions can in general not be rebuild by other developers
 and should therefore not be considered when trying to reproduce bugs.
 
 
-\section CPFUseInProductionCode Using the version number in the production code
+Using the version number in the production code
+-----------------------------------------------
 
 For C++ packages, the *CPF* will automatically generate a header file that
 contains the current version number. The version can be obtained in the C++
 code by using:
 
-\verbatim
-#include <MyPackage/cpfPackageVersion_MyPackage.h>
+.. code-block:: cpp
 
-std::string version = mp::getPackageVersion();
-\endverbatim
+  #include <MyPackage/cpfPackageVersion_MyPackage.h>
+
+  std::string version = mp::getPackageVersion();
+
 
 assuming that you have a package \c MyPackage with namespace \c mp.
 
@@ -73,7 +80,8 @@ the package via the \c PROJECT_VERSION variable after the call of the
 version files.
 
 
-\section CPFTagsAsValidationStamp Version tags as validation stamps
+Version tags as validation stamps
+---------------------------------
 
 In the CPF the version tags in the repository are also used to mark commits for
 which the pipeline target was successfully build. This is only enforced in combination
@@ -82,7 +90,8 @@ version tags after successfully building a commit. When this policy is followed,
 can quickly see which commits are worth checking out when they try to build older versions.
 
 
-\section CPFIncrementingVersions Incrementing versions
+Incrementing versions
+---------------------
 
 Version numbers are incremented by adding new release version tags to the repository.
 This can either be done manually or by setting certain parameters to the build-job
@@ -95,6 +104,3 @@ The build-job of the *CPFMachines* package will make sure that all of these requ
 are met, when incrementing version numbers.
 
 \see \ref CPFJobSubsection2
-
-
-*/

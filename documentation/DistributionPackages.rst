@@ -1,8 +1,5 @@
-/**
-\page CPFDistributionPackages Distribution packages 
 
-\todo Discuss package creation and package consumption.
+Distribution packages 
+=====================
 
-
-
-*/
+.. todo:: Discuss package creation and package consumption.
