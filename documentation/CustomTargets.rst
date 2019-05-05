@@ -1,4 +1,6 @@
 
+.. _customtargets:
+
 Custom targets
 ==============
 

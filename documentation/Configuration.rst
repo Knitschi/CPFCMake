@@ -1,4 +1,6 @@
 
+.. _configurationManagement:
+
 Configuration Management
 ========================
 

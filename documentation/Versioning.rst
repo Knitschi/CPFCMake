@@ -50,6 +50,8 @@ version number. For this reason the version number also contains the first digit
 This part will be as long as is needed to make it unique.
 
 
+.. _versioning:
+
 Dirty versions
 --------------
 
