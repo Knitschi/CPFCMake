@@ -52,6 +52,7 @@ In a function call this could look like this:
   )
 
 
+.. _cpfInitModule:
 
 Module cpfInit.cmake
 --------------------
@@ -71,6 +72,8 @@ This module provides the following function.
 
 -  cpfAddPackages()
 
+
+.. _cpfAddPackages:
 
 cpfAddPackages()
 ^^^^^^^^^^^^^^^^
@@ -103,6 +106,9 @@ Module cpfInitPackageModule.cmake
 This module provides the following function.
 
 - cpfInitPackageProject()
+
+
+.. _cpfInitPackageProject:
 
 cpfInitPackageProject()
 ^^^^^^^^^^^^^^^^^^^^^^^

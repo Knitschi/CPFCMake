@@ -33,6 +33,8 @@ when the developer deems a commit worthy to be published. This can also be done 
 that is provided by the CPFMachines package.
 
 
+.. _internalVersion:
+
 Internal version format
 -----------------------
 
