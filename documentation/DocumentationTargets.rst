@@ -1,4 +1,6 @@
 
+.. _DocumentationGeneration:
+
 Documentation generation
 ========================
 

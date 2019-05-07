@@ -1,4 +1,6 @@
 
+.. _DistributionPackages:
+
 Distribution packages 
 =====================
 

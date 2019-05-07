@@ -1,4 +1,6 @@
 
+.. _Versioning:
+
 Versioning
 ==========
 
@@ -51,8 +53,6 @@ could have branched since the last release version. This could lead to two commi
 version number. For this reason the version number also contains the first digits of the commit hash.
 This part will be as long as is needed to make it unique.
 
-
-.. _versioning:
 
 Dirty versions
 --------------

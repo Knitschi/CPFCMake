@@ -1,4 +1,6 @@
 
+.. _TestTargets:
+
 Test targets
 ============
 

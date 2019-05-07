@@ -1,4 +1,6 @@
 
+.. _PackagesCMake:
+
 The packages.cmake file
 =======================
 

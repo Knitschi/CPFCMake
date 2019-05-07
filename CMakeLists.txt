@@ -20,7 +20,7 @@ set( files
 	${CPF_DEFAULT_CONFIGS_DIR}/Windows.config.cmake
 	documentation/APIDocGlobalVariables.rst
 	documentation/APIDocModules.rst
-	documentation/Configuration.rst
+	documentation/ConfigurationManagement.rst
 	documentation/CPFCMake.rst
 	documentation/CustomTargets.rst
 	documentation/DistributionPackages.rst

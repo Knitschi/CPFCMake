@@ -25,7 +25,7 @@ Index
 
   APIDocModules
   APIDocGlobalVariables
-  Configuration
+  ConfigurationManagement
   CustomTargets
   PackagesCMake
   TestTargets

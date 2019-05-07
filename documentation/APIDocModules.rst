@@ -714,6 +714,8 @@ This module provides the following function.
 - cpfAddDoxygenPackage()
 
 
+.. _cpfAddDoxygenPackage:
+
 cpfAddDoxygenPackage()
 ^^^^^^^^^^^^^^^^^^^^^^
 
