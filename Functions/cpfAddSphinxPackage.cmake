@@ -21,6 +21,7 @@ function( cpfAddSphinxPackage )
     set(optionalMultiValueKeywords
         OTHER_FILES
         ADDITIONAL_SPHINX_ARGUMENTS
+		SOURCE_SUFFIXES
     )
 
 	cmake_parse_arguments(
@@ -48,6 +49,10 @@ function( cpfAddSphinxPackage )
 		set(outputDir ${outputDir}/${ARG_OUTPUT_SUBDIR})
 	endif()
 
+	if(NOT ARG_SOURCE_SUFFIXES)
+		set(ARG_SOURCE_SUFFIXES rst)
+	endif()
+
     # Assert that the index.rst file exists
     set(sphinxSourceDir ${CMAKE_SOURCE_DIR})
 	if(NOT EXISTS ${sphinxSourceDir}/index.rst )
@@ -56,16 +61,20 @@ function( cpfAddSphinxPackage )
 
     # locations
     set(configFile ${absConfigDir}/conf.py)
-    cpfToAbsSourcePaths(sourceFiles "${ARG_OTHER_FILES}" ${CMAKE_CURRENT_SOURCE_DIR})
     set(stampFile ${CMAKE_CURRENT_BINARY_DIR}/sphinx.stamp)
+
+	# File dependencies
+	# Explicitly set files from this package
+	cpfToAbsSourcePaths(sourceFiles "${ARG_OTHER_FILES}" ${CMAKE_CURRENT_SOURCE_DIR})
+	# All relevant depended on source files from other packages in the project.
+	cpfGetSphinxSourceFilesFromAllPackages(otherPackageFiles "${ARG_SOURCE_SUFFIXES}")
 
     set(sphinxCommand "\"${TOOL_SPHINX-BUILD}\" -c \"${absConfigDir}\" \"${sphinxSourceDir}\" \"${outputDir}\" -j auto ${ARG_ADDITIONAL_SPHINX_ARGUMENTS}")
     # We create a stampfile here for outdating the target because we do not know what the users shpinx configuration will produce.
     set(stampCommand "\"${CMAKE_COMMAND}\" -E touch \"${stampFile}\"")
 
     cpfAddStandardCustomCommand(
-        DEPENDS ${configFile} ${sourceFiles}
-		#WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS ${configFile} ${sourceFiles} ${otherPackageFiles}
         COMMANDS ${sphinxCommand} ${stampCommand}
         OUTPUT ${stampFile}
     )
@@ -109,5 +118,21 @@ function( cpfFindSphinxBuild )
         "A tool that generates html documentation from .rst files."
         "${userSitePath}/../Scripts"
     )
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetSphinxSourceFilesFromAllPackages filesOut parsedFilesExtensions )
+
+	cpfGetAllTargets(allTargets)
+
+	set(allUsedSources)
+	foreach(target ${allTargets})
+		getAbsPathsOfTargetSources(targetSources ${target})
+		cpfGetFilepathsWithExtensions(usedTargetSources "${targetSources}" "${parsedFilesExtensions}")
+		cpfListAppend(allUsedSources ${usedTargetSources})
+	endforeach()
+
+	set(${filesOut} "${allUsedSources}" PARENT_SCOPE)
 
 endfunction()

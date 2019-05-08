@@ -161,7 +161,7 @@ function( cpfGetSubtargets subTargetsOut packages subtargetProperty)
 	foreach(package ${packages})
 		if(TARGET ${package}) # not all packages have targets
 			
-			# check for subtargets that belong to the package
+			# check for subtargets that belong to the main package target
 			get_property(subTarget TARGET ${package} PROPERTY ${subtargetProperty})
 			cpfListAppend( targets ${subTarget} )
 
@@ -174,7 +174,26 @@ function( cpfGetSubtargets subTargetsOut packages subtargetProperty)
 			
 		endif()
 	endforeach()
+
 	set(${subTargetsOut} "${targets}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns a list with all non-imported targets that are defined in a package directory
+# with add_library(), add_executable() or add_custom_target().
+#
+function( cpfGetAllTargets allTargetsOut )
+	
+	set(allTargets)
+
+	cpfGetAllPackages(packages)
+	foreach(package ${packages})
+		get_property(targets DIRECTORY ${CMAKE_SOURCE_DIR}/${package} PROPERTY BUILDSYSTEM_TARGETS )
+		cpfListAppend(allTargets ${targets})
+	endforeach()
+
+	set(${allTargetsOut} "${allTargets}" PARENT_SCOPE)
 
 endfunction()
 

@@ -4,13 +4,16 @@
 CPFCMake 
 ========
 
-The CPFCMake package implements a standardized C++ CMake project with additional CI functionality.
-This package is the most basic component of the CMakeProjectFramework. It helps with setting
-up a CMake based C++ project with extended functionality. The package tries to solve the following problems:
+The CPFCMake package implements a rich-featured and standardized C++ CMake project that offers
+many tasks that are required for a continuous integration pipeline.
+This package is the most basic component of the CMakeProjectFramework. 
 
-- Abstraction of common CMake code to a higher level. CMakeProjectFramework projects are set up by using only
-  a handfull of CMake functions. This removes implementation details from the `CMakeLists.txt` files.
-- Providing a standardized directory structure for a C++ project.
+The package tries to solve the following problems:
+
+- Abstract common CMake code to a higher level. CMakeProjectFramework projects are set up by using only
+  a handfull of CMake functions that take a lot of arguments but hide implementation details.
+  This makes the code in the :code:`CMakeLists.txt` files shorter, cleaner and more descriptive.
+- Providing a cannonical directory structure for a C++ project.
 - Providing additional CI tasks like code-analysis or documentation-generation as custom targets.
 - Package-versioning based on version tags provided by the Git repository.
 - Modularisation of the code base into individual CMake packages.
@@ -23,6 +26,7 @@ Index
 .. toctree::
   :maxdepth: 1
 
+  ../README
   APIDocModules
   APIDocGlobalVariables
   ConfigurationManagement

@@ -123,6 +123,8 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns the filenames in the given list that have one of the given extensions.
+# The extensions must be given without the leading dot.
+#
 function( cpfGetFilepathsWithExtensions pathsOut filePaths extensions)
 
 	# Prepare a regular expression that matches the extensions.

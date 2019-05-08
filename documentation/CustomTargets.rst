@@ -119,6 +119,9 @@ distributionPackages
 
 This target bundles the \ref distributionPackages_package targets.
 
+
+.. _globalFiles:
+
 globalFiles
 """""""""""
 
