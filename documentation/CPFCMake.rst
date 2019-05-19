@@ -36,5 +36,6 @@ Index
   DistributionPackages
   DocumentationTargets
   Versioning
-  KnownProblems
+  UsageProblems
+  ImplementationProblems
 

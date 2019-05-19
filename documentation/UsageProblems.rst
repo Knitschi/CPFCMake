@@ -1,6 +1,6 @@
 
-Known Problems
-==============
+Problems when using the CPF
+===========================
 
 Known Problems and Workarounds
 ------------------------------

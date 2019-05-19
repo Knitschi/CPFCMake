@@ -1,6 +1,8 @@
 include_guard(GLOBAL)
 
+include(cpfMiscUtilities)
 
+include(GNUInstallDirs)
 
 #----------------------------------------------------------------------------------------
 # See api docs for documentation
@@ -12,7 +14,6 @@ function( cpfAddSphinxPackage )
 
     set(optionalSingleValueKeywords
 		CONFIG_FILE_DIR
-		OUTPUT_SUBDIR
 	)
 
     set( requiredMultiValueKeywords
@@ -44,10 +45,7 @@ function( cpfAddSphinxPackage )
 		cpfToAbsSourcePath(absConfigDir)
 	endif()
 
-	set(outputDir ${CMAKE_CURRENT_BINARY_DIR})
-	if(ARG_OUTPUT_SUBDIR)
-		set(outputDir ${outputDir}/${ARG_OUTPUT_SUBDIR})
-	endif()
+	set(outputDir ${CMAKE_CURRENT_BINARY_DIR}/html)
 
 	if(NOT ARG_SOURCE_SUFFIXES)
 		set(ARG_SOURCE_SUFFIXES rst)
@@ -61,7 +59,7 @@ function( cpfAddSphinxPackage )
 
     # locations
     set(configFile ${absConfigDir}/conf.py)
-    set(stampFile ${CMAKE_CURRENT_BINARY_DIR}/sphinx.stamp)
+	set(keyOutputFile ${outputDir}/index.html)
 
 	# File dependencies
 	# Explicitly set files from this package
@@ -71,16 +69,38 @@ function( cpfAddSphinxPackage )
 
     set(sphinxCommand "\"${TOOL_SPHINX-BUILD}\" -c \"${absConfigDir}\" \"${sphinxSourceDir}\" \"${outputDir}\" -j auto ${ARG_ADDITIONAL_SPHINX_ARGUMENTS}")
     # We create a stampfile here for outdating the target because we do not know what the users shpinx configuration will produce.
-    set(stampCommand "\"${CMAKE_COMMAND}\" -E touch \"${stampFile}\"")
+    set(stampCommand "\"${CMAKE_COMMAND}\" -E touch \"${keyOutputFile}\"")
 
     cpfAddStandardCustomCommand(
         DEPENDS ${configFile} ${sourceFiles} ${otherPackageFiles}
         COMMANDS ${sphinxCommand} ${stampCommand}
-        OUTPUT ${stampFile}
+        OUTPUT ${keyOutputFile}
     )
 
     cpfGetPackageName(package)
-    cpfAddStandardCustomTarget(${package} ${package} "${configFile};${sourceFiles}" "${stampFile}")
+	cpfAddStandardCustomTarget(${package} ${package} "${configFile};${sourceFiles}" "${keyOutputFile}")
+	
+	# Add install rules to create the cmake_install.cmake script.
+	install(
+		DIRECTORY ${outputDir}
+		DESTINATION doc/sphinx
+		COMPONENT documentation
+		OPTIONAL
+	)
+
+	# Add a custom install target.
+	cpfGetRunInstallScriptCommands( runInstallScriptCommands ${package} "" "documentation" "${CMAKE_INSTALL_PREFIX}" )
+	set(installedIndexHtmlFile ${CMAKE_INSTALL_PREFIX}/doc/sphinx/html/index.html)
+	cpfAddStandardCustomCommand(
+        DEPENDS ${keyOutputFile}
+        COMMANDS ${runInstallScriptCommands}
+        OUTPUT ${installedIndexHtmlFile}
+	)
+	set(installTarget install_${package})
+	cpfAddStandardCustomTarget(${package} ${installTarget} "" "${installedIndexHtmlFile};${package}")
+
+	# Set target properties
+	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGETS ${installTarget})
 
 endfunction()
 

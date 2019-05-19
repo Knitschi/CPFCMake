@@ -158,7 +158,7 @@ function( cpfDefineProperties )
     # A property that is set on some package main targets
     define_property(
         TARGET
-        PROPERTY INTERFACE_RUN_TESTS_SUBTARGET
+        PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET
         BRIEF_DOCS "The name of the sub-target that runs all automated tests."
         FULL_DOCS " "
     )
@@ -206,8 +206,8 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets
 	define_property(
         TARGET
-        PROPERTY CPF_INSTALL_PACKAGE_SUBTARGET
-        BRIEF_DOCS "The name of a custom sub-target that installs the packages files to the local InstallStage directory."
+        PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGETS
+        BRIEF_DOCS "The name of a custom sub-target that installs the packages files to location defined by CMAKE_INSTALL_PREFIX."
         FULL_DOCS " "
     )
 
@@ -263,6 +263,6 @@ function( cpfDefineProperties )
 			FULL_DOCS " "
         )
 
-	endforeach()
+    endforeach()
 
 endfunction()

@@ -2,7 +2,9 @@
 # This file contains basic CMakeProjectFramework default configuration settings that are common for all platforms. 
 
 # LOCATIONS
-set( CPF_WEBSERVER_BASE_DIR "" CACHE STRING "The url of the html base directory of the web-server to which the updateExistingWebPage.cmake script copies the html build-output." )
+# The pipeline requires an install prefix to be set.
+set(CMAKE_INSTALL_PREFIX "${CPF_ROOT_DIR}/install" CACHE FILEPATH "The location to which all final build results are copied." FORCE)
+set(CPF_WEBSERVER_BASE_DIR "" CACHE STRING "The url of the html base directory of the web-server to which the updateExistingWebPage.cmake script copies the html build-output." )
 
 # OUTPUT NAMES
 set( CMAKE_DEBUG_POSTFIX "-debug" CACHE STRING "Postfix for libraries build with Debug configuration." FORCE)

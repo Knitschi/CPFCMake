@@ -6,7 +6,7 @@
 # Arguments:
 # EXISTING_HTML_DIR		- The html directory with the existing page on the web-server.
 # FRESH_HTML_DIR		- The html directory that was created by the last build.
-# ROOT_DIR: 		- The root directory of a CPF project.
+# ROOT_DIR: 			- The root directory of a CPF project.
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 include(cpfMiscUtilities)

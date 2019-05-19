@@ -152,7 +152,7 @@ function( cpfAddCustomTestTarget runTestsCommand sourceFiles dependedOnExternalF
 	cpfAddCustomTestTargetWithName(${runTargetName} ${runTestsCommand} "${sourceFiles}" "${dependedOnExternalFiles}")
 
 	set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/pipeline")
-	set_property( TARGET ${package} PROPERTY INTERFACE_RUN_TESTS_SUBTARGET ${runTargetName})
+	set_property( TARGET ${package} PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET ${runTargetName})
 
 endfunction()
 
@@ -231,7 +231,7 @@ function( cpfAddRunPython3TestTargetForEachModule testScript modules args source
 		set(bundleTestTarget ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${package})
 		cpfAddBundleTarget(${bundleTestTarget} "${runModuleTestsTargets}")
 		set_property( TARGET ${bundleTestTarget} PROPERTY FOLDER "${package}/pipeline")
-		set_property( TARGET ${package} PROPERTY INTERFACE_RUN_TESTS_SUBTARGET ${bundleTestTarget})
+		set_property( TARGET ${package} PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET ${bundleTestTarget})
 
 	endif()
 endfunction()

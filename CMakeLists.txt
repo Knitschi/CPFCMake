@@ -25,10 +25,11 @@ set( files
 	documentation/CustomTargets.rst
 	documentation/DistributionPackages.rst
 	documentation/DocumentationTargets.rst
-	documentation/KnownProblems.rst
 	documentation/TestTargets.rst
 	documentation/Versioning.rst
 	documentation/PackagesCMake.rst
+	documentation/UsageProblems.rst
+	documentation/ImplementationProblems.rst
 	Functions/cpfAddAcyclicTarget.cmake
 	Functions/cpfAddClangTidyTarget.cmake
 	Functions/cpfAddClangFormatTarget.cmake

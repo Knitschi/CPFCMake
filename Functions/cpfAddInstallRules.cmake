@@ -6,6 +6,13 @@ include(cpfCustomTargetUtilities)
 include(cpfLocations)
 include(cpfProjectUtilities)
 include(cpfAddDeploySharedLibrariesTarget)
+include(GNUInstallDirs)
+
+#---------------------------------------------------------------------------------------------
+# Adds a bundle target for all install_<package> targets
+function( cpfAddGlobalInstallTarget )
+	cpfAddSubTargetBundleTarget( install_all "${packages}" INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGETS "")
+endfunction()
 
 
 #---------------------------------------------------------------------------------------------
@@ -572,3 +579,6 @@ function( cpfGetTargetSourcesWithoutPrefixHeader sourcesOut target )
 	set(${sourcesOut} "${sources}" PARENT_SCOPE )
 
 endfunction()
+
+#----------------------------------------------------------------------------------------
+

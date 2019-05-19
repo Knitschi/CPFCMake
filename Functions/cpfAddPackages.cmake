@@ -85,6 +85,8 @@ function( cpfAddPackages )
 	cpfAddGlobalCreatePackagesTarget("${packages}")
 	# abiComplianceCheck
 	cpfAddGlobalAbiCheckerTarget("${packages}")
+	# install_all target
+	cpfAddGlobalInstallTarget("${packages}")
 	# pipeline
 	cpfAddPipelineTargetDependencies("${packages}")
 
@@ -108,17 +110,15 @@ function( cpfInitGlobalState )
 	cpfDebugMessage("Using toolchain file: \"${CMAKE_TOOLCHAIN_FILE}\"")
 	cpfPrintToolchainVariables()
 
-	####################################### OTHER GLOBAL SETTINGS #########################################    
 	# Define properties that are used within the CPFCMake code.
 	cpfDefineProperties()
 
 	# allow project folders
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+	# Search for tool dependencies.
 	cpfFindRequiredTools()
 
-	# assert variables
-	
 	# We expect the CMAKE_BUILD_TYPE to be set for single configuration generators.
 	# This helps to make some config dependent code simpler.
 	if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)

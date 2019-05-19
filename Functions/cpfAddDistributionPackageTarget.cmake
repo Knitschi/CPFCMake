@@ -317,24 +317,6 @@ function( cpfGetPackageContentStagingDir stagingDirOut package config contentId 
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetRunInstallScriptCommands runInstallScriptCommandsOut package config components destDir )
-
-	set(scriptFile "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake")
-
-	if(config)
-		set(configOption "-DCMAKE_INSTALL_CONFIG_NAME=${config}")
-	endif()
-
-	set(commands)
-	foreach(component ${components})
-		cpfListAppend( commands "\"${CMAKE_COMMAND}\" -DCMAKE_INSTALL_PREFIX=\"${destDir}\" -DCMAKE_INSTALL_COMPONENT=${component} ${configOption} -P \"${scriptFile}\"" )
-	endforeach()
-
-	set( ${runInstallScriptCommandsOut} "${commands}" PARENT_SCOPE )
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
 # This function adds target that creates a distribution package. The command specifies how this is done.
 #
 # Note that packages are created in a temporary directory and later copied to the "Packages" directory.
