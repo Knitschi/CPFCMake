@@ -35,7 +35,7 @@ endif()
 
 # Copy to the results to the LastBuild directory
 file(MAKE_DIRECTORY ${lastBuildDir})
-file(COPY ${CMAKE_INSTALL_PREFIX} DESTINATION ${lastBuildDir})
+file(COPY ${CMAKE_INSTALL_PREFIX}/ DESTINATION ${lastBuildDir} PATTERN *)
 
 # Also copy the results to a permanent version subdirectory if it is a release.
 cpfGetLastVersionTagOfBranch( version master "${ROOT_DIR}" True)
@@ -44,7 +44,7 @@ if(isRelease)
 	# Copy to version subdirectory.
 	set(versionDir ${projectDir}/${version})
 	file(MAKE_DIRECTORY ${versionDir})
-	file(COPY ${CMAKE_INSTALL_PREFIX} DESTINATION ${versionDir})
+	file(COPY ${CMAKE_INSTALL_PREFIX}/ DESTINATION ${versionDir} PATTERN *)
 endif()
 
 # Add and commit the files.
