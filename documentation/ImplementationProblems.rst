@@ -38,7 +38,7 @@ custom-targets for the installation operations.
 CMake does not support lists that have only one empty element
 =============================================================
 
-Befcause lists are implemented as ; separated strings and the notation
+Because lists are implemented as ; separated strings and the notation
 does not have the list end with a ;, it is not possible to have a list
 with one empty element. This especially is a problem in algorithms which handle
 lists. Our function :code:`cpf_append_list()` is used to detect this problem,

@@ -437,3 +437,54 @@ function( cpfGetPackagesTrackedBranch packageBranchOut package rootDir)
 	set(${packageBranchOut} ${branch} PARENT_SCOPE)
 endfunction()
 
+#----------------------------------------------------------------------------------------
+function( cpfGitRemove dir repoDir )
+
+	execute_process(
+		COMMAND git;rm;-r;${dir}
+		WORKING_DIRECTORY "${repoDir}"
+	)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGitAddContent dir )
+
+	execute_process(
+		COMMAND git;add;.
+		WORKING_DIRECTORY "${dir}"
+	)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGitCommit message dir )
+
+	execute_process(
+		COMMAND git;commit;.;-m;${message}
+		WORKING_DIRECTORY "${dir}"
+	)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGitPush remote branch dir)
+
+	execute_process(
+		COMMAND git;push;${remote};${branch}
+		WORKING_DIRECTORY "${dir}"
+	)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGitAddRemote remoteName remoteAddress repoDir )
+
+	execute_process(
+		COMMAND git;remote;add;${remoteName};${remoteAddress}
+		WORKING_DIRECTORY "${repoDir}"
+	)
+
+endfunction()
+
+

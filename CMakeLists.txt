@@ -70,7 +70,7 @@ set( files
 	Scripts/prepareCIRepoForBuild.cmake
 	Scripts/printScriptFileVariables.cmake
 	Scripts/runAbiComplianceChecker.cmake
-	Scripts/updateExistingWebPage.cmake
+	Scripts/updateBuildResultsRepository.cmake
 	Templates/.gitignore.in
 	Templates/${CPF_GRAPHVIZ_OPTIONS_FILE}.in
 	${CPF_PACKAGE_CONFIG_TEMPLATE}
