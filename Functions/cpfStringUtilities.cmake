@@ -95,7 +95,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfStringContains containsOut string substring)
 
-	string(FIND "${string}" "substring" index)
+	string(FIND "${string}" "${substring}" index)
 	if(${index} EQUAL -1)
 		set(${containsOut} FALSE PARENT_SCOPE)
 	else()

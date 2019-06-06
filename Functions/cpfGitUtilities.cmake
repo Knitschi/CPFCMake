@@ -481,6 +481,20 @@ endfunction()
 function( cpfGitAddRemote remoteName remoteAddress repoDir )
 
 	execute_process(
+		COMMAND git;remote
+		WORKING_DIRECTORY "${repoDir}"
+		OUTPUT_VARIABLE remotes
+	)
+
+	cpfStringContains(hasRemote "${remotes}" ${remoteName})
+	if(hasRemote)
+		execute_process(
+			COMMAND git;remote;remove;${remoteName}
+			WORKING_DIRECTORY "${repoDir}"
+		)
+	endif()
+
+	execute_process(
 		COMMAND git;remote;add;${remoteName};${remoteAddress}
 		WORKING_DIRECTORY "${repoDir}"
 	)
