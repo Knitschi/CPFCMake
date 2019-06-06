@@ -38,7 +38,7 @@ set( files
 	Functions/cpfAddDistributionPackageTarget.cmake
 	Functions/cpfAddDoxygenPackage.cmake
 	Functions/cpfAddFilePackage.cmake
-	Functions/cpfAddInstallRules.cmake
+	Functions/cpfAddInstallTarget.cmake
 	Functions/cpfAddOpenCppCoverageTarget.cmake
 	Functions/cpfAddCppPackage.cmake
 	Functions/cpfAddPipelineTargetDependencies.cmake

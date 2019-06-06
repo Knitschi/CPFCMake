@@ -207,7 +207,7 @@ function( cpfDefineProperties )
 	define_property(
         TARGET
         PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGETS
-        BRIEF_DOCS "The name of a custom sub-target that installs the packages files to location defined by CMAKE_INSTALL_PREFIX."
+        BRIEF_DOCS "A list with custom targets that install the packages components to the location defined by CMAKE_INSTALL_PREFIX."
         FULL_DOCS " "
     )
 
