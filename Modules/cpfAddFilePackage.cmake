@@ -3,9 +3,10 @@
 
 include_guard(GLOBAL)
 
-include(cpfPathUtilities)
-include(cpfAddCppPackage)
-include(cpfInitPackageProject)
+include(cpfPackageUtilities)
+include(cpfAssertions)
+include(cpfCustomTargetUtilities)
+
 
 #-----------------------------------------------------------
 # Documentation in APIDocs.dox

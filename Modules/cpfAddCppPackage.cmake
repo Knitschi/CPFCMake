@@ -12,6 +12,7 @@ include(cpfTargetUtilities)
 include(cpfPackageUtilities)
 include(cpfGitUtilities)
 include(cpfPathUtilities)
+include(cpfAssertions)
 
 include(cpfAddClangTidyTarget)
 include(cpfAddRunTestsTarget)
@@ -228,90 +229,6 @@ function( cpfAddCppPackage )
 	cpfAddDistributionPackageTargets( ${package} "${distributionPackageOptionLists}" )
 
 endfunction() 
-
-
-#---------------------------------------------------------------------
-# This function only returns the libraries from the input that actually exist.
-# Lower level packages must be added first.
-# For non existing target a warning is issued when CPF_VERBOSE is ON.
-# We allow adding dependencies to non existing targets so we can link to targets that may only be available
-# for some configurations.
-#
-function( cpfDebugAssertLinkedLibrariesExists linkedLibrariesOut package linkedLibrariesIn )
-
-	foreach(lib ${linkedLibrariesIn})
-		if(NOT TARGET ${lib} )
-			cpfDebugMessage("${lib} is not a Target when creating package ${package}. If it should be available, make sure to have target ${lib} added before adding this package.")
-		else()
-			list(APPEND linkedLibraries ${lib})
-		endif()
-	endforeach()
-	set(${linkedLibrariesOut} ${linkedLibraries} PARENT_SCOPE)
-
-endfunction()
-
-#---------------------------------------------------------------------
-# Checks that the compatibility scheme option contains one of the allowed values.
-function( cpfAssertCompatibilitySchemeOption scheme )
-	if( NOT ( "${scheme}" STREQUAL ExactVersion ) )
-		message(FATAL_ERROR "Invalid argument to cpfAddCppPackage()!. Value \"${scheme}\" for option VERSION_COMPATIBILITY_SCHEME is not allowed.")
-	endif()
-endfunction()
-
-#---------------------------------------------------------------------
-# This function is used to change properties of imported targets to make
-# sure that property values are set after the same "scheme" on which the
-# rest of the CPF cmake code can rely.
-#
-# E.g. On Linuy the LOCATION_<config> property should hold the location of the actual binary
-# file and not the location of the symlink that points to the binary. The symlink
-# location should be stored in the IMPORTED_SONAME_<config> property.
-#
-function( cpfNormalizeImportedTargetProperties targets )
-
-	# also get indirectly linked targets
-	cpfGetAllTargetsInLinkTree( allLinkedTargets "${targets}")
-	
-	cpfFilterInTargetsWithProperty( importedTargets "${allLinkedTargets}" IMPORTED TRUE)
-	foreach(target ${importedTargets})
-	
-		# make sure the location property does not point to a symbolic link but to the real file on linux
-		if( ${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-			cpfIsSingleConfigGenerator( isSingleConfig )
-			if(NOT ${isSingleConfig})
-				message(FATAL_ERROR "Function cpfNormalizeImportedTargetProperties() assumes that there are only single configuration generators on linux.")
-			endif()
-			cpfToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} ) 
-			
-			get_property( location TARGET ${target} PROPERTY LOCATION_${configSuffix} )
-			if( IS_SYMLINK ${location} )
-			
-				# get the file to which the symlink points
-				execute_process(COMMAND readlink;${location} RESULT_VARIABLE result OUTPUT_VARIABLE linkTarget )
-				if(NOT ${result} STREQUAL 0)
-					message(FATAL_ERROR "Could not read symlink ${location}")
-				endif()
-				# refine the output result
-				string(STRIP ${linkTarget} linkTarget)
-				get_filename_component( dir ${location} DIRECTORY)
-				set(linkTarget "${dir}/${linkTarget}")
-				
-				# change the target properties
-				if( EXISTS ${linkTarget})
-					set_property( TARGET ${target} PROPERTY LOCATION_${configSuffix} ${linkTarget})
-					set_property( TARGET ${target} PROPERTY IMPORTED_LOCATION_${configSuffix} ${linkTarget} )
-					get_filename_component( locationShort ${location} NAME)
-					set_property( TARGET ${target} PROPERTY IMPORTED_SONAME_${configSuffix} ${locationShort} )
-				else()
-					message( FATAL_ERROR "The soname symlink \"${location}\" of imported target ${target} points to the not existing file \"${linkTarget}\"." )
-				endif()
-				
-			endif()
-			
-		endif()
-	
-	endforeach()
-endfunction()
 
 #---------------------------------------------------------------------
 #
@@ -566,12 +483,9 @@ function( cpfAddBinaryTarget )
 		
     endif()
 
-	
-
     # Link with other libraries
 	# This must be done before setting up the precompiled headers.
 	target_link_libraries(${ARG_NAME} PUBLIC ${ARG_LINKED_LIBRARIES})
-	
 
     # Set target properties
 	# Set include directories, that all header are included with #include <package/myheader.h>
@@ -759,67 +673,6 @@ function( cpfQt5AddUIAndQrcFiles filesOut )
 
 endfunction()
 
-#---------------------------------------------------------------------------------------------
-# Sets the <binary-type>_OUTOUT_DIRECTORY_<config> properties of the given target.
-#
-function( cpfSetTargetOutputDirectoriesAndNames package target )
-
-	cpfGetConfigurations( configs)
-	foreach(config ${configs})
-		cpfSetAllOutputDirectoriesAndNames(${target} ${package} ${config} )
-	endforeach()
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfSetAllOutputDirectoriesAndNames target package config )
-
-	# The output directory properties can not be set on interface libraries.
-	cpfIsInterfaceLibrary(isIntLib ${target})
-	if(isIntLib)
-		return()
-	endif()
-
-	cpfToConfigSuffix( configSuffix ${config})
-
-	# Delete the <config>_postfix property and handle things manually in cpfSetOutputDirAndName()
-	string(TOUPPER ${config} uConfig)
-	set_property( TARGET ${target} PROPERTY ${uConfig}_POSTFIX "" )
-
-	cpfSetOutputDirAndName( ${target} ${package} ${config} RUNTIME)
-	cpfSetOutputDirAndName( ${target} ${package} ${config} LIBRARY)
-	cpfSetOutputDirAndName( ${target} ${package} ${config} ARCHIVE)
-
-	cpfCompilerProducesPdbFiles(hasOutput ${config})
-	if(hasOutput)
-		cpfSetOutputDirAndName( ${target} ${package} ${config} COMPILE_PDB)
-		set_property(TARGET ${target} PROPERTY COMPILE_PDB_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX}-compiler) # we overwrite the filename to make it more meaningful
-	endif()
-
-	cpfTargetHasPdbLinkerOutput(hasOutput ${target} ${configSuffix})
-	if(hasOutput)
-		# Note that we use the same name and path for linker as are used for the dlls files.
-		# When consuming imported targets we guess that the pdb files have these locations. 
-		cpfSetOutputDirAndName( ${target} ${package} ${config} PDB)
-		set_property(TARGET ${target} PROPERTY PDB_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX})
-	endif()
-
-endfunction()
-
-
-#---------------------------------------------------------------------------------------------
-# This function sets the output name property to make sure that the same target file names are
-# achieved across all platforms.
-function( cpfSetOutputDirAndName target package config outputType )
-
-	cpfGetAbsOutputDir(outputDir ${package} ${outputType} ${config})
-	cpfToConfigSuffix(configSuffix ${config})
-	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_DIRECTORY_${configSuffix} ${outputDir})
-	# use the config postfix for all target types
-	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX} )
-
-endfunction()
-
 #---------------------------------------------------------------------
 # generate a header file that contains the EXPORT macros
 function( cpfGenerateExportMacroHeader target macroBaseName )
@@ -868,6 +721,36 @@ function( cpfAddPlugins package pluginOptionLists )
 			cpfAddDeploySharedLibsToBuildStageTarget( ${package} ${plugin} ${subdirectory} ) 
 		endif()
 	endforeach()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfAddAliasTarget target packageNamespace )
+
+	cpfIsExecutable(isExe ${target})
+	if(isExe)
+		add_executable(${packageNamespace}::${target} ALIAS ${target})
+	else()
+		add_library(${packageNamespace}::${target} ALIAS ${target})
+	endif()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Goes through the given targets and in case that a target is an alias target replaces them
+# with the name of the original target.
+function( cpfStripTargetAliases deAliasedTargetsOut targets)
+	
+	set(deAliasedTargets)
+	foreach(target ${targets})
+		get_property(aliasedTarget TARGET ${target} PROPERTY ALIASED_TARGET)
+		if(aliasedTarget)
+			cpfListAppend(deAliasedTargets ${aliasedTarget})
+		else()
+			cpfListAppend(deAliasedTargets ${target})
+		endif()
+	endforeach()
+	set(${deAliasedTargetsOut} "${deAliasedTargets}" PARENT_SCOPE)
 
 endfunction()
 

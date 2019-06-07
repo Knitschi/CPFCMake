@@ -30,40 +30,44 @@ set( files
 	documentation/PackagesCMake.rst
 	documentation/UsageProblems.rst
 	documentation/ImplementationProblems.rst
-	Functions/cpfAddAcyclicTarget.cmake
-	Functions/cpfAddClangTidyTarget.cmake
-	Functions/cpfAddClangFormatTarget.cmake
-	Functions/cpfAddCompatibilityCheckTarget.cmake
-	Functions/cpfAddDeploySharedLibrariesTarget.cmake
-	Functions/cpfAddDistributionPackageTarget.cmake
-	Functions/cpfAddDoxygenPackage.cmake
-	Functions/cpfAddFilePackage.cmake
-	Functions/cpfAddInstallTarget.cmake
-	Functions/cpfAddOpenCppCoverageTarget.cmake
-	Functions/cpfAddCppPackage.cmake
-	Functions/cpfAddPipelineTargetDependencies.cmake
-	Functions/cpfAddRunTestsTarget.cmake
-	Functions/cpfAddRunUicTarget.cmake
-	Functions/cpfAddSphinxPackage.cmake
-	Functions/cpfAddValgrindTarget.cmake
-	Functions/cpfAddVersionRcPreBuildEvent.cmake
-	Functions/cpfCustomTargetUtilities.cmake
-	Functions/cpfGitUtilities.cmake
-	Functions/cpfAddPackages.cmake
-	Functions/cpfInitPackageProject.cmake
-	Functions/cpfListUtilities.cmake
-	Functions/cpfMiscUtilities.cmake
-	Functions/cpfNumericUtilities.cmake
-	Functions/cpfPathUtilities.cmake
-	Functions/cpfConfigUtilities.cmake
-	Functions/cpfReadVariablesFromFile.cmake
-	Functions/cpfStringUtilities.cmake
-	Functions/cpfTestUtilities.cmake
-	Functions/cpfTargetUtilities.cmake
-	Functions/cpfPackageUtilities.cmake
-	Functions/cpfVersionUtilities.cmake
-	Functions/cpfPropertyUtilities.cmake
-	Functions/cpfAssertions.cmake
+	Modules/cpfAddAcyclicTarget.cmake
+	Modules/cpfAddClangTidyTarget.cmake
+	Modules/cpfAddClangFormatTarget.cmake
+	Modules/cpfAddCompatibilityCheckTarget.cmake
+	Modules/cpfAddDeploySharedLibrariesTarget.cmake
+	Modules/cpfAddDistributionPackageTarget.cmake
+	Modules/cpfAddDoxygenPackage.cmake
+	Modules/cpfAddFilePackage.cmake
+	Modules/cpfAddInstallTarget.cmake
+	Modules/cpfAddOpenCppCoverageTarget.cmake
+	Modules/cpfAddCppPackage.cmake
+	Modules/cpfAddPipelineTargetDependencies.cmake
+	Modules/cpfAddRunTestsTarget.cmake
+	Modules/cpfAddRunUicTarget.cmake
+	Modules/cpfAddSphinxPackage.cmake
+	Modules/cpfAddValgrindTarget.cmake
+	Modules/cpfAddVersionRcPreBuildEvent.cmake
+	Modules/cpfCustomTargetUtilities.cmake
+	Modules/cpfGitUtilities.cmake
+	Modules/cpfAddPackages.cmake
+	Modules/cpfInitPackageProject.cmake
+	Modules/cpfListUtilities.cmake
+	Modules/cpfMiscUtilities.cmake
+	Modules/cpfNumericUtilities.cmake
+	Modules/cpfPathUtilities.cmake
+	Modules/cpfConfigUtilities.cmake
+	Modules/cpfReadVariablesFromFile.cmake
+	Modules/cpfStringUtilities.cmake
+	Modules/cpfTestUtilities.cmake
+	Modules/cpfTargetUtilities.cmake
+	Modules/cpfPackageUtilities.cmake
+	Modules/cpfVersionUtilities.cmake
+	Modules/cpfOutputPathUtilities.cmake
+	Modules/cpfAssertions.cmake
+	Modules/cpfConstants.cmake
+	Modules/cpfLocations.cmake
+	Modules/cpfProperties.cmake
+	Modules/cpfLinkTreeUtilities.cmake
 	Scripts/addVersionTag.cmake
 	Scripts/appendLineToFile.cmake
 	Scripts/clearDirExcept.cmake
@@ -88,9 +92,6 @@ set( files
 	Tests/cpfPathUtilities_tests.cmake
 	Tests/cpfStringUtilities_tests.cmake
 	Tests/run_tests.cmake
-	Variables/cpfConstants.cmake
-	Variables/cpfLocations.cmake
-	Variables/cpfProperties.cmake
 )
 
 cpfAddFilePackage(

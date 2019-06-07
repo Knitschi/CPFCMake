@@ -9,6 +9,49 @@ include(cpfStringUtilities)
 include(cpfPathUtilities)
 include(cpfReadVariablesFromFile)
 
+#----------------------------------------------------------------------------------------
+# Returns a list of _DEBUG;_RELEASE;etc when using multi-config generators or an empty value otherwise
+#
+function( cpfGetConfigVariableSuffixes suffixes)
+	
+	if(CMAKE_CONFIGURATION_TYPES)
+		foreach(config ${CMAKE_CONFIGURATION_TYPES})
+			cpfToConfigSuffix( suffix ${config})
+			cpfListAppend( endings ${suffix})
+		endforeach()
+	elseif(CMAKE_BUILD_TYPE)
+		cpfToConfigSuffix( suffix ${CMAKE_BUILD_TYPE})
+		cpfListAppend( endings ${suffix})
+	else()
+		message(FATAL_ERROR "Config file error! The CMakeProjectFramework expects either CMAKE_CONFIGURATION_TYPES or CMAKE_BUILD_TYPE to be set.")
+	endif()
+
+	set(${suffixes} "${endings}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfToConfigSuffix suffix config)
+
+	string(TOUPPER ${config} upperConfig)
+	set(${suffix} ${upperConfig} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns the possible configurations in which the project can be build
+function( cpfGetConfigurations configs )
+
+	if(CMAKE_CONFIGURATION_TYPES)
+		set( ${configs} ${CMAKE_CONFIGURATION_TYPES} PARENT_SCOPE)
+	elseif(CMAKE_BUILD_TYPE)
+		set( ${configs} ${CMAKE_BUILD_TYPE} PARENT_SCOPE)
+	else()
+		message(FATAL_ERROR "Config file error! The CMakeProjectFramework expects either CMAKE_CONFIGURATION_TYPES or CMAKE_BUILD_TYPE to be set.")
+	endif()
+
+endfunction()
+
 #---------------------------------------------------------------------------------------------
 function( cpfGetHighWarningLevelFlags flagsOut )
 
@@ -139,6 +182,18 @@ function( cpfIsVisualStudioGenerator isVSOut )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+function( cpfIsSingleConfigGenerator var )
+
+	# consider using global property GENERATOR_IS_MULTI_CONFIG instead
+	if(CMAKE_CONFIGURATION_TYPES)
+		set( ${var} FALSE PARENT_SCOPE)
+	else()
+		set( ${var} TRUE PARENT_SCOPE)
+	endif()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # Prints all CMAKE variables that together define the toolchain
 #
 function( cpfPrintToolchainVariables )
@@ -155,36 +210,17 @@ function( cpfPrintToolchainVariables )
 
 endfunction()
 
-#---------------------------------------------------------------------------------------------
-# This function reads the package version from a packages version file.
-function( cpfGetPackageVersionFromFile versionOut package absPackageSourceDir )
-
-	getExistingPackageVersionFile( versionFile ${package} )
-
-	include("${versionFile}")
-	if( "${CPF_${package}_VERSION}" STREQUAL "")
-		message(FATAL_ERROR "Could not read value of variable CPF_${package}_VERSION from file \"${absPackageSourceDir}/${versionFile}\"." )
-	endif()
-	set( ${versionOut} ${CPF_${package}_VERSION} PARENT_SCOPE)
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# Returns the path to the version.cmake file in the source tree or in the binary tree depending on which exists.
-function( getExistingPackageVersionFile absPathOut package )
-
-	cpfGetPackageVersionFileName( versionFile ${package})
-	set(sourceTreePath "${CMAKE_CURRENT_SOURCE_DIR}/${versionFile}")
-	set(binaryTreePath "${CMAKE_CURRENT_BINARY_DIR}/${versionFile}")
-
-	if(EXISTS "${sourceTreePath}")
-		set(${absPathOut} "${sourceTreePath}" PARENT_SCOPE)
-	elseif(EXISTS "${binaryTreePath}")
-		set(${absPathOut} "${binaryTreePath}" PARENT_SCOPE)
-	else()
-		message(FATAL_ERROR "File ${verisonFile} is missing! It should be in the source or binary directory of package ${package}." )
-	endif()
-
+#----------------------------------------------------------------------------------------
+function( cpfGetFirstMSVCDebugConfig configOut )
+	cpfGetConfigurations( configs )
+	foreach(config ${configs})
+		cpfIsMSVCDebugConfig(isDebugConfig ${config})
+		if( isDebugConfig )
+			set( ${configOut} ${config} PARENT_SCOPE)
+			return()
+		endif()		
+	endforeach()
+	set( ${configOut} "" PARENT_SCOPE)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
@@ -221,6 +257,20 @@ function( cpfFindConfigFile absFilePathOut configName )
 	endif()
 	
 	message(FATAL_ERROR "Could not find any configuration file with base-name ${configName}.")
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetConfigurationsInDirectory configsOut absDirPath )
+
+	set(configs)
+	file(GLOB configFiles LIST_DIRECTORIES false "${absDirPath}/*${CPF_CONFIG_FILE_ENDING}")
+	foreach(file ${configFiles})
+		get_filename_component(config ${file} NAME_WE)
+		cpfListAppend(configs ${config})
+	endforeach()
+
+	set(${configsOut} "${configs}" PARENT_SCOPE)
 
 endfunction()
 

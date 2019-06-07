@@ -14,8 +14,6 @@ function( cpfAddGlobalRunAllTestsTarget packages)
 	
 endfunction()
 
-
-
 #----------------------------------------------------------------------------------------
 # Creates a custom target that executes all unit tests of the given packages
 
@@ -26,7 +24,6 @@ function( cpfAddGlobalRunUnitTestsTarget packages)
 	endif()
 	
 endfunction()
-
 
 #----------------------------------------------------------------------------------------
 # Creates a custom target that executes the given test executable when "build"
@@ -84,7 +81,6 @@ function( cpfAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix te
 	endif()
 endfunction()
 
-
 #----------------------------------------------------------------------------------------
 function( getRunTestStampFile filenameOut runTargetName targetPrefix )
 	
@@ -96,39 +92,23 @@ function( getRunTestStampFile filenameOut runTargetName targetPrefix )
 
 endfunction()
 
-
 #----------------------------------------------------------------------------------------
 # Adds a run-tests target that runs a pyhton script
 # dependedOnPackages -> This argument is used to outdate the test target if the sources of some
 # other package/target change. This is usefull if the tests internally use functionality from
 # an external package.
-function( cpfAddRunPython3TestTarget testScript args sourceFiles dependedOnPackages dependedOnExternalFiles)
+function( cpfAddRunPython3TestTarget testScript args sourceFiles dependedOnTargets dependedOnExternalFiles)
 	if(TOOL_PYTHON3)
 
 		# Since there is no generated file for the depended on cmake packages, we get there source files instead
 		# to make the out-of-date mechanism work.
-		cpfGetAllDependedOnSourceFiles(sourceFiles "${sourceFiles}" "${dependedOnPackages}")
+		cpfGetAllDependedOnSourceFiles(sourceFiles "${sourceFiles}" "${dependedOnTargets}")
 		# Get the basic command for running a python script in module mode
 		cpfGetRunPythonModuleCommand( runScriptCommand "${CMAKE_CURRENT_SOURCE_DIR}/${testScript}")
 		set( runTestsCommand "${runScriptCommand} ${args}")
 		cpfAddCustomTestTarget(${runTestsCommand} "${sourceFiles}" "${dependedOnExternalFiles}" )
 
 	endif()
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetAllDependedOnSourceFiles filesOut sourceFiles dependedOnPackages )
-
-	cpfPrependMulti( absSourceFiles "${CMAKE_CURRENT_SOURCE_DIR}/" "${sourceFiles}")
-
-	# Get the sources from the depended on packages.
-	foreach( package ${dependedOnPackages})
-		getAbsPathsOfTargetSources( absSources ${package})
-		cpfListAppend( absSourceFiles ${absSources})
-	endforeach()
-
-	set(${filesOut} "${absSourceFiles}" PARENT_SCOPE)
-
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -200,7 +180,7 @@ endfunction()
 # This function adds a target for each of the given test modules so they can be run in parallel.
 # It is the clients responsibility to ensure that there is no interaction between the test-cases of two
 # different modules.
-function( cpfAddRunPython3TestTargetForEachModule testScript modules args sourceFiles dependedOnPackages dependedOnExternalFiles)
+function( cpfAddRunPython3TestTargetForEachModule testScript modules args sourceFiles dependedOnTargets dependedOnExternalFiles)
 	if(TOOL_PYTHON3)
 
 		cpfGetPackageName(package)
@@ -215,7 +195,7 @@ function( cpfAddRunPython3TestTargetForEachModule testScript modules args source
 			# Since there is no generated file for the depended on cmake packages, we get there source files instead
 			# to make the out-of-date mechanism work.
 			set(sourceFilesPlusModule)
-			cpfGetAllDependedOnSourceFiles(sourceFilesPlusModule "${sourceFiles};${moduleFile}" "${dependedOnPackages}")
+			cpfGetAllDependedOnSourceFiles(sourceFilesPlusModule "${sourceFiles};${moduleFile}" "${dependedOnTargets}")
 			# Get the basic command for running a python script in module mode
 			cpfGetRunPythonModuleCommand( runScriptCommand "${CMAKE_CURRENT_SOURCE_DIR}/${testScript}")
 			set( runTestsCommand "${runScriptCommand} ${args} module=${module}")

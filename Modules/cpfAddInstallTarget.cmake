@@ -28,7 +28,7 @@ function( cpfAddPackageInstallTargets package components )
 
 		# Add commands for running the install script.
 		set(installScript "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake")
-		set(installCommand "\"${CMAKE_COMMAND}\" -DCMAKE_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\" -DCMAKE_INSTALL_COMPONENT=${component} -DCMAKE_INSTALL_CONFIG_NAME=$<CONFIG> -P \"${installScript}\" ")
+		#set(installCommand "\"${CMAKE_COMMAND}\" -DCMAKE_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\" -DCMAKE_INSTALL_COMPONENT=${component} -DCMAKE_INSTALL_CONFIG_NAME=$<CONFIG> -P \"${installScript}\" ")
 
 		set(stampFile "${CMAKE_CURRENT_BINARY_DIR}/${targetName}.stamp")
 		set(touchCommand "\"${CMAKE_COMMAND}\" -E touch \"${stampFile}\"")
@@ -57,6 +57,26 @@ function( cpfAddPackageInstallTargets package components )
 	set_property(TARGET ${bundleTarget} PROPERTY FOLDER ${package}/pipeline )
 
 endfunction()
+
+
+#----------------------------------------------------------------------------------------
+function( cpfGetRunInstallScriptCommands runInstallScriptCommandsOut package config components destDir )
+
+	set(scriptFile "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake")
+
+	if(config)
+		set(configOption "-DCMAKE_INSTALL_CONFIG_NAME=${config}")
+	endif()
+
+	set(commands)
+	foreach(component ${components})
+		cpfListAppend( commands "\"${CMAKE_COMMAND}\" -DCMAKE_INSTALL_PREFIX=\"${destDir}\" -DCMAKE_INSTALL_COMPONENT=${component} ${configOption} -P \"${scriptFile}\"" )
+	endforeach()
+
+	set( ${runInstallScriptCommandsOut} "${commands}" PARENT_SCOPE )
+
+endfunction()
+
 
 #---------------------------------------------------------------------------------------------
 function( cpfGetInstallTargetDependencies fileDependenciesOut targetDependenciesOut package component )
@@ -148,16 +168,6 @@ function( cpfInstallTargetsForPackage package targets component versionCompatibi
 		INCLUDES
 			DESTINATION "${relIncludeDir}/.."
 	)
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfAppendPackageExeRPaths package rpath )
-
-	cpfGetExecutableTargets( exeTargets ${package})
-	foreach(target ${exeTargets})
-		set_property(TARGET ${target} APPEND PROPERTY INSTALL_RPATH "${rpath}")
-	endforeach()
 
 endfunction()
 
@@ -366,7 +376,6 @@ function( cpfInstallAbiDumpFiles package )
 
 endfunction()
 
-
 #----------------------------------------------------------------------------------------
 # Parses the pluginOptionLists and returns two lists of same size. One list contains the
 # plugin target while the element with the same index in the other list contains the 
@@ -419,7 +428,7 @@ endfunction()
 #
 function( cpfInstallDependedOnSharedLibraries package pluginOptions distributionPackageOptionLists )
 
-	cpfDependedOnSharedLibrariesAndDirectories( libraries directories ${package} "${pluginOptions}" )
+	cpfGetDependedOnSharedLibrariesAndDirectories( libraries directories ${package} "${pluginOptions}" )
 
 	# Add install rules for each distribution package that has a runtime-portable content.
 	set(contentIds)
@@ -445,7 +454,7 @@ endfunction()
 # Returns a list with shared library targets and one with a relative directory for each
 # target to which the shared library must be copied.
 #
-function( cpfDependedOnSharedLibrariesAndDirectories librariesOut directoriesOut package pluginOptionLists )
+function( cpfGetDependedOnSharedLibrariesAndDirectories librariesOut directoriesOut package pluginOptionLists )
 
 	cpfGetRelativeOutputDir( relRuntimeDir ${package} RUNTIME)
 	cpfGetRelativeOutputDir( relLibraryDir ${package} LIBRARY)
@@ -578,7 +587,6 @@ function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTa
 
 endfunction()
 
-
 #----------------------------------------------------------------------------------------
 # This function parses the distribution package options of the package and returns a list
 # with the content-ids of all runtime-portable packages.
@@ -608,7 +616,6 @@ function( addSharedLibraryDependenciesInstallRules package contentId libraries d
 
 endfunction()
 
-
 #----------------------------------------------------------------------------------------
 function( cpfInstallSources package )
 
@@ -625,23 +632,3 @@ function( cpfInstallSources package )
 	cpfInstallSourceFiles( relFiles ${package} "${packageSourceFiles}" SOURCE sources "" )
 
 endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetTargetSourcesWithoutPrefixHeader sourcesOut target )
-
-	cpfGetTargetSourceFiles(sources ${target})
-
-	cpfIsInterfaceLibrary( isIntLib ${target})
-	if(NOT isIntLib)
-		get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
-		if(sources AND prefixHeader)
-			list(REMOVE_ITEM sources "${prefixHeader}")
-		endif()
-	endif()
-
-	set(${sourcesOut} "${sources}" PARENT_SCOPE )
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-

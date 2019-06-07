@@ -65,8 +65,6 @@ function( cpfAddCustomCommandCopyFile source destination )
 
 endfunction()
 
-
-
 #----------------------------------------------------------------------------------------
 # This function can be used when a custom target needs to add multiple lines to a file.
 # The function creates a custom command for each line that is added to the file.
@@ -193,7 +191,6 @@ function( cpfAddConfigurationDependendCommand )
 
 endfunction()
 
-
 #----------------------------------------------------------------------------------------
 # This function creates a file that contains definitions for all the given variables with the given values.
 # This is intended to be used to pass arguments to cmake scripts. This is a workaround for the problem
@@ -277,7 +274,6 @@ function( cpfAddAppendLineCommand commandList line file isValue)
 
 	set(${commandList} ${commandListLocal} PARENT_SCOPE)
 endfunction()
-
 
 #----------------------------------------------------------------------------------------
 # Returns a list of cmake command line calls that will copy a set of files from one directory to another.
@@ -401,24 +397,4 @@ function( cpfAddBundleTarget targetName dependedOnTargets )
 		)
 	endif()
 endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetRunInstallScriptCommands runInstallScriptCommandsOut package config components destDir )
-
-	set(scriptFile "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake")
-
-	if(config)
-		set(configOption "-DCMAKE_INSTALL_CONFIG_NAME=${config}")
-	endif()
-
-	set(commands)
-	foreach(component ${components})
-		cpfListAppend( commands "\"${CMAKE_COMMAND}\" -DCMAKE_INSTALL_PREFIX=\"${destDir}\" -DCMAKE_INSTALL_COMPONENT=${component} ${configOption} -P \"${scriptFile}\"" )
-	endforeach()
-
-	set( ${runInstallScriptCommandsOut} "${commands}" PARENT_SCOPE )
-
-endfunction()
-
-
 

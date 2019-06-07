@@ -49,218 +49,7 @@ function( cpfIsInterfaceLibrary isIntLibOut target )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Returns a list with the binary sub-targets that are of type SHARED_LIBRARY or MODULE_LIBRARY.
-function( cpfGetSharedLibrarySubTargets librarySubTargetsOut package)
-
-	set(libraryTargets)
-	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
-	foreach( binaryTarget ${binaryTargets})
-		cpfIsDynamicLibrary( isDynamic ${binaryTarget})
-		if(isDynamic)
-			cpfListAppend( libraryTargets ${binaryTarget})
-		endif()
-	endforeach()
-	
-	set( ${librarySubTargetsOut} "${libraryTargets}" PARENT_SCOPE)
-	
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns $<TARGET_FILE:<target>> if the target is not an interface library,
-# othervise it returns an empty string.
-function( cpfGetTargetFileGeneratorExpression expOut target)
-	set(file)
-	cpfIsInterfaceLibrary(isIntLib ${productionLib})
-	if(NOT isIntLib)
-		set(file "$<TARGET_FILE:${productionLib}>")
-	endif()
-	set(${expOut} "${file}" PARENT_SCOPE)
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# This reads the source files from the targets SOURCES property or in case of interface 
-# library targets from the targets file container target.
-#
-function( cpfGetTargetSourceFiles filesOut target)
-	cpfGetTargetSourceFilesAndSourceDir(files unused ${target})
-	set(${filesOut} "${files}" PARENT_SCOPE)
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetTargetSourceFilesAndSourceDir filesOut dirOut target )
-
-	cpfIsInterfaceLibrary( isIntLib ${target})
-	if(isIntLib)
-		# Use the file container target to get the files.
-		get_property(target TARGET ${target} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET )
-	endif()
-	get_property(sourceDir TARGET ${target} PROPERTY SOURCE_DIR )
-	get_property(sources TARGET ${target} PROPERTY SOURCES )
-
-	set(${dirOut} ${sourceDir} PARENT_SCOPE)
-	set(${filesOut} ${sources} PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Gets all files from the targets SOURCES property, turns them into abs pathes if needed
-# and returns the list.
-function( getAbsPathsOfTargetSources absPathsOut target)
-
-	cpfGetTargetSourceFilesAndSourceDir(sources sourceDir ${target})
-
-	# sources can have relative or absolute pathes
-	set(absPaths)
-	foreach( file ${sources})
-		cpfToAbsSourcePath( absPath ${file} ${sourceDir})
-		cpfListAppend( absPaths ${absPath})
-	endforeach()
-
-	set(${absPathsOut} "${absPaths}" PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns a list with all files from target property SOURCES that are below the given
-# directory, relative to the given directory.
-function( getAbsPathesForSourceFilesInDir absfilePathsOut target dir)
-
-	getAbsPathsOfTargetSources( absSources ${target})
-	# get only files that are in the sources directory
-	cpfGetSubPaths( subPaths ${dir} "${absSources}")
-	set( ${absfilePathsOut} "${subPaths}" PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Assumes that the given path is either relative to CMAKE_CURRENT_SOURCE dir or an absolute
-# path and prepends CMAKE_CURRENT_SCOURCE dir if it is relative.
-function( cpfToAbsSourcePath absPathOut sourceFile sourceDir)
-	cpfIsAbsolutePath( isAbsPath ${sourceFile})
-	if(NOT isAbsPath )
-		set(sourceFile ${sourceDir}/${sourceFile} )
-	endif()
-	set(${absPathOut} "${sourceFile}" PARENT_SCOPE)
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Calls cpfToAbsSourcePath() for multiple files.
-function( cpfToAbsSourcePaths absPathsOut sourceFiles sourceDir)
-	set(absFiles)
-	foreach(file ${sourceFiles})
-		cpfToAbsSourcePath( absFile ${file} ${sourceDir})
-		cpfListAppend(absFiles ${absFile})
-	endforeach()
-	set(${absPathsOut} "${absFiles}" PARENT_SCOPE)
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetSubtargets subTargetsOut packages subtargetProperty)
-
-	set(targets)
-	foreach(package ${packages})
-		if(TARGET ${package}) # not all packages have targets
-			
-			# check for subtargets that belong to the main package target
-			get_property(subTarget TARGET ${package} PROPERTY ${subtargetProperty})
-			cpfListAppend( targets ${subTarget} )
-
-			# check for subtargets that belong to the binary targets
-			get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
-			foreach(binaryTarget ${binaryTargets})
-				get_property(subTarget TARGET ${binaryTarget} PROPERTY ${subtargetProperty})
-				cpfListAppend( targets ${subTarget} )
-			endforeach()
-			
-		endif()
-	endforeach()
-
-	set(${subTargetsOut} "${targets}" PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns a list with all non-imported targets that are defined in a package directory
-# with add_library(), add_executable() or add_custom_target().
-#
-function( cpfGetAllTargets allTargetsOut )
-	
-	set(allTargets)
-
-	cpfGetAllPackages(packages)
-	foreach(package ${packages})
-		get_property(targets DIRECTORY ${CMAKE_SOURCE_DIR}/${package} PROPERTY BUILDSYSTEM_TARGETS )
-		cpfListAppend(allTargets ${targets})
-	endforeach()
-
-	set(${allTargetsOut} "${allTargets}" PARENT_SCOPE)
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# Sorts the source files of the target into various folders for Visual Studio.
-# 
-# Remarks
-# I failed to add the cotire prefix header to the generated files because
-# it does not belong to the target.
-# The ui_*.h files could also not be added to the generated files because they do not exist when the target is created.
-function( cpfSetIDEDirectoriesForTargetSources targetName )
-
-	cpfIsInterfaceLibrary(isInterfaceLib ${targetName})
-	if(isInterfaceLib)
-		return()
-	endif()
-
-    # get the source files in the Sources directory
-	get_target_property( sourceDir ${targetName} SOURCE_DIR)
-	getAbsPathesForSourceFilesInDir( sourcesFiles ${targetName} ${sourceDir})
-	# get the generated source files in the binary directory
-	get_target_property( binaryDir ${targetName} BINARY_DIR)
-	getAbsPathesForSourceFilesInDir( generatedFiles ${targetName} ${binaryDir})
-	# manually add a file that is generated by automoc and not visible here
-	list(APPEND generatedFiles ${CMAKE_CURRENT_BINARY_DIR}/${targetName}_autogen/moc_compilation.cpp) 
-	
-	# set source groups for generated files that do exist
-	source_group(Generated FILES ${generatedFiles})
-	
-	# set the file groups of the files in the Source directory to follow the directory structure
-	cpfGetRelativePaths( sourcesFiles "${sourceDir}" "${sourcesFiles}")
-	cpfSourceGroupTree("${sourcesFiles}")
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfAddAliasTarget target packageNamespace )
-
-	cpfIsExecutable(isExe ${target})
-	if(isExe)
-		add_executable(${packageNamespace}::${target} ALIAS ${target})
-	else()
-		add_library(${packageNamespace}::${target} ALIAS ${target})
-	endif()
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# Goes through the given targets and in case that a target is an alias target replaces them
-# with the name of the original target.
-function( cpfStripTargetAliases deAliasedTargetsOut targets)
-	
-	set(deAliasedTargets)
-	foreach(target ${targets})
-		get_property(aliasedTarget TARGET ${target} PROPERTY ALIASED_TARGET)
-		if(aliasedTarget)
-			cpfListAppend(deAliasedTargets ${aliasedTarget})
-		else()
-			cpfListAppend(deAliasedTargets ${target})
-		endif()
-	endforeach()
-	set(${deAliasedTargetsOut} "${deAliasedTargets}" PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# This function reads some properties from a target and prints the value if it is set.
+# This function reads all properties from a target and prints the value if it is set.
 #
 function( cpfPrintTargetProperties target )
 
@@ -573,18 +362,6 @@ function( cpfPrintTargetProperties target )
 
 endfunction()
 
-#----------------------------------------------------------------------------------------
-# Prints the value of the given target property if it is set.
-#
-function( cpfPrintTargetPropertyIfSet target property )
-
-	get_property( value TARGET ${target} PROPERTY ${property} )
-	if(NOT "${value}" STREQUAL "")
-		message("- ${property}: ${value} ")
-	endif()
-
-endfunction()
-
 #---------------------------------------------------------------------------------------------
 function( cpfGetTargetProperties outputValues targets properties )
 
@@ -614,257 +391,6 @@ function( cpfGetFirstDefinedTargetProperty valueOut target properties )
         endif()
     endforeach()
     set( ${valueOut} "" PARENT_SCOPE )
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# Returns the short output name of the internal target
-#
-function( cpfGetTargetOutputFileName output target config )
-
-	cpfGetTargetOutputType( outputType ${target})
-	cpfGetTargetOutputFileNameForTargetType( shortFilename ${target} ${config} ${outputType})
-	set( ${output} ${shortFilename} PARENT_SCOPE )
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfGetTargetOutputFileNameForTargetType output target config outputType)
-
-	cpfToConfigSuffix(configSuffix ${config})
-	get_property( outputBaseName TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME_${configSuffix} )
-	get_property( targetType TARGET ${target} PROPERTY TYPE)
-	get_property( version TARGET ${target} PROPERTY VERSION)
-	
-	cpfGetTargetTypeFileExtension( extension ${targetType})
-	cpfIsDynamicLibrary( isDynamicLib ${target})
-	cpfIsExecutable( isExe ${target})
-
-	if(${CMAKE_SYSTEM_NAME} STREQUAL Linux AND isDynamicLib )
-		set( shortFilename "${outputBaseName}${extension}.${version}")
-	elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux AND isExe)
-		set( shortFilename "${outputBaseName}-${version}${extension}")
-	else()
-		set( shortFilename "${outputBaseName}${extension}")
-	endif()
-
-	set( ${output} ${shortFilename} PARENT_SCOPE )
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfGetTargetOutputBaseName nameOut target config)
-	cpfToConfigSuffix( configSuffix ${config})
-	cpfGetTargetOutputType( outputType ${target})
-	get_property( baseName TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME_${configSuffix} )
-	set( ${nameOut} ${baseName} PARENT_SCOPE)
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfGetAbsOutputDir absDirOut package outputType config )
-	cpfGetRelativeOutputDir(relativeDir ${package} ${outputType})
-	set(${absDirOut} "${CMAKE_BINARY_DIR}/BuildStage/${config}/${relativeDir}" PARENT_SCOPE)
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# Note that this function defines a part of the directory structure of the deployed files
-#
-function( cpfGetRelativeOutputDir relativeDirOut package outputType )
-
-	cpfGetPackagePrefixOutputDir( packagePrefixDir ${package} )
-	cpfGetTypePartOfOutputDir(typeDir ${package} ${outputType})
-	set(${relativeDirOut} ${packagePrefixDir}/${typeDir} PARENT_SCOPE )
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# 
-function( cpfGetPackagePrefixOutputDir outputDir package )
-	set(${outputDir} ${package} PARENT_SCOPE )
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# returns the output directory of the target
-function( cpfGetTargetOutputDirectory output target config )
-
-	cpfToConfigSuffix(configSuffix ${config})
-	cpfGetTargetOutputType( outputType ${target})
-	get_property( outputDir TARGET ${target} PROPERTY ${outputType}_OUTPUT_DIRECTORY_${configSuffix} )
-	set( ${output} "${outputDir}" PARENT_SCOPE )
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# This function defines the part of the output directory that comes after the config/package add_subdirectory
-#
-function( cpfGetTypePartOfOutputDir typeDir package outputType )
-
-	# handle relative dirs that are the same on all platforms
-	if(${outputType} STREQUAL ARCHIVE)
-		set(typeDirLocal lib)
-	elseif(${outputType} STREQUAL COMPILE_PDB )	
-		# We put the compiler pdb files parallel to the lib, because msvc looks for them there.
-		set(typeDirLocal lib )
-	elseif(${outputType} STREQUAL PDB)
-		# We put the linker pdb files parallel to the dll, because msvc looks for them there.
-		set(typeDirLocal . )
-	elseif(${outputType} STREQUAL INCLUDE)
-		set(typeDirLocal include/${package})
-	elseif(${outputType} STREQUAL CMAKE_PACKAGE_FILES)
-		set(typeDirLocal lib/cmake/${package}) 
-	elseif(${outputType} STREQUAL SOURCE )
-		set(typeDirLocal src/${package}) 
-	elseif(${outputType} STREQUAL OTHER )
-		set(typeDirLocal other ) 
-	endif()
-
-	# handle platform specific relative dirs
-	if( ${CMAKE_SYSTEM_NAME} STREQUAL Windows  )
-		# on windows we put executables and dlls directly in the package directory.
-		if(${outputType} STREQUAL RUNTIME)
-			set(typeDirLocal . )
-		elseif(${outputType} STREQUAL LIBRARY)
-			set(typeDirLocal . )
-		endif()
-
-	elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-		# On Linux we follow the GNU coding standards that propose a directory structure
-		# https://www.gnu.org/prep/standards/html_node/Directory-Variables.html
-		if(${outputType} STREQUAL RUNTIME)
-			set(typeDirLocal bin)
-		elseif(${outputType} STREQUAL LIBRARY)
-			set(typeDirLocal lib)
-		endif()
-
-	else()
-		message(FATAL_ERROR "Function cpfSetAllOutputDirectoriesAndNames() must be extended for system ${CMAKE_SYSTEM_NAME}")
-	endif()
-	
-	set( ${typeDir} ${typeDirLocal} PARENT_SCOPE ) 
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns the absolute path to the output directory and the short filename of the output file of an imported or internal target
-#
-function( cpfGetTargetLocation targetDirOut targetFilenameOut target config )
-
-	get_property(isImported TARGET ${target} PROPERTY IMPORTED)
-	if(isImported)
-		cpfToConfigSuffix( configSuffix ${config})
-		# for imported targets it is not clear which property holds the 
-		set( possibleLocationProperties IMPORTED_LOCATION_${configSuffix} LOCATION_${configSuffix} IMPORTED_LOCATION LOCATION )
-		cpfGetFirstDefinedTargetProperty( fullTargetFile ${target} "${possibleLocationProperties}")
-  
-        if("${fullTargetFile}" STREQUAL "") # give up
-            cpfPrintTargetProperties(${target}) # print more debug information about which variable may hold the location
-            message(FATAL_ERROR "Function cpfGetTargetLocation() could not determine the location of the binary file for target ${target} and configuration ${config}")
-        endif()
-
-	else()
-		cpfGetFullTargetOutputFile( fullTargetFile ${target} ${config})
-	endif()
-
-	get_filename_component( shortName "${fullTargetFile}" NAME)
-	get_filename_component( targetDir "${fullTargetFile}" DIRECTORY )
-
-	set(${targetDirOut} ${targetDir} PARENT_SCOPE)
-	set(${targetFilenameOut} ${shortName} PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns the absolute pathes of the output files of multiple targets.
-#
-function( cpfGetTargetLocations absolutePathes targets config )
-	set(locations)
-	foreach(target ${targets})
-		cpfGetTargetLocation( dir shortName ${target} ${config} )
-		cpfListAppend( locations "${dir}/${shortName}")
-	endforeach()
-	set(${absolutePathes} "${locations}" PARENT_SCOPE)
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# returns the full output filename of the given target
-function( cpfGetFullTargetOutputFile output target config )
-
-	cpfGetTargetOutputDirectory( directory ${target} ${config} )
-	cpfGetTargetOutputFileName( name ${target} ${config})
-	set( ${output} "${directory}/${name}" PARENT_SCOPE )
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# translates the target type into the output type (ARCHIVE, RUNTIME etc.)
-function( cpfGetTargetOutputType outputTypeOut target )
-
-	get_property( type TARGET ${target} PROPERTY TYPE)
-	if( ${type} STREQUAL EXECUTABLE )
-		set( ${outputTypeOut} RUNTIME PARENT_SCOPE)
-	elseif(${type} STREQUAL STATIC_LIBRARY)
-		set( ${outputTypeOut} ARCHIVE PARENT_SCOPE)
-	elseif(${type} STREQUAL MODULE_LIBRARY)
-		set( ${outputTypeOut} LIBRARY PARENT_SCOPE)
-	elseif(${type} STREQUAL SHARED_LIBRARY)
-		if(${CMAKE_SYSTEM_NAME} STREQUAL Windows ) # this should also be set when using cygwin or maybe clang-cl, but we ignore that for now
-			set( ${outputTypeOut} RUNTIME PARENT_SCOPE)
-		else()
-			set( ${outputTypeOut} LIBRARY PARENT_SCOPE)
-		endif()
-	elseif(${type} STREQUAL INTERFACE_LIBRARY)
-		set( ${outputTypeOut} ARCHIVE PARENT_SCOPE)
-	else()
-		message(FATAL_ERROR "Target type ${type} not supported by function cpfGetTargetOutputType()")
-	endif()
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# returns the file extension for the type of the given target
-function( cpfGetTargetTypeFileExtension extension targetType)
-	
-	if( ${targetType} STREQUAL EXECUTABLE )
-		set( ${extension} ${CMAKE_${targetType}_SUFFIX} PARENT_SCOPE)
-	elseif(${targetType} STREQUAL STATIC_LIBRARY)
-		set( ${extension} ${CMAKE_${targetType}_SUFFIX} PARENT_SCOPE)
-	elseif(${targetType} STREQUAL MODULE_LIBRARY)
-		set( ${extension} ${CMAKE_SHARED_MODULE_SUFFIX} PARENT_SCOPE)
-	elseif(${targetType} STREQUAL SHARED_LIBRARY)
-		set( ${extension} ${CMAKE_${targetType}_SUFFIX} PARENT_SCOPE)
-	else()
-		message(FATAL_ERROR "Target type ${targetType} not supported by function cpfGetTargetTypeFileExtension()")
-	endif()
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# This function returns all the subdirectories in the Sources directory of a CMakeProjectFramework project.
-#
-function( cpfGetSourcesSubdirectories subdirsOut cpfRootDir )
-
-	# get subdirectories in the Sources directory to find potential packages
-	set( fullSourceDir "${cpfRootDir}/${CPF_SOURCE_DIR}" )
-	cpfGetSubdirectories( subDirs "${fullSourceDir}" )
-	if(NOT subDirs)
-		message(FATAL_ERROR "No possible package directories found in directory \"${fullSourceDir}\"")
-	endif()
-
-	set(${subdirsOut} "${subDirs}" PARENT_SCOPE)
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# Similar to the cmake function source_group( TREE ), but also sorts .cpp and .h files # in directories.
-# For some unkown reason the cmake function does not work for us, so we have to implement it manually.
-# However, the cmake function worked in a minimalistic test project. wtf!?
-function( cpfSourceGroupTree relfiles)
-
-	foreach(file ${relfiles})
-		get_filename_component(dir ${file} DIRECTORY)
-		string(REPLACE "/" "\\" sourceGroup "${dir}")
-		source_group("${sourceGroup}" FILES ${file})
-	endforeach()
-
 endfunction()
 
 #---------------------------------------------------------------------------------------------
@@ -903,5 +429,258 @@ function( cpfFilterOutTargetsWithProperty output targets property value )
 	endforeach()
 
 	set(${output} "${filteredTargets}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Prints the value of the given target property if it is set.
+#
+function( cpfPrintTargetPropertyIfSet target property )
+
+	get_property( value TARGET ${target} PROPERTY ${property} )
+	if(NOT "${value}" STREQUAL "")
+		message("- ${property}: ${value} ")
+	endif()
+
+endfunction()
+
+#---------------------------------------------------------------------
+# This function is used to change properties of imported targets to make
+# sure that property values are set after the same "scheme" on which the
+# rest of the CPF cmake code can rely.
+#
+# E.g. On Linuy the LOCATION_<config> property should hold the location of the actual binary
+# file and not the location of the symlink that points to the binary. The symlink
+# location should be stored in the IMPORTED_SONAME_<config> property.
+#
+function( cpfNormalizeImportedTargetProperties targets )
+
+	# also get indirectly linked targets
+	cpfGetAllTargetsInLinkTree( allLinkedTargets "${targets}")
+	
+	cpfFilterInTargetsWithProperty( importedTargets "${allLinkedTargets}" IMPORTED TRUE)
+	foreach(target ${importedTargets})
+	
+		# make sure the location property does not point to a symbolic link but to the real file on linux
+		if( ${CMAKE_SYSTEM_NAME} STREQUAL Linux)
+			cpfIsSingleConfigGenerator( isSingleConfig )
+			if(NOT ${isSingleConfig})
+				message(FATAL_ERROR "Function cpfNormalizeImportedTargetProperties() assumes that there are only single configuration generators on linux.")
+			endif()
+			cpfToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} ) 
+			
+			get_property( location TARGET ${target} PROPERTY LOCATION_${configSuffix} )
+			if( IS_SYMLINK ${location} )
+			
+				# get the file to which the symlink points
+				execute_process(COMMAND readlink;${location} RESULT_VARIABLE result OUTPUT_VARIABLE linkTarget )
+				if(NOT ${result} STREQUAL 0)
+					message(FATAL_ERROR "Could not read symlink ${location}")
+				endif()
+				# refine the output result
+				string(STRIP ${linkTarget} linkTarget)
+				get_filename_component( dir ${location} DIRECTORY)
+				set(linkTarget "${dir}/${linkTarget}")
+				
+				# change the target properties
+				if( EXISTS ${linkTarget})
+					set_property( TARGET ${target} PROPERTY LOCATION_${configSuffix} ${linkTarget})
+					set_property( TARGET ${target} PROPERTY IMPORTED_LOCATION_${configSuffix} ${linkTarget} )
+					get_filename_component( locationShort ${location} NAME)
+					set_property( TARGET ${target} PROPERTY IMPORTED_SONAME_${configSuffix} ${locationShort} )
+				else()
+					message( FATAL_ERROR "The soname symlink \"${location}\" of imported target ${target} points to the not existing file \"${linkTarget}\"." )
+				endif()
+				
+			endif()
+			
+		endif()
+	
+	endforeach()
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# This reads the source files from the targets SOURCES property or in case of interface 
+# library targets from the targets file container target.
+#
+function( cpfGetTargetSourceFiles filesOut target)
+	cpfGetTargetSourceFilesAndSourceDir(files unused ${target})
+	set(${filesOut} "${files}" PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetTargetSourceFilesAndSourceDir filesOut dirOut target )
+
+	cpfIsInterfaceLibrary( isIntLib ${target})
+	if(isIntLib)
+		# Use the file container target to get the files.
+		get_property(target TARGET ${target} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET )
+	endif()
+	get_property(sourceDir TARGET ${target} PROPERTY SOURCE_DIR )
+	get_property(sources TARGET ${target} PROPERTY SOURCES )
+
+	set(${dirOut} ${sourceDir} PARENT_SCOPE)
+	set(${filesOut} ${sources} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Gets all files from the targets SOURCES property, turns them into abs pathes if needed
+# and returns the list.
+function( getAbsPathsOfTargetSources absPathsOut target)
+
+	cpfGetTargetSourceFilesAndSourceDir(sources sourceDir ${target})
+
+	# sources can have relative or absolute pathes
+	set(absPaths)
+	foreach( file ${sources})
+		cpfToAbsSourcePath( absPath ${file} ${sourceDir})
+		cpfListAppend( absPaths ${absPath})
+	endforeach()
+
+	set(${absPathsOut} "${absPaths}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns a list with all files from target property SOURCES that are below the given
+# directory, relative to the given directory.
+function( getAbsPathesForSourceFilesInDir absfilePathsOut target dir)
+
+	getAbsPathsOfTargetSources( absSources ${target})
+	# get only files that are in the sources directory
+	cpfGetSubPaths( subPaths ${dir} "${absSources}")
+	set( ${absfilePathsOut} "${subPaths}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Assumes that the given path is either relative to CMAKE_CURRENT_SOURCE dir or an absolute
+# path and prepends CMAKE_CURRENT_SCOURCE dir if it is relative.
+function( cpfToAbsSourcePath absPathOut sourceFile sourceDir)
+	cpfIsAbsolutePath( isAbsPath ${sourceFile})
+	if(NOT isAbsPath )
+		set(sourceFile ${sourceDir}/${sourceFile} )
+	endif()
+	set(${absPathOut} "${sourceFile}" PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Calls cpfToAbsSourcePath() for multiple files.
+function( cpfToAbsSourcePaths absPathsOut sourceFiles sourceDir)
+	set(absFiles)
+	foreach(file ${sourceFiles})
+		cpfToAbsSourcePath( absFile ${file} ${sourceDir})
+		cpfListAppend(absFiles ${absFile})
+	endforeach()
+	set(${absPathsOut} "${absFiles}" PARENT_SCOPE)
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# This function returns all the subdirectories in the Sources directory of a CMakeProjectFramework project.
+#
+function( cpfGetSourcesSubdirectories subdirsOut cpfRootDir )
+
+	# get subdirectories in the Sources directory to find potential packages
+	set( fullSourceDir "${cpfRootDir}/${CPF_SOURCE_DIR}" )
+	cpfGetSubdirectories( subDirs "${fullSourceDir}" )
+	if(NOT subDirs)
+		message(FATAL_ERROR "No possible package directories found in directory \"${fullSourceDir}\"")
+	endif()
+
+	set(${subdirsOut} "${subDirs}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Similar to the cmake function source_group( TREE ), but also sorts .cpp and .h files # in directories.
+# For some unkown reason the cmake function does not work for us, so we have to implement it manually.
+# However, the cmake function worked in a minimalistic test project. wtf!?
+function( cpfSourceGroupTree relfiles)
+
+	foreach(file ${relfiles})
+		get_filename_component(dir ${file} DIRECTORY)
+		string(REPLACE "/" "\\" sourceGroup "${dir}")
+		source_group("${sourceGroup}" FILES ${file})
+	endforeach()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetTargetSourcesWithoutPrefixHeader sourcesOut target )
+
+	cpfGetTargetSourceFiles(sources ${target})
+
+	cpfIsInterfaceLibrary( isIntLib ${target})
+	if(NOT isIntLib)
+		get_property(prefixHeader TARGET ${target} PROPERTY COTIRE_CXX_PREFIX_HEADER)
+		if(sources AND prefixHeader)
+			list(REMOVE_ITEM sources "${prefixHeader}")
+		endif()
+	endif()
+
+	set(${sourcesOut} "${sources}" PARENT_SCOPE )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Sorts the source files of the target into various folders for Visual Studio.
+# 
+# Remarks
+# I failed to add the cotire prefix header to the generated files because
+# it does not belong to the target.
+# The ui_*.h files could also not be added to the generated files because they do not exist when the target is created.
+function( cpfSetIDEDirectoriesForTargetSources targetName )
+
+	cpfIsInterfaceLibrary(isInterfaceLib ${targetName})
+	if(isInterfaceLib)
+		return()
+	endif()
+
+    # get the source files in the Sources directory
+	get_target_property( sourceDir ${targetName} SOURCE_DIR)
+	getAbsPathesForSourceFilesInDir( sourcesFiles ${targetName} ${sourceDir})
+	# get the generated source files in the binary directory
+	get_target_property( binaryDir ${targetName} BINARY_DIR)
+	getAbsPathesForSourceFilesInDir( generatedFiles ${targetName} ${binaryDir})
+	# manually add a file that is generated by automoc and not visible here
+	list(APPEND generatedFiles ${CMAKE_CURRENT_BINARY_DIR}/${targetName}_autogen/moc_compilation.cpp) 
+	
+	# set source groups for generated files that do exist
+	source_group(Generated FILES ${generatedFiles})
+	
+	# set the file groups of the files in the Source directory to follow the directory structure
+	cpfGetRelativePaths( sourcesFiles "${sourceDir}" "${sourcesFiles}")
+	cpfSourceGroupTree("${sourcesFiles}")
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns $<TARGET_FILE:<target>> if the target is not an interface library,
+# othervise it returns an empty string.
+function( cpfGetTargetFileGeneratorExpression expOut target)
+	set(file)
+	cpfIsInterfaceLibrary(isIntLib ${target})
+	if(NOT isIntLib)
+		set(file "$<TARGET_FILE:${target}>")
+	endif()
+	set(${expOut} "${file}" PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns a list with all non-imported targets that are defined in a package directory
+# with add_library(), add_executable() or add_custom_target().
+#
+function( cpfGetAllTargets allTargetsOut )
+	
+	set(allTargets)
+
+	cpfGetAllPackages(packages)
+	foreach(package ${packages})
+		get_property(targets DIRECTORY ${CMAKE_SOURCE_DIR}/${package} PROPERTY BUILDSYSTEM_TARGETS )
+		cpfListAppend(allTargets ${targets})
+	endforeach()
+
+	set(${allTargetsOut} "${allTargets}" PARENT_SCOPE)
 
 endfunction()

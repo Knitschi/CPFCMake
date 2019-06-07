@@ -113,59 +113,6 @@ function( devMessageList list)
     endforeach()
 endfunction()
 
-#----------------------------------------------------------------------------------------
-# Takes a variable by name and asserts that it is defined.
-#
-function( cpfAssertDefined variableName )
-	if(NOT DEFINED ${variableName})
-		message(FATAL_ERROR "Assertion failed! Variable ${variableName} was not defined.}")
-	endif()
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Takes a variable by name and asserts that it is defined and prints the given message if not.
-#
-function( cpfAssertDefinedMessage variableName message )
-	if(NOT DEFINED ${variableName})
-		message(FATAL_ERROR "${message}")
-	endif()
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Asserts the the variable PROJECT_VERSION is defined.
-#
-function( cpfAssertProjectVersionDefined )
-	cpfAssertDefinedMessage(PROJECT_VERSION "The variable PROJECT_VERSION is not defined. Did you forget to call cpfInitPackageProject() before adding the package?")
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# This function can be used at the beginning of a script to check whether a variable
-# was set as a script argument.
-function( cpfAssertScriptArgumentDefined variableName )
-	
-	if(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
-		message(FATAL_ERROR "Function cpfAssertScriptArgumentDefined() is supposed to used in .cmake files that are run in script mode \"cmake -P file\".")
-	endif()
-	
-	if(NOT DEFINED ${variableName})
-		get_filename_component(shortName "${CMAKE_SCRIPT_MODE_FILE}" NAME)
-		message(FATAL_ERROR "Script \"${shortName}\" requires the -D${variableName}=<value> option.")
-	endif()
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# This function can be used to assert that key-word arguments were set.
-#
-function( cpfAssertKeywordArgumentsHaveValue keywords keywordPrefix function )
-
-	foreach(keyword ${keywords})
-		if(NOT ${keywordPrefix}_${keyword})
-			message(FATAL_ERROR "Function ${function} requires keyword argument ${keyword}")
-		endif()
-	endforeach()
-
-endfunction()
 
 #----------------------------------------------------------------------------------------
 # This function will set the value of a variable if it is not already set.
@@ -176,72 +123,6 @@ function( cpfSetIfNotSet variable value )
 	endif()
 endfunction()
 
-#----------------------------------------------------------------------------------------
-# A version of the configure_file() function that asserts that all given variables have
-# values when the function is called. This is supposed to prevent errors where configure_file()
-# is broken because variables that are used in the configured file are renamed.
-#
-function( cpfConfigureFileWithVariables input output variables )
-	foreach( variable ${variables})
-		cpfAssertDefined(${variable})
-	endforeach()
-	configure_file( "${input}" "${output}" )
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfIsSingleConfigGenerator var )
-
-	# consider using global property GENERATOR_IS_MULTI_CONFIG instead
-	if(CMAKE_CONFIGURATION_TYPES)
-		set( ${var} FALSE PARENT_SCOPE)
-	else()
-		set( ${var} TRUE PARENT_SCOPE)
-	endif()
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns a list of _DEBUG;_RELEASE;etc when using multi-config generators or an empty value otherwise
-#
-function( cpfGetConfigVariableSuffixes suffixes)
-	
-	if(CMAKE_CONFIGURATION_TYPES)
-		foreach(config ${CMAKE_CONFIGURATION_TYPES})
-			cpfToConfigSuffix( suffix ${config})
-			cpfListAppend( endings ${suffix})
-		endforeach()
-	elseif(CMAKE_BUILD_TYPE)
-		cpfToConfigSuffix( suffix ${CMAKE_BUILD_TYPE})
-		cpfListAppend( endings ${suffix})
-	else()
-		message(FATAL_ERROR "Config file error! The CMakeProjectFramework expects either CMAKE_CONFIGURATION_TYPES or CMAKE_BUILD_TYPE to be set.")
-	endif()
-
-	set(${suffixes} "${endings}" PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfToConfigSuffix suffix config)
-
-	string(TOUPPER ${config} upperConfig)
-	set(${suffix} ${upperConfig} PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns the possible configurations in which the project can be build
-function( cpfGetConfigurations configs )
-
-	if(CMAKE_CONFIGURATION_TYPES)
-		set( ${configs} ${CMAKE_CONFIGURATION_TYPES} PARENT_SCOPE)
-	elseif(CMAKE_BUILD_TYPE)
-		set( ${configs} ${CMAKE_BUILD_TYPE} PARENT_SCOPE)
-	else()
-		message(FATAL_ERROR "Config file error! The CMakeProjectFramework expects either CMAKE_CONFIGURATION_TYPES or CMAKE_BUILD_TYPE to be set.")
-	endif()
-
-endfunction()
 
 #----------------------------------------------------------------------------------------
 # A common variant of executing a process that will cause an cmake error when the command fails.
@@ -283,71 +164,6 @@ function( cpfExecuteProcess stdOut commandString workingDir)
 
 	string(STRIP "${textOutput}" textOutput)
 	set( ${stdOut} ${textOutput} PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# The function assumes that version and has the form 123.12.123.12-acdf and returns the 
-# first number as major version, the second number as minor version  and the last part
-# as commitIdOut if it exists.
-# 
-function( cpfSplitVersion majorOut minorOut patchOut commitIdOut versionString)
-	
-	cpfSplitString( versionList ${versionString} ".")
-	list(GET versionList 0 majorVersion)
-	list(GET versionList 1 minorVersion)
-	list(GET versionList 2 patchNr)
-
-	set(${majorOut} ${majorVersion} PARENT_SCOPE)
-	set(${minorOut} ${minorVersion} PARENT_SCOPE)
-	set(${patchOut} ${patchNr} PARENT_SCOPE)
-
-	cpfListLength(length "${versionList}" )
-	if( ${length} GREATER 3 )
-		list(GET versionList 3 commitsNr)
-		set( ${commitIdOut} ${commitsNr} PARENT_SCOPE)
-	else()
-		set( ${commitIdOut} "" PARENT_SCOPE)
-	endif()
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns true if the version number misses the 4th commits number.
-# 
-function( cpfIsReleaseVersion isReleaseOut version )
-	cpfSplitVersion( d d d commits ${version})
-	if("${commits}" STREQUAL "")
-		set( ${isReleaseOut} TRUE PARENT_SCOPE)
-	else()
-		set( ${isReleaseOut} FALSE PARENT_SCOPE)
-	endif()
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns true if the version is marked as dirty, which means there are local uncommitted changes.
-#
-function( cpfIsDirtyVersion isDirtyOut version )
-	cpfStringContains( isDirty "${version}" -dirty)
-	set(${isDirtyOut} ${isDirty} PARENT_SCOPE)
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns the part of the version number that contains the nummber of commits since the
-# last release version.
-#
-function( cpfGetCommitsSinceLastRelease commitNrOut version )
-	
-	cpfIsReleaseVersion(isRelease ${version})
-	if(isRelease)
-		set(${commitNrOut} 0 PARENT_SCOPE)
-		return()
-	endif()
-
-	string(REGEX MATCH ".[0-9]*-" commitNr "${version}")
-	cpfStringRemoveRight( commitNr ${commitNr} 1)
-	cpfRightSideOfString( commitNr ${commitNr} 1)
-	set(${commitNrOut} ${commitNr} PARENT_SCOPE)
 
 endfunction()
 
@@ -398,7 +214,6 @@ function( cpfIsCacheVariable isCacheVarOut variableName )
 	endif()
 endfunction()
 
-
 #----------------------------------------------------------------------------------------
 # This function extracts value lists from keyword based argument lists where one keyword can occur
 # multiple times. 
@@ -442,6 +257,30 @@ function( cpfGetKeywordValueLists valueListsOut valueListsKeyword otherKeywords 
 	endforeach()
 
 endfunction()
+
+#----------------------------------------------------------------------------------------
+# This function does a COPY_ONLY file configure if the target file does not exist yet.
+# This function can be used when the created file should not be overwritten when
+# the template file changes.
+function( configureFileIfNotExists templateFile targetFile )
+	if(NOT EXISTS ${targetFile} )
+		# we use the manual existance check to prevent overwriting the file when the template changes.
+		configure_file( ${templateFile} ${targetFile} COPYONLY )
+	endif()
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# A version of the configure_file() function that asserts that all given variables have
+# values when the function is called. This is supposed to prevent errors where configure_file()
+# is broken because variables that are used in the configured file are renamed.
+#
+function( cpfConfigureFileWithVariables input output variables )
+	foreach( variable ${variables})
+		cpfAssertDefined(${variable})
+	endforeach()
+	configure_file( "${input}" "${output}" )
+endfunction()
+
 
 
 

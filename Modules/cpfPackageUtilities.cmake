@@ -1,19 +1,12 @@
 include_guard(GLOBAL)
 
-#---------------------------------------------------------------------------------------------
-function( cpfGetConfigurationsInDirectory configsOut absDirPath )
 
-	set(configs)
-	file(GLOB configFiles LIST_DIRECTORIES false "${absDirPath}/*${CPF_CONFIG_FILE_ENDING}")
-	foreach(file ${configFiles})
-		get_filename_component(config ${file} NAME_WE)
-		cpfListAppend(configs ${config})
-	endforeach()
-
-	set(${configsOut} "${configs}" PARENT_SCOPE)
-
+#-----------------------------------------------------------
+# Returns the name of the current source directory.
+function( cpfGetPackageName packageNameOut )
+    cpfGetParentDirectory( package "${CMAKE_CURRENT_SOURCE_DIR}/blub")
+    set(${packageNameOut} "${package}" PARENT_SCOPE)
 endfunction()
-
 
 #---------------------------------------------------------------------------------------------
 function( cpfGetExecutableTargets exeTargetsOut package )
@@ -49,6 +42,44 @@ function( cpfGetProductionTargets productionTargetsOut package)
 
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# Returns a list with the binary sub-targets that are of type SHARED_LIBRARY or MODULE_LIBRARY.
+function( cpfGetSharedLibrarySubTargets librarySubTargetsOut package)
+
+	set(libraryTargets)
+	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
+	foreach( binaryTarget ${binaryTargets})
+		cpfIsDynamicLibrary( isDynamic ${binaryTarget})
+		if(isDynamic)
+			cpfListAppend( libraryTargets ${binaryTarget})
+		endif()
+	endforeach()
+	
+	set( ${librarySubTargetsOut} "${libraryTargets}" PARENT_SCOPE)
+	
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns a list with the binary sub-targets that will be shared libraries if
+# the BUILD_SHARED_LIBS option is set to ON.
+function( cpfGetPossiblySharedLibrarySubTargets librarySubTargetsOut package)
+
+	set(libraryTargets)
+
+	cpfIsExecutable(isExe ${package})
+	if(NOT isExe)
+		cpfListAppend( libraryTargets ${package})
+	endif()
+
+	get_property( fixtureTarget TARGET ${package} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET)
+	if(TARGET ${fixtureTarget})
+		cpfListAppend( libraryTargets ${fixtureTarget})
+	endif()
+
+	set( ${librarySubTargetsOut} "${libraryTargets}" PARENT_SCOPE)
+
+endfunction()
+
 #---------------------------------------------------------------------------------------------
 function( cpfGetTestTargets testTargetsOut package )
 
@@ -65,6 +96,31 @@ function( cpfGetTestTargets testTargetsOut package )
 	endif()
 
 	set(${testTargetsOut} ${targets} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetSubtargets subTargetsOut packages subtargetProperty)
+
+	set(targets)
+	foreach(package ${packages})
+		if(TARGET ${package}) # not all packages have targets
+			
+			# check for subtargets that belong to the main package target
+			get_property(subTarget TARGET ${package} PROPERTY ${subtargetProperty})
+			cpfListAppend( targets ${subTarget} )
+
+			# check for subtargets that belong to the binary targets
+			get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
+			foreach(binaryTarget ${binaryTargets})
+				get_property(subTarget TARGET ${binaryTarget} PROPERTY ${subtargetProperty})
+				cpfListAppend( targets ${subTarget} )
+			endforeach()
+			
+		endif()
+	endforeach()
+
+	set(${subTargetsOut} "${targets}" PARENT_SCOPE)
 
 endfunction()
 
@@ -174,7 +230,6 @@ function( isOwnedOrExternal isOut var )
 		set(${isOut} FALSE PARENT_SCOPE)
 	endif()
 endfunction()
-
 
 #---------------------------------------------------------------------------------------------
 # Returns a list with the owned packages from the packages.cmake file
@@ -295,27 +350,6 @@ function( cpfPrintAddPackageStatusMessage packageType )
 
 endfunction()
 
-#----------------------------------------------------------------------------------------
-# Returns a list with the binary sub-targets that will be shared libraries if
-# the BUILD_SHARED_LIBS option is set to ON.
-function( cpfGetPossiblySharedLibrarySubTargets librarySubTargetsOut package)
-
-	set(libraryTargets)
-
-	cpfIsExecutable(isExe ${package})
-	if(NOT isExe)
-		cpfListAppend( libraryTargets ${package})
-	endif()
-
-	get_property( fixtureTarget TARGET ${package} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET)
-	if(TARGET ${fixtureTarget})
-		cpfListAppend( libraryTargets ${fixtureTarget})
-	endif()
-
-	set( ${librarySubTargetsOut} "${libraryTargets}" PARENT_SCOPE)
-
-endfunction()
-
 #---------------------------------------------------------------------------------------------
 # returns the absolute paths to the repository directories that are owned by the CPF project located at rootDir
 #
@@ -360,3 +394,57 @@ function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)
 	set(${dirsOut} "${uniqueRepoDirs}" PARENT_SCOPE)
 
 endfunction()
+
+#----------------------------------------------------------------------------------------
+# read all sources from all binary targets of the given packages
+function( cpfGetAllNonGeneratedPackageSources sourceFiles packages )
+
+	foreach( package ${packages} globalFiles) # we also get the global files from the globalFiles target
+		if(TARGET ${package}) # non-cpf packages may not have targets set to them
+			get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
+			# explicitly include the package itself, because it may not be a binary target.
+			set(targets ${binaryTargets} ${package})
+			list(REMOVE_DUPLICATES targets)
+			foreach( target ${targets} )
+				cpfIsInterfaceLibrary( isIntLib ${target})
+				if(isIntLib)
+					# Use the file container target to get the source dir.
+					get_property(target TARGET ${target} PROPERTY INTERFACE_CPF_FILE_CONTAINER_SUBTARGET )
+				endif()
+				get_property( sourceDir TARGET ${target} PROPERTY SOURCE_DIR)
+				getAbsPathesForSourceFilesInDir( files ${target} ${sourceDir})
+				list(APPEND allFiles ${files})
+			endforeach()
+		endif()
+	endforeach()
+	set(${sourceFiles} ${allFiles} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetAllDependedOnSourceFiles filesOut sourceFiles dependedOnPackages )
+
+	cpfPrependMulti( absSourceFiles "${CMAKE_CURRENT_SOURCE_DIR}/" "${sourceFiles}")
+
+	# Get the sources from the depended on packages.
+	foreach( package ${dependedOnPackages})
+		getAbsPathsOfTargetSources( absSources ${package})
+		cpfListAppend( absSourceFiles ${absSources})
+	endforeach()
+
+	set(${filesOut} "${absSourceFiles}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfAppendPackageExeRPaths package rpath )
+
+	cpfGetExecutableTargets( exeTargets ${package})
+	foreach(target ${exeTargets})
+		set_property(TARGET ${target} APPEND PROPERTY INSTALL_RPATH "${rpath}")
+	endforeach()
+
+endfunction()
+
+
+

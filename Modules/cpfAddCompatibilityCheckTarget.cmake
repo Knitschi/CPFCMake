@@ -5,6 +5,7 @@ include(cpfProjectUtilities)
 include(cpfGitUtilities)
 include(cpfLocations)
 include(cpfAddInstallTarget)
+include(cpfVersionUtilities)
 
  
 # This file contains functions that the targets that are used to implement the ABI and API compatibility checks.
@@ -220,18 +221,6 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfGetArchiveFormats archiveFormatsOut )
 	set( ${archiveFormatsOut} 7Z TBZ2 TGZ TXZ TZ ZIP PARENT_SCOPE)
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetLastBuildAndLastReleaseVersion lastBuildVersionOut lastReleaseVersionOut )
-	
-	cpfGetCurrentBranch( branch "${CMAKE_CURRENT_SOURCE_DIR}")
-	cpfGetLastVersionTagOfBranch( lastVersion ${branch} "${CMAKE_CURRENT_SOURCE_DIR}" FALSE)
-	cpfGetLastReleaseVersionTagOfBranch( lastReleaseVersion ${branch} "${CMAKE_CURRENT_SOURCE_DIR}" FALSE)
-	
-	set(${lastBuildVersionOut} "${lastVersion}" PARENT_SCOPE)
-	set(${lastReleaseVersionOut} "${lastReleaseVersion}" PARENT_SCOPE)
-	
 endfunction()
 
 #----------------------------------------------------------------------------------------

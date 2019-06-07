@@ -28,7 +28,6 @@ function( cpfAddPipelineTargetDependencies packages)
 		INTERFACE_CPF_ABI_CHECK_SUBTARGETS
 		INTERFACE_CPF_VALGRIND_SUBTARGET
 		INTERFACE_CPF_CLANG_TIDY_SUBTARGET
-		INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGETS
 	)
 
 	# When we know that the dynamic analysis target exists,

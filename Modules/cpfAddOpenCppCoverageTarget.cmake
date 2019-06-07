@@ -130,17 +130,3 @@ function( cpfAddOpenCppCoverageTarget package)
 	endif()
 
 endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetFirstMSVCDebugConfig configOut )
-	cpfGetConfigurations( configs )
-	foreach(config ${configs})
-		cpfIsMSVCDebugConfig(isDebugConfig ${config})
-		if( isDebugConfig )
-			set( ${configOut} ${config} PARENT_SCOPE)
-			return()
-		endif()		
-	endforeach()
-	set( ${configOut} "" PARENT_SCOPE)
-endfunction()
-

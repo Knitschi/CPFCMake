@@ -9,8 +9,7 @@ cmake_policy(SET CMP0071 NEW)
 
 # Enable short includes for cpf modules
 list(APPEND CMAKE_MODULE_PATH 
-    "${CMAKE_CURRENT_LIST_DIR}/Functions"
-    "${CMAKE_CURRENT_LIST_DIR}/Variables"
+    "${CMAKE_CURRENT_LIST_DIR}/Modules"
 )
 
 include(cpfAddPackages)					# This is always needed in the root lists file.

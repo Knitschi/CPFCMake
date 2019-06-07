@@ -35,13 +35,6 @@ macro( cpfInitPackageProject )
 endmacro()
 
 #-----------------------------------------------------------
-# Returns the name of the current source directory.
-function( cpfGetPackageName packageNameOut )
-    cpfGetParentDirectory( package "${CMAKE_CURRENT_SOURCE_DIR}/blub")
-    set(${packageNameOut} "${package}" PARENT_SCOPE)
-endfunction()
-
-#-----------------------------------------------------------
 # Creates the cpfPackageVersion_<package>.cmake file in the Sources directory, by reading the version from git.
 # The file is required to provide a version if the build is done with sources that are not checked out from git.
 #
