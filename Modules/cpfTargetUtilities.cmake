@@ -49,6 +49,17 @@ function( cpfIsInterfaceLibrary isIntLibOut target )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Returns true if the given target is an INTERFACE_LIBRARY
+function( cpfIsBinaryTarget isBinTargetOut target )
+    get_property(type TARGET ${target} PROPERTY TYPE)
+    if(${type} STREQUAL UTILITY)
+        set(${isBinTargetOut} FALSE PARENT_SCOPE)
+    else()
+        set(${isBinTargetOut} TRUE PARENT_SCOPE)
+    endif()
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # This function reads all properties from a target and prints the value if it is set.
 #
 function( cpfPrintTargetProperties target )

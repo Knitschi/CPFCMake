@@ -56,7 +56,7 @@ else() # Do the file generation
 	cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}")
 
 	# CREATE CONFIG-FILE CONTENT 
-	cpfNormalizeAbsPath( pathToVariables "${CMAKE_CURRENT_LIST_DIR}/../Variables")
+	cpfNormalizeAbsPath( pathToVariables "${CMAKE_CURRENT_LIST_DIR}/../Modules")
 
 	# Add standard lines.
 	set(fileContent)

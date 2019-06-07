@@ -150,88 +150,9 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfAddPackageContentTarget targetName package contentId contentType )
 
+	cpfGetPackageContentStagingDir( destDir ${package} ${contentId})
 	cpfGetPackageComponents( components ${contentType} ${contentId} )
-
-    set(allStampFiles)
-	set(configSuffixes)
-	if(${contentType} STREQUAL CT_SOURCES) # source packages need special treatment because the do not depend on the config.
-
-		# Wenn using MSVC, the source package depends on the generated version.rc file
-		# so it must depend on the binary target to make sure that it is produced.
-		set(dependedOnTargets)
-		if(MSVC)
-			get_property(dependedOnTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
-		endif()
-
-		# commands for clearing the package stage
-		cpfGetPackageContentStagingDir( destDir ${package} "" ${contentId})
-		cpfGetClearDirectoryCommands( clearContentStageCommands "${destDir}")
-
-		# commands to run the packages install script
-		cpfGetRunInstallScriptCommands( runInstallScriptCommands ${package} "" "${components}" "${destDir}" )
-
-		# command to touch the target stamp
-		set( stampFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/install_${contentId}.stamp")
-		cpfGetTouchFileCommands( touchCommmand "${stampFile}")
-		cpfAddStandardCustomCommand(
-			DEPENDS ${dependedOnTargets}
-			COMMANDS ${clearContentStageCommands} ${runInstallScriptCommands} ${touchCommmand}
-			OUTPUT "${stampFile}"
-		)
-		
-		cpfListAppend( allStampFiles ${stampFile} )
-
-	else()
-
-		cpfGetConfigurations(configs)
-		foreach( config ${configs})
-			cpfToConfigSuffix( configSuffix ${config})
-			cpfListAppend( configSuffixes ${configSuffix})
-
-			# Get target and file dependencies
-			cpfGetContentProducingTargetsAndOutputFiles( contentProducerTargets dependedOnFiles ${package} ${config} "${components}" )
-
-			# commands for clearing the package stage
-			cpfGetPackageContentStagingDir( destDir ${package} ${config} ${contentId})
-			cpfGetClearDirectoryCommands( clearContentStageCommands "${destDir}")
-
-			# commands to run the packages install script
-			cpfGetRunInstallScriptCommands( runInstallScriptCommands ${package} ${config} "${components}" "${destDir}" )
-
-			# command to touch the target stamp
-			set( stampFile${configSuffix} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}/install_${contentId}_${config}.stamp")
-			cpfGetTouchFileCommands( touchCommmand "${stampFile${configSuffix}}")
-			cpfAddConfigurationDependendCommand(
-				TARGET ${targetName}
-				OUTPUT ${stampFile${configSuffix}}
-				DEPENDS ${dependedOnFiles} # ${sourceTargets${configSuffix}}
-				COMMENT "Collect ${package} ${contentType} package files for config ${config}"
-				CONFIG ${config}
-				COMMANDS_CONFIG ${clearContentStageCommands} ${runInstallScriptCommands} ${touchCommmand}
-				COMMANDS_NOT_CONFIG ${touchCommmand}
-			)
-			
-			cpfListAppend( allStampFiles ${stampFile${configSuffix}} )
-
-		endforeach()
-
-	endif()
-
-	# add a target
-	add_custom_target(
-		${targetName}
-		DEPENDS ${contentProducerTargets} ${allStampFiles}
-	)
-
-	# set target properties
-	set_property(TARGET ${targetName} PROPERTY FOLDER "${package}/private")
-	if(configSuffixes)
-		foreach( configSuffix ${configSuffixes})
-			set_property(TARGET ${targetName} PROPERTY CPF_STAMP_FILE_${configSuffix} ${stampFile${configSuffix}})
-		endforeach()
-	else()
-		set_property(TARGET ${targetName} PROPERTY CPF_STAMP_FILE ${stampFile})
-	endif()
+	cpfAddInstallTarget( ${package} ${targetName} "${components}" ${destDir} TRUE ${package}/private)
 
 endfunction()
 
@@ -258,9 +179,7 @@ function( cpfGetPackageComponents componentsOut contentType contentId )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetContentProducingTargetsAndOutputFiles contentProducerTargetsOut filesOut package config components )
-
-	cpfToConfigSuffix(configSuffix ${config})
+function( cpfGetContentProducingTargetsAndOutputFiles contentProducerTargetsOut filesOut package components )
 
 	# The content depends on the binary targets
 	get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
@@ -281,7 +200,7 @@ function( cpfGetContentProducingTargetsAndOutputFiles contentProducerTargetsOut 
 			# add target
 			cpfListAppend(abiDumpTargets ${abiDumpTarget})
 			# add dump file
-			get_property( dumpFile TARGET ${abiDumpTarget} PROPERTY CPF_OUTPUT_FILES_${configSuffix} )
+			get_property( dumpFile TARGET ${abiDumpTarget} PROPERTY CPF_OUTPUT_FILES )
 			cpfListAppend(files "${dumpFile}")
 
 		endif()
@@ -304,16 +223,9 @@ function( cpfGetPackagingDir dirOut )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetPackageContentStagingDir stagingDirOut package config contentId )
-	# we add another config level here, so we can touch files in the not-config case without polluting the collected files
-	# cpfGetPackagePrefixOutputDir( packagePrefixDir ${package} )
+function( cpfGetPackageContentStagingDir stagingDirOut package contentId )
 	cpfGetPackagingDir( baseDir)
-	if(config)
-		set( ${stagingDirOut} "${baseDir}/${config}/${contentId}/${package}" PARENT_SCOPE)
-	else()
-		set( ${stagingDirOut} "${baseDir}/${contentId}/${package}" PARENT_SCOPE)
-	endif()
-
+	set( ${stagingDirOut} "${baseDir}/${contentId}/${package}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------

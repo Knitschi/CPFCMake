@@ -11,56 +11,129 @@ include(GNUInstallDirs)
 #---------------------------------------------------------------------------------------------
 # Adds a bundle target for all install_<package> targets
 function( cpfAddGlobalInstallTarget )
-	cpfAddSubTargetBundleTarget( install_all "${packages}" INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGETS "")
+	cpfAddSubTargetBundleTarget( install_all "${packages}" INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET "")
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# Adds an install_<package>_component target for each given component
-function( cpfAddPackageInstallTargets package components )
+# Adds an install_<package> target that installs all components of the package.
+# 
+function( cpfAddPackageInstallTargets package )
 	
-	set(installComponentTargets)
+	# Use the default install prefix if it is not set by the user.
+	set( CMAKE_INSTALL_PREFIX "${CPF_ROOT_DIR}/install" CACHE STRING " ")
+	
+	# Add the install_<package> target that installs all components of the package to the install prefix.
+	cpfGetPossibleInstallComponents(components)
+	cpfAddInstallTarget( ${package} install_${package} "${components}" ${CMAKE_INSTALL_PREFIX} FALSE ${package}/pipeline)
+	# Add the target to the package property.
+	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET ${installTargetName} )
 
-	foreach( component ${components})
+endfunction()
 
-		set(targetName install_${package}_${component})
+#---------------------------------------------------------------------------------------------
+function(cpfGetPossibleInstallComponents componentsOut)
 
-		cpfGetInstallTargetDependencies( fileDependencies targetDependencies ${package} ${component})
+	set(${componentsOut}
+		runtime
+		developer
+		sources
+		documentation
+		PARENT_SCOPE
+	)
 
-		# Add commands for running the install script.
-		set(installScript "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake")
-		#set(installCommand "\"${CMAKE_COMMAND}\" -DCMAKE_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\" -DCMAKE_INSTALL_COMPONENT=${component} -DCMAKE_INSTALL_CONFIG_NAME=$<CONFIG> -P \"${installScript}\" ")
+endfunction()
 
-		set(stampFile "${CMAKE_CURRENT_BINARY_DIR}/${targetName}.stamp")
-		set(touchCommand "\"${CMAKE_COMMAND}\" -E touch \"${stampFile}\"")
+#---------------------------------------------------------------------------------------------
+function(cpfAddInstallTarget package installTargetName components destDir clearDestDir vsTargetFolder )
 
-		cpfAddStandardCustomCommand(
-			DEPENDS ${fileDependencies}
-			COMMANDS ${installCommand} ${touchCommand}
-			OUTPUT ${stampFile}
-			WORKING_DIRECTORY ${CPF_ROOT_DIR}
-		)
+	cpfGetInstallTargetDependencies( fileDependencies targetDependencies ${package} "${components}")
 
-		add_custom_target(
-			${targetName}
-			DEPENDS ${stampFile} ${targetDependencies}
-		)
-		set_property( TARGET ${targetName} PROPERTY FOLDER ${package}/pipeline )
-		set_property( TARGET ${package} APPEND PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGETS ${targetName} )
+	# Get the commands
+	set(clearDestDirCommands)
+	if(clearDestDir)
+		cpfGetClearDirectoryCommands(clearDestDirCommands ${destDir})
+	endif()
+	cpfGetRunInstallScriptCommands( installCommands $<CONFIG> "${components}" ${destDir})
+	cpfGetTouchTargetStampCommand( touchCommand stampFile ${installTargetName})
 
-		cpfListAppend(installComponentTargets ${targetName})
+	cpfAddStandardCustomCommand(
+		DEPENDS ${fileDependencies}
+		COMMANDS ${clearDestDirCommands} ${installCommands} ${touchCommand}
+		OUTPUT ${stampFile}
+		WORKING_DIRECTORY ${CPF_ROOT_DIR}
+	)
 
-	endforeach()
+	# Add install target
+	add_custom_target(
+		${installTargetName}
+		DEPENDS ${stampFile} ${targetDependencies}
+	)
 
-	# Add one bundle target for all install targets of the package
-	set(bundleTarget install_${package})
-	cpfAddBundleTarget( ${bundleTarget} "${installComponentTargets}")
-	set_property(TARGET ${bundleTarget} PROPERTY FOLDER ${package}/pipeline )
+	# Set target properties
+	set_property(TARGET ${installTargetName} PROPERTY CPF_OUTPUT_FILES ${vsTargetFolder} )
+	set_property(TARGET ${installTargetName} PROPERTY FOLDER ${vsTargetFolder} )
+	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${installTargetName} )
 
 endfunction()
 
 
+#---------------------------------------------------------------------------------------------
+function( cpfGetInstallTargetDependencies fileDependenciesOut targetDependenciesOut package components )
+
+	set(fileDependencies)
+	set(targetDependencies)
+
+	get_property(subtargets TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS)
+
+	foreach(target ${subtargets})
+
+		# Only add the target if it installs to the 
+		get_property(targetInstallComponents TARGET ${target} PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS)
+
+		foreach(component ${components})
+
+			# Only add the target to the dependencies if it contributes files to the
+			# current component.
+			cpfContains(hasComponent "${targetInstallComponents}" ${component})
+			if(hasComponent)
+
+				cpfIsBinaryTarget( isBinaryTarget ${target})
+				if(isBinaryTarget)
+
+					cpfIsInterfaceLibrary( isIntLib ${target})
+					if(NOT isIntLib)
+						cpfListAppend(fileDependencies $<TARGET_FILE:${target}>)
+					endif()
+
+				else()
+
+					get_property(outputFiles TARGET ${target} PROPERTY CPF_OUTPUT_FILES)
+					cpfListAppend(fileDependencies ${outputFiles})
+
+				endif()
+
+				cpfListAppend(targetDependencies ${target})
+
+			endif()
+
+		endforeach()
+	endforeach()
+
+	if(fileDependencies)
+		list(REMOVE_DUPLICATES fileDependencies)
+	endif()
+
+	if(targetDependencies)
+		list(REMOVE_DUPLICATES targetDependencies)
+	endif()
+
+	set(${fileDependenciesOut} "${fileDependencies}" PARENT_SCOPE)
+	set(${targetDependenciesOut} "${targetDependencies}" PARENT_SCOPE)
+
+endfunction()
+
 #----------------------------------------------------------------------------------------
-function( cpfGetRunInstallScriptCommands runInstallScriptCommandsOut package config components destDir )
+function( cpfGetRunInstallScriptCommand runInstallScriptCommandOut config component destDir )
 
 	set(scriptFile "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake")
 
@@ -68,567 +141,20 @@ function( cpfGetRunInstallScriptCommands runInstallScriptCommandsOut package con
 		set(configOption "-DCMAKE_INSTALL_CONFIG_NAME=${config}")
 	endif()
 
+	set( ${runInstallScriptCommandOut} "\"${CMAKE_COMMAND}\" -DCMAKE_INSTALL_PREFIX=\"${destDir}\" -DCMAKE_INSTALL_COMPONENT=${component} ${configOption} -P \"${scriptFile}\"" PARENT_SCOPE )
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetRunInstallScriptCommands runInstallScriptCommandsOut config components destDir )
+
 	set(commands)
 	foreach(component ${components})
-		cpfListAppend( commands "\"${CMAKE_COMMAND}\" -DCMAKE_INSTALL_PREFIX=\"${destDir}\" -DCMAKE_INSTALL_COMPONENT=${component} ${configOption} -P \"${scriptFile}\"" )
+		cpfGetRunInstallScriptCommand( command "${config}" ${component} ${destDir})
+		cpfListAppend( commands ${command} )
 	endforeach()
 
 	set( ${runInstallScriptCommandsOut} "${commands}" PARENT_SCOPE )
 
 endfunction()
 
-
-#---------------------------------------------------------------------------------------------
-function( cpfGetInstallTargetDependencies fileDependenciesOut targetDependenciesOut package component )
-
-	if(${component} STREQUAL runtime)
-
-		
-		set(${fileDependenciesOut} PARENT_SCOPE)
-
-	elseif(${component} STREQUAL dev-bin)
-
-	elseif(${component} STREQUAL documentation)
-
-	elseif(${component} STREQUAL sources)
-		
-	else()
-		message(FATAL_ERROR "Error! \"${component}\" is not a viable value for an installation component.")
-	endif()
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# Adds install rules for the various package components.
-#
-function( cpfAddInstallRules package namespace pluginOptionLists distributionPackageOptionLists versionCompatibilityScheme )
-
-	cpfInstallPackageBinaries( ${package} ${versionCompatibilityScheme} )
-	cpfGenerateAndInstallCmakeConfigFiles( ${package} ${namespace} ${versionCompatibilityScheme} )
-	cpfInstallHeaders( ${package} )
-	cpfInstallDebugFiles( ${package} )
-	cpfInstallAbiDumpFiles( ${package} )
-	cpfInstallDependedOnSharedLibraries( ${package} "${pluginOptionLists}" "${distributionPackageOptionLists}" )
-	cpfInstallSources( ${package} )
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfInstallPackageBinaries package versionCompatibilityScheme )
-	
-	cpfGetProductionTargets( productionTargets ${package} )
-	cpfInstallTargetsForPackage( ${package} "${productionTargets}" runtime ${versionCompatibilityScheme} )
-
-	cpfGetTestTargets( testTargets ${package})
-	if(testTargets)
-		cpfInstallTargetsForPackage( ${package} "${testTargets}" developer ${versionCompatibilityScheme} )
-	endif()
-    
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfInstallTargetsForPackage package targets component versionCompatibilityScheme )
-
-	# Do not install the targets that have been removed from the ALL_BUILD target
-	cpfFilterInTargetsWithProperty( interfaceLibs "${targets}" TYPE INTERFACE_LIBRARY )
-	cpfFilterOutTargetsWithProperty( noneInterfaceLibTargets "${targets}" TYPE INTERFACE_LIBRARY )
-	cpfFilterOutTargetsWithProperty( noneInterfaceLibTargets "${noneInterfaceLibTargets}" EXCLUDE_FROM_ALL TRUE )
-	set(targets ${interfaceLibs} ${noneInterfaceLibTargets})
-
-	cpfGetRelativeOutputDir( relRuntimeDir ${package} RUNTIME )
-	cpfGetRelativeOutputDir( relLibDir ${package} LIBRARY)
-	cpfGetRelativeOutputDir( relArchiveDir ${package} ARCHIVE)
-	cpfGetRelativeOutputDir( relIncludeDir ${package} INCLUDE)
-	cpfGetTargetsExportsName( targetsExportName ${package})
-		
-	# Add an relative rpath to the executables that points to the lib directory.
-	file(RELATIVE_PATH rpath "${CMAKE_CURRENT_BINARY_DIR}/${relRuntimeDir}" "${CMAKE_CURRENT_BINARY_DIR}/${relLibDir}")
-	cpfAppendPackageExeRPaths( ${package} "\$ORIGIN/${rpath}")
-
-	set(skipNameLinkOption)
-	if( ${versionCompatibilityScheme} STREQUAL ExactVersion)
-		set(skipNameLinkOption NAMELINK_SKIP)
-	endif()
-
-	install( 
-		TARGETS ${targets}
-		EXPORT ${targetsExportName}
-		RUNTIME 
-			DESTINATION "${relRuntimeDir}"
-			COMPONENT ${component}
-		LIBRARY
-			DESTINATION "${relLibDir}"
-			COMPONENT ${component}
-			${skipNameLinkOption}
-		ARCHIVE
-			DESTINATION "${relArchiveDir}"
-			COMPONENT developer
-		# This sets the import targets include directories to <package>/include, 
-		# so clients can also include with <package/bla.h>
-		INCLUDES
-			DESTINATION "${relIncludeDir}/.."
-	)
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfGetTargetsExportsName output package)
-	set(${output} ${package}Targets PARENT_SCOPE)
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# This function adds install rules for the files that are required for debugging.
-# This is currently the pdb and source files for msvc configurations.
-#
-function( cpfInstallDebugFiles package )
-
-	get_property(targets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
-
-	cpfGetConfigurations( configs )
-	foreach( config ${configs})
-
-		cpfToConfigSuffix( suffix ${config})
-
-		foreach(target ${targets})
-	
-			cpfIsInterfaceLibrary( isIntLib ${target})
-			if(NOT isIntLib)
-
-				# Install compiler generated pdb files
-				get_property( compilePdbName TARGET ${target} PROPERTY COMPILE_PDB_NAME_${suffix} )
-				get_property( compilePdbDir TARGET ${target} PROPERTY COMPILE_PDB_OUTPUT_DIRECTORY_${suffix} )
-				cpfGetRelativeOutputDir( relPdbCompilerDir ${package} COMPILE_PDB )
-				if(compilePdbName)
-					install(
-						FILES ${compilePdbDir}/${compilePdbName}.pdb
-						DESTINATION "${relPdbCompilerDir}"
-						COMPONENT developer
-						CONFIGURATIONS ${config}
-					)
-				endif()
-
-				# Install linker generated pdb files
-				get_property( linkerPdbName TARGET ${target} PROPERTY PDB_NAME_${suffix} )
-				get_property( linkerPdbDir TARGET ${target} PROPERTY PDB_OUTPUT_DIRECTORY_${suffix} )
-				cpfGetRelativeOutputDir( relPdbLinkerDir ${package} PDB)
-				if(linkerPdbName)
-					install(
-						FILES ${linkerPdbDir}/${linkerPdbName}.pdb
-						DESTINATION "${relPdbLinkerDir}"
-						COMPONENT developer
-						CONFIGURATIONS ${config}
-					)
-				endif()
-				
-				# Install source files for configurations that require them for debugging.
-				cpfCompilerProducesPdbFiles( needsSourcesForDebugging ${config})
-				if(needsSourcesForDebugging)
-
-					cpfGetTargetSourcesWithoutPrefixHeader( sources ${target} )
-					cpfGetFilepathsWithExtensions( cppSources "${sources}" "${CPF_CXX_SOURCE_FILE_EXTENSIONS}" )
-					cpfInstallSourceFiles( relFiles ${package} "${cppSources}" SOURCE developer ${config} )
-
-					# Add the installed files to the target property
-					cpfPrependMulti(relInstallPaths "${relSourceDir}/" "${shortSourceNames}" )
-
-				endif()
-
-			endif()
-
-		endforeach()
-	endforeach()
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfInstallHeaders package)
-
-	set(outputType INCLUDE)
-	set(installComponent developer)
-
-	# Install rules for production headers
-	get_property( productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
-	get_property( header TARGET ${productionLib} PROPERTY INTERFACE_CPF_PUBLIC_HEADER)
-	cpfInstallSourceFiles( relBasicHeader ${package} "${header}" ${outputType} ${installComponent} "")
-	
-	# Install rules for test fixture library headers
-	get_property( fixtureTarget TARGET ${package} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET)
-	if(TARGET ${fixtureTarget})
-		get_property( header TARGET ${fixtureTarget} PROPERTY INTERFACE_CPF_PUBLIC_HEADER)
-		cpfInstallSourceFiles( relfixtureHeader ${package} "${header}" ${outputType} ${installComponent} "")
-	endif()
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfInstallSourceFiles installedFilesOut package sources outputType installComponent config )
-
-    # Create header pathes relative to the install include directory.
-    set( sourceDir ${${package}_SOURCE_DIR})
-	set( binaryDir ${${package}_BINARY_DIR})
-	cpfGetRelativeOutputDir( relIncludeDir ${package} ${outputType})
-
-	set(installedFiles)
-	foreach( file ${sources})
-		
-		cpfToAbsSourcePath(absFile ${file} ${${package}_SOURCE_DIR})
-
-		# When building, the include directories are the packages binary and source directory.
-		# This means we need the path of the header relative to one of the two in order to get the
-		# relative path to the distribution packages install directory right.
-		file(RELATIVE_PATH relPathSource ${${package}_SOURCE_DIR} ${absFile} )
-		file(RELATIVE_PATH relPathBinary ${${package}_BINARY_DIR} ${absFile} )
-		cpfGetShorterString( relFilePath ${relPathSource} ${relPathBinary}) # assume the shorter path is the correct one
-
-		# prepend the include/<package> directory
-		get_filename_component( relDestDir ${relFilePath} DIRECTORY)
-		if(relDestDir)
-			set(relDestDir ${relIncludeDir}/${relDestDir} )
-		else()
-			set(relDestDir ${relIncludeDir} )
-		endif()
-		
-		if(config)
-			set(configOption CONFIGURATIONS ${config})
-		endif()
-
-		install(
-			FILES ${absFile}
-			DESTINATION "${relDestDir}"
-			COMPONENT ${installComponent}
-			${configOption}
-		)
-
-		# add the relative install path to the returned paths
-		get_filename_component( header ${absFile} NAME)
-		list( APPEND installedFiles ${relDestDir}/${header})
-	endforeach()
-
-	set( ${installedFilesOut} ${installedFiles} PARENT_SCOPE)
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfGenerateAndInstallCmakeConfigFiles package namespace compatibilityScheme )
-
-	# Generate the cmake config files
-	set(packageConfigFile ${package}Config.cmake)
-	set(versionConfigFile ${package}ConfigVersion.cmake )
-	set(packageConfigFileFull "${CMAKE_CURRENT_BINARY_DIR}/${packageConfigFile}")	# The config file is used by find package 
-	set(versionConfigFileFull "${CMAKE_CURRENT_BINARY_DIR}/${versionConfigFile}")
-	cpfGetRelativeOutputDir( relCmakeFilesDir ${package} CMAKE_PACKAGE_FILES)
-	cpfGetTargetsExportsName( targetsExportName ${package})
-
-	configure_package_config_file(
-		${CPF_PACKAGE_CONFIG_TEMPLATE}
-		"${packageConfigFileFull}"
-		INSTALL_DESTINATION ${relCmakeFilesDir}
-	)
-		
-	write_basic_package_version_file( 
-		"${versionConfigFileFull}" 
-		COMPATIBILITY ${compatibilityScheme}
-	) 
-
-	# Install cmake exported targets config file
-	# This can not be done in the configs loop, so we need a generator expression for the output directory
-	install(
-		EXPORT "${targetsExportName}"
-		NAMESPACE "${namespace}::"
-		DESTINATION "${relCmakeFilesDir}"
-		COMPONENT developer
-	)
-
-	# Install cmake config files
-	install(
-		FILES "${packageConfigFileFull}" "${versionConfigFileFull}"
-		DESTINATION "${relCmakeFilesDir}"
-		COMPONENT developer
-	)
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfInstallAbiDumpFiles package )
-
-	set(installedPackageFiles)
-
-	# get files from abiDump targets
-	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
-	foreach(binaryTarget ${binaryTargets})
-		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_ABI_DUMP_SUBTARGET )
-		if(abiDumpTarget)
-
-			cpfGetCurrentDumpFile( dumpFile ${package} ${binaryTarget})
-			get_filename_component( shortDumpFile "${dumpFile}" NAME )
-			cpfGetRelativeOutputDir( relDumpFileDir ${package} OTHER)
-
-			install(
-				FILES ${dumpFile}
-				DESTINATION "${relDumpFileDir}"
-				COMPONENT developer
-			)
-
-			cpfListAppend( installedPackageFiles "${relDumpFileDir}/${shortDumpFile}" )
-
-		endif()
-	endforeach()
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Parses the pluginOptionLists and returns two lists of same size. One list contains the
-# plugin target while the element with the same index in the other list contains the 
-# directory of the plugin target.
-function( cpfGetPluginTargetDirectoryPairLists targetsOut directoriesOut pluginOptionLists )
-	
-	# parse the plugin dependencies arguments
-	# Creates two lists of the same length, where one list contains the plugin targets
-	# and the other the directory to which they are deployed.
-	set(pluginTargets)
-	set(pluginDirectories)
-	foreach( list ${pluginOptionLists})
-		cmake_parse_arguments(
-			ARG 
-			"" 
-			"PLUGIN_DIRECTORY"
-			"PLUGIN_TARGETS"
-			${${list}}
-		)
-
-		# check for correct keywords
-		if(NOT ARG_PLUGIN_TARGETS)
-			message(FATAL_ERROR "Faulty plugin option \"${${list}}\"! The option is missing the PLUGIN_TARGETS key word or values for it.")
-		endif()
-
-		if(NOT ARG_PLUGIN_DIRECTORY)
-			message(FATAL_ERROR "Faulty plugin option \"${${list}}\"! The option is missing the PLUGIN_DIRECTORY key word or a value for it.")
-		endif()
-
-		foreach( pluginTarget ${ARG_PLUGIN_TARGETS})
-			if(TARGET ${pluginTarget})
-				cpfListAppend( pluginTargets ${pluginTarget})
-				cpfListAppend( pluginDirectories ${ARG_PLUGIN_DIRECTORY})
-			else()
-				cpfDebugMessage("Ignored missing plugin target ${pluginTarget}.")
-			endif()
-		endforeach()
-
-	endforeach()
-
-	set(${targetsOut} "${pluginTargets}" PARENT_SCOPE)
-	set(${directoriesOut} "${pluginDirectories}" PARENT_SCOPE)
-	
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# This function adds install rules for the shared libraries that are provided by other
-# internal or external packages. We only add these rules for packages that actually
-# create distribution packages that include depended on shared libraries.
-#
-function( cpfInstallDependedOnSharedLibraries package pluginOptions distributionPackageOptionLists )
-
-	cpfGetDependedOnSharedLibrariesAndDirectories( libraries directories ${package} "${pluginOptions}" )
-
-	# Add install rules for each distribution package that has a runtime-portable content.
-	set(contentIds)
-	foreach( list ${distributionPackageOptionLists})
-
-		cpfParseDistributionPackageOptions( contentType packageFormats distributionPackageFormatOptions excludedTargets "${${list}}")
-		if( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
-			cpfGetDistributionPackageContentId( contentId ${contentType} "${excludedTargets}" )
-			cpfContains(contentTypeHandled "${contentIds}" ${contentId})
-			if(NOT ${contentTypeHandled})
-				
-				cpfListAppend(contentIds ${contentId})
-				removeExcludedTargets( libraries directories "${libraries}" "${directories}" "${excludedTargets}" )
-				addSharedLibraryDependenciesInstallRules( ${package} ${contentId} "${libraries}" "${directories}" )
-			
-			endif()
-		endif()
-	endforeach()
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# Returns a list with shared library targets and one with a relative directory for each
-# target to which the shared library must be copied.
-#
-function( cpfGetDependedOnSharedLibrariesAndDirectories librariesOut directoriesOut package pluginOptionLists )
-
-	cpfGetRelativeOutputDir( relRuntimeDir ${package} RUNTIME)
-	cpfGetRelativeOutputDir( relLibraryDir ${package} LIBRARY)
-
-	# Get plugin targets and relative directories
-	cpfGetPluginTargetDirectoryPairLists( pluginTargets pluginDirectories "${pluginOptionLists}" )
-	cpfPrependMulti( pluginDirectories "${relRuntimeDir}/" "${pluginDirectories}" )
-	
-	# Get library targets and add them to directories
-	cpfGetSharedLibrariesRequiredByPackageProductionLib( libraries ${package} )
-	set( allLibraries ${pluginTargets} )
-	set( allDirectories ${pluginDirectories} )
-	foreach( library ${libraries} )
-		cpfListAppend( allLibraries ${library} )
-		cpfListAppend( allDirectories ${relLibraryDir} )
-	endforeach()
-
-	set(${librariesOut} "${allLibraries}" PARENT_SCOPE)
-	set(${directoriesOut} "${allDirectories}" PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( removeExcludedTargets librariesOut directoriesOut libraries directories excludedTargets )
-
-	set(index 0)
-	set(filteredLibraries)
-	set(filteredDirectories)
-	foreach( library ${libraries} )
-		cpfContains(isExcluded "${excludedTargets}" ${library})
-		if(NOT isExcluded)
-			cpfListAppend(filteredLibraries ${library})
-			list(GET directories ${index} dir)
-			cpfListAppend(filteredDirectories ${dir})
-		endif()	
-		cpfIncrement(index)
-	endforeach()
-
-	set(${librariesOut} ${filteredLibraries} PARENT_SCOPE)
-	set(${directoriesOut} ${filteredDirectories} PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# This function was introduced to only have one definition of the distribution package option keywords
-function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut distributionPackageFormatOptionsOut excludedTargetsOut argumentList )
-
-	cmake_parse_arguments(
-		ARG 
-		"" 
-		"" 
-		"DISTRIBUTION_PACKAGE_CONTENT_TYPE;DISTRIBUTION_PACKAGE_FORMATS;DISTRIBUTION_PACKAGE_FORMAT_OPTIONS"
-		${argumentList}
-	)
-
-	set( contentTypeOptions 
-		CT_DEVELOPER
-		CT_RUNTIME
-		CT_SOURCES
-	)
-
-	set(runtimePortableOption CT_RUNTIME_PORTABLE) 
-	cmake_parse_arguments(
-		ARG
-		"${contentTypeOptions}"
-		""
-		"${runtimePortableOption}"
-		"${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}"
-	)
-	
-	# Check that only one content type was given.
-	cpfContains(isRuntimeAndDependenciesType "${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" ${runtimePortableOption})
-	cpfPrependMulti( argOptions ARG_ "${contentTypeOptions}")
-	set(nrOptions 0)
-	foreach(option ${isRuntimeAndDependenciesType} ${argOptions})
-		if(${option})
-			cpfIncrement(nrOptions)
-		endif()
-	endforeach()
-	
-	if( NOT (${nrOptions} EQUAL 1) )
-		message(FATAL_ERROR "Each DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddCppPackage() must contain exactly one of these options: ${contentTypeOptions};${runtimePortableOption}. The given option was ${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" )
-	endif()
-	
-	if(ARG_CT_DEVELOPER)
-		set(contentType CT_DEVELOPER)
-	elseif(ARG_CT_RUNTIME)
-		set(contentType CT_RUNTIME)
-	elseif(isRuntimeAndDependenciesType)
-		set(contentType CT_RUNTIME_PORTABLE)
-	elseif(ARG_CT_SOURCES)
-		set(contentType CT_SOURCES)
-	else()
-		message(FATAL_ERROR "Faulty DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddCppPackage().")
-	endif()
-	
-	set(${contentTypeOut} ${contentType} PARENT_SCOPE)
-	set(${packageFormatsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMATS} PARENT_SCOPE)
-	set(${distributionPackageFormatOptionsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMAT_OPTIONS} PARENT_SCOPE)
-	set(${excludedTargetsOut} ${ARG_CT_RUNTIME_PORTABLE} PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTargets )
-
-	if( "${contentType}" STREQUAL CT_DEVELOPER)
-		set(contentIdLocal dev)
-	elseif( "${contentType}" STREQUAL CT_RUNTIME )
-		set(contentIdLocal runtime )
-	elseif( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
-		set(contentIdLocal runtime-port )
-		if( NOT "${excludedTargets}" STREQUAL "")
-			# When using excluded targets there are arbitrary numbers of possible
-			# package contents. To distinguish between them and get a short content
-			# id we calculate the MD5 checksum of the excluded targets list and add
-			# it to the base runtime portable content id.
-			list(SORT excludedTargets)
-			string(MD5 excludedTargetsHash "${excludedTargets}")
-			string(SUBSTRING ${excludedTargetsHash} 0 8 excludedTargetsHash) # Only use the first 8 characters to keep things short.
-			string(APPEND contentIdLocal -${excludedTargetsHash})
-		endif()
-	elseif( "${contentType}" STREQUAL CT_SOURCES )
-		set(contentIdLocal src )
-	else()
-		message(FATAL_ERROR "Content type \"${contentType}\" is not supported by function contentTypeOutputNameIdentifier().")
-	endif()
-	
-	set(${contentIdOut} ${contentIdLocal} PARENT_SCOPE)
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-# This function parses the distribution package options of the package and returns a list
-# with the content-ids of all runtime-portable packages.
-function( addSharedLibraryDependenciesInstallRules package contentId libraries directories )
-
-	cpfGetConfigurations(configurations)
-	foreach(config ${configurations})
-
-		set(installedFiles)
-		set(index 0)
-		foreach(library ${libraries})
-
-			cpfGetLibFilePath( libFile ${library} ${config})
-			list(GET directories ${index} dir)
-
-			install(
-				FILES ${libFile}
-				DESTINATION "${dir}"
-				COMPONENT ${contentId}
-				CONFIGURATIONS ${config}
-			)
-
-			cpfIncrement(index)
-
-		endforeach()
-	endforeach()
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfInstallSources package )
-
-	set(outputType INCLUDE)
-	set(installComponent developer)
-
-	# Install rules for production headers
-	set(packageSourceFiles)
-	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
-	foreach(target ${binaryTargets})
-		cpfGetTargetSourcesWithoutPrefixHeader( sources ${target})
-		cpfListAppend(packageSourceFiles ${sources})
-	endforeach()
-	cpfInstallSourceFiles( relFiles ${package} "${packageSourceFiles}" SOURCE sources "" )
-
-endfunction()

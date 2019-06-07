@@ -51,6 +51,22 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
+	# A property that is set on all binary targets.
+	define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_PUBLIC_HEADER
+        BRIEF_DOCS "The header files that need to be accessed by consumers that link to the target."
+        FULL_DOCS " "
+    )
+
+	# A property that is set on all package main targets that have the same name as their package.
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS
+        BRIEF_DOCS "A list of all targets that are associated with the package including the main target."
+        FULL_DOCS " "
+    )
+
     # A property that is set on all main targets that have the same name as their package.
     define_property(
         TARGET
@@ -91,11 +107,19 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-	# A property that is set on all binary targets.
+	# A property that may be set on all targets that contribute to the install rules of a package.
 	define_property(
         TARGET
-        PROPERTY INTERFACE_CPF_PUBLIC_HEADER
-        BRIEF_DOCS "The header files that need to be accessed by consumers that link to the target."
+        PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS
+        BRIEF_DOCS "A list with install-components that are provided by the target. If no components are given, it means that the target does not contribute any installable files to the package."
+        FULL_DOCS " "
+    )
+
+	# A property that is set on all package main targets
+	define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET
+        BRIEF_DOCS "The name of the target that installs all package components to the location defined by CMAKE_INSTALL_PREFIX."
         FULL_DOCS " "
     )
 
@@ -206,14 +230,6 @@ function( cpfDefineProperties )
 	# A property that is set on all package main targets
 	define_property(
         TARGET
-        PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGETS
-        BRIEF_DOCS "A list with custom targets that install the packages components to the location defined by CMAKE_INSTALL_PREFIX."
-        FULL_DOCS " "
-    )
-
-	# A property that is set on all package main targets
-	define_property(
-        TARGET
         PROPERTY INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS
         BRIEF_DOCS "The names of the custom sub-target that create distribution-packages for the package."
         FULL_DOCS " "
@@ -251,14 +267,6 @@ function( cpfDefineProperties )
 		define_property(
 			TARGET
 			PROPERTY CPF_OUTPUT_FILES_${configSuffix}
-			BRIEF_DOCS "A list of files that are created when the target is build in the given configuration."
-			FULL_DOCS " "
-        )
-        
-        # A configuration dependent property that is set on some targets that produce stamp files.
-		define_property(
-			TARGET
-			PROPERTY CPF_STAMP_FILE_${configSuffix}
 			BRIEF_DOCS "A list of files that are created when the target is build in the given configuration."
 			FULL_DOCS " "
         )

@@ -186,7 +186,7 @@ function( cpfAddConfigurationDependendCommand )
 		OUTPUT ${ARG_OUTPUT}
 		DEPENDS "${argumentFile}" ${ARG_DEPENDS}
 		COMMENT ${ARG_COMMENT}
-		COMMANDS "cmake -DCMAKE_HOST_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME} -DCURRENT_CONFIG=$<CONFIG> -DSTATIC_CONFIG=${ARG_CONFIG} -DARGUMENT_FILE=${relPathArgFile} -DPRINT_SKIPPED_INSTEAD_OF_NON_CONFIG_OUTPUT=TRUE -P \"${CPF_ABS_SCRIPT_DIR}/executeCommandForConfig.cmake\""
+		COMMANDS "\"${CMAKE_COMMAND}\" -DCMAKE_HOST_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME} -DCURRENT_CONFIG=$<CONFIG> -DSTATIC_CONFIG=${ARG_CONFIG} -DARGUMENT_FILE=${relPathArgFile} -DPRINT_SKIPPED_INSTEAD_OF_NON_CONFIG_OUTPUT=TRUE -P \"${CPF_ABS_SCRIPT_DIR}/executeCommandForConfig.cmake\""
 	)
 
 endfunction()
@@ -269,7 +269,7 @@ function( cpfAddAppendLineCommand commandList line file isValue)
 		set( line "    \"${line}\"")
     endif()
     
-	set( command COMMAND cmake -E echo "${line}" >> "${file}" )
+	set( command COMMAND ${CMAKE_COMMAND} -E echo "${line}" >> "${file}" )
 	list( APPEND commandListLocal ${command})
 
 	set(${commandList} ${commandListLocal} PARENT_SCOPE)
@@ -292,8 +292,8 @@ function( cpfGetInstallFileCommands commandsOut absSourceFilePaths absDestFilePa
 		
 		list(GET absDestFilePaths ${index} destFile)
 		
-		cpfListAppend( commands "cmake -E copy \"${sourceFile}\" \"${destFile}\" ")
-		cpfListAppend( commands "cmake -E touch \"${destFile}\" ")
+		cpfListAppend( commands "\"${CMAKE_COMMAND}\" -E copy \"${sourceFile}\" \"${destFile}\" ")
+		cpfListAppend( commands "\"${CMAKE_COMMAND}\" -E touch \"${destFile}\" ")
 
 		cpfIncrement(index)
 	endforeach()
@@ -316,12 +316,12 @@ function( cpfGetTouchFileCommands commandsOut absFilePaths )
 
 	# add commands for creating these directories
 	foreach( dir ${outputDirs} )
-		cpfListAppend( commands "cmake -E make_directory \"${dir}\"")
+		cpfListAppend( commands "\"${CMAKE_COMMAND}\" -E make_directory \"${dir}\"")
 	endforeach()
 
 	# add commands for touching the files
 	foreach( file ${absFilePaths})
-		cpfListAppend( commands "cmake -E touch \"${file}\" ")
+		cpfListAppend( commands "\"${CMAKE_COMMAND}\" -E touch \"${file}\" ")
 	endforeach()
 
 	set( ${commandsOut} ${commands} PARENT_SCOPE )
@@ -329,8 +329,17 @@ function( cpfGetTouchFileCommands commandsOut absFilePaths )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+function( cpfGetTouchTargetStampCommand commandOut stampFileOut targetName)
+
+	set(stampFile "${CMAKE_CURRENT_BINARY_DIR}/${targetName}.stamp")
+	set(${commandOut} "\"${CMAKE_COMMAND}\" -E touch \"${stampFile}\"" PARENT_SCOPE)
+	set(${stampFileOut} ${stampFile} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
 function( cpfGetClearDirectoryCommands commandsOut absDirPath )
-	set( ${commandsOut} "cmake -E remove_directory \"${absDirPath}\"" "cmake -E make_directory \"${absDirPath}\"" PARENT_SCOPE )
+	set( ${commandsOut} "\"${CMAKE_COMMAND}\" -E remove_directory \"${absDirPath}\"" "\"${CMAKE_COMMAND}\" -E make_directory \"${absDirPath}\"" PARENT_SCOPE )
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -352,7 +361,7 @@ function( cpfAddClearDirExceptCommand stampFileOut directory notDeletedEntries t
 		OUTPUT ${stampFile}
 		DEPENDS ${argumentFile} # ${notDeletedEntriesFull}
 		COMMENT "Clear directory \"${directory}\""
-		COMMANDS "cmake -DARGUMENT_FILE=\"${argumentFile}\" -P \"${CPF_ABS_SCRIPT_DIR}/clearDirExcept.cmake\"" "cmake -E touch \"${stampFile}\""
+		COMMANDS "\"${CMAKE_COMMAND}\" -DARGUMENT_FILE=\"${argumentFile}\" -P \"${CPF_ABS_SCRIPT_DIR}/clearDirExcept.cmake\"" "\"${CMAKE_COMMAND}\" -E touch \"${stampFile}\""
 	)
 
 	set(${stampFileOut} ${stampFile} PARENT_SCOPE)

@@ -223,10 +223,12 @@ function( cpfAddCppPackage )
 	)
 	
 	# Adds the install rules and the per package install targets.
-	cpfAddInstallRules( ${package} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${ARG_VERSION_COMPATIBILITY_SCHEME} )
+	cpfAddInstallRulesForCppPackage( ${package} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${ARG_VERSION_COMPATIBILITY_SCHEME} )
 
 	# Adds the targets that create the distribution packages.
 	cpfAddDistributionPackageTargets( ${package} "${distributionPackageOptionLists}" )
+
+	cpfAddPackageInstallTargets(${package})
 
 endfunction() 
 
@@ -412,8 +414,10 @@ function( cpfAddPackageBinaryTargets
     endif()
     
 	# Set some properties
-    set_property(TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS ${exeTarget} ${fixtureTarget} ${productionTarget} ${unitTestsTarget} )
-    set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET ${productionTarget} )
+	set(binaryTargets ${exeTarget} ${fixtureTarget} ${productionTarget} ${unitTestsTarget})
+    set_property(TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS ${binaryTargets})
+	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${binaryTargets})
+    set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET ${productionTarget})
 	set( ${outProductionLibrary} ${productionTarget} PARENT_SCOPE)
 
 endfunction()
@@ -754,6 +758,539 @@ function( cpfStripTargetAliases deAliasedTargetsOut targets)
 
 endfunction()
 
+
+#---------------------------------------------------------------------------------------------
+# Adds install rules for the various package components.
+#
+function( cpfAddInstallRulesForCppPackage package namespace pluginOptionLists distributionPackageOptionLists versionCompatibilityScheme )
+
+	cpfAddInstallRulesForPackageBinaries( ${package} ${versionCompatibilityScheme} )
+	cpfGenerateAndInstallCmakeConfigFiles( ${package} ${namespace} ${versionCompatibilityScheme} )
+	cpfAddInstallRulesForPublicHeaders( ${package} )
+	cpfAddInstallRulesForPDBFiles( ${package} )
+	cpfAddInstallRulesForDependedOnSharedLibraries( ${package} "${pluginOptionLists}" "${distributionPackageOptionLists}" )
+	cpfAddInstallRulesForSources( ${package} )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfAddInstallRulesForPackageBinaries package versionCompatibilityScheme )
+	
+	cpfGetProductionTargets( productionTargets ${package} )
+	cpfAddInstallRulesForBinaryTargets( ${package} "${productionTargets}" "" ${versionCompatibilityScheme} )
+
+	cpfGetTestTargets( testTargets ${package})
+	if(testTargets)
+		cpfAddInstallRulesForBinaryTargets( ${package} "${testTargets}" developer ${versionCompatibilityScheme} )
+	endif()
+    
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfAddInstallRulesForBinaryTargets package targets component versionCompatibilityScheme )
+
+	# Do not install the targets that have been removed from the ALL_BUILD target
+	cpfFilterInTargetsWithProperty( interfaceLibs "${targets}" TYPE INTERFACE_LIBRARY )
+	cpfFilterOutTargetsWithProperty( noneInterfaceLibTargets "${targets}" TYPE INTERFACE_LIBRARY )
+	cpfFilterOutTargetsWithProperty( noneInterfaceLibTargets "${noneInterfaceLibTargets}" EXCLUDE_FROM_ALL TRUE )
+	set(targets ${interfaceLibs} ${noneInterfaceLibTargets})
+
+	cpfGetRelativeOutputDir( relRuntimeDir ${package} RUNTIME )
+	cpfGetRelativeOutputDir( relLibDir ${package} LIBRARY)
+	cpfGetRelativeOutputDir( relArchiveDir ${package} ARCHIVE)
+	cpfGetRelativeOutputDir( relIncludeDir ${package} INCLUDE)
+	cpfGetTargetsExportsName( targetsExportName ${package})
+		
+	# Add an relative rpath to the executables that points to the lib directory.
+	file(RELATIVE_PATH rpath "${CMAKE_CURRENT_BINARY_DIR}/${relRuntimeDir}" "${CMAKE_CURRENT_BINARY_DIR}/${relLibDir}")
+	cpfAppendPackageExeRPaths( ${package} "\$ORIGIN/${rpath}")
+
+	set(skipNameLinkOption)
+	if( ${versionCompatibilityScheme} STREQUAL ExactVersion)
+		set(skipNameLinkOption NAMELINK_SKIP)
+	endif()
+
+	foreach(target ${targets})
+
+		set(additionalComponent)
+		cpfIsDynamicLibrary(isDynLib ${target})
+		if(NOT component)
+			cpfIsExecutable(isExe ${target})
+			if(isExe OR isDynLib)
+				set(component runtime)
+			else()
+				set(component developer)
+			endif()
+
+			# MSVC will create additional static libs for dynamic libraries so we also have the developer
+			# component in this case.
+			if(MSVC AND isDynLib)
+				set(additionalComponent developer)
+			endif()
+
+		endif()
+
+		install( 
+			TARGETS ${target}
+			EXPORT ${targetsExportName}
+			RUNTIME 
+				DESTINATION "${relRuntimeDir}"
+				COMPONENT ${component}
+			LIBRARY
+				DESTINATION "${relLibDir}"
+				COMPONENT ${component}
+				${skipNameLinkOption}
+			ARCHIVE
+				DESTINATION "${relArchiveDir}"
+				COMPONENT developer
+			# This sets the import targets include directories to <package>/include, 
+			# so clients can also include with <package/bla.h>
+			INCLUDES
+				DESTINATION "${relIncludeDir}/.."
+		)
+
+		set_property(TARGET ${target} APPEND PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS ${component} ${additionalComponent} )
+
+	endforeach()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetTargetsExportsName output package)
+	set(${output} ${package}Targets PARENT_SCOPE)
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# This function adds install rules for the files that are required for debugging.
+# This is currently the pdb and source files for msvc configurations.
+#
+function( cpfAddInstallRulesForPDBFiles package )
+
+	get_property(targets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
+
+	cpfGetConfigurations( configs )
+	foreach( config ${configs})
+
+		cpfToConfigSuffix( suffix ${config})
+
+		foreach(target ${targets})
+	
+			cpfIsInterfaceLibrary( isIntLib ${target})
+			if(NOT isIntLib)
+
+				# Install compiler generated pdb files
+				get_property( compilePdbName TARGET ${target} PROPERTY COMPILE_PDB_NAME_${suffix} )
+				get_property( compilePdbDir TARGET ${target} PROPERTY COMPILE_PDB_OUTPUT_DIRECTORY_${suffix} )
+				cpfGetRelativeOutputDir( relPdbCompilerDir ${package} COMPILE_PDB )
+				if(compilePdbName)
+					install(
+						FILES ${compilePdbDir}/${compilePdbName}.pdb
+						DESTINATION "${relPdbCompilerDir}"
+						COMPONENT developer
+						CONFIGURATIONS ${config}
+					)
+				endif()
+
+				# Install linker generated pdb files
+				get_property( linkerPdbName TARGET ${target} PROPERTY PDB_NAME_${suffix} )
+				get_property( linkerPdbDir TARGET ${target} PROPERTY PDB_OUTPUT_DIRECTORY_${suffix} )
+				cpfGetRelativeOutputDir( relPdbLinkerDir ${package} PDB)
+				if(linkerPdbName)
+					install(
+						FILES ${linkerPdbDir}/${linkerPdbName}.pdb
+						DESTINATION "${relPdbLinkerDir}"
+						COMPONENT developer
+						CONFIGURATIONS ${config}
+					)
+				endif()
+				
+				# Install source files for configurations that require them for debugging.
+				cpfCompilerProducesPdbFiles( needsSourcesForDebugging ${config})
+				if(needsSourcesForDebugging)
+
+					cpfGetTargetSourcesWithoutPrefixHeader( sources ${target} )
+					cpfGetFilepathsWithExtensions( cppSources "${sources}" "${CPF_CXX_SOURCE_FILE_EXTENSIONS}" )
+					cpfInstallSourceFiles( relFiles ${package} "${cppSources}" SOURCE developer ${config} )
+
+					# Add the installed files to the target property
+					cpfPrependMulti(relInstallPaths "${relSourceDir}/" "${shortSourceNames}" )
+
+				endif()
+
+			endif()
+
+		endforeach()
+	endforeach()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfAddInstallRulesForPublicHeaders package)
+
+	set(outputType INCLUDE)
+	set(installComponent developer)
+
+	# Install rules for production headers
+	get_property( productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
+	get_property( header TARGET ${productionLib} PROPERTY INTERFACE_CPF_PUBLIC_HEADER)
+	cpfInstallSourceFiles( relBasicHeader ${package} "${header}" ${outputType} ${installComponent} "")
+	
+	# Install rules for test fixture library headers
+	get_property( fixtureTarget TARGET ${package} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET)
+	if(TARGET ${fixtureTarget})
+		get_property( header TARGET ${fixtureTarget} PROPERTY INTERFACE_CPF_PUBLIC_HEADER)
+		cpfInstallSourceFiles( relfixtureHeader ${package} "${header}" ${outputType} ${installComponent} "")
+	endif()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfInstallSourceFiles installedFilesOut package sources outputType installComponent config )
+
+    # Create header pathes relative to the install include directory.
+    set( sourceDir ${${package}_SOURCE_DIR})
+	set( binaryDir ${${package}_BINARY_DIR})
+	cpfGetRelativeOutputDir( relIncludeDir ${package} ${outputType})
+
+	set(installedFiles)
+	foreach( file ${sources})
+		
+		cpfToAbsSourcePath(absFile ${file} ${${package}_SOURCE_DIR})
+
+		# When building, the include directories are the packages binary and source directory.
+		# This means we need the path of the header relative to one of the two in order to get the
+		# relative path to the distribution packages install directory right.
+		file(RELATIVE_PATH relPathSource ${${package}_SOURCE_DIR} ${absFile} )
+		file(RELATIVE_PATH relPathBinary ${${package}_BINARY_DIR} ${absFile} )
+		cpfGetShorterString( relFilePath ${relPathSource} ${relPathBinary}) # assume the shorter path is the correct one
+
+		# prepend the include/<package> directory
+		get_filename_component( relDestDir ${relFilePath} DIRECTORY)
+		if(relDestDir)
+			set(relDestDir ${relIncludeDir}/${relDestDir} )
+		else()
+			set(relDestDir ${relIncludeDir} )
+		endif()
+		
+		if(config)
+			set(configOption CONFIGURATIONS ${config})
+		endif()
+
+		install(
+			FILES ${absFile}
+			DESTINATION "${relDestDir}"
+			COMPONENT ${installComponent}
+			${configOption}
+		)
+
+		# add the relative install path to the returned paths
+		get_filename_component( header ${absFile} NAME)
+		list( APPEND installedFiles ${relDestDir}/${header})
+	endforeach()
+
+	set( ${installedFilesOut} ${installedFiles} PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGenerateAndInstallCmakeConfigFiles package namespace compatibilityScheme )
+
+	# Generate the cmake config files
+	set(packageConfigFile ${package}Config.cmake)
+	set(versionConfigFile ${package}ConfigVersion.cmake )
+	set(packageConfigFileFull "${CMAKE_CURRENT_BINARY_DIR}/${packageConfigFile}")	# The config file is used by find package 
+	set(versionConfigFileFull "${CMAKE_CURRENT_BINARY_DIR}/${versionConfigFile}")
+	cpfGetRelativeOutputDir( relCmakeFilesDir ${package} CMAKE_PACKAGE_FILES)
+	cpfGetTargetsExportsName( targetsExportName ${package})
+
+	configure_package_config_file(
+		${CPF_PACKAGE_CONFIG_TEMPLATE}
+		"${packageConfigFileFull}"
+		INSTALL_DESTINATION ${relCmakeFilesDir}
+	)
+		
+	write_basic_package_version_file( 
+		"${versionConfigFileFull}" 
+		COMPATIBILITY ${compatibilityScheme}
+	) 
+
+	# Install cmake exported targets config file
+	# This can not be done in the configs loop, so we need a generator expression for the output directory
+	install(
+		EXPORT "${targetsExportName}"
+		NAMESPACE "${namespace}::"
+		DESTINATION "${relCmakeFilesDir}"
+		COMPONENT developer
+	)
+
+	# Install cmake config files
+	install(
+		FILES "${packageConfigFileFull}" "${versionConfigFileFull}"
+		DESTINATION "${relCmakeFilesDir}"
+		COMPONENT developer
+	)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Parses the pluginOptionLists and returns two lists of same size. One list contains the
+# plugin target while the element with the same index in the other list contains the 
+# directory of the plugin target.
+function( cpfGetPluginTargetDirectoryPairLists targetsOut directoriesOut pluginOptionLists )
+	
+	# parse the plugin dependencies arguments
+	# Creates two lists of the same length, where one list contains the plugin targets
+	# and the other the directory to which they are deployed.
+	set(pluginTargets)
+	set(pluginDirectories)
+	foreach( list ${pluginOptionLists})
+		cmake_parse_arguments(
+			ARG 
+			"" 
+			"PLUGIN_DIRECTORY"
+			"PLUGIN_TARGETS"
+			${${list}}
+		)
+
+		# check for correct keywords
+		if(NOT ARG_PLUGIN_TARGETS)
+			message(FATAL_ERROR "Faulty plugin option \"${${list}}\"! The option is missing the PLUGIN_TARGETS key word or values for it.")
+		endif()
+
+		if(NOT ARG_PLUGIN_DIRECTORY)
+			message(FATAL_ERROR "Faulty plugin option \"${${list}}\"! The option is missing the PLUGIN_DIRECTORY key word or a value for it.")
+		endif()
+
+		foreach( pluginTarget ${ARG_PLUGIN_TARGETS})
+			if(TARGET ${pluginTarget})
+				cpfListAppend( pluginTargets ${pluginTarget})
+				cpfListAppend( pluginDirectories ${ARG_PLUGIN_DIRECTORY})
+			else()
+				cpfDebugMessage("Ignored missing plugin target ${pluginTarget}.")
+			endif()
+		endforeach()
+
+	endforeach()
+
+	set(${targetsOut} "${pluginTargets}" PARENT_SCOPE)
+	set(${directoriesOut} "${pluginDirectories}" PARENT_SCOPE)
+	
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# This function adds install rules for the shared libraries that are provided by other
+# internal or external packages. We only add these rules for packages that actually
+# create distribution packages that include depended on shared libraries.
+#
+function( cpfAddInstallRulesForDependedOnSharedLibraries package pluginOptions distributionPackageOptionLists )
+
+	cpfGetDependedOnSharedLibrariesAndDirectories( libraries directories ${package} "${pluginOptions}" )
+
+	# Add install rules for each distribution package that has a runtime-portable content.
+	set(contentIds)
+	foreach( list ${distributionPackageOptionLists})
+
+		cpfParseDistributionPackageOptions( contentType packageFormats distributionPackageFormatOptions excludedTargets "${${list}}")
+		if( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
+			cpfGetDistributionPackageContentId( contentId ${contentType} "${excludedTargets}" )
+			cpfContains(contentTypeHandled "${contentIds}" ${contentId})
+			if(NOT ${contentTypeHandled})
+				
+				cpfListAppend(contentIds ${contentId})
+				removeExcludedTargets( libraries directories "${libraries}" "${directories}" "${excludedTargets}" )
+				addSharedLibraryDependenciesInstallRules( ${package} ${contentId} "${libraries}" "${directories}" )
+			
+			endif()
+		endif()
+	endforeach()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns a list with shared library targets and one with a relative directory for each
+# target to which the shared library must be copied.
+#
+function( cpfGetDependedOnSharedLibrariesAndDirectories librariesOut directoriesOut package pluginOptionLists )
+
+	cpfGetRelativeOutputDir( relRuntimeDir ${package} RUNTIME)
+	cpfGetRelativeOutputDir( relLibraryDir ${package} LIBRARY)
+
+	# Get plugin targets and relative directories
+	cpfGetPluginTargetDirectoryPairLists( pluginTargets pluginDirectories "${pluginOptionLists}" )
+	cpfPrependMulti( pluginDirectories "${relRuntimeDir}/" "${pluginDirectories}" )
+	
+	# Get library targets and add them to directories
+	cpfGetSharedLibrariesRequiredByPackageProductionLib( libraries ${package} )
+	set( allLibraries ${pluginTargets} )
+	set( allDirectories ${pluginDirectories} )
+	foreach( library ${libraries} )
+		cpfListAppend( allLibraries ${library} )
+		cpfListAppend( allDirectories ${relLibraryDir} )
+	endforeach()
+
+	set(${librariesOut} "${allLibraries}" PARENT_SCOPE)
+	set(${directoriesOut} "${allDirectories}" PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( removeExcludedTargets librariesOut directoriesOut libraries directories excludedTargets )
+
+	set(index 0)
+	set(filteredLibraries)
+	set(filteredDirectories)
+	foreach( library ${libraries} )
+		cpfContains(isExcluded "${excludedTargets}" ${library})
+		if(NOT isExcluded)
+			cpfListAppend(filteredLibraries ${library})
+			list(GET directories ${index} dir)
+			cpfListAppend(filteredDirectories ${dir})
+		endif()	
+		cpfIncrement(index)
+	endforeach()
+
+	set(${librariesOut} ${filteredLibraries} PARENT_SCOPE)
+	set(${directoriesOut} ${filteredDirectories} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# This function was introduced to only have one definition of the distribution package option keywords
+function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut distributionPackageFormatOptionsOut excludedTargetsOut argumentList )
+
+	cmake_parse_arguments(
+		ARG 
+		"" 
+		"" 
+		"DISTRIBUTION_PACKAGE_CONTENT_TYPE;DISTRIBUTION_PACKAGE_FORMATS;DISTRIBUTION_PACKAGE_FORMAT_OPTIONS"
+		${argumentList}
+	)
+
+	set( contentTypeOptions 
+		CT_DEVELOPER
+		CT_RUNTIME
+		CT_SOURCES
+	)
+
+	set(runtimePortableOption CT_RUNTIME_PORTABLE) 
+	cmake_parse_arguments(
+		ARG
+		"${contentTypeOptions}"
+		""
+		"${runtimePortableOption}"
+		"${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}"
+	)
+	
+	# Check that only one content type was given.
+	cpfContains(isRuntimeAndDependenciesType "${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" ${runtimePortableOption})
+	cpfPrependMulti( argOptions ARG_ "${contentTypeOptions}")
+	set(nrOptions 0)
+	foreach(option ${isRuntimeAndDependenciesType} ${argOptions})
+		if(${option})
+			cpfIncrement(nrOptions)
+		endif()
+	endforeach()
+	
+	if( NOT (${nrOptions} EQUAL 1) )
+		message(FATAL_ERROR "Each DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddCppPackage() must contain exactly one of these options: ${contentTypeOptions};${runtimePortableOption}. The given option was ${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" )
+	endif()
+	
+	if(ARG_CT_DEVELOPER)
+		set(contentType CT_DEVELOPER)
+	elseif(ARG_CT_RUNTIME)
+		set(contentType CT_RUNTIME)
+	elseif(isRuntimeAndDependenciesType)
+		set(contentType CT_RUNTIME_PORTABLE)
+	elseif(ARG_CT_SOURCES)
+		set(contentType CT_SOURCES)
+	else()
+		message(FATAL_ERROR "Faulty DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddCppPackage().")
+	endif()
+	
+	set(${contentTypeOut} ${contentType} PARENT_SCOPE)
+	set(${packageFormatsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMATS} PARENT_SCOPE)
+	set(${distributionPackageFormatOptionsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMAT_OPTIONS} PARENT_SCOPE)
+	set(${excludedTargetsOut} ${ARG_CT_RUNTIME_PORTABLE} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTargets )
+
+	if( "${contentType}" STREQUAL CT_DEVELOPER)
+		set(contentIdLocal dev)
+	elseif( "${contentType}" STREQUAL CT_RUNTIME )
+		set(contentIdLocal runtime )
+	elseif( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
+		set(contentIdLocal runtime-port )
+		if( NOT "${excludedTargets}" STREQUAL "")
+			# When using excluded targets there are arbitrary numbers of possible
+			# package contents. To distinguish between them and get a short content
+			# id we calculate the MD5 checksum of the excluded targets list and add
+			# it to the base runtime portable content id.
+			list(SORT excludedTargets)
+			string(MD5 excludedTargetsHash "${excludedTargets}")
+			string(SUBSTRING ${excludedTargetsHash} 0 8 excludedTargetsHash) # Only use the first 8 characters to keep things short.
+			string(APPEND contentIdLocal -${excludedTargetsHash})
+		endif()
+	elseif( "${contentType}" STREQUAL CT_SOURCES )
+		set(contentIdLocal src )
+	else()
+		message(FATAL_ERROR "Content type \"${contentType}\" is not supported by function contentTypeOutputNameIdentifier().")
+	endif()
+	
+	set(${contentIdOut} ${contentIdLocal} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# This function parses the distribution package options of the package and returns a list
+# with the content-ids of all runtime-portable packages.
+function( addSharedLibraryDependenciesInstallRules package contentId libraries directories )
+
+	cpfGetConfigurations(configurations)
+	foreach(config ${configurations})
+
+		set(installedFiles)
+		set(index 0)
+		foreach(library ${libraries})
+
+			cpfGetLibFilePath( libFile ${library} ${config})
+			list(GET directories ${index} dir)
+
+			install(
+				FILES ${libFile}
+				DESTINATION "${dir}"
+				COMPONENT ${contentId}
+				CONFIGURATIONS ${config}
+			)
+
+			cpfIncrement(index)
+
+		endforeach()
+	endforeach()
+
+	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS ${contentId} )
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfAddInstallRulesForSources package )
+
+	set(outputType INCLUDE)
+	set(installComponent developer)
+
+	# Install rules for production headers
+	set(packageSourceFiles)
+	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
+	foreach(target ${binaryTargets})
+		cpfGetTargetSourcesWithoutPrefixHeader( sources ${target})
+		cpfListAppend(packageSourceFiles ${sources})
+		set_property(TARGET ${target} APPEND PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS sources )
+	endforeach()
+	cpfInstallSourceFiles( relFiles ${package} "${packageSourceFiles}" SOURCE sources "" )
+
+endfunction()
 
 
 

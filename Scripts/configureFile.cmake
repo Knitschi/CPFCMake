@@ -4,7 +4,7 @@
 # additional script arguments.
 # The template file must use the @@ syntax for replaced variables.
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../Functions)
+include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 include(cpfMiscUtilities)
 
 cpfAssertScriptArgumentDefined(ABS_SOURCE_PATH) # The absolute path to the file template.

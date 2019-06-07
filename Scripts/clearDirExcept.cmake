@@ -6,10 +6,7 @@
 #	DIRECTORY	- A cmake variable in the argument file that contains the absolute path to the directory that shall be cleared.
 #	ENTRIES		- A cmake variable in the argument file that contains the entries that shall not be deleted from the directory.
 
-list( APPEND CMAKE_MODULE_PATH
-	${CMAKE_CURRENT_LIST_DIR}/../Functions
-)
-
+include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 include(cpfMiscUtilities)
 include(cpfListUtilities)
 

@@ -78,6 +78,10 @@ function( cpfAddAbiCheckerTargets package distributionPackageOptionLists enableC
 		cpfGetPackageVersionCompatibilityCheckTarget( targetName ${package})
 		cpfAddCleanOutputDirsCommands( cleanStamps ${targetName} "${reportFiles};${reportFileApiCheck};${reportFileAbiCheck}" )
 		cpfAddSubTargetBundleTarget( ${targetName} ${package} INTERFACE_CPF_ABI_CHECK_SUBTARGETS "${cleanStamps}")
+
+		# Add install rules
+		cpfAddInstallRuleForAbiDumpFiles(${package})
+
 	endif()
 endfunction()
 
@@ -356,10 +360,39 @@ function( cpfAddAbiDumpTarget package binaryTarget headerListFile )
 		DEPENDS ${binaryTarget} ${abiDumpFile}
 	)
 	
-	# set target properties
-	cpfToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} )
-	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES_${configSuffix} ${abiDumpFile} )
+	# Set target properties
+	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${abiDumpFile} )
+	set_property(TARGET ${targetName} PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS developer )
 	set_property(TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_ABI_DUMP_SUBTARGET ${targetName} )
+	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${targetName} )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfAddInstallRuleForAbiDumpFiles package )
+
+	set(installedPackageFiles)
+
+	# get files from abiDump targets
+	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
+	foreach(binaryTarget ${binaryTargets})
+		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_ABI_DUMP_SUBTARGET )
+		if(abiDumpTarget)
+
+			cpfGetCurrentDumpFile( dumpFile ${package} ${binaryTarget})
+			get_filename_component( shortDumpFile "${dumpFile}" NAME )
+			cpfGetRelativeOutputDir( relDumpFileDir ${package} OTHER)
+
+			install(
+				FILES ${dumpFile}
+				DESTINATION "${relDumpFileDir}"
+				COMPONENT developer
+			)
+
+			cpfListAppend( installedPackageFiles "${relDumpFileDir}/${shortDumpFile}" )
+
+		endif()
+	endforeach()
 
 endfunction()
 

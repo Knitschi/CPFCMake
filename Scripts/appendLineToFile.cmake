@@ -5,8 +5,7 @@
 # FILE      - The file to which a line shall be appended.
 # LINE      - The content of the added line.
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../Functions)
-
+include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 include(cpfMiscUtilities)
 
 cpfAssertScriptArgumentDefined(FILE)

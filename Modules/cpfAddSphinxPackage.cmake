@@ -89,7 +89,7 @@ function( cpfAddSphinxPackage )
 	)
 
 	# Add a custom install target.
-	cpfGetRunInstallScriptCommands( runInstallScriptCommands ${package} "" "documentation" "${CMAKE_INSTALL_PREFIX}" )
+	cpfGetRunInstallScriptCommands( runInstallScriptCommands "" "documentation" "${CMAKE_INSTALL_PREFIX}" )
 	set(installedIndexHtmlFile ${CMAKE_INSTALL_PREFIX}/doc/sphinx/html/index.html)
 	cpfAddStandardCustomCommand(
         DEPENDS ${keyOutputFile}
