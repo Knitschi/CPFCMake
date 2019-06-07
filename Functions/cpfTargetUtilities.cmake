@@ -259,3 +259,649 @@ function( cpfStripTargetAliases deAliasedTargetsOut targets)
 
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# This function reads some properties from a target and prints the value if it is set.
+#
+function( cpfPrintTargetProperties target )
+
+	if( NOT TARGET ${target})
+		message("There is no target ${target}")
+		return()
+	endif()
+
+	message("Properties on target ${target}:")
+	
+	set( configDependentProperies 
+		ARCHIVE_OUTPUT_DIRECTORY
+		ARCHIVE_OUTPUT_NAME
+		COMPILE_DEFINITIONS
+		COMPILE_PDB_NAME
+		COMPILE_PDB_OUTPUT_DIRECTORY
+		EXCLUDE_FROM_DEFAULT_BUILD
+		IMPORTED_IMPLIB
+		IMPORTED_LIBNAME
+		IMPORTED_LINK_DEPENDENT_LIBRARIES
+		IMPORTED_LINK_INTERFACE_LANGUAGES
+		IMPORTED_LINK_INTERFACE_LIBRARIES
+		IMPORTED_LINK_INTERFACE_MULTIPLICITY
+		IMPORTED_LOCATION
+		IMPORTED_NO_SONAME
+		IMPORTED_OBJECTS
+		IMPORTED_SONAME
+		INTERPROCEDURAL_OPTIMIZATION
+		LIBRARY_OUTPUT_DIRECTORY
+		LIBRARY_OUTPUT_NAME
+		LINK_FLAGS
+		LINK_INTERFACE_LIBRARIES
+		LINK_INTERFACE_MULTIPLICITY
+		MAP_IMPORTED_CONFIG
+		OSX_ARCHITECTURES
+		OUTPUT_NAME
+		PDB_NAME
+		PDB_OUTPUT_DIRECTORY
+		RUNTIME_OUTPUT_DIRECTORY
+		RUNTIME_OUTPUT_NAME
+		STATIC_LIBRARY_FLAGS
+		# CPF properties
+		CPF_OUTPUT_FILES
+	)
+	
+	# cmake gives an error when reading the LOCATION property from internal targets
+	set( onlyImportedTargetsConfigDependentProperties
+		LOCATION
+	)
+
+	set(properties 
+		ALIASED_TARGET
+		ANDROID_ANT_ADDITIONAL_OPTIONS
+		ANDROID_API
+		ANDROID_API_MIN
+		ANDROID_ARCH
+		ANDROID_ASSETS_DIRECTORIES
+		ANDROID_GUI
+		ANDROID_JAR_DEPENDENCIES
+		ANDROID_JAR_DIRECTORIES
+		ANDROID_JAVA_SOURCE_DIR
+		ANDROID_NATIVE_LIB_DEPENDENCIES
+		ANDROID_NATIVE_LIB_DIRECTORIES
+		ANDROID_PROCESS_MAX
+		ANDROID_PROGUARD
+		ANDROID_PROGUARD_CONFIG_PATH
+		ANDROID_SECURE_PROPS_PATH
+		ANDROID_SKIP_ANT_STEP
+		ANDROID_STL_TYPE
+		AUTOGEN_BUILD_DIR
+		AUTOGEN_TARGET_DEPENDS
+		AUTOMOC_DEPEND_FILTERS
+		AUTOMOC_MOC_OPTIONS
+		AUTOMOC
+		AUTOUIC
+		AUTOUIC_OPTIONS
+		AUTOUIC_SEARCH_PATHS
+		AUTORCC
+		AUTORCC_OPTIONS
+		BINARY_DIR
+		BUILD_RPATH
+		BUILD_WITH_INSTALL_NAME_DIR
+		BUILD_WITH_INSTALL_RPATH
+		BUNDLE_EXTENSION
+		BUNDLE
+		C_EXTENSIONS
+		C_STANDARD
+		C_STANDARD_REQUIRED
+		COMPATIBLE_INTERFACE_BOOL
+		COMPATIBLE_INTERFACE_NUMBER_MAX
+		COMPATIBLE_INTERFACE_NUMBER_MIN
+		COMPATIBLE_INTERFACE_STRING
+		COMPILE_DEFINITIONS
+		COMPILE_FEATURES
+		COMPILE_FLAGS
+		COMPILE_OPTIONS
+		CROSSCOMPILING_EMULATOR
+		CUDA_PTX_COMPILATION
+		CUDA_SEPARABLE_COMPILATION
+		CUDA_RESOLVE_DEVICE_SYMBOLS
+		CUDA_EXTENSIONS
+		CUDA_STANDARD
+		CUDA_STANDARD_REQUIRED
+		CXX_EXTENSIONS
+		CXX_STANDARD
+		CXX_STANDARD_REQUIRED
+		DEBUG_OUTPUT_NAME
+		DEBUG_POSTFIX
+		DEFINE_SYMBOL
+		EchoString
+		ENABLE_EXPORTS
+		EXCLUDE_FROM_ALL
+		EXPORT_NAME
+		FOLDER
+		Fortran_FORMAT
+		Fortran_MODULE_DIRECTORY
+		FRAMEWORK
+		FRAMEWORK_VERSION
+		GENERATOR_FILE_NAME
+		GNUtoMS
+		HAS_CXX
+		IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
+		IMPORTED_CONFIGURATIONS
+		IMPORTED
+		IMPORT_PREFIX
+		IMPORT_SUFFIX
+		INCLUDE_DIRECTORIES
+		INSTALL_NAME_DIR
+		INSTALL_RPATH
+		INSTALL_RPATH_USE_LINK_PATH
+		INTERFACE_AUTOUIC_OPTIONS
+		INTERFACE_COMPILE_DEFINITIONS
+		INTERFACE_COMPILE_OPTIONS
+		INTERFACE_INCLUDE_DIRECTORIES
+		INTERFACE_LINK_LIBRARIES
+		INTERFACE_POSITION_INDEPENDENT_CODE
+		INTERFACE_SOURCES
+		INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
+		IOS_INSTALL_COMBINED
+		JOB_POOL_COMPILE
+		JOB_POOL_LINK
+		LABELS
+		CXX_CLANG_TIDY
+		CXX_COMPILER_LAUNCHER
+		CXX_CPPLINT
+		CXX_INCLUDE_WHAT_YOU_USE
+		CXX_VISIBILITY_PRESET
+		LINK_DEPENDS_NO_SHARED
+		LINK_DEPENDS
+		LINKER_LANGUAGE
+		LINK_LIBRARIES
+		LINK_SEARCH_END_STATIC
+		LINK_SEARCH_START_STATIC
+		LINK_WHAT_YOU_USE
+		MACOSX_BUNDLE_INFO_PLIST
+		MACOSX_BUNDLE
+		MACOSX_FRAMEWORK_INFO_PLIST
+		MACOSX_RPATH
+		MANUALLY_ADDED_DEPENDENCIES
+		NAME
+		NO_SONAME
+		NO_SYSTEM_FROM_IMPORTED
+		POSITION_INDEPENDENT_CODE
+		PREFIX
+		PRIVATE_HEADER
+		PROJECT_LABEL
+		PUBLIC_HEADER
+		RESOURCE
+		RELEASE_OUTPUT_NAME
+		RELEASE_POSTFIX
+		RULE_LAUNCH_COMPILE
+		RULE_LAUNCH_CUSTOM
+		RULE_LAUNCH_LINK
+		SKIP_BUILD_RPATH
+		SOURCE_DIR
+		SOURCES
+		SOVERSION
+		SUFFIX
+		TYPE
+		VERSION
+		VISIBILITY_INLINES_HIDDEN
+		VS_CONFIGURATION_TYPE
+		VS_DEBUGGER_WORKING_DIRECTORY
+		VS_DESKTOP_EXTENSIONS_VERSION
+		VS_DOTNET_REFERENCES
+		VS_DOTNET_REFERENCES_COPY_LOCAL
+		VS_DOTNET_TARGET_FRAMEWORK_VERSION
+		VS_GLOBAL_KEYWORD
+		VS_GLOBAL_PROJECT_TYPES
+		VS_GLOBAL_ROOTNAMESPACE
+		VS_IOT_EXTENSIONS_VERSION
+		VS_IOT_STARTUP_TASK
+		VS_KEYWORD
+		VS_MOBILE_EXTENSIONS_VERSION
+		VS_SCC_AUXPATH
+		VS_SCC_LOCALPATH
+		VS_SCC_PROJECTNAME
+		VS_SCC_PROVIDER
+		VS_SDK_REFERENCES
+		VS_USER_PROPS
+		VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION
+		VS_WINRT_COMPONENT
+		VS_WINRT_EXTENSIONS
+		VS_WINRT_REFERENCES
+		WIN32_EXECUTABLE
+		WINDOWS_EXPORT_ALL_SYMBOLS
+		XCODE_ATTRIBUTE_<an-attribute>
+		XCODE_EXPLICIT_FILE_TYPE
+		XCODE_PRODUCT_TYPE
+		XCTEST
+		# CPF properties
+		INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION
+		INTERFACE_CPF_PACKAGE_WEBPAGE_URL
+		INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL
+		INTERFACE_CPF_BINARY_SUBTARGETS
+		INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET
+		INTERFACE_CPF_TEST_FIXTURE_SUBTARGET
+		INTERFACE_CPF_TESTS_SUBTARGET
+		INTERFACE_CPF_PUBLIC_HEADER
+		INTERFACE_CPF_UIC_SUBTARGET
+		INTERFACE_CPF_UIC_SUBTARGET
+		INTERFACE_CPF_CLANG_TIDY_SUBTARGET
+		INTERFACE_CPF_VALGRIND_SUBTARGET
+		INTERFACE_CPF_OPENCPPCOVERAGE_SUBTARGET
+		CPF_CPPCOVERAGE_OUTPUT
+		INTERFACE_CPF_RUN_CPP_TESTS_SUBTARGET
+		INTERFACE_CPF_RUN_TESTS_SUBTARGET
+		INTERFACE_CPF_RUN_FAST_TESTS_SUBTARGET
+		CPF_DOXYGEN_SUBTARGET
+		CPF_DOXYGEN_TAGSFILE
+		CPF_DOXYGEN_CONFIG_SUBTARGET
+		CPF_DOXYGEN_CONFIG_FILE
+		CPF_INSTALL_PACKAGE_SUBTARGET
+		INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS
+		INTERFACE_CPF_ABI_DUMP_SUBTARGET
+		INTERFACE_CPF_ABI_CHECK_SUBTARGETS
+		CPF_OUTPUT_FILES
+	)
+
+	# For interface targets accessing non whitelisted properties causes errors.
+	set( interfaceTargetPropertyWhitelist
+		COMPATIBLE_INTERFACE_BOOL
+		COMPATIBLE_INTERFACE_NUMBER_MAX
+		COMPATIBLE_INTERFACE_NUMBER_MIN
+		COMPATIBLE_INTERFACE_STRING
+		EXPORT_NAME
+		IMPORTED
+		NAME
+		INTERFACE_AUTOUIC_OPTIONS
+		INTERFACE_COMPILE_DEFINITIONS
+		INTERFACE_COMPILE_OPTIONS
+		INTERFACE_INCLUDE_DIRECTORIES
+		INTERFACE_LINK_LIBRARIES
+		INTERFACE_POSITION_INDEPENDENT_CODE
+		INTERFACE_SOURCES
+		INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
+	)
+
+	set( configInterfaceTargetPropertyWhitelist
+		IMPORTED_LIBNAME
+		MAP_IMPORTED_CONFIG
+	)
+
+	# limit the propeties to the whitelist for interface libraries
+	get_property( type TARGET ${target} PROPERTY TYPE )
+	if(${type} STREQUAL INTERFACE_LIBRARY)
+		set(properties ${interfaceTargetPropertyWhitelist})
+		set(configDependentProperies ${configInterfaceTargetPropertyWhitelist})
+	endif()
+
+
+	# get all conifg suffixes for the target
+	cpfGetConfigVariableSuffixes(suffixes TRUE)
+	if(NOT CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
+		if(NOT ${type} STREQUAL INTERFACE_LIBRARY)
+			cpfListAppend( suffixes " ") # also show the variables without the suffix
+		endif()
+	endif()
+	
+	# also check imported configurations variables
+	get_property( importedConfigurations TARGET ${target} PROPERTY IMPORTED_CONFIGURATIONS )
+	foreach(importConfig ${importedConfigurations})
+		string(TOUPPER ${importConfig} upperConfig)
+		cpfListAppend( suffixes ${upperConfig})
+	endforeach()
+	list(REMOVE_DUPLICATES suffixes)
+
+	# append all config variants of the properties to the list
+	foreach( configProperty ${configDependentProperies})
+		foreach( suffix ${suffixes})
+			cpfListAppend( properties ${configProperty}_${suffix} )
+		endforeach()
+	endforeach()
+	
+	# only append the import only properties if the target is imported
+	get_property( isImported TARGET ${target} PROPERTY IMPORTED )
+	if(isImported AND ( NOT ${type} STREQUAL INTERFACE_LIBRARY ))
+		foreach( configProperty ${onlyImportedTargetsConfigDependentProperties})
+			foreach( suffix ${suffixes})
+				cpfListAppend( properties ${configProperty}_${suffix} )
+			endforeach()
+		endforeach()
+	endif()
+	
+	
+	# print the properties
+	foreach( property ${properties})
+		cpfPrintTargetPropertyIfSet( ${target} ${property})
+	endforeach()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Prints the value of the given target property if it is set.
+#
+function( cpfPrintTargetPropertyIfSet target property )
+
+	get_property( value TARGET ${target} PROPERTY ${property} )
+	if(NOT "${value}" STREQUAL "")
+		message("- ${property}: ${value} ")
+	endif()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetTargetProperties outputValues targets properties )
+
+	set(values)
+
+	foreach(target ${targets})
+		foreach( property ${properties})
+			get_property(value TARGET ${target} PROPERTY ${property})
+			cpfListAppend( values ${value})
+		endforeach()
+	endforeach()
+
+	set(${outputValues} "${values}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# This function can be used when there are possibly multiple target properties that may hold the
+# required information. The function will try on property after the other and return the value
+# for the first that holds a value.
+function( cpfGetFirstDefinedTargetProperty valueOut target properties )
+    foreach( property ${properties} )
+        get_property( value TARGET ${target} PROPERTY ${property})
+        if(value)
+            set( ${valueOut} ${value} PARENT_SCOPE )
+            return()
+        endif()
+    endforeach()
+    set( ${valueOut} "" PARENT_SCOPE )
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns the short output name of the internal target
+#
+function( cpfGetTargetOutputFileName output target config )
+
+	cpfGetTargetOutputType( outputType ${target})
+	cpfGetTargetOutputFileNameForTargetType( shortFilename ${target} ${config} ${outputType})
+	set( ${output} ${shortFilename} PARENT_SCOPE )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetTargetOutputFileNameForTargetType output target config outputType)
+
+	cpfToConfigSuffix(configSuffix ${config})
+	get_property( outputBaseName TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME_${configSuffix} )
+	get_property( targetType TARGET ${target} PROPERTY TYPE)
+	get_property( version TARGET ${target} PROPERTY VERSION)
+	
+	cpfGetTargetTypeFileExtension( extension ${targetType})
+	cpfIsDynamicLibrary( isDynamicLib ${target})
+	cpfIsExecutable( isExe ${target})
+
+	if(${CMAKE_SYSTEM_NAME} STREQUAL Linux AND isDynamicLib )
+		set( shortFilename "${outputBaseName}${extension}.${version}")
+	elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux AND isExe)
+		set( shortFilename "${outputBaseName}-${version}${extension}")
+	else()
+		set( shortFilename "${outputBaseName}${extension}")
+	endif()
+
+	set( ${output} ${shortFilename} PARENT_SCOPE )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetTargetOutputBaseName nameOut target config)
+	cpfToConfigSuffix( configSuffix ${config})
+	cpfGetTargetOutputType( outputType ${target})
+	get_property( baseName TARGET ${target} PROPERTY ${outputType}_OUTPUT_NAME_${configSuffix} )
+	set( ${nameOut} ${baseName} PARENT_SCOPE)
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetAbsOutputDir absDirOut package outputType config )
+	cpfGetRelativeOutputDir(relativeDir ${package} ${outputType})
+	set(${absDirOut} "${CMAKE_BINARY_DIR}/BuildStage/${config}/${relativeDir}" PARENT_SCOPE)
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Note that this function defines a part of the directory structure of the deployed files
+#
+function( cpfGetRelativeOutputDir relativeDirOut package outputType )
+
+	cpfGetPackagePrefixOutputDir( packagePrefixDir ${package} )
+	cpfGetTypePartOfOutputDir(typeDir ${package} ${outputType})
+	set(${relativeDirOut} ${packagePrefixDir}/${typeDir} PARENT_SCOPE )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# 
+function( cpfGetPackagePrefixOutputDir outputDir package )
+	set(${outputDir} ${package} PARENT_SCOPE )
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# returns the output directory of the target
+function( cpfGetTargetOutputDirectory output target config )
+
+	cpfToConfigSuffix(configSuffix ${config})
+	cpfGetTargetOutputType( outputType ${target})
+	get_property( outputDir TARGET ${target} PROPERTY ${outputType}_OUTPUT_DIRECTORY_${configSuffix} )
+	set( ${output} "${outputDir}" PARENT_SCOPE )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# This function defines the part of the output directory that comes after the config/package add_subdirectory
+#
+function( cpfGetTypePartOfOutputDir typeDir package outputType )
+
+	# handle relative dirs that are the same on all platforms
+	if(${outputType} STREQUAL ARCHIVE)
+		set(typeDirLocal lib)
+	elseif(${outputType} STREQUAL COMPILE_PDB )	
+		# We put the compiler pdb files parallel to the lib, because msvc looks for them there.
+		set(typeDirLocal lib )
+	elseif(${outputType} STREQUAL PDB)
+		# We put the linker pdb files parallel to the dll, because msvc looks for them there.
+		set(typeDirLocal . )
+	elseif(${outputType} STREQUAL INCLUDE)
+		set(typeDirLocal include/${package})
+	elseif(${outputType} STREQUAL CMAKE_PACKAGE_FILES)
+		set(typeDirLocal lib/cmake/${package}) 
+	elseif(${outputType} STREQUAL SOURCE )
+		set(typeDirLocal src/${package}) 
+	elseif(${outputType} STREQUAL OTHER )
+		set(typeDirLocal other ) 
+	endif()
+
+	# handle platform specific relative dirs
+	if( ${CMAKE_SYSTEM_NAME} STREQUAL Windows  )
+		# on windows we put executables and dlls directly in the package directory.
+		if(${outputType} STREQUAL RUNTIME)
+			set(typeDirLocal . )
+		elseif(${outputType} STREQUAL LIBRARY)
+			set(typeDirLocal . )
+		endif()
+
+	elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
+		# On Linux we follow the GNU coding standards that propose a directory structure
+		# https://www.gnu.org/prep/standards/html_node/Directory-Variables.html
+		if(${outputType} STREQUAL RUNTIME)
+			set(typeDirLocal bin)
+		elseif(${outputType} STREQUAL LIBRARY)
+			set(typeDirLocal lib)
+		endif()
+
+	else()
+		message(FATAL_ERROR "Function cpfSetAllOutputDirectoriesAndNames() must be extended for system ${CMAKE_SYSTEM_NAME}")
+	endif()
+	
+	set( ${typeDir} ${typeDirLocal} PARENT_SCOPE ) 
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns the absolute path to the output directory and the short filename of the output file of an imported or internal target
+#
+function( cpfGetTargetLocation targetDirOut targetFilenameOut target config )
+
+	get_property(isImported TARGET ${target} PROPERTY IMPORTED)
+	if(isImported)
+		cpfToConfigSuffix( configSuffix ${config})
+		# for imported targets it is not clear which property holds the 
+		set( possibleLocationProperties IMPORTED_LOCATION_${configSuffix} LOCATION_${configSuffix} IMPORTED_LOCATION LOCATION )
+		cpfGetFirstDefinedTargetProperty( fullTargetFile ${target} "${possibleLocationProperties}")
+  
+        if("${fullTargetFile}" STREQUAL "") # give up
+            cpfPrintTargetProperties(${target}) # print more debug information about which variable may hold the location
+            message(FATAL_ERROR "Function cpfGetTargetLocation() could not determine the location of the binary file for target ${target} and configuration ${config}")
+        endif()
+
+	else()
+		cpfGetFullTargetOutputFile( fullTargetFile ${target} ${config})
+	endif()
+
+	get_filename_component( shortName "${fullTargetFile}" NAME)
+	get_filename_component( targetDir "${fullTargetFile}" DIRECTORY )
+
+	set(${targetDirOut} ${targetDir} PARENT_SCOPE)
+	set(${targetFilenameOut} ${shortName} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns the absolute pathes of the output files of multiple targets.
+#
+function( cpfGetTargetLocations absolutePathes targets config )
+	set(locations)
+	foreach(target ${targets})
+		cpfGetTargetLocation( dir shortName ${target} ${config} )
+		cpfListAppend( locations "${dir}/${shortName}")
+	endforeach()
+	set(${absolutePathes} "${locations}" PARENT_SCOPE)
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# returns the full output filename of the given target
+function( cpfGetFullTargetOutputFile output target config )
+
+	cpfGetTargetOutputDirectory( directory ${target} ${config} )
+	cpfGetTargetOutputFileName( name ${target} ${config})
+	set( ${output} "${directory}/${name}" PARENT_SCOPE )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# translates the target type into the output type (ARCHIVE, RUNTIME etc.)
+function( cpfGetTargetOutputType outputTypeOut target )
+
+	get_property( type TARGET ${target} PROPERTY TYPE)
+	if( ${type} STREQUAL EXECUTABLE )
+		set( ${outputTypeOut} RUNTIME PARENT_SCOPE)
+	elseif(${type} STREQUAL STATIC_LIBRARY)
+		set( ${outputTypeOut} ARCHIVE PARENT_SCOPE)
+	elseif(${type} STREQUAL MODULE_LIBRARY)
+		set( ${outputTypeOut} LIBRARY PARENT_SCOPE)
+	elseif(${type} STREQUAL SHARED_LIBRARY)
+		if(${CMAKE_SYSTEM_NAME} STREQUAL Windows ) # this should also be set when using cygwin or maybe clang-cl, but we ignore that for now
+			set( ${outputTypeOut} RUNTIME PARENT_SCOPE)
+		else()
+			set( ${outputTypeOut} LIBRARY PARENT_SCOPE)
+		endif()
+	elseif(${type} STREQUAL INTERFACE_LIBRARY)
+		set( ${outputTypeOut} ARCHIVE PARENT_SCOPE)
+	else()
+		message(FATAL_ERROR "Target type ${type} not supported by function cpfGetTargetOutputType()")
+	endif()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# returns the file extension for the type of the given target
+function( cpfGetTargetTypeFileExtension extension targetType)
+	
+	if( ${targetType} STREQUAL EXECUTABLE )
+		set( ${extension} ${CMAKE_${targetType}_SUFFIX} PARENT_SCOPE)
+	elseif(${targetType} STREQUAL STATIC_LIBRARY)
+		set( ${extension} ${CMAKE_${targetType}_SUFFIX} PARENT_SCOPE)
+	elseif(${targetType} STREQUAL MODULE_LIBRARY)
+		set( ${extension} ${CMAKE_SHARED_MODULE_SUFFIX} PARENT_SCOPE)
+	elseif(${targetType} STREQUAL SHARED_LIBRARY)
+		set( ${extension} ${CMAKE_${targetType}_SUFFIX} PARENT_SCOPE)
+	else()
+		message(FATAL_ERROR "Target type ${targetType} not supported by function cpfGetTargetTypeFileExtension()")
+	endif()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# This function returns all the subdirectories in the Sources directory of a CMakeProjectFramework project.
+#
+function( cpfGetSourcesSubdirectories subdirsOut cpfRootDir )
+
+	# get subdirectories in the Sources directory to find potential packages
+	set( fullSourceDir "${cpfRootDir}/${CPF_SOURCE_DIR}" )
+	cpfGetSubdirectories( subDirs "${fullSourceDir}" )
+	if(NOT subDirs)
+		message(FATAL_ERROR "No possible package directories found in directory \"${fullSourceDir}\"")
+	endif()
+
+	set(${subdirsOut} "${subDirs}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Similar to the cmake function source_group( TREE ), but also sorts .cpp and .h files # in directories.
+# For some unkown reason the cmake function does not work for us, so we have to implement it manually.
+# However, the cmake function worked in a minimalistic test project. wtf!?
+function( cpfSourceGroupTree relfiles)
+
+	foreach(file ${relfiles})
+		get_filename_component(dir ${file} DIRECTORY)
+		string(REPLACE "/" "\\" sourceGroup "${dir}")
+		source_group("${sourceGroup}" FILES ${file})
+	endforeach()
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Takes a list of targets and returns only the targets that have a given property set to a given value.
+# An empty string "" for value means, that the property should not be set.
+function( cpfFilterInTargetsWithProperty output targets property value )
+
+	set(filteredTargets)
+
+	foreach( target ${targets})
+		get_property(isValue TARGET ${target} PROPERTY ${property})
+		if( NOT isValue ) # handle special case "property not set"
+			if( NOT value)
+				cpfListAppend( filteredTargets ${target})
+			endif()
+		elseif( "${isValue}" STREQUAL "${value}")
+			cpfListAppend( filteredTargets ${target})
+		endif()
+	endforeach()
+
+	set(${output} "${filteredTargets}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# The inverse of cpfFilterInTargetsWithProperty()
+function( cpfFilterOutTargetsWithProperty output targets property value )
+
+	set(filteredTargets)
+
+	foreach( target ${targets})
+		cpfFilterInTargetsWithProperty( hasProperty "${target}" ${property} ${value})
+		if(NOT hasProperty)
+			cpfListAppend( filteredTargets ${target})
+		endif()
+	endforeach()
+
+	set(${output} "${filteredTargets}" PARENT_SCOPE)
+
+endfunction()

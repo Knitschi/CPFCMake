@@ -2,19 +2,75 @@
 
 include_guard(GLOBAL)
 
-#----------------------------------------------------------------------------------------
-# call the correct version of separate_arguments depending on the current platform.
-macro ( cpfSeparateArgumentsForPlatform listArg command)
-	#if(CMAKE_HOST_UNIX)
-	#	separate_arguments(list UNIX_COMMAND "${command}")
-	#elseif(CMAKE_HOST_WIN32)
-	#	separate_arguments(list WINDOWS_COMMAND "${command}")
-	#else()
-	#	message(FATAL_ERROR "Function cpfSeparateArgumentsForPlatform() needs to be extended for the current host platform.")
-	#endif()
-	separate_arguments(list NATIVE_COMMAND "${command}")
-	set(${listArg} ${list})
-endmacro()
+#---------------------------------------------------------------------------------------------
+# This function will find all the tools that are required to build all the custom
+# targets of a CMakeProjectFramework package.
+# The function will populate the TOOL_<exe> cache entries.
+#
+function( cpfFindRequiredTools )
+
+	if(CPF_ENABLE_CLANG_TIDY_TARGET)
+		cpfGetCompiler(compiler)
+		if( ${compiler} STREQUAL Clang)
+			
+			if(NOT CPF_CLANG_TIDY_EXE)
+				set(CPF_CLANG_TIDY_EXE clang-tidy)
+			endif()
+			cpfFindRequiredProgram(TOOL_CLANG_TIDY ${CPF_CLANG_TIDY_EXE} "A tool from the LLVM project that performs static analysis of cpp code" "")
+		
+		endif()
+		cpfFindRequiredProgram( TOOL_ACYCLIC acyclic "A tool from the graphviz library that can check if a graphviz graph is acyclic" "")
+	endif()
+
+	if(CPF_ENABLE_CLANG_FORMAT_TARGETS)
+
+		if(NOT CPF_CLANG_FORMAT_EXE)
+			set(CPF_CLANG_FORMAT_EXE clang-format)
+		endif()
+
+		# Find clang-format
+		cpfGetClangFormatSearchPath(clangFormatPath)
+		cpfFindRequiredProgram( TOOL_CLANG_FORMAT ${CPF_CLANG_FORMAT_EXE} "A tool that formats .cpp and .c files." "${clangFormatPath}")
+	endif()
+
+	if(Qt5Gui_FOUND )
+		cpfFindRequiredProgram( 
+			TOOL_UIC uic
+			"A tool from the Qt framework that generates ui_*.h files from *.ui GUI defining xml files"
+			"${Qt5_DIR}/../../../bin"
+			)
+	endif()
+
+	# python is optional
+	find_package(PythonInterp 3)
+	if(PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR STREQUAL 3)
+		set(TOOL_PYTHON3 "${PYTHON_EXECUTABLE}" CACHE PATH "The used python3 interpreter.")
+	endif()
+
+endfunction()
+
+#--------------------------------------------------------------------------------------
+function( cpfGetClangFormatSearchPath pathOut )
+
+    if(MSVC)
+        cpfNormalizeAbsPath( vswherePath "$ENV{ProgramFiles\(x86\)}/Microsoft Visual Studio/Installer")
+        cpfFindRequiredProgram( TOOL_VSWHERE vswhere "A tool that finds visual studio installations." "${vswherePath}")
+		execute_process( 
+			COMMAND "${vswherePath}/vswhere.exe" -property installationPath 
+			OUTPUT_VARIABLE vswhereOutput
+			)
+		string(STRIP "${vswhereOutput}" vswhereOutput)
+		
+		# Use the latest installation, which is the last element in the output.
+		cpfSplitString( outputList "${vswhereOutput}" "\n")
+		cpfPopBack(vsInstallPath dummy "${outputList}")
+		cpfNormalizeAbsPath( clangTidyPath "${vsInstallPath}/Common7/IDE/VC/VCPackages")
+
+    endif()
+
+    set(${pathOut} "${clangTidyPath}" PARENT_SCOPE)
+
+endfunction()
 
 #----------------------------------------------------------------------------------------
 # calls find_programm and triggers an fatal assertion if the program is not found
@@ -141,45 +197,6 @@ function( cpfIsSingleConfigGenerator var )
 	else()
 		set( ${var} TRUE PARENT_SCOPE)
 	endif()
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# Takes a list of targets and returns only the targets that have a given property set to a given value.
-# An empty string "" for value means, that the property should not be set.
-function( cpfFilterInTargetsWithProperty output targets property value )
-
-	set(filteredTargets)
-
-	foreach( target ${targets})
-		get_property(isValue TARGET ${target} PROPERTY ${property})
-		if( NOT isValue ) # handle special case "property not set"
-			if( NOT value)
-				cpfListAppend( filteredTargets ${target})
-			endif()
-		elseif( "${isValue}" STREQUAL "${value}")
-			cpfListAppend( filteredTargets ${target})
-		endif()
-	endforeach()
-
-	set(${output} "${filteredTargets}" PARENT_SCOPE)
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# The inverse of cpfFilterInTargetsWithProperty()
-function( cpfFilterOutTargetsWithProperty output targets property value )
-
-	set(filteredTargets)
-
-	foreach( target ${targets})
-		cpfFilterInTargetsWithProperty( hasProperty "${target}" ${property} ${value})
-		if(NOT hasProperty)
-			cpfListAppend( filteredTargets ${target})
-		endif()
-	endforeach()
-
-	set(${output} "${filteredTargets}" PARENT_SCOPE)
 
 endfunction()
 

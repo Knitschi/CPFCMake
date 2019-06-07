@@ -79,7 +79,7 @@ function( cpfIsMSVCDebugConfig bOut config )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfCompilerProducesPdbFiles hasPdbOutput config )
+function( cpfProjectProducesPdbFiles hasPdbOutput config )
 
 	set( hasPdbFlag FALSE )
 	if(MSVC)
@@ -94,7 +94,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 function( cpfTargetHasPdbLinkerOutput hasPdbOutput target configSuffix )
 
-	cpfCompilerProducesPdbFiles( hasPdbCompileOutput ${config})
+	cpfProjectProducesPdbFiles( hasPdbCompileOutput ${config})
 	
 	if( hasPdbCompileOutput )
 		get_property( targetType TARGET ${target} PROPERTY TYPE)
@@ -152,6 +152,29 @@ function( cpfPrintToolchainVariables )
 	cpfDebugMessage("CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
 	cpfDebugMessage("CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
 	cpfDebugMessage("CMAKE_VS_PLATFORM_NAME: ${CMAKE_VS_PLATFORM_NAME}")
+
+endfunction()
+
+#--------------------------------------------------------------------------------------
+function( cpfGetClangFormatSearchPath pathOut )
+
+    if(MSVC)
+        cpfNormalizeAbsPath( vswherePath "$ENV{ProgramFiles\(x86\)}/Microsoft Visual Studio/Installer")
+        cpfFindRequiredProgram( TOOL_VSWHERE vswhere "A tool that finds visual studio installations." "${vswherePath}")
+		execute_process( 
+			COMMAND "${vswherePath}/vswhere.exe" -property installationPath 
+			OUTPUT_VARIABLE vswhereOutput
+			)
+		string(STRIP "${vswhereOutput}" vswhereOutput)
+		
+		# Use the latest installation, which is the last element in the output.
+		cpfSplitString( outputList "${vswhereOutput}" "\n")
+		cpfPopBack(vsInstallPath dummy "${outputList}")
+		cpfNormalizeAbsPath( clangTidyPath "${vsInstallPath}/Common7/IDE/VC/VCPackages")
+
+    endif()
+
+    set(${pathOut} "${clangTidyPath}" PARENT_SCOPE)
 
 endfunction()
 
@@ -223,4 +246,57 @@ function( cpfFindConfigFile absFilePathOut configName )
 	message(FATAL_ERROR "Could not find any configuration file with base-name ${configName}.")
 
 endfunction()
+
+
+#---------------------------------------------------------------------------------------------
+# returns the absolute paths to the repository directories that are owned by the CPF project located at rootDir
+#
+function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)
+
+	# Get all directories that may belong to different owned repositories
+	cpfGetOwnedPackages( ownedPackages ${rootDir})
+	set( possibleRepoDirectories ${rootDir} )
+	foreach(package ${ownedPackages})
+		cpfGetAbsPackageDirectory( packageDirOut ${package} ${rootDir})
+		list(APPEND possibleRepoDirectories ${packageDirOut})
+	endforeach()
+
+	# Check which of these repositories belong together (have the same hash of the HEAD).
+	# Get list of all current hashes
+	set(hashes)
+	foreach(repoDir ${possibleRepoDirectories})
+		cpfGetHashOfTag( hashHEAD HEAD "${repoDir}")
+		list(APPEND hashes ${hashHEAD})
+	endforeach()
+
+	# Get indexes of duplicated elements in list
+	set(duplicatedIndexes)
+	foreach(hash ${hashes})
+		cpfFindAllInList( indexes "${hashes}" ${hash})
+		cpfSplitList( unused duplIndexes "${indexes}" 1)
+		list(APPEND duplicatedIndexes ${duplIndexes})
+	endforeach()
+
+	# Get directories of non duplicated hashes
+	set(uniqueRepoDirs)
+	set(index 0)
+	foreach(hash ${hashes})
+		cpfContains(isDuplicated "${duplicatedIndexes}" ${index})
+		if(NOT isDuplicated)
+			list(GET possibleRepoDirectories ${index} repoDir)
+			list(APPEND uniqueRepoDirs ${repoDir})
+		endif()
+		cpfIncrement(index)
+	endforeach()
+
+	set(${dirsOut} "${uniqueRepoDirs}" PARENT_SCOPE)
+
+endfunction()
+
+
+
+
+
+
+
 

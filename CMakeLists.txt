@@ -55,11 +55,15 @@ set( files
 	Functions/cpfMiscUtilities.cmake
 	Functions/cpfNumericUtilities.cmake
 	Functions/cpfPathUtilities.cmake
-	Functions/cpfProjectUtilities.cmake
+	Functions/cpfConfigUtilities.cmake
 	Functions/cpfReadVariablesFromFile.cmake
 	Functions/cpfStringUtilities.cmake
 	Functions/cpfTestUtilities.cmake
 	Functions/cpfTargetUtilities.cmake
+	Functions/cpfPackageUtilities.cmake
+	Functions/cpfVersionUtilities.cmake
+	Functions/cpfPropertyUtilities.cmake
+	Functions/cpfAssertions.cmake
 	Scripts/addVersionTag.cmake
 	Scripts/appendLineToFile.cmake
 	Scripts/clearDirExcept.cmake

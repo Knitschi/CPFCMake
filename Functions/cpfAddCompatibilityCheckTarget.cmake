@@ -4,7 +4,7 @@ include(cpfCustomTargetUtilities)
 include(cpfProjectUtilities)
 include(cpfGitUtilities)
 include(cpfLocations)
-include(cpfAddInstallRules)
+include(cpfAddInstallTarget)
 
  
 # This file contains functions that the targets that are used to implement the ABI and API compatibility checks.

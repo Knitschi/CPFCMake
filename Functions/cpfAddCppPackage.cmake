@@ -7,20 +7,20 @@ include_guard(GLOBAL)
 include(cpfInitPackageProject)
 include(cpfLocations)
 include(cpfConstants)
-include(cpfProjectUtilities)
+include(cpfConfigUtilities)
+include(cpfTargetUtilities)
+include(cpfPackageUtilities)
 include(cpfGitUtilities)
 include(cpfPathUtilities)
-include(cpfTargetUtilities)
 
 include(cpfAddClangTidyTarget)
 include(cpfAddRunTestsTarget)
 include(cpfAddDeploySharedLibrariesTarget)
-include(cpfAddInstallRules)
+include(cpfAddInstallTarget)
 include(cpfAddDistributionPackageTarget)
 include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDoxygenPackage)
 include(cpfAddVersionRcPreBuildEvent)
-
 
 
 # cotire must be included on the global scope or we get errors that target xyz already has a custom rule
@@ -790,7 +790,7 @@ function( cpfSetAllOutputDirectoriesAndNames target package config )
 	cpfSetOutputDirAndName( ${target} ${package} ${config} LIBRARY)
 	cpfSetOutputDirAndName( ${target} ${package} ${config} ARCHIVE)
 
-	cpfProjectProducesPdbFiles(hasOutput ${config})
+	cpfCompilerProducesPdbFiles(hasOutput ${config})
 	if(hasOutput)
 		cpfSetOutputDirAndName( ${target} ${package} ${config} COMPILE_PDB)
 		set_property(TARGET ${target} PROPERTY COMPILE_PDB_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX}-compiler) # we overwrite the filename to make it more meaningful

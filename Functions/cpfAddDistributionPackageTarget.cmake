@@ -3,7 +3,7 @@ include_guard(GLOBAL)
 include(cpfCustomTargetUtilities)
 include(cpfLocations)
 include(cpfAddCompatibilityCheckTarget)
-include(cpfAddInstallRules)
+include(cpfAddInstallTarget)
 
 
 

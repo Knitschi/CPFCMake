@@ -14,6 +14,69 @@ function( cpfAddGlobalInstallTarget )
 	cpfAddSubTargetBundleTarget( install_all "${packages}" INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGETS "")
 endfunction()
 
+#---------------------------------------------------------------------------------------------
+# Adds an install_<package>_component target for each given component
+function( cpfAddPackageInstallTargets package components )
+	
+	set(installComponentTargets)
+
+	foreach( component ${components})
+
+		set(targetName install_${package}_${component})
+
+		cpfGetInstallTargetDependencies( fileDependencies targetDependencies ${package} ${component})
+
+		# Add commands for running the install script.
+		set(installScript "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake")
+		set(installCommand "\"${CMAKE_COMMAND}\" -DCMAKE_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\" -DCMAKE_INSTALL_COMPONENT=${component} -DCMAKE_INSTALL_CONFIG_NAME=$<CONFIG> -P \"${installScript}\" ")
+
+		set(stampFile "${CMAKE_CURRENT_BINARY_DIR}/${targetName}.stamp")
+		set(touchCommand "\"${CMAKE_COMMAND}\" -E touch \"${stampFile}\"")
+
+		cpfAddStandardCustomCommand(
+			DEPENDS ${fileDependencies}
+			COMMANDS ${installCommand} ${touchCommand}
+			OUTPUT ${stampFile}
+			WORKING_DIRECTORY ${CPF_ROOT_DIR}
+		)
+
+		add_custom_target(
+			${targetName}
+			DEPENDS ${stampFile} ${targetDependencies}
+		)
+		set_property( TARGET ${targetName} PROPERTY FOLDER ${package}/pipeline )
+		set_property( TARGET ${package} APPEND PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGETS ${targetName} )
+
+		cpfListAppend(installComponentTargets ${targetName})
+
+	endforeach()
+
+	# Add one bundle target for all install targets of the package
+	set(bundleTarget install_${package})
+	cpfAddBundleTarget( ${bundleTarget} "${installComponentTargets}")
+	set_property(TARGET ${bundleTarget} PROPERTY FOLDER ${package}/pipeline )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetInstallTargetDependencies fileDependenciesOut targetDependenciesOut package component )
+
+	if(${component} STREQUAL runtime)
+
+		
+		set(${fileDependenciesOut} PARENT_SCOPE)
+
+	elseif(${component} STREQUAL dev-bin)
+
+	elseif(${component} STREQUAL documentation)
+
+	elseif(${component} STREQUAL sources)
+		
+	else()
+		message(FATAL_ERROR "Error! \"${component}\" is not a viable value for an installation component.")
+	endif()
+
+endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Adds install rules for the various package components.
@@ -148,7 +211,7 @@ function( cpfInstallDebugFiles package )
 				endif()
 				
 				# Install source files for configurations that require them for debugging.
-				cpfProjectProducesPdbFiles( needsSourcesForDebugging ${config})
+				cpfCompilerProducesPdbFiles( needsSourcesForDebugging ${config})
 				if(needsSourcesForDebugging)
 
 					cpfGetTargetSourcesWithoutPrefixHeader( sources ${target} )
