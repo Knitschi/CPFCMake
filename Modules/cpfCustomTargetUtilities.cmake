@@ -276,33 +276,6 @@ function( cpfAddAppendLineCommand commandList line file isValue)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Returns a list of cmake command line calls that will copy a set of files from one directory to another.
-# Destination directories will be created as needed.
-# Files will be touched after copying to update the modification date.
-#
-function( cpfGetInstallFileCommands commandsOut absSourceFilePaths absDestFilePaths)
-
-	cpfAssertListsHaveSameLength( "${absSourceFilePaths}" "${absDestFilePaths}")
-	
-	set(commands)
-
-	# add commands for copying the files
-	set(index 0)
-	foreach( sourceFile ${absSourceFilePaths})
-		
-		list(GET absDestFilePaths ${index} destFile)
-		
-		cpfListAppend( commands "\"${CMAKE_COMMAND}\" -E copy \"${sourceFile}\" \"${destFile}\" ")
-		cpfListAppend( commands "\"${CMAKE_COMMAND}\" -E touch \"${destFile}\" ")
-
-		cpfIncrement(index)
-	endforeach()
-
-	set( ${commandsOut} ${commands} PARENT_SCOPE )
-
-endfunction()
-
-#----------------------------------------------------------------------------------------
 function( cpfGetTouchFileCommands commandsOut absFilePaths )
 
 	set(commands)

@@ -24,7 +24,8 @@ function( cpfAddPackageInstallTargets package )
 	
 	# Add the install_<package> target that installs all components of the package to the install prefix.
 	cpfGetPossibleInstallComponents(components)
-	cpfAddInstallTarget( ${package} install_${package} "${components}" ${CMAKE_INSTALL_PREFIX} FALSE ${package}/pipeline)
+	set(installTargetName install_${package})
+	cpfAddInstallTarget( ${package} ${installTargetName} "${components}" ${CMAKE_INSTALL_PREFIX} FALSE ${package}/pipeline)
 	# Add the target to the package property.
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET ${installTargetName} )
 
@@ -38,6 +39,7 @@ function(cpfGetPossibleInstallComponents componentsOut)
 		developer
 		sources
 		documentation
+		distributionPackages
 		PARENT_SCOPE
 	)
 
@@ -70,7 +72,7 @@ function(cpfAddInstallTarget package installTargetName components destDir clearD
 	)
 
 	# Set target properties
-	set_property(TARGET ${installTargetName} PROPERTY CPF_OUTPUT_FILES ${vsTargetFolder} )
+	set_property(TARGET ${installTargetName} PROPERTY CPF_OUTPUT_FILES ${stampFile} )
 	set_property(TARGET ${installTargetName} PROPERTY FOLDER ${vsTargetFolder} )
 	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${installTargetName} )
 
