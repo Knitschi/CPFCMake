@@ -224,6 +224,7 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 		FILES ${absPathPackageFile}
 		DESTINATION ${relDistPackageFilesDir}
 		COMPONENT distributionPackages
+		EXCLUDE_FROM_ALL	# This has a custom target dependency so we can not include it in the default install target.
 	)
 	
 endfunction()
