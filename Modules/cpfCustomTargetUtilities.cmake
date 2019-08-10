@@ -90,7 +90,7 @@ function( cpfAddAppendLinesToFileCommands)
 	cpfAddStandardCustomCommand(
 		OUTPUT ${stampFile}
 		DEPENDS ${ARG_INPUT} ${ARG_DEPENDS}
-		COMMANDS "cmake -E copy \"${ARG_INPUT}\" \"${ARG_OUTPUT}\"" "cmake -E touch \"${stampFile}\""
+		COMMANDS "cmake -E remove \"${ARG_OUTPUT}\"" "cmake -E copy \"${ARG_INPUT}\" \"${ARG_OUTPUT}\"" "cmake -E touch \"${stampFile}\""
 	)
 	
 	# now add one command for each appended line except the last one

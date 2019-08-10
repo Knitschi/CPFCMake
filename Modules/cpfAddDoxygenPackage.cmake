@@ -16,7 +16,6 @@ include(cpfPackageUtilities)
 function( cpfAddDoxygenPackage )
 
 	set( optionalBoolKeywords
-		RUN_DOXYINDEXER
 	) 
 
 	set( requiredSingleValueKeywords
@@ -65,10 +64,10 @@ function( cpfAddDoxygenPackage )
 	cpfGetPackageName( package )
 
 	# Locations
-	set(targetBinaryDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${package}" )
-	set(tempDoxygenConfigFile "${targetBinaryDir}/tempDoxygenConfig.txt" )
-	set(reducedGraphFile "${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/CPFDependenciesTransitiveReduced.dot")
-	set(htmlCgiBinDir "${CPF_PROJECT_HTML_ABS_DIR}/${CPF_CGI_BIN_DIR}" )
+	set(tempDoxygenConfigFile "${CMAKE_CURRENT_BINARY_DIR}/tempDoxygenConfig.txt" )
+	set(absDoxygenOutputDir "${CMAKE_CURRENT_BINARY_DIR}/doxygen" )
+	set(dotFileDir ${absDoxygenOutputDir}/external)
+	set(reducedGraphFile "${dotFileDir}/CPFDependenciesTransitiveReduced.dot")
 	set(doxygenHtmlSubdir html)
 
 	# Get dependencies
@@ -100,15 +99,15 @@ function( cpfAddDoxygenPackage )
 
 	# add a command to copy the full dependency graph to the doxygen output dir
 	get_filename_component(destShort ${CPF_TARGET_DEPENDENCY_GRAPH_FILE} NAME )
-	set(copiedDependencyGraphFile ${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}/${destShort})
+	set(copiedDependencyGraphFile ${dotFileDir}/${destShort})
 	cpfAddCustomCommandCopyFile(${CPF_TARGET_DEPENDENCY_GRAPH_FILE} ${copiedDependencyGraphFile} )
 
 	# The config file must contain the names of the depended on xml tag files of other doxygen sub-targets.
 	list(APPEND appendedLines "PROJECT_NAME  = ${ARG_PROJECT_NAME}")
-	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${CPF_DOXYGEN_OUTPUT_ABS_DIR}\"")
+	list(APPEND appendedLines "OUTPUT_DIRECTORY = \"${absDoxygenOutputDir}\"")
 	list(APPEND appendedLines "GENERATE_HTML = YES")
 	list(APPEND appendedLines "HTML_OUTPUT = ${doxygenHtmlSubdir}")	# We set a fixed location, so we can be sure were files are when copying the documentation on the build-server.	
-	list(APPEND appendedLines "DOTFILE_DIRS = \"${CPF_DOXYGEN_EXTERNAL_DOT_FILES_ABS_DIR}\"")
+	list(APPEND appendedLines "DOTFILE_DIRS = \"${dotFileDir}\"")
 	list(APPEND appendedLines "LAYOUT_FILE = \"${ARG_DOXYGEN_LAYOUT_FILE}\"")
 	list(APPEND appendedLines "HTML_EXTRA_STYLESHEET = \"${ARG_DOXYGEN_STYLESHEET_FILE}\"")
 	if(ARG_HTML_HEADER)
@@ -124,6 +123,9 @@ function( cpfAddDoxygenPackage )
 	# Make sure the name of the searchdate.xml file is the one that we use here.
 	set(searchDataXmlShortName searchdata.xml)
 	list(APPEND appendedLines "SEARCHDATA_FILE = ${searchDataXmlShortName}")
+
+	# This option does not seem to work correctly, it causes all directories to be searched.
+	list(APPEND appendedLines "RECURSIVE = YES")
 
 	# input files
 	list(APPEND appendedLines "INPUT = \"${CMAKE_SOURCE_DIR}\"")
@@ -157,7 +159,7 @@ function( cpfAddDoxygenPackage )
 	# I created an issue for this, maybe it will be fixed and this code here can be removed.
 	# https://github.com/doxygen/doxygen/issues/6830
 	# Because of the file access problems that are caused by deleting the files we got back to using doxygen 1.8.14
-	set( problematicFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/html/graph_legend.png)
+	set( problematicFile ${absDoxygenOutputDir}/${doxygenHtmlSubdir}/graph_legend.png)
 	if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
 		# The build on the buildsever failed because some files were blocked when using the cmake delete function.
 		# With the native command, the problems do not occurr.
@@ -169,7 +171,7 @@ function( cpfAddDoxygenPackage )
 
 	# Add the command for running doxygen
 	set( doxygenCommand "\"${TOOL_DOXYGEN}\" \"${tempDoxygenConfigFile}\"")
-	set( searchDataXmlFile ${CPF_DOXYGEN_OUTPUT_ABS_DIR}/${searchDataXmlShortName})
+	set( searchDataXmlFile ${absDoxygenOutputDir}/${searchDataXmlShortName})
 	cpfGetAllNonGeneratedPackageSources(packagSourceFiles "${documentedPackages}")
 	set( allDependedOnFiles 
 		${tempDoxygenConfigFile}
@@ -188,27 +190,12 @@ function( cpfAddDoxygenPackage )
 		OUTPUT ${searchDataXmlFile}
 	)
 
-	# Create the command for running the doxyindexer.
-	# The doxyindexer creates the content of the doxysearch.dp directory which is used by the doxysearch.cgi script 
-	# when using the search function of the documentation
-	set(doxyIndexerStampFile)
-	if(ARG_RUN_DOXYINDEXER)
-		set(doxyIndexerCommand "\"${TOOL_DOXYINDEXER}\" -o \"${htmlCgiBinDir}\" \"${searchDataXmlFile}\"" )
-		set(doxyIndexerStampFile ${targetBinaryDir}/doxyindexer.stamp)
-		cpfAddStandardCustomCommand(
-			OUTPUT ${doxyIndexerStampFile}
-			DEPENDS ${searchDataXmlFile}
-			COMMANDS "\"${CMAKE_COMMAND}\" -E make_directory \"${htmlCgiBinDir}\"" ${doxyIndexerCommand} "cmake -E touch \"${doxyIndexerStampFile}\""
-		)
-	endif()
-
 	# Now add the target
 	add_custom_target(
 		${package}
 		DEPENDS 
 			${targetDependencies}
 			${searchDataXmlFile}
-			${doxyIndexerStampFile}
 		SOURCES 
 			${ARG_SOURCES}
 			${ARG_DOXYGEN_CONFIG_FILE}
@@ -219,9 +206,22 @@ function( cpfAddDoxygenPackage )
 			${ARG_PROJECT_LOGO}
 	)
 	set_property( TARGET ${package} PROPERTY FOLDER ${package} )
+	set_property( TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${package})
+	set_property( TARGET ${package} PROPERTY PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS documentation)
+
 	cpfSetIDEDirectoriesForTargetSources(${package})
 
 	add_dependencies(pipeline ${package})
+
+	# Set an install rule for the generated files.
+	install( 
+		DIRECTORY ${absDoxygenOutputDir}
+		DESTINATION ${package}/doc
+		COMPONENT documentation
+	)
+
+	# Add an install target for the package.
+	cpfAddPackageInstallTargets(${package})
 
 endfunction()
 
