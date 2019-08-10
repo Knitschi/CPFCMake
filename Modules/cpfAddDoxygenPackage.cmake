@@ -124,8 +124,11 @@ function( cpfAddDoxygenPackage )
 	set(searchDataXmlShortName searchdata.xml)
 	list(APPEND appendedLines "SEARCHDATA_FILE = ${searchDataXmlShortName}")
 
-	# This option does not seem to work correctly, it causes all directories to be searched.
-	list(APPEND appendedLines "RECURSIVE = YES")
+	# This option does not seem to work correctly, it causes all directories to be searched, which causes trouble
+	# when the files in the generated directory are changed by parallel build targets.
+	# Without the option we can not parse the content of the source directories. :-(
+	# It is time to switch to the Qt help generation pipeline.
+	#list(APPEND appendedLines "RECURSIVE = YES")
 
 	# input files
 	list(APPEND appendedLines "INPUT = \"${CMAKE_SOURCE_DIR}\"")
