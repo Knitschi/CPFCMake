@@ -464,10 +464,12 @@ function( cpfGitRemove dir repoDir )
 		COMMAND git;rm;-r;${dir}
 		WORKING_DIRECTORY "${repoDir}"
 		RESULT_VARIABLE result
+		OUTPUT_VARIABLE stdOut
+		ERROR_VARIABLE errOut
 	)
 
 	if(NOT (${result} EQUAL 0))
-		message(FATAL_ERROR "Error! Git \"rm -r\" on repository at \"${dir}\" failed.")
+		message(FATAL_ERROR "Error! Git \"rm -r\" on repository at \"${dir}\" failed.\nStdOut: ${stdOut}\n ErrOut: ${errOut}")
 	endif()
 
 endfunction()
@@ -479,10 +481,12 @@ function( cpfGitAddContent dir )
 		COMMAND git;add;.
 		WORKING_DIRECTORY "${dir}"
 		RESULT_VARIABLE result
+		OUTPUT_VARIABLE stdOut
+		ERROR_VARIABLE errOut
 	)
 
 	if(NOT (${result} EQUAL 0))
-		message(FATAL_ERROR "Error! Git \"add .\" on repository at \"${dir}\" failed.")
+		message(FATAL_ERROR "Error! Git \"add .\" on repository at \"${dir}\" failed.\nStdOut: ${stdOut}\n ErrOut: ${errOut}")
 	endif()
 
 endfunction()
@@ -494,10 +498,12 @@ function( cpfGitCommit message dir )
 		COMMAND git;commit;.;-m;${message}
 		WORKING_DIRECTORY "${dir}"
 		RESULT_VARIABLE result
+		OUTPUT_VARIABLE stdOut
+		ERROR_VARIABLE errOut
 	)
 
 	if(NOT (${result} EQUAL 0))
-		message(FATAL_ERROR "Error! Git commit on repository at \"${dir}\" failed.")
+		message(FATAL_ERROR "Error! Git commit on repository at \"${dir}\" failed.\nStdOut: ${stdOut}\n ErrOut: ${errOut}")
 	endif()
 
 endfunction()
@@ -509,10 +515,12 @@ function( cpfGitPush remote branch dir)
 		COMMAND git;push;${remote};${branch}
 		WORKING_DIRECTORY "${dir}"
 		RESULT_VARIABLE result
+		OUTPUT_VARIABLE stdOut
+		ERROR_VARIABLE errOut
 	)
 
 	if(NOT (${result} EQUAL 0))
-		message(FATAL_ERROR "Error! Git push on repository at \"${dir}\" failed.")
+		message(FATAL_ERROR "Error! Git push on repository at \"${dir}\" failed.\nStdOut: ${stdOut}\n ErrOut: ${errOut}")
 	endif()
 
 endfunction()
