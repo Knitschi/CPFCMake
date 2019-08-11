@@ -223,6 +223,7 @@ function( cpfAddDoxygenPackage )
 		DIRECTORY ${absDoxygenOutputDir}
 		DESTINATION ${package}/doc
 		COMPONENT documentation
+		EXCLUDE_FROM_ALL					# Must be exluded from all, because all custom targets are excluded from all.
 	)
 
 	# Add an install target for the package.

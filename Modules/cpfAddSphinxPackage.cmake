@@ -93,6 +93,7 @@ function( cpfAddSphinxPackage )
 		DIRECTORY ${outputDir}
 		DESTINATION doc/sphinx
 		COMPONENT documentation
+		EXCLUDE_FROM_ALL					# Must be exluded from all, because all custom targets are excluded from all.
 	)
 
 	# Add a custom install target.
