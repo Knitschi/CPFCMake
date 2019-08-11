@@ -248,6 +248,26 @@ function( cpfIsGitRepositoryDir isRepoDirOut absDirPath )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+function( cpfGetCheckedOutCommit commitHashOut absDirPath )
+
+	execute_process(
+		COMMAND git;rev-parse;HEAD
+		WORKING_DIRECTORY "${absDirPath}"
+		RESULT_VARIABLE result
+		OUTPUT_VARIABLE hash	# suppress the output of the command
+		ERROR_VARIABLE errorOut
+	)
+
+	if( ${result} EQUAL 0 )
+		set(${commitHashOut} "${hash}" PARENT_SCOPE)
+	else()
+		message(FATAL_ERROR "Error! Command \"git rev-parse HEAD\" failed to retrieve commit hash from repository at \"${absDirPath}\" with the following error:\n${errorOut}")
+		set(${commitHashOut} "" PARENT_SCOPE)
+	endif()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # Returns the 4th part of a version number that can only be found in internal versions.
 # It consists of a number that indicates the number of commits since the last release
 # version and the first digits of the commit hash that are needed to uniquely identify 
@@ -500,5 +520,4 @@ function( cpfGitAddRemote remoteName remoteAddress repoDir )
 	)
 
 endfunction()
-
 

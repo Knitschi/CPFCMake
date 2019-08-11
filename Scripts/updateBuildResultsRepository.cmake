@@ -38,7 +38,8 @@ file(MAKE_DIRECTORY ${lastBuildDir})
 file(COPY ${CMAKE_INSTALL_PREFIX}/ DESTINATION ${lastBuildDir} PATTERN *)
 
 # Also copy the results to a permanent version subdirectory if it is a release.
-cpfGetLastVersionTagOfBranch( version master "${ROOT_DIR}" True)
+cpfGetCheckedOutCommit( commitId "${ROOT_DIR}")
+cpfGetLastVersionTagOfBranch( version ${commitId} "${ROOT_DIR}" True)
 cpfIsReleaseVersion(isRelease ${version})
 if(isRelease)
 	# Copy to version subdirectory.
