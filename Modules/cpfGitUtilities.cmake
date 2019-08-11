@@ -463,7 +463,12 @@ function( cpfGitRemove dir repoDir )
 	execute_process(
 		COMMAND git;rm;-r;${dir}
 		WORKING_DIRECTORY "${repoDir}"
+		RESULT_VARIABLE result
 	)
+
+	if(NOT (${RESULT_VARIABLE} STREQUAL 0))
+		message(FATAL_ERROR "Error! Git \"rm -r\" on repository at \"${dir}\" failed.")
+	endif()
 
 endfunction()
 
@@ -473,7 +478,12 @@ function( cpfGitAddContent dir )
 	execute_process(
 		COMMAND git;add;.
 		WORKING_DIRECTORY "${dir}"
+		RESULT_VARIABLE result
 	)
+
+	if(NOT (${RESULT_VARIABLE} STREQUAL 0))
+		message(FATAL_ERROR "Error! Git \"add .\" on repository at \"${dir}\" failed.")
+	endif()
 
 endfunction()
 
@@ -483,7 +493,12 @@ function( cpfGitCommit message dir )
 	execute_process(
 		COMMAND git;commit;.;-m;${message}
 		WORKING_DIRECTORY "${dir}"
+		RESULT_VARIABLE result
 	)
+
+	if(NOT (${RESULT_VARIABLE} STREQUAL 0))
+		message(FATAL_ERROR "Error! Git commit on repository at \"${dir}\" failed.")
+	endif()
 
 endfunction()
 
@@ -493,7 +508,12 @@ function( cpfGitPush remote branch dir)
 	execute_process(
 		COMMAND git;push;${remote};${branch}
 		WORKING_DIRECTORY "${dir}"
+		RESULT_VARIABLE result
 	)
+
+	if(NOT (${RESULT_VARIABLE} STREQUAL 0))
+		message(FATAL_ERROR "Error! Git push on repository at \"${dir}\" failed.")
+	endif()
 
 endfunction()
 

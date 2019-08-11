@@ -28,6 +28,9 @@ set(projectDir ${MASTER_BUILD_RESULTS_REPOSITORY_DIR}/${BUILD_RESULTS_REPOSITORY
 file(TO_CMAKE_PATH ${projectDir} projectDir)
 set(lastBuildDir ${projectDir}/LastBuild )
 
+if(FALSE)
+
+
 # Remove the results from the last build.
 if(EXISTS ${lastBuildDir})
 	cpfGitRemove(LastBuild ${projectDir})
@@ -62,5 +65,7 @@ if(DEFINED WEB_SERVER_BUILD_RESULTS_REPOSITORY AND WEB_SERVER_BUILD_RESULTS_REPO
 
 	cpfGitAddRemote(webserver ${WEB_SERVER_BUILD_RESULTS_REPOSITORY} ${projectDir})
 	cpfGitPush(webserver master ${projectDir})
+
+endif()
 
 endif()
