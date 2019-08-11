@@ -30,8 +30,8 @@ set(lastBuildDir ${projectDir}/LastBuild )
 
 # Make sure the result repository is on the master branch.
 # On the buildserver a checkout with the GitPlugin puts the repository into detached head state.
-cpfGitCheckout(master ${projectDir})
-cpfGitPullRebase(origin master ${projectDir})
+cpfGitCheckout(master ${MASTER_BUILD_RESULTS_REPOSITORY_DIR})
+cpfGitPullRebase(origin master ${MASTER_BUILD_RESULTS_REPOSITORY_DIR})
 
 # Remove the results from the last build.
 if(EXISTS ${lastBuildDir})
