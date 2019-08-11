@@ -282,6 +282,3 @@ function( cpfConfigureFileWithVariables input output variables )
 endfunction()
 
 
-
-
-

@@ -26,7 +26,11 @@ function( cpfAddFilePackage )
     cpfAssertProjectVersionDefined()
 
     cpfGetPackageName(package)
-    cpfAddStandardCustomTarget(${package} ${package} "${ARG_SOURCES}" "")
+    cpfAddStandardCustomTarget(
+        PACKAGE ${package}
+        TARGET ${package}
+        SOURCES ${ARG_SOURCES}
+    )
 
 endfunction()
 

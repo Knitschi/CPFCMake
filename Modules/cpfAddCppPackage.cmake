@@ -42,6 +42,8 @@ endif()
 #
 function( cpfAddCppPackage )
 
+	cpfPrintAddPackageStatusMessage("C++")
+
 	set( optionKeywords
 	) 
 	
@@ -95,9 +97,8 @@ function( cpfAddCppPackage )
 		${ARGN} 
 	)
 
-	cpfPrintAddPackageStatusMessage("C++")
-
 	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddCppPackage()")
+	
 	cpfAssertProjectVersionDefined()
 
 	# Use values of global variables for unset arguments.
@@ -228,7 +229,7 @@ function( cpfAddCppPackage )
 	# Adds the targets that create the distribution packages.
 	cpfAddDistributionPackageTargets( ${package} "${distributionPackageOptionLists}" )
 
-	cpfAddPackageInstallTargets(${package})
+	cpfAddPackageInstallTarget(${package})
 
 endfunction() 
 
