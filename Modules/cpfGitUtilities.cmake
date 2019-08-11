@@ -466,7 +466,7 @@ function( cpfGitRemove dir repoDir )
 		RESULT_VARIABLE result
 	)
 
-	if(NOT (${RESULT_VARIABLE} STREQUAL 0))
+	if(NOT (${result} EQUAL 0))
 		message(FATAL_ERROR "Error! Git \"rm -r\" on repository at \"${dir}\" failed.")
 	endif()
 
@@ -481,7 +481,7 @@ function( cpfGitAddContent dir )
 		RESULT_VARIABLE result
 	)
 
-	if(NOT (${RESULT_VARIABLE} STREQUAL 0))
+	if(NOT (${result} EQUAL 0))
 		message(FATAL_ERROR "Error! Git \"add .\" on repository at \"${dir}\" failed.")
 	endif()
 
@@ -496,7 +496,7 @@ function( cpfGitCommit message dir )
 		RESULT_VARIABLE result
 	)
 
-	if(NOT (${RESULT_VARIABLE} STREQUAL 0))
+	if(NOT (${result} EQUAL 0))
 		message(FATAL_ERROR "Error! Git commit on repository at \"${dir}\" failed.")
 	endif()
 
@@ -511,7 +511,7 @@ function( cpfGitPush remote branch dir)
 		RESULT_VARIABLE result
 	)
 
-	if(NOT (${RESULT_VARIABLE} STREQUAL 0))
+	if(NOT (${result} EQUAL 0))
 		message(FATAL_ERROR "Error! Git push on repository at \"${dir}\" failed.")
 	endif()
 
