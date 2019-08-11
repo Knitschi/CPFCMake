@@ -28,6 +28,10 @@ set(projectDir ${MASTER_BUILD_RESULTS_REPOSITORY_DIR}/${BUILD_RESULTS_REPOSITORY
 file(TO_CMAKE_PATH ${projectDir} projectDir)
 set(lastBuildDir ${projectDir}/LastBuild )
 
+# Make sure the result repository is on the master branch.
+# On the buildserver a checkout with the GitPlugin puts the repository into detached head state.
+cpfGitCheckout(master ${projectDir})
+
 # debug
 cpfGetCurrentBranch( currentBranch ${projectDir})
 devMessage("Before remove: ${currentBranch}")
@@ -66,9 +70,6 @@ endif()
 cpfGetCurrentBranch( currentBranch ${projectDir})
 devMessage("Before adding copied files to repo: ${currentBranch}")
 
-if(FALSE)
-
-
 # Add and commit the files.
 cpfGitAddContent(${projectDir})
 cpfGitCommit("Updates \"${BUILD_RESULTS_REPOSITORY_PROJECT_SUBDIR}\" with the build results of version ${version}" ${projectDir})
@@ -81,7 +82,5 @@ if(DEFINED WEB_SERVER_BUILD_RESULTS_REPOSITORY AND WEB_SERVER_BUILD_RESULTS_REPO
 
 	cpfGitAddRemote(webserver ${WEB_SERVER_BUILD_RESULTS_REPOSITORY} ${projectDir})
 	cpfGitPush(webserver master ${projectDir})
-
-endif()
 
 endif()

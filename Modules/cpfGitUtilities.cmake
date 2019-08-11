@@ -526,6 +526,23 @@ function( cpfGitPush remote branch dir)
 endfunction()
 
 #----------------------------------------------------------------------------------------
+function( cpfGitCheckout branch dir)
+
+	execute_process(
+		COMMAND git;checkout;${branch}
+		WORKING_DIRECTORY "${dir}"
+		RESULT_VARIABLE result
+		OUTPUT_VARIABLE stdOut
+		ERROR_VARIABLE errOut
+	)
+
+	if(NOT (${result} EQUAL 0))
+		message(FATAL_ERROR "Error! Git \"checkout ${branch}\" on repository at \"${dir}\" failed.\nStdOut: ${stdOut}\n ErrOut: ${errOut}")
+	endif()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
 function( cpfGitAddRemote remoteName remoteAddress repoDir )
 
 	execute_process(
