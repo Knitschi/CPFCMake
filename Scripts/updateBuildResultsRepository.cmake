@@ -75,6 +75,7 @@ cpfGitAddContent(${projectDir})
 cpfGitCommit("Updates \"${BUILD_RESULTS_REPOSITORY_PROJECT_SUBDIR}\" with the build results of version ${version}" ${projectDir})
 
 # Push to the master
+cpfGitPullRebase(origin master ${projectDir})
 cpfGitPush(origin master ${projectDir})
 
 # Push to the alternative remote
