@@ -509,6 +509,23 @@ function( cpfGitCommit message dir )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+function( cpfGitPullRebase remote branch dir)
+
+	execute_process(
+		COMMAND git;pull;${remote};${branch};--rebase
+		WORKING_DIRECTORY "${dir}"
+		RESULT_VARIABLE result
+		OUTPUT_VARIABLE stdOut
+		ERROR_VARIABLE errOut
+	)
+
+	if(NOT (${result} EQUAL 0))
+		message(FATAL_ERROR "Error! Git push on repository at \"${dir}\" failed.\nStdOut: ${stdOut}\n ErrOut: ${errOut}")
+	endif()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
 function( cpfGitPush remote branch dir)
 
 	execute_process(
