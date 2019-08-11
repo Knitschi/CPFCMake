@@ -28,6 +28,7 @@ set(projectDir ${MASTER_BUILD_RESULTS_REPOSITORY_DIR}/${BUILD_RESULTS_REPOSITORY
 file(TO_CMAKE_PATH ${projectDir} projectDir)
 set(lastBuildDir ${projectDir}/LastBuild )
 
+if(FALSE)
 
 # Remove the results from the last build.
 if(EXISTS ${lastBuildDir})
@@ -51,11 +52,10 @@ if(isRelease)
 	file(COPY ${CMAKE_INSTALL_PREFIX}/ DESTINATION ${versionDir} PATTERN *)
 endif()
 
-if(FALSE)
 
 # Add and commit the files.
 cpfGitAddContent(${projectDir})
-cpfGitCommit("Updates \"${BUILD_RESULTS_REPOSITORY_PROJECT_SUBDIR}\" with results of version ${version}" ${projectDir})
+cpfGitCommit("Updates \"${BUILD_RESULTS_REPOSITORY_PROJECT_SUBDIR}\" with the build results of version ${version}" ${projectDir})
 
 # Push to the master
 cpfGitPush(origin master ${projectDir})
