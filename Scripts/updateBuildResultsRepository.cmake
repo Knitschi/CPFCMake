@@ -33,26 +33,14 @@ set(lastBuildDir ${projectDir}/LastBuild )
 cpfGitCheckout(master ${projectDir})
 cpfGitPullRebase(origin master ${projectDir})
 
-# debug
-cpfGetCurrentBranch( currentBranch ${projectDir})
-devMessage("Before remove: ${currentBranch}")
-
 # Remove the results from the last build.
 if(EXISTS ${lastBuildDir})
 	cpfGitRemove(LastBuild ${projectDir})
 endif()
 
-# debug
-cpfGetCurrentBranch( currentBranch ${projectDir})
-devMessage("Before copy install: ${currentBranch}")
-
 # Copy to the results to the LastBuild directory
 file(MAKE_DIRECTORY ${lastBuildDir})
 file(COPY ${CMAKE_INSTALL_PREFIX}/ DESTINATION ${lastBuildDir} PATTERN *)
-
-# debug
-cpfGetCurrentBranch( currentBranch ${projectDir})
-devMessage("Before getting version of main repo: ${currentBranch}")
 
 # Also copy the results to a permanent version subdirectory if it is a release.
 # The repo can be in detached-head state on the build-server.
@@ -66,10 +54,6 @@ if(isRelease)
 	file(MAKE_DIRECTORY ${versionDir})
 	file(COPY ${CMAKE_INSTALL_PREFIX}/ DESTINATION ${versionDir} PATTERN *)
 endif()
-
-# debug
-cpfGetCurrentBranch( currentBranch ${projectDir})
-devMessage("Before adding copied files to repo: ${currentBranch}")
 
 # Add and commit the files.
 cpfGitAddContent(${projectDir})
