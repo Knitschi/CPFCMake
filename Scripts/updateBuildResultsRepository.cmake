@@ -38,7 +38,9 @@ file(MAKE_DIRECTORY ${lastBuildDir})
 file(COPY ${CMAKE_INSTALL_PREFIX}/ DESTINATION ${lastBuildDir} PATTERN *)
 
 # Also copy the results to a permanent version subdirectory if it is a release.
-cpfGetCheckedOutCommit( commitId "${ROOT_DIR}")
+# The repo can be in detached-head state on the build-server.
+# In this case we need to specify the commit hash when getting the version tags.
+cpfGetCheckedOutCommit( commitId "${ROOT_DIR}")	
 cpfGetLastVersionTagOfBranch( version ${commitId} "${ROOT_DIR}" True)
 cpfIsReleaseVersion(isRelease ${version})
 if(isRelease)
