@@ -31,6 +31,7 @@ set(lastBuildDir ${projectDir}/LastBuild )
 # Make sure the result repository is on the master branch.
 # On the buildserver a checkout with the GitPlugin puts the repository into detached head state.
 cpfGitCheckout(master ${projectDir})
+cpfGitPullRebase(origin master ${projectDir})
 
 # debug
 cpfGetCurrentBranch( currentBranch ${projectDir})
