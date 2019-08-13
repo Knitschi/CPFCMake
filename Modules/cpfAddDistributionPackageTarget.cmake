@@ -202,7 +202,7 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 	get_property( contentStampFile TARGET ${contentTarget} PROPERTY CPF_OUTPUT_FILES)
 	cpfAddStandardCustomCommand(
 		DEPENDS ${contentTarget} ${contentStampFile}
-		COMMANDS ${packagingCommand} ${touchStampCommand}
+		COMMANDS ${packagingCommand} ${touchCommmand}
 		OUTPUT ${stampFile}
 	)
 
