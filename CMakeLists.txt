@@ -11,7 +11,7 @@ cpfInitPackageProject()
 set( files
 	cpfInit.cmake
 	LICENSE
-	README.rst
+	README.md
 	${CPF_DEFAULT_CONFIGS_DIR}/Clang.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Gcc.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Linux.config.cmake
