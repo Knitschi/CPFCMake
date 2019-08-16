@@ -211,44 +211,6 @@ function( getExistingPackageVersionFile absPathOut package )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# This function tries to find the location of a config file with the given configName
-# configName can be an absolute file path to a .config.cmake file or the base-name of
-# config file which is situated in one of the following directories:
-#    <cpf-root>/Configuration     
-#    <cpf-root>/Sources/BuildConfigurations
-#    <cpf-root>/Sources/CPFCMake/DefaultConfigurations
-#
-# If multiple files with the same base-name exist, the one in the directory that comes
-# first in the above list is taken.
-#
-function( cpfFindConfigFile absFilePathOut configName )
-
-	if(EXISTS "${configName}")
-		set( ${absFilePathOut} "${configName}" PARENT_SCOPE )
-	else()
-
-		set( searchLocations
-			"${CPF_ROOT_DIR}/${CPF_CONFIG_DIR}"											# developer specific configs
-			"${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/${CPF_PROJECT_CONFIGURATIONS_DIR}"		# project default configs
-			"${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/${CPF_DEFAULT_CONFIGS_DIR}"		# CPF provided standard configs
-		)
-
-		foreach( dir ${searchLocations})
-			cpfNormalizeAbsPath( fullConfigFile "${dir}/${configName}${CPF_CONFIG_FILE_ENDING}" )
-			if( EXISTS "${fullConfigFile}" )
-				set( ${absFilePathOut} "${fullConfigFile}" PARENT_SCOPE )
-				return()
-			endif()
-		endforeach()
-
-	endif()
-	
-	message(FATAL_ERROR "Could not find any configuration file with base-name ${configName}.")
-
-endfunction()
-
-
-#---------------------------------------------------------------------------------------------
 # returns the absolute paths to the repository directories that are owned by the CPF project located at rootDir
 #
 function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)

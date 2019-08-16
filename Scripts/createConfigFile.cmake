@@ -53,7 +53,7 @@ else() # Do the file generation
 	cpfAssertScriptArgumentDefined(PARENT_CONFIG)
 
 	# Find the location of the inherited configuration
-	cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}")
+	cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}" FALSE)
 
 	# CREATE CONFIG-FILE CONTENT 
 	cpfNormalizeAbsPath( pathToVariables "${CMAKE_CURRENT_LIST_DIR}/../Modules")
