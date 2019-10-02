@@ -12,6 +12,8 @@ include(cpfMiscUtilities)
 include(cpfProjectUtilities)
 include(cpfLocations)
 include(cpfPathUtilities)
+include(cpfAssertions)
+include(cpfConfigUtilities)
 
 cpfNormalizeAbsPath( CPF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../..")
 
