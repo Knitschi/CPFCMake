@@ -480,7 +480,13 @@ function( cpfNormalizeImportedTargetProperties targets )
 			endif()
 			cpfToConfigSuffix( configSuffix ${CMAKE_BUILD_TYPE} ) 
 			
-			get_property( location TARGET ${target} PROPERTY LOCATION_${configSuffix} )
+			set(interfacePrefix)
+			cpfIsInterfaceLibrary( isIntLib ${target})
+			if(isIntLib)
+				set(interfacePrefix INTERFACE_)
+			endif()
+
+			get_property( location TARGET ${target} PROPERTY ${interfacePrefix}LOCATION_${configSuffix} )
 			if( IS_SYMLINK ${location} )
 			
 				# get the file to which the symlink points
@@ -495,10 +501,10 @@ function( cpfNormalizeImportedTargetProperties targets )
 				
 				# change the target properties
 				if( EXISTS ${linkTarget})
-					set_property( TARGET ${target} PROPERTY LOCATION_${configSuffix} ${linkTarget})
-					set_property( TARGET ${target} PROPERTY IMPORTED_LOCATION_${configSuffix} ${linkTarget} )
+					set_property( TARGET ${target} PROPERTY ${interfacePrefix}LOCATION_${configSuffix} ${linkTarget})
+					set_property( TARGET ${target} PROPERTY ${interfacePrefix}IMPORTED_LOCATION_${configSuffix} ${linkTarget} )
 					get_filename_component( locationShort ${location} NAME)
-					set_property( TARGET ${target} PROPERTY IMPORTED_SONAME_${configSuffix} ${locationShort} )
+					set_property( TARGET ${target} PROPERTY ${interfacePrefix}IMPORTED_SONAME_${configSuffix} ${locationShort} )
 				else()
 					message( FATAL_ERROR "The soname symlink \"${location}\" of imported target ${target} points to the not existing file \"${linkTarget}\"." )
 				endif()

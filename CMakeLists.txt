@@ -10,8 +10,9 @@ cpfInitPackageProject()
 # Files that define variables.
 set( files
 	cpfInit.cmake
+	cpfInitCIProject.cmake
 	LICENSE
-	README.rst
+	README.md
 	${CPF_DEFAULT_CONFIGS_DIR}/Clang.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Gcc.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Linux.config.cmake

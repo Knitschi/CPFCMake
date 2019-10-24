@@ -202,7 +202,7 @@ function( cpfAddDistributionPackageTarget package contentTarget contentId conten
 	get_property( contentStampFile TARGET ${contentTarget} PROPERTY CPF_OUTPUT_FILES)
 	cpfAddStandardCustomCommand(
 		DEPENDS ${contentTarget} ${contentStampFile}
-		COMMANDS ${packagingCommand} ${touchStampCommand}
+		COMMANDS ${packagingCommand} ${touchCommmand}
 		OUTPUT ${stampFile}
 	)
 
@@ -232,13 +232,8 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfGetCPackWorkingDir dirOut package contentId )
 		
-	# We remove some directory levels and replace them with a hash
-	# to shorten the long filenames, which has caused trouble in the past. 
-	string(MD5 hash "${package}/$<CONFIG>/${contentId}" )
-	string(SUBSTRING ${hash} 0 8 shortCpackDir)
-
 	cpfGetPackagingDir( baseDir )
-	set( ${dirOut} "${baseDir}/${shortCpackDir}" PARENT_SCOPE)
+	set( ${dirOut} "${baseDir}/$<CONFIG>/${contentId}" PARENT_SCOPE)
 
 endfunction()
 

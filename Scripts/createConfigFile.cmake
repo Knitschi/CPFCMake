@@ -12,6 +12,8 @@ include(cpfMiscUtilities)
 include(cpfProjectUtilities)
 include(cpfLocations)
 include(cpfPathUtilities)
+include(cpfAssertions)
+include(cpfConfigUtilities)
 
 cpfNormalizeAbsPath( CPF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../..")
 
@@ -53,7 +55,7 @@ else() # Do the file generation
 	cpfAssertScriptArgumentDefined(PARENT_CONFIG)
 
 	# Find the location of the inherited configuration
-	cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}")
+	cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}" FALSE)
 
 	# CREATE CONFIG-FILE CONTENT 
 	cpfNormalizeAbsPath( pathToVariables "${CMAKE_CURRENT_LIST_DIR}/../Modules")
@@ -62,15 +64,11 @@ else() # Do the file generation
 	set(fileContent)
 	cpfListAppend( fileContent "# This file contains cmake project configuration parameters." )
 	cpfListAppend( fileContent "" )
-	cpfListAppend( fileContent "list( APPEND CMAKE_MODULE_PATH \"${pathToVariables}\")" )
-	cpfListAppend( fileContent "include(cpfLocations)")
-	cpfListAppend( fileContent "" )
 	cpfListAppend( fileContent "# Inherit configuration parameters." )
 	cpfListAppend( fileContent "include( \"${fullInheritedConfigFile}\" )" )
 	cpfListAppend( fileContent "set( CPF_PARENT_CONFIG \"${PARENT_CONFIG}\" CACHE STRING \"The CI-configuration from which this config derives.\" FORCE)" )
 	cpfListAppend( fileContent "" )
 	cpfListAppend( fileContent "# internal variables" )
-	cpfListAppend( fileContent "set( CPF_ROOT_DIR \"${CPF_ROOT_DIR}\" CACHE FILEPATH \"The path to the root directory of this CPF CI-project.\" FORCE)" )
 	cpfListAppend( fileContent "set( CPF_CONFIG \"${DERIVED_CONFIG}\" CACHE STRING \"The name of the cmake configuration that is defined by this file.\" FORCE)" )
 	cpfListAppend( fileContent "" )
 

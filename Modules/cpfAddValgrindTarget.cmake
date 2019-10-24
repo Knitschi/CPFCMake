@@ -46,11 +46,11 @@ function( cpfAddValgrindTarget package)
 		if(gccClangDebug) # muss auf gcc mit debug symbolen testen
 
 			cpfFindRequiredProgram( TOOL_VALGRIND valgrind "A tool for dynamic analysis." "")
-			
+
 			# add valgrind commands
 			set(stampFile "${binaryDir}/Valgrind_${testTarget}.stamp")
 			set(suppressionsFile "${CMAKE_CURRENT_SOURCE_DIR}/Other/${package}ValgrindSuppressions.supp")
-			set(valgrindCommand "\"${TOOL_VALGRIND}\" --leak-check=full --track-origins=yes --smc-check=all --error-exitcode=1 --gen-suppressions=all --suppressions=\"${suppressionsFile}\" \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")
+			set(valgrindCommand "\"${TOOL_VALGRIND}\" --show-reachable=yes --error-limit=no --leak-check=full --track-origins=yes --smc-check=all --error-exitcode=1 --gen-suppressions=all --suppressions=\"${suppressionsFile}\" \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")
 				
 			cpfIsInterfaceLibrary(isInterfaceLib ${productionLib})
 			set(productionLibFile)

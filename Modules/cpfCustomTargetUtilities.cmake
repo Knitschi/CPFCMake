@@ -40,15 +40,45 @@ function( cpfAddStandardCustomCommand )
 endfunction()
 
 #-----------------------------------------------------------
-function( cpfAddStandardCustomTarget package target sources depends )
+# Creates a custom target with the common cpf properties.
+#
+function( cpfAddStandardCustomTarget )
+
+	set( requiredSingleValueKeywords
+		PACKAGE
+		TARGET
+	)
+
+	set( optionalMultiValueKeywords
+		SOURCES
+		TARGET_DEPENDENCIES
+		PRODUCED_FILES
+		INSTALL_COMPONENTS
+	)
+
+	cmake_parse_arguments(
+		ARG 
+		""
+		"${requiredSingleValueKeywords}"
+		"${optionalMultiValueKeywords}"
+		${ARGN} 
+	)
+
+	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords}" ARG "cpfAddStandardCustomTarget()")
 
     add_custom_target( 
-        ${target}
-        SOURCES ${sources}
-        DEPENDS ${depends}
-    )
-    set_property( TARGET ${target} PROPERTY FOLDER ${package} )
-    cpfSetIDEDirectoriesForTargetSources(${target})
+        ${ARG_TARGET}
+        SOURCES ${ARG_SOURCES}
+        DEPENDS ${ARG_PRODUCED_FILES} ${ARG_TARGET_DEPENDENCIES}
+	)
+	
+	# Set properties
+	set_property( TARGET ${ARG_TARGET} PROPERTY FOLDER ${ARG_PACKAGE} )
+	set_property( TARGET ${ARG_TARGET} PROPERTY CPF_OUTPUT_FILES ${ARG_PRODUCED_FILES} )
+	set_property( TARGET ${ARG_TARGET} PROPERTY PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS ${ARG_INSTALL_COMPONENTS})
+	cpfSetIDEDirectoriesForTargetSources(${ARG_TARGET})
+
+	set_property( TARGET ${ARG_PACKAGE} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${ARG_TARGET})
 
 endfunction()
 

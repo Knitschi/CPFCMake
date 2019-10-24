@@ -78,29 +78,26 @@ function( cpfAddSphinxPackage )
     )
 
     cpfGetPackageName(package)
-	cpfAddStandardCustomTarget(${package} ${package} "${configFile};${sourceFiles}" "${keyOutputFile}")
+	cpfAddStandardCustomTarget(
+		PACKAGE ${package}
+		TARGET ${package}
+		SOURCES ${configFile} ${sourceFiles}
+		PRODUCED_FILES ${keyOutputFile}
+		INSTALL_COMPONENTS documentation
+	)
+	add_dependencies(pipeline ${package})
 	
+
 	# Add install rules to create the cmake_install.cmake script.
 	install(
 		DIRECTORY ${outputDir}
 		DESTINATION doc/sphinx
 		COMPONENT documentation
-		OPTIONAL
+		EXCLUDE_FROM_ALL					# Must be exluded from all, because all custom targets are excluded from all.
 	)
 
 	# Add a custom install target.
-	cpfGetRunInstallScriptCommands( runInstallScriptCommands "" "documentation" "${CMAKE_INSTALL_PREFIX}" )
-	set(installedIndexHtmlFile ${CMAKE_INSTALL_PREFIX}/doc/sphinx/html/index.html)
-	cpfAddStandardCustomCommand(
-        DEPENDS ${keyOutputFile}
-        COMMANDS ${runInstallScriptCommands}
-        OUTPUT ${installedIndexHtmlFile}
-	)
-	set(installTarget install_${package})
-	cpfAddStandardCustomTarget(${package} ${installTarget} "" "${installedIndexHtmlFile};${package}")
-
-	# Set target properties
-	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGETS ${installTarget})
+	cpfAddPackageInstallTarget(${package})
 
 endfunction()
 

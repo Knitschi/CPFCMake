@@ -234,17 +234,22 @@ endfunction()
 # If multiple files with the same base-name exist, the one in the directory that comes
 # first in the above list is taken.
 #
-function( cpfFindConfigFile absFilePathOut configName )
+function( cpfFindConfigFile absFilePathOut configName userConfigOnly )
 
 	if(EXISTS "${configName}")
 		set( ${absFilePathOut} "${configName}" PARENT_SCOPE )
 	else()
 
-		set( searchLocations
-			"${CPF_ROOT_DIR}/${CPF_CONFIG_DIR}"											# developer specific configs
-			"${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/${CPF_PROJECT_CONFIGURATIONS_DIR}"		# project default configs
-			"${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/${CPF_DEFAULT_CONFIGS_DIR}"		# CPF provided standard configs
-		)
+		set( searchLocations )
+		if(NOT userConfigOnly)
+			cpfListAppend( searchLocations "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/${CPF_PROJECT_CONFIGURATIONS_DIR}")			# project default configs
+			cpfListAppend( searchLocations "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/${CPF_DEFAULT_CONFIGS_DIR}")		# CPF provided standard configs
+		endif()
+
+		# Note that it is important that the users config file comes last in the list.
+		# This allows to use a CI-config name for a user config file without getting infinite
+		# include recursions in the config file.
+		cpfListAppend( searchLocations "${CPF_ROOT_DIR}/${CPF_CONFIG_DIR}" ) # developer specific configs
 
 		foreach( dir ${searchLocations})
 			cpfNormalizeAbsPath( fullConfigFile "${dir}/${configName}${CPF_CONFIG_FILE_ENDING}" )

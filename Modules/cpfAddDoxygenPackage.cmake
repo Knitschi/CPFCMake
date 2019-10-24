@@ -194,26 +194,28 @@ function( cpfAddDoxygenPackage )
 	)
 
 	# Now add the target
-	add_custom_target(
-		${package}
-		DEPENDS 
-			${targetDependencies}
-			${searchDataXmlFile}
-		SOURCES 
-			${ARG_SOURCES}
-			${ARG_DOXYGEN_CONFIG_FILE}
-			${ARG_DOXYGEN_LAYOUT_FILE}
-			${ARG_DOXYGEN_STYLESHEET_FILE}
-			${ARG_HTML_HEADER}
-			${ARG_HTML_FOOTER}
-			${ARG_PROJECT_LOGO}
+	set(targetDependencies 
+		${targetDependencies}
+		${searchDataXmlFile}
 	)
-	set_property( TARGET ${package} PROPERTY FOLDER ${package} )
-	set_property( TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${package})
-	set_property( TARGET ${package} PROPERTY PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS documentation)
+	set(targetSources 
+		${ARG_SOURCES}
+		${ARG_DOXYGEN_CONFIG_FILE}
+		${ARG_DOXYGEN_LAYOUT_FILE}
+		${ARG_DOXYGEN_STYLESHEET_FILE}
+		${ARG_HTML_HEADER}
+		${ARG_HTML_FOOTER}
+		${ARG_PROJECT_LOGO}
+	)
 
-	cpfSetIDEDirectoriesForTargetSources(${package})
-
+	cpfAddStandardCustomTarget( 
+		PACKAGE ${package}
+		TARGET ${package}
+		SOURCES ${targetSources}
+		TARGET_DEPENDENCIES ${targetDependencies}
+		INSTALL_COMPONENTS documentation
+	)
+	
 	add_dependencies(pipeline ${package})
 
 	# Set an install rule for the generated files.
@@ -221,10 +223,11 @@ function( cpfAddDoxygenPackage )
 		DIRECTORY ${absDoxygenOutputDir}
 		DESTINATION ${package}/doc
 		COMPONENT documentation
+		EXCLUDE_FROM_ALL					# Must be exluded from all, because all custom targets are excluded from all.
 	)
 
 	# Add an install target for the package.
-	cpfAddPackageInstallTargets(${package})
+	cpfAddPackageInstallTarget(${package})
 
 endfunction()
 

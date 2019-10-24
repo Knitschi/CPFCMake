@@ -41,10 +41,13 @@ function( cpfFindRequiredTools )
 			)
 	endif()
 
+	# We put the include in here or python is always looked for when the file is included which is not wanted in scripts.
+	include(FindPython3)
+
 	# python is optional
-	find_package(PythonInterp 3)
-	if(PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR STREQUAL 3)
-		set(TOOL_PYTHON3 "${PYTHON_EXECUTABLE}" CACHE PATH "The used python3 interpreter.")
+	find_package(Python3 COMPONENTS Interpreter)
+	if(Python3_Interpreter_FOUND)
+		set(TOOL_PYTHON3 "${Python3_EXECUTABLE}" CACHE PATH "The used python3 interpreter.")
 	endif()
 
 endfunction()
@@ -281,8 +284,5 @@ function( cpfConfigureFileWithVariables input output variables )
 	endforeach()
 	configure_file( "${input}" "${output}" )
 endfunction()
-
-
-
 
 

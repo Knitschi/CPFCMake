@@ -17,10 +17,9 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Adds an install_<package> target that installs all components of the package.
 # 
-function( cpfAddPackageInstallTargets package )
+function( cpfAddPackageInstallTarget package )
 	
-	# Use the default install prefix if it is not set by the user.
-	set( CMAKE_INSTALL_PREFIX "${CPF_ROOT_DIR}/install" CACHE STRING " ")
+	cpfAssertDefined(CMAKE_INSTALL_PREFIX)	# The install targets require the definition of the CMAKE_INSTALL_PREFIX path.
 	
 	# Add the install_<package> target that installs all components of the package to the install prefix.
 	cpfGetPossibleInstallComponents(components)

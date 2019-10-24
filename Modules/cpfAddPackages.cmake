@@ -2,6 +2,7 @@
 
 include_guard(GLOBAL)
 
+include(cpfLocations)
 include(cpfProperties)
 include(cpfProjectUtilities)
 include(cpfAddDoxygenPackage)
@@ -14,13 +15,6 @@ include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDistributionPackageTarget)
 include(cpfAddValgrindTarget)
 include(cpfAddOpenCppCoverageTarget)
-
-
-# We include the config file here to retrigger the cmake generate step when the config changes.
-if(DEFINED CPF_CONFIG)
-	cpfFindConfigFile(configFile "${CPF_CONFIG}")
-	include("${configFile}")
-endif()
 
 
 #----------------------------------------------------------------------------------------
