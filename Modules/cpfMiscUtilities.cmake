@@ -29,8 +29,8 @@ function( cpfFindRequiredTools )
 		endif()
 
 		# Find clang-format
-		cpfGetClangFormatSearchPath(clangFormatPath)
-		cpfFindRequiredProgram( TOOL_CLANG_FORMAT ${CPF_CLANG_FORMAT_EXE} "A tool that formats .cpp and .c files." "${clangFormatPath}")
+		cpfGetClangFormatSearchPaths(clangFormatPaths)
+		cpfFindRequiredProgram( TOOL_CLANG_FORMAT ${CPF_CLANG_FORMAT_EXE} "A tool that formats .cpp and .c files." "${clangFormatPaths}")
 	endif()
 
 	if(Qt5Gui_FOUND )
@@ -50,7 +50,7 @@ function( cpfFindRequiredTools )
 endfunction()
 
 #--------------------------------------------------------------------------------------
-function( cpfGetClangFormatSearchPath pathOut )
+function( cpfGetClangFormatSearchPaths pathsOut )
 
     if(MSVC)
         cpfNormalizeAbsPath( vswherePath "$ENV{ProgramFiles\(x86\)}/Microsoft Visual Studio/Installer")
@@ -64,11 +64,12 @@ function( cpfGetClangFormatSearchPath pathOut )
 		# Use the latest installation, which is the last element in the output.
 		cpfSplitString( outputList "${vswhereOutput}" "\n")
 		cpfPopBack(vsInstallPath dummy "${outputList}")
-		cpfNormalizeAbsPath( clangTidyPath "${vsInstallPath}/Common7/IDE/VC/VCPackages")
+		cpfNormalizeAbsPath( clangFormatPathVS2017 "${vsInstallPath}/Common7/IDE/VC/VCPackages")
+		cpfNormalizeAbsPath( clangFormatPathVS2019 "${vsInstallPath}/VC/Tools/Llvm/bin")
 
     endif()
 
-    set(${pathOut} "${clangTidyPath}" PARENT_SCOPE)
+    set(${pathsOut} "${clangFormatPaths};${clangFormatPathVS2019}" PARENT_SCOPE)
 
 endfunction()
 
