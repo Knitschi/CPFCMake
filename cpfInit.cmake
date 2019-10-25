@@ -15,5 +15,6 @@ list(APPEND CMAKE_MODULE_PATH
 
 # Define the root directory of the project.
 include(cpfPathUtilities)
+include(cpfAssertions)
 cpfNormalizeAbsPath( CPF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." )
 
