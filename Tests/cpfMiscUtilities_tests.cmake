@@ -2,6 +2,8 @@
 
 include(cpfMiscUtilities)
 include(cpfTestUtilities)
+include(cpfConfigUtilities)
+include(cpfVersionUtilities)
 
 #----------------------------------------------------------------------------------------
 # Runs all tests from this file
