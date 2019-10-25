@@ -10,6 +10,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 
 include(cpfGitUtilities)
 include(cpfMiscUtilities)
+include(cpfVersionUtilities)
 
 cpfAssertScriptArgumentDefined(REPO_DIR)
 
