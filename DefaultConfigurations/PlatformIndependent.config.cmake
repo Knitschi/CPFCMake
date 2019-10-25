@@ -2,7 +2,7 @@
 # This file contains basic CMakeProjectFramework default configuration settings that are common for all platforms. 
 
 # LOCATIONS
-set( CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/../install" CACHE STRING "The path to which to build results are copied by the install targets.")
+set( CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../../../install" CACHE STRING "The path to which to build results are copied by the install targets.")
 set( CPF_WEBSERVER_BASE_DIR "" CACHE STRING "The url of the html base directory of the web-server to which the updateExistingWebPage.cmake script copies the html build-output." )
 
 # OUTPUT NAMES
