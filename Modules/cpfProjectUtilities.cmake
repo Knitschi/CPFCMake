@@ -8,6 +8,7 @@ include(cpfListUtilities)
 include(cpfStringUtilities)
 include(cpfPathUtilities)
 include(cpfReadVariablesFromFile)
+include(cpfPackageUtilities)
 
 #---------------------------------------------------------------------------------------------
 function( cpfGetHighWarningLevelFlags flagsOut )
