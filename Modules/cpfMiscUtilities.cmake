@@ -117,6 +117,16 @@ function( devMessageList list)
     endforeach()
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# Helps to check whether a target exists during debugging.
+function(devIsTarget target)
+	if(NOT TARGET ${target})
+		devMessage("${target} is missing.")
+	else()
+		devMessage("${target} exists.")
+	endif()
+endfunction()
+
 
 #----------------------------------------------------------------------------------------
 # This function will set the value of a variable if it is not already set.
