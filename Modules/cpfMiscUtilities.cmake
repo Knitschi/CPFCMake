@@ -70,9 +70,11 @@ function( cpfGetClangFormatSearchPaths pathsOut )
 		cpfNormalizeAbsPath( clangFormatPathVS2017 "${vsInstallPath}/Common7/IDE/VC/VCPackages")
 		cpfNormalizeAbsPath( clangFormatPathVS2019 "${vsInstallPath}/VC/Tools/Llvm/bin")
 
+		set(clangFormatPaths ${clangFormatPathVS2017} ${clangFormatPathVS2019})
+
     endif()
 
-    set(${pathsOut} ${clangFormatPaths} ${clangFormatPathVS2019} PARENT_SCOPE)
+    set(${pathsOut} "${clangFormatPaths}" PARENT_SCOPE)
 
 endfunction()
 
