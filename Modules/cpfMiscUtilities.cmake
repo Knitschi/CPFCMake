@@ -72,7 +72,7 @@ function( cpfGetClangFormatSearchPaths pathsOut )
 
     endif()
 
-    set(${pathsOut} "${clangFormatPaths};${clangFormatPathVS2019}" PARENT_SCOPE)
+    set(${pathsOut} ${clangFormatPaths} ${clangFormatPathVS2019} PARENT_SCOPE)
 
 endfunction()
 
