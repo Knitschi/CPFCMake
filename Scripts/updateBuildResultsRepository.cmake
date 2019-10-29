@@ -66,7 +66,7 @@ cpfGitPush(origin master ${projectDir})
 # Push to the alternative remote
 if(DEFINED WEB_SERVER_BUILD_RESULTS_REPOSITORY AND WEB_SERVER_BUILD_RESULTS_REPOSITORY)
 
-	cpfGitAddRemote(webserver ${WEB_SERVER_BUILD_RESULTS_REPOSITORY} ${projectDir})
+	cpfGitAddRemote(webserver ${WEB_SERVER_BUILD_RESULTS_REPOSITORY}/${BUILD_RESULTS_REPOSITORY_PROJECT_SUBDIR} ${projectDir})
 	cpfGitPush(webserver master ${projectDir})
 
 endif()
