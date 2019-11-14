@@ -5,7 +5,7 @@ include(cpfInitPackageProject)
 include(cpfAddFilePackage)
 include(cpfAddRunTestsTarget)
 
-cpfInitPackageProject()
+cpfInitPackageProject(LANGUAGES NONE)
 
 # Files that define variables.
 set( files

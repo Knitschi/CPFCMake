@@ -9,6 +9,15 @@ include(cpfMiscUtilities)
 # Documentation in APIDocs.dox
 macro( cpfInitPackageProject )
 
+	cmake_parse_arguments(ARG "" "" "LANGUAGES" ${ARGN})
+
+	# Look for CXX and C by default.
+	if(NOT ARG_LANGUAGES)
+		set(languageOption CXX C)
+	else()
+		set(languageOption LANGUAGES ${ARG_LANGUAGES})
+	endif()
+
 	# The package name is defined by the sub-directory name
     cpfGetPackageName( package )
 
@@ -23,7 +32,7 @@ macro( cpfInitPackageProject )
 	project( 
 		${package} 
 		VERSION ${major}.${minor}.${patch}
-		LANGUAGES CXX C
+		${languageOption}
     )
     
 	set(PROJECT_VERSION ${packageVersion})

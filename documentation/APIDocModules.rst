@@ -126,7 +126,9 @@ cpfInitPackageProject()
 
 .. code-block:: cmake
 
-  cpfInitPackageProject()
+  cpfInitPackageProject(
+      [LANGUAGES]
+  )
 
 
 This macro is called at the beginning of a cpf-packages *CMakeLists.txt* file.
@@ -134,6 +136,19 @@ This function calls the :code:`project()` function to create the package-level p
 It automatically reads the version number of the package from the packages
 git repository or a provided version file and uses it to initiated the cmake
 variables :code:`PROJECT_VERSION` and :code:`PROJECT_VERSION_<digit>` variables.
+
+
+.. _cpfAddCppPackage_arguments:
+
+Arguments
+---------
+
+LANGUAGES
+^^^^^^^^^
+
+The value of this argument is passed on to the underlying :code:`project()` call.
+It determines for which compilers cmake will look. When the argument is not given,
+the default value :code:`CXX C` is used.
 
 .. seealso::
 
