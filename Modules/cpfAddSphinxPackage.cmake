@@ -14,6 +14,7 @@ function( cpfAddSphinxPackage )
 
     set(optionalSingleValueKeywords
 		CONFIG_FILE_DIR
+		SOURCE_DIR
 	)
 
     set( requiredMultiValueKeywords
@@ -51,8 +52,13 @@ function( cpfAddSphinxPackage )
 		set(ARG_SOURCE_SUFFIXES rst)
 	endif()
 
-    # Assert that the index.rst file exists
-    set(sphinxSourceDir ${CMAKE_SOURCE_DIR})
+	# Assert that the index.rst file exists
+	if(NOT ARG_SOURCE_DIR)
+		set(sphinxSourceDir ${CMAKE_SOURCE_DIR})
+	else()
+		set(sphinxSourceDir ${ARG_SOURCE_DIR})
+	endif()
+
 	if(NOT EXISTS ${sphinxSourceDir}/index.rst )
 		message(FATAL_ERROR "Error! The Sphinx package requires an index.rst file to be present in the build projects source directory.")
 	endif()

@@ -924,6 +924,7 @@ cpfAddSphinxPackage()
 .. code-block:: cmake
 
   cpfAddSphinxPackage(
+      [SOURCE_DIR]                    absDir
       [CONFIG_FILE_DIR]               absDir
       [OTHER_FILES]                   file1 ...
       [OUTPUT_SUBDIR]                 relDir
@@ -938,6 +939,13 @@ directory.
 
 Arguments
 ---------
+
+SOURCE_DIR
+^^^^^^^^^^
+
+The base directory in which sphinx searches for files that contribute to the documentation.
+When the argument is not given, :code:`CMAKE_SOURCE_DIR` is used in order to look for documentation
+files in all packages of the CI-project.
 
 CONFIG_FILE_DIR
 ^^^^^^^^^^^^^^^
