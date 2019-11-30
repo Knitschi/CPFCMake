@@ -138,7 +138,7 @@ git repository or a provided version file and uses it to initiated the cmake
 variables :code:`PROJECT_VERSION` and :code:`PROJECT_VERSION_<digit>` variables.
 
 
-.. _cpfAddCppPackage_arguments:
+.. _cpfInitPackageModule_arguments:
 
 Arguments
 ---------
