@@ -13,7 +13,7 @@ macro( cpfInitPackageProject )
 
 	# Look for CXX and C by default.
 	if(NOT ARG_LANGUAGES)
-		set(languageOption CXX C)
+		set(languageOption LANGUAGES CXX C)
 	else()
 		set(languageOption LANGUAGES ${ARG_LANGUAGES})
 	endif()
