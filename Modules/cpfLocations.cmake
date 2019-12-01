@@ -12,7 +12,6 @@ set(CPF_PACKAGES_ASSEMBLE_DIR _pckg)			# Utility directory which is used to copy
 set(CPF_CMAKE_DIR CPFCMake )					# The directory of the CPFCMake package
 set(CPF_BUILDSCRIPTS_DIR CPFBuildscripts )			# The directory of the CPFBuildscripts package
 set(CPF_JENKINSFILE_DIR CPFJenkinsfile )			# The directory of the CPFJenkinsfile package
-set(CPF_MACHINES_DIR CPFMachines )					# The directory of the CPFMachines package
 set(CPF_PROJECT_CONFIGURATIONS_DIR CIBuildConfigurations )	# The directory that contains project specific cmake configuration files.
 
 # SPECIAL FILES
