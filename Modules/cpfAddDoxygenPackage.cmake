@@ -278,7 +278,7 @@ endfunction()
 
 #-------------------------------------------------------------------------
 function( cpfGetGeneratedDoxygenDirectory dirOut )
-	set(${dirOut} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/doxygen" PARENT_SCOPE)
+	set(${dirOut} "${CMAKE_CURRENT_BINARY_DIR}/generatedDoxFiles" PARENT_SCOPE)
 endfunction()
 
 #-------------------------------------------------------------------------

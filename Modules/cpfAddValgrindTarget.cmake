@@ -30,7 +30,7 @@ function( cpfAddValgrindTarget package)
 	endif()
 
 	set(targetName valgrind_${package})
-	set(binaryDir ${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName})
+	set(binaryDir ${CMAKE_CURRENT_BINARY_DIR}/${targetName})
 	file(MAKE_DIRECTORY ${binaryDir})
 		
 	# check preconditions

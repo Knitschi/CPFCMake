@@ -287,7 +287,7 @@ function( cpfDownloadAndExtractPackage package packageFormat packageUrl  )
 
 	# downlaod the package
 	get_filename_component( shortName "${packageUrl}" NAME )
-	set( downloadDir "${CPF_PREVIOUS_PACKAGES_ABS_DIR}")
+	getPreviousPackageDownloadDirectory(downloadDir)
 	set( downloadedPackage "${downloadDir}/${shortName}")
 	cpfDebugMessage("Download package from \"${packageUrl}\"")
 	file(DOWNLOAD "${packageUrl}" "${downloadedPackage}" INACTIVITY_TIMEOUT 1 STATUS resultValues )
@@ -303,6 +303,11 @@ function( cpfDownloadAndExtractPackage package packageFormat packageUrl  )
 		cpfExecuteProcess( unused "cmake -E tar x ${shortName}" "${downloadDir}" DONT_INTERCEPT_OUTPUT )
 	endif()
 
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( getPreviousPackageDownloadDirectory dirOut )
+	set(${dirOut} ${CMAKE_CURRENT_BINARY_DIR}/PreviousPackages PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -551,7 +556,8 @@ function( cpfGetLocationOfDownloadedDumpFile dumpFileOut package binaryTarget pa
 	cpfIncrement(length) # + 1 for the dot
 	cpfStringRemoveRight( packageDir ${archiveFileName} ${length})
 
-	set( ${dumpFileOut} "${CPF_PREVIOUS_PACKAGES_ABS_DIR}/${packageDir}/${relDumpFilePath}" PARENT_SCOPE)
+	getPreviousPackageDownloadDirectory(downloadDir)
+	set( ${dumpFileOut} "${downloadDir}/${packageDir}/${relDumpFilePath}" PARENT_SCOPE)
 	
 endfunction()
 
@@ -560,7 +566,7 @@ function( cpfAddApiCompatibilityCheckTarget reportFileOut package binaryTarget p
 	
 	set(reportFile)
 	set(targetName checkApiCompatibility_${binaryTarget} )
-	cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}" API)
+	cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_CURRENT_BINARY_DIR}/${targetName}" API)
 	set(${reportFileOut} "${reportFile}" PARENT_SCOPE)
 	
 endfunction()
@@ -570,7 +576,7 @@ function( cpfAddAbiCompatibilityCheckTarget reportFileOut package binaryTarget p
 	
 	set(reportFile)
 	set(targetName checkAbiCompatibility_${binaryTarget} )
-	cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}" ABI)
+	cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_CURRENT_BINARY_DIR}/${targetName}" ABI)
 	set(${reportFileOut} "${reportFile}" PARENT_SCOPE)
 	
 endfunction()

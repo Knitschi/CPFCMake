@@ -78,7 +78,7 @@ function( cpfAddOpenCppCoverageTarget package)
 	cpfAssertDefined(CPF_TEST_FILES_DIR)
 
 	set(targetName opencppcoverage_${package})
-	set(binaryDir ${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName})
+	set(binaryDir ${CMAKE_CURRENT_BINARY_DIR}/${targetName})
 	file(MAKE_DIRECTORY ${binaryDir})
 
 	# get related targets

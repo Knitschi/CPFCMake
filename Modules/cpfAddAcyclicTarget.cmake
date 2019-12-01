@@ -17,7 +17,7 @@ function( cpfAddAcyclicTarget )
 
     # Add the command for doing the acyclicity check
     set(command "\"${TOOL_ACYCLIC}\" -nv \"${CPF_TARGET_DEPENDENCY_GRAPH_FILE}\"")
-    set(stampFileDir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${targetName}")
+    set(stampFileDir "${CMAKE_BINARY_DIR}")
     file(MAKE_DIRECTORY ${stampFileDir})
     set(acyclicStampFile "${stampFileDir}/runAcyclic.stamp" )
 

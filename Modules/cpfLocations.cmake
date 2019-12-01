@@ -9,7 +9,6 @@ set(CPF_GENERATED_DIR Generated)				# The directory that holds all files that ar
 set(CPF_SOURCE_DIR Sources)						# The directory that should hold all non generated files that are checked into the repository.
 set(CPF_CONFIG_DIR Configuration)				# The directory that holds files that define cmake variables that are specific to the local project instance, like local paths to dependencies etc.
 set(CPF_PACKAGES_ASSEMBLE_DIR _pckg)			# Utility directory which is used to copy the content of the packages together.
-set(CPF_PRIVATE_DIR _CPF)						# A directory for storing generated helper files of the CMakeProjectFramework project.
 set(CPF_CMAKE_DIR CPFCMake )					# The directory of the CPFCMake package
 set(CPF_BUILDSCRIPTS_DIR CPFBuildscripts )			# The directory of the CPFBuildscripts package
 set(CPF_JENKINSFILE_DIR CPFJenkinsfile )			# The directory of the CPFJenkinsfile package
@@ -97,4 +96,3 @@ set( CPF_CURRENT_TO_LAST_RELEASE_DIR LastReleaseToCurrent )
 set( CPF_ABS_TEMPLATE_DIR "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/Templates")							# The directory that holds the file templates of the CPFCMake package.
 set( CPF_ABS_SCRIPT_DIR "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/Scripts")								# The directory that holds the scripts of the CPFCMake package.
 set( CPF_PROJECT_HTML_ABS_DIR ${CMAKE_BINARY_DIR}/html)														# The directory that contains the html page of the project
-set( CPF_PREVIOUS_PACKAGES_ABS_DIR ${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/PreviousPackages )				# The directory where the abi-compliance-checker targets download the previous packages to.

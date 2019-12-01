@@ -231,7 +231,7 @@ endfunction()
 function( cpfSetupArgumentFile filenameOut target depends variableDefinitions )
 
 	# create a unique argument file
-	set( dir "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${target}")
+	set( dir "${CMAKE_CURRENT_BINARY_DIR}/${target}")
     file( MAKE_DIRECTORY "${dir}")
 	string(MD5 hash "${variableDefinitions}")
 	set( filename "${dir}/argumentFile_${hash}.cmake" ) 
@@ -358,7 +358,7 @@ function( cpfAddClearDirExceptCommand stampFileOut directory notDeletedEntries t
 	cpfPrependMulti(notDeletedEntriesFull "${directory}/" "${notDeletedEntries}")
     cpfSetupArgumentFile( argumentFile ${target} "${dependedOnTargets}" "${variableDefinitions}")
 
-	set(stampFile "${CMAKE_BINARY_DIR}/${CPF_PRIVATE_DIR}/${target}/clearLastBuild.stamp")
+	set(stampFile "${CMAKE_CURRENT_BINARY_DIR}/${target}/clearLastBuild.stamp")
 	
 	cpfAddStandardCustomCommand(
 		OUTPUT ${stampFile}
