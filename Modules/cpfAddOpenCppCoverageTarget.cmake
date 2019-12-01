@@ -17,7 +17,7 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
         set(targetName opencppcoverage)
 
         #Locations
-        set(htmlReportDir ${CPF_PROJECT_HTML_ABS_DIR}/${CPF_OPENCPPCOVERAGE_DIR})
+        set(htmlReportDir ${CMAKE_BINARY_DIR}/${targetName}/${html}/${CPF_OPENCPPCOVERAGE_DIR})
 
         cpfGetSubtargets(opencppcoverageTargets "${packages}" INTERFACE_CPF_OPENCPPCOVERAGE_SUBTARGET)
         if(opencppcoverageTargets)
@@ -40,7 +40,7 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
             string(APPEND runOpenCppCoverageCommand "--quiet")
 
             # stampfile command
-            set( stampFile ${CMAKE_BINARY_DIR}/${targetName}/${targetName}.stamp )
+            set( stampFile ${CMAKE_CURRENT_BINARY_DIR}/${targetName}/${targetName}.stamp )
             set( stampFileCommand "cmake -E touch \"${stampFile}\"")
 
             cpfAddConfigurationDependendCommand(
@@ -58,7 +58,8 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
                 DEPENDS ${opencppcoverageTargets} ${stampFile}
             )
 
-        endif()
+		endif()
+
     endif()
 
 endfunction()

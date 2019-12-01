@@ -73,15 +73,15 @@ function( cpfAddDoxygenPackage )
 	# Get dependencies
 	cpfGetOwnedPackages( documentedPackages ${CPF_ROOT_DIR})
 	cpfListAppend(documentedPackages "${ARG_ADDITIONAL_PACKAGES}")
-	set(fileDependencies)
+	set(generatedDoxFiles)
 	set(targetDependencies)
 	set(hasGeneratedDocumentation FALSE)
 	foreach( package ${documentedPackages})
 		cpfGetPackageDoxFilesTargetName( doxFilesTarget ${package} )
 		if( TARGET ${doxFilesTarget}) # not all packages may have the doxFilesTarget
 			list(APPEND targetDependencies ${doxFilesTarget})
-			get_property( generatedDoxFiles TARGET ${doxFilesTarget} PROPERTY CPF_OUTPUT_FILES )
-			list(APPEND fileDependencies ${generatedDoxFiles})
+			get_property( doxFiles TARGET ${doxFilesTarget} PROPERTY CPF_OUTPUT_FILES )
+			list(APPEND generatedDoxFiles ${doxFiles})
 			set(hasGeneratedDocumentation TRUE)
 		endif()
 	endforeach()
@@ -133,8 +133,10 @@ function( cpfAddDoxygenPackage )
 	# input files
 	list(APPEND appendedLines "INPUT = \"${CMAKE_SOURCE_DIR}\"")
 	if(hasGeneratedDocumentation)
-		cpfGetGeneratedDoxygenDirectory(docsDir)
-		list(APPEND appendedLines "INPUT += \"${docsDir}\"")
+		foreach(doxFile ${generatedDoxFiles})
+			get_filename_component(dir ${doxFile} DIRECTORY)
+			list(APPEND appendedLines "INPUT += \"${dir}\"")
+		endforeach()
 	endif()
 
 	# Exclude non-owned packages from the documentation unless they were not explicitly added to the documentation.
@@ -183,7 +185,7 @@ function( cpfAddDoxygenPackage )
 		${ARG_SOURCES}
 		${copiedDependencyGraphFile}
 		${reducedGraphFile}
-		${fileDependencies}
+		${generatedDoxFiles}
 		${packagSourceFiles}
 		)
 	
