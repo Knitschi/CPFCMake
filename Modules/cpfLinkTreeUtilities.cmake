@@ -2,12 +2,12 @@ include_guard(GLOBAL)
 
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetSharedLibrariesRequiredByPackageExecutables librariesOut package )
+function( cpfGetSharedLibrariesRequiredByPackageExecutables librariesOut package config )
 
 	cpfGetExecutableTargets( exeTargets ${package})
 	set(allLinkedLibraries)
 	foreach(exeTarget ${exeTargets})
-		cpfGetRecursiveLinkedLibraries( targetLinkedLibraries ${exeTarget})
+		cpfGetRecursiveLinkedLibraries( targetLinkedLibraries ${exeTarget} ${config})
 		list(APPEND allLinkedLibraries ${targetLinkedLibraries})
 	endforeach()
 	if(allLinkedLibraries)
@@ -24,7 +24,7 @@ endfunction()
 function( cpfGetSharedLibrariesRequiredByPackageProductionLib librariesOut package )
 
 	get_property( productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET )
-	cpfGetRecursiveLinkedLibraries( linkedLibraries ${productionLib})
+	cpfGetRecursiveLinkedLibraries( linkedLibraries ${productionLib} all)
 	if(linkedLibraries)
 		list(REMOVE_DUPLICATES linkedLibraries)
 	endif()
@@ -37,14 +37,16 @@ endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Recursively get either imported or non-imported linked shared libraries of the target.
+# config:	Can be "all" or a specific configuration. This option is used when the libraries list contains
+# targets that are only linked for a special configuration via generator expression $<$<CONFIG:Release>:lib1;lib2>
 #
-function( cpfGetRecursiveLinkedLibraries linkedLibsOut target )
+function( cpfGetRecursiveLinkedLibraries linkedLibsOut target config )
 
 	set(allLinkedLibraries)
     set(outputLocal)
 
-	get_property(linkedLibraries TARGET ${target} PROPERTY INTERFACE_LINK_LIBRARIES)											# The linked libraries for non imported targets
-	list(APPEND allLinkedLibraries ${linkedLibraries})
+	get_property(linkedLibrariesTemp TARGET ${target} PROPERTY INTERFACE_LINK_LIBRARIES) # The linked libraries for non imported targets
+	removeConfigGeneratorExpressions(allLinkedLibraries "${linkedLibrariesTemp}" ${config})
 
 	get_property(type TARGET ${target} PROPERTY TYPE)	
 	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )		# The following properties can not be accessed for interface libraries.
@@ -73,7 +75,7 @@ function( cpfGetRecursiveLinkedLibraries linkedLibsOut target )
 		if(TARGET ${lib})
 			
 			list( APPEND outputLocal ${lib} )
-			cpfGetRecursiveLinkedLibraries( subLibs ${lib})
+			cpfGetRecursiveLinkedLibraries( subLibs ${lib} ${config})
 			list( APPEND outputLocal ${subLibs} )
 
 		else()
@@ -96,6 +98,81 @@ function( cpfGetRecursiveLinkedLibraries linkedLibsOut target )
 	endif()
 
 	set(${linkedLibsOut} ${outputLocal} PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# The function removes libraries from the list that are wrapped in config generator expressions like
+# $<$<CONFIG:Release>:CONAN_LIB::GTest_gmock_mainrelease;CONAN_LIB::GTest_gmockrelease;CONAN_LIB::GTest_gtestrelease>
+#
+function( removeConfigGeneratorExpressions libsOut libs config)
+
+	cpfGetConfigGenExpRegExp(configRegexp ${config})
+
+	set(cleanLibs)
+	if(${config} STREQUAL all)
+		
+		set(openRegexp FALSE)
+		foreach(lib ${libs})
+
+			if(${lib} MATCHES ${configRegexp}) # check for an opening config regexp
+				string(REGEX REPLACE ${configRegexp} "" lib ${lib} )
+				list(APPEND cleanLibs ${lib})
+				set(openRegexp TRUE)
+			elseif(${lib} STREQUAL ">")
+				# ignore the closing braket
+				set(openRegexp FALSE)
+			else()
+				# keep libraries without config generator expression.
+				list(APPEND cleanLibs ${lib})
+			endif()
+
+		endforeach()
+
+	else()
+
+		cpfGetConfigGenExpRegExp(configRegexpAll all)
+		set(openRegexp FALSE)
+		set(openOtherConfigRegexp FALSE)
+		foreach(lib ${libs})
+
+			if(${lib} MATCHES ${configRegexp}) 
+
+				# handle the opening generator expression for the given config.
+				string(REGEX REPLACE ${configRegexp} "" lib ${lib} )
+				list(APPEND cleanLibs ${lib})
+				set(openRegexp TRUE)
+
+			elseif(${lib} STREQUAL ">")
+				# ignore the closing braket
+				set(openRegexp FALSE)
+				set(openOtherConfigRegexp FALSE)
+			elseif(${lib} MATCHES ${configRegexpAll})
+				# start ignoring libs that match other configs then the given one.
+				set(openOtherConfigRegexp TRUE)
+			elseif(openOtherConfigRegexp)
+				# ignore libs that are only relevant for other configs
+			else()
+				# keep libraries without config generator expression.
+				list(APPEND cleanLibs ${lib})
+			endif()
+
+		endforeach()
+
+	endif()
+
+	set(${libsOut} ${cleanLibs} PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetConfigGenExpRegExp regexpOut config )
+
+	if(${config} STREQUAL all)
+		set(${regexpOut} "\\\$<\\\$<CONFIG:[a-zA-Z]*>:" PARENT_SCOPE)
+	else()
+		set(${regexpOut} "\\\$<\\\$<CONFIG:${config}>:" PARENT_SCOPE)
+	endif()
 
 endfunction()
 
@@ -188,7 +265,7 @@ function( cpfGetAllTargetsInLinkTree targetsOut targetsIn )
 
 	set(allLinkedTargets)
 	foreach( target ${targetsIn})
-		cpfGetRecursiveLinkedLibraries( indirectlyLinkedTargets ${target})
+		cpfGetRecursiveLinkedLibraries( indirectlyLinkedTargets ${target} all)
 		list(APPEND allLinkedTargets ${target} ${indirectlyLinkedTargets} )
 	endforeach()
 	if(allLinkedTargets)

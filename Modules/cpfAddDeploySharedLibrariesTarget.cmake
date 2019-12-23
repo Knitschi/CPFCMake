@@ -17,37 +17,36 @@ function( cpfAddDeploySharedLibrariesTarget package )
 		return()
 	endif()
 
-	# Get all libraries that need to be copied.
-	cpfGetSharedLibrariesRequiredByPackageExecutables( sharedLibraries ${package} )
-	cpfAddDeploySharedLibsToBuildStageTarget( ${package} "${sharedLibraries}" "" ) 
+	cpfAddDeploySharedLibsToBuildStageTarget( ${package} "" "" ) 
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAddDeploySharedLibsToBuildStageTarget package libs outputSubDir )
-
-	if(NOT libs)
-		return()
-	endif()
+function( cpfAddDeploySharedLibsToBuildStageTarget package libs subdirectory)
 
 	# Add one custom target to copy all external libs.
 	cpfGetIndexedTargetName(targetName deployExternal_${package})
 
 	set(outputs)
-	foreach( lib ${libs})
-		
-		# Add a copy command for the current version.
-		cpfGetConfigurations(configs)
-		foreach(config ${configs})
+
+	# Add a copy command for the current version.
+	cpfGetConfigurations(configs)
+	foreach(config ${configs})
+
+		if(NOT libs)
+			cpfGetSharedLibrariesRequiredByPackageExecutables( libs ${package} ${config} )
+		endif()
+
+		foreach(lib ${libs})
 
 			# Deploy the dll files
 			cpfGetLibFilePath( libFile ${lib} ${config})
-			cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${outputSubDir}" ${lib} ${libFile} "${outputs}")
+			cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${subdirectory}" ${lib} ${libFile} "${outputs}")
 
 			# Deploy the liner pdb files if they are available.
 			cpfGetImportedLibPdbFilePath( libPdbFile ${lib} ${config})
 			if(libPdbFile)
-				cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${outputSubDir}" ${lib} ${libPdbFile} "${outputs}")
+				cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${subdirectory}" ${lib} ${libPdbFile} "${outputs}")
 			endif()
 
 		endforeach()
@@ -85,6 +84,7 @@ function( cpfAddDeployCommand outputsOut targetName package config outputSubDir 
 
 	set(outputs)
 	cpfContains( alreadyCopied existingOutputs ${output})
+
 	if(NOT ("${libFile}" STREQUAL "${output}") AND NOT alreadyCopied )  # Do not deploy the library that belongs to the same package or one that has already been copied.
 
 		get_property( isImported TARGET ${lib} PROPERTY IMPORTED)
