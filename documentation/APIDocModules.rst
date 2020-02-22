@@ -213,6 +213,7 @@ cpfAddCppPackage()
       [ENABLE_RUN_TESTS_TARGET bool]
       [ENABLE_VALGRIND_TARGET bool]
       [ENABLE_VERSION_RC_FILE_GENERATION bool]
+      [HAS_GOOGLE_TEST_EXE]
   )
 
 
@@ -694,6 +695,15 @@ to inject some version information into the binary files. If this
 version.rc file does not fit your needs, you can disable it's generation
 with this option and provide your custom made :code:`.rc` file.
 Setting this argument overrides the value of the global :code:`CPF_ENABLE_VERSION_RC_FILE_GENERATION` variable for this package.
+
+
+HAS_GOOGLE_TEST_EXE
+^^^^^^^^^^^^^^^^^^^
+
+This option only has an effect when using a Visual Studio Generator.
+When this option is set to true, :code:`cpfAddCppPackage()` will create an empty file :code:`<test-exe>.is_google_test` that lies beside the
+create test executable. Set this option to true when you use the <a href="https://github.com/csoltenborn/GoogleTestAdapter">GoogleTestAdapter</a> 
+and it fails to find your tests.
 
 
 .. _cpfQt5AddUIAndQrcFiles:

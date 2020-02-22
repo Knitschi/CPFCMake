@@ -346,7 +346,7 @@ function( cpfAddAbiDumpTarget package binaryTarget headerListFile )
 	cpfGetAbiDumpTargetName( targetName ${binaryTarget})
 	
 	# Locations
-	cpfGetFullTargetOutputFile( targetBinaryFile ${binaryTarget} ${CMAKE_BUILD_TYPE} )
+	cpfGetAbsPathOfTargetOutputFile( targetBinaryFile ${binaryTarget} ${CMAKE_BUILD_TYPE} )
 	cpfGetCurrentDumpFile( abiDumpFile ${package} ${binaryTarget})
 	
 	# Setup the command

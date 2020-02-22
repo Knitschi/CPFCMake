@@ -109,6 +109,7 @@ Here is a list of the variables.
 - CPF\_:ref:`cpfArgEnableValgrindTarget`
 - CPF\_:ref:`cpfArgEnableVersionRCFileGeneration`
 - CPF\_:ref:`cpfArgCompileOptions`
+- CPF\_:ref:`cpfArgHasGoogleTestExe`
 
 
 Allowed CMake Variables

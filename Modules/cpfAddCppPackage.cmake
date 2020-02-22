@@ -69,6 +69,7 @@ function( cpfAddCppPackage )
 		ENABLE_RUN_TESTS_TARGET
 		ENABLE_VALGRIND_TARGET
 		ENABLE_VERSION_RC_FILE_GENERATION
+		HAS_GOOGLE_TEST_EXE
 	)
 
 	set( requiredMultiValueKeywords
@@ -113,6 +114,7 @@ function( cpfAddCppPackage )
 	cpfSetIfNotSet( ARG_ENABLE_VALGRIND_TARGET "${CPF_ENABLE_VALGRIND_TARGET}")
 	cpfSetIfNotSet( ARG_ENABLE_VERSION_RC_FILE_GENERATION "${CPF_ENABLE_VERSION_RC_FILE_GENERATION}")
 	cpfSetIfNotSet( ARG_COMPILE_OPTIONS "${CPF_COMPILE_OPTIONS}")
+	cpfSetIfNotSet( ARG_IS_GOOGLE_TEST_EXE "${CPF_HAS_GOOGLE_TEST_EXE}")
 
 	# parse argument sublists
 	set( allKeywords ${optionKeywords} ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
@@ -173,6 +175,7 @@ function( cpfAddCppPackage )
 		${ARG_ENABLE_PRECOMPILED_HEADER}
 		${ARG_ENABLE_VERSION_RC_FILE_GENERATION}
 		"${ARG_COMPILE_OPTIONS}"
+		"${ARG_HAS_GOOGLE_TEST_EXE}"
 	)
 
 	#set some package properties
@@ -255,6 +258,7 @@ function( cpfAddPackageBinaryTargets
 	enablePrecompiledHeader
 	enableVersionRcGeneration
 	compileOptions
+	isGoogleTestExe
 )
 
 	# filter some files
@@ -412,6 +416,10 @@ function( cpfAddPackageBinaryTargets
 			set_property(TARGET ${unitTestsTarget} PROPERTY EXCLUDE_FROM_ALL TRUE )
 		endif()
 
+		if(isGoogleTestExe)
+			cpfGenerateGoogleTestAdapterHelperFiles(${unitTestsTarget})
+		endif()
+
     endif()
     
 	# Set some properties
@@ -421,6 +429,21 @@ function( cpfAddPackageBinaryTargets
     set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET ${productionTarget})
 	set( ${outProductionLibrary} ${productionTarget} PARENT_SCOPE)
 
+endfunction()
+
+#---------------------------------------------------------------------
+function( cpfGenerateGoogleTestAdapterHelperFiles testExeTarget )
+		# Generating a file .is_google_test makes sure the  GoogleTestAdapter can find the tests.
+		cpfIsVisualStudioGenerator(useVS)
+		if(useVS)
+			cpfGetConfigurations(configs)
+			foreach(config ${configs})
+				cpfGetTargetOutputDirectory( exeDir ${testExeTarget} ${config} )
+				file(MAKE_DIRECTORY ${exeDir})
+				cpfGetAbsPathOfTargetOutputFile( exeFilename ${testExeTarget} ${config})
+				file(TOUCH ${exeFilename}.is_google_test)
+			endforeach()
+		endif()
 endfunction()
 
 #---------------------------------------------------------------------

@@ -257,7 +257,7 @@ function( cpfGetTargetLocation targetDirOut targetFilenameOut target config )
         endif()
 
 	else()
-		cpfGetFullTargetOutputFile( fullTargetFile ${target} ${config})
+		cpfGetAbsPathOfTargetOutputFile( fullTargetFile ${target} ${config})
 	endif()
 
 	get_filename_component( shortName "${fullTargetFile}" NAME)
@@ -281,8 +281,8 @@ function( cpfGetTargetLocations absolutePathes targets config )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# returns the full output filename of the given target
-function( cpfGetFullTargetOutputFile output target config )
+# returns the absolute path to the created binary output file of the the given target
+function( cpfGetAbsPathOfTargetOutputFile output target config )
 
 	cpfGetTargetOutputDirectory( directory ${target} ${config} )
 	cpfGetTargetOutputFileName( name ${target} ${config})

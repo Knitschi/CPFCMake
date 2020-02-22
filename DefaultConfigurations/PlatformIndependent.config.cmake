@@ -25,6 +25,7 @@ set( CPF_ENABLE_PRECOMPILED_HEADER OFF CACHE BOOL "Switch the use of precompiled
 set( CPF_ENABLE_RUN_TESTS_TARGET ON CACHE BOOL "Activates custom targets that run the test executables." FORCE)
 set( CPF_ENABLE_VALGRIND_TARGET ON CACHE BOOL "Activates custom targets that run Valgrind. The targets are only available when compiling with clang or gcc with debug info." FORCE)
 set( CPF_ENABLE_VERSION_RC_FILE_GENERATION ON CACHE BOOL "If this is set to ON and the configuration uses the MSVC compiler, the CPF will generate a version.rc file to compile version information into C++ binary targets." FORCE )
+set( CPF_HAS_GOOGLE_TEST_EXE FALSE CACHE BOOL "This option is currently only relevant when using Visual Studio with the GoogleTestAdaper. It will cause the CPF to create an empty file <test-exe>.is_google_test which helps the GoogleTestAdaper to discover the tests." FORCE )
 
 # OUTPUT VERBOSITY
 set( CPF_VERBOSE OFF CACHE BOOL "Increases the output verbosity of the CMakeProjectFramework cmake modules." FORCE)

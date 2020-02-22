@@ -17,6 +17,7 @@ set( files
 	${CPF_DEFAULT_CONFIGS_DIR}/Gcc.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Linux.config.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/MSVC2017.cmake
+	${CPF_DEFAULT_CONFIGS_DIR}/MSVC2019.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/PlatformIndependent.config.cmake
 	${CPF_DEFAULT_CONFIGS_DIR}/Windows.config.cmake
 	documentation/APIDocGlobalVariables.rst
