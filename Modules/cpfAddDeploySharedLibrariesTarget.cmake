@@ -53,6 +53,9 @@ function( cpfAddDeploySharedLibsToBuildStageTarget package libs subdirectory)
 
 	endforeach()
 
+	#devMessage("${targetName}")
+	#devMessage("${outputs}")
+
 	cpfAddDeployTarget( ${targetName} ${package} "${outputs}" "${libs}" )
 
 endfunction()
@@ -106,7 +109,7 @@ function( cpfAddDeployCommand outputsOut targetName package config outputSubDir 
 			cpfAddConfigurationDependendCommand(
 				TARGET ${targetName}
 				OUTPUT ${output}
-				DEPENDS ${lib} ${libFile}
+				DEPENDS $<$<CONFIG:${config}>:${lib}> $<$<CONFIG:${config}>:${libFile}>	
 				COMMENT "Copy \"${libFile}\" to \"${output}\""
 				CONFIG ${config}
 				COMMANDS_CONFIG ${copyCommand}
@@ -129,17 +132,17 @@ function( cpfAddDeployTarget targetName package outputs libs )
 
 	if(outputs)
 
-	add_custom_target(
-		${targetName}
-		DEPENDS ${outputs} ${libs}
-	)
-	set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/private)
+		add_custom_target(
+			${targetName}
+			DEPENDS ${outputs} ${libs}
+		)
+		set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/private)
 
-	# make sure the copying is done before the target is build
-	cpfGetExecutableTargets(exeTargets ${package})
-	foreach(exeTarget ${exeTargets})
-		add_dependencies( ${exeTarget} ${targetName} )
-	endforeach()
+		# make sure the copying is done before the target is build
+		cpfGetExecutableTargets(exeTargets ${package})
+		foreach(exeTarget ${exeTargets})
+			add_dependencies( ${exeTarget} ${targetName} )
+		endforeach()
 
 	endif()
 

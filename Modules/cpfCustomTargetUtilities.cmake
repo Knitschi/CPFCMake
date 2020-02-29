@@ -6,24 +6,40 @@ include(cpfTestUtilities)
 #----------------------------------------------------------------------------------------
 # This function binds some commonly used arguments for the add_custom_command function
 # to reduce code repetition.
-# It only takes the DEPENDS OUTPUT and COMMANDS options.
+# It only takes the DEPENDS OUTPUT and COMMANDS and COMMAND options.
 # The COMMANDS option contains full commands as strings.
 # DEPENDS - Note that for correct dependency propagation you need to depend on a target, and the files that it is producing.
-# 
+# COMMAND	This can be used when the command is available as a list rather then a single string. This can be
+#			be used multiple times to add multiple commands.
+#
 function( cpfAddStandardCustomCommand )
 
-	cmake_parse_arguments(ARG "" "WORKING_DIRECTORY" "COMMANDS;DEPENDS;OUTPUT" ${ARGN} )
+	set(singleValueKeywords WORKING_DIRECTORY )
+	set(multiValueKeywords COMMANDS COMMAND DEPENDS OUTPUT)
+
+	cmake_parse_arguments(ARG "" "${singleValueKeywords}" "${multiValueKeywords}" ${ARGN} )
+
+	set(allKeywords ${singleValueKeywords} ${multiValueKeywords})
+	cpfGetKeywordValueLists( commandOptionLists COMMAND "${allKeywords}" "${ARGN}" commandOptions)
 
 	if(NOT ARG_WORKING_DIRECTORY)
 		set(ARG_WORKING_DIRECTORY ${CPF_ROOT_DIR})
 	endif()
 
+	# Handle the one string commands
 	set(commandArguments)
 	set(comment)
 	foreach(command ${ARG_COMMANDS})
 		separate_arguments(argumentList NATIVE_COMMAND ${command})
 		cpfListAppend( commandArguments COMMAND ${argumentList} )
 		string(APPEND comment "${command} & ")
+	endforeach()
+
+	# Handle the string list commands
+	foreach(listVariable ${commandOptionLists})
+		cpfListAppend( commandArguments COMMAND ${${listVariable}} )
+		cpfJoinString( commandString "${${listVariable}}" " ")
+		string(APPEND comment "${commandString} & ")
 	endforeach()
 	
 	add_custom_command(

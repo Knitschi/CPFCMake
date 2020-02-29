@@ -70,6 +70,7 @@ set( files
 	Modules/cpfLocations.cmake
 	Modules/cpfProperties.cmake
 	Modules/cpfLinkTreeUtilities.cmake
+	Modules/cpfGTAUtilities.cmake
 	Scripts/addVersionTag.cmake
 	Scripts/appendLineToFile.cmake
 	Scripts/clearDirExcept.cmake

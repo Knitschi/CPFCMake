@@ -129,3 +129,25 @@ function( cpfAssertContainsNoGeneratorExpressions string message )
 	endif()
 
 endfunction()
+
+#----------------------------------------------------------------------------------------
+# Joins a list based command line argument into a single string.
+# The reverse operation of separate_arguments().
+#
+function( cpfJoinArguments argumentStringOut arguments )
+
+	set(wrappedArgs)
+	foreach(arg ${arguments})
+		# Wrap argement in double-quotes if it contains a space.
+		cpfStringContains( hasSpaces ${arg} " ")
+		if(hasSpaces)
+			cpfListAppend(wrappedArgs "\"${arg}\"")
+		else()
+			cpfListAppend(wrappedArgs "${arg}")
+		endif()
+	endforeach()
+
+	cpfJoinString(commandString "${wrappedArgs}" " ")
+	set(${argumentStringOut} ${commandString} PARENT_SCOPE)
+
+endfunction()

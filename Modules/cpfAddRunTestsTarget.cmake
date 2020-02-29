@@ -30,26 +30,35 @@ endfunction()
 # Note that this function will add no target if the global CPF_ENABLE_RUN_TESTS_TARGET is set to FALSE
 # 
 # unitTestTarget : The name of t
-function( cpfAddRunCppTestsTargets package)
+function( cpfAddRunCppTestsTargets package arguments)
 
 	if(CPF_ENABLE_RUN_TESTS_TARGET)
 
 		cpfAssertDefined(CPF_TEST_FILES_DIR)
 		
 		# add target that runs all tests
-		cpfAddRunCppTestTarget( runTargetName ${package} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX} "*" )
+		cpfAddRunCppTestTarget( runTargetName ${package} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX} "*" "${arguments}" )
         set_property( TARGET ${package} PROPERTY INTERFACE_CPF_RUN_CPP_TESTS_SUBTARGET ${runTargetName})
 
 		# add target that runs only the fast tests
-		cpfAddRunCppTestTarget( runTargetName ${package} runFastTests_ "*FastFixture*:*FastTests*" )
+		cpfAddRunCppTestTarget( runTargetName ${package} runFastTests_ "*FastFixture*:*FastTests*" "${arguments}")
         set_property( TARGET ${package} PROPERTY INTERFACE_CPF_RUN_FAST_TESTS_SUBTARGET ${runTargetName})
 
+	endif()
+
+	cpfIsVisualStudioGenerator(isVS)
+	if(isVS)
+	    get_property(testTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
+		if(TARGET ${testTarget})
+			cpfJoinArguments(argumentString "${arguments}")
+			set_property(TARGET ${testTarget} PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS ${argumentString})
+		endif()
 	endif()
 	
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix testFilter )
+function( cpfAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix testFilter arguments )
 
 	# get related targets
 	get_property(productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
@@ -66,7 +75,8 @@ function( cpfAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix te
 		cpfAddStandardCustomCommand(
 			DEPENDS "$<TARGET_FILE:${testTarget}>" ${prodLibFile} ${productionLib} ${testTarget}
 			OUTPUT "${stampFile}" 
-			COMMANDS "$<TARGET_FILE:${testTarget}> -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/${runTargetName}\" --gtest_filter=${testFilter}" "cmake -E touch \"${stampFile}\""
+			COMMAND $<TARGET_FILE:${testTarget}> ${arguments} --gtest_filter="${testFilter}"
+			COMMAND cmake -E touch "${stampFile}"
 		)
 
 		add_custom_target(
@@ -74,7 +84,7 @@ function( cpfAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix te
 			DEPENDS ${productionLib} ${testTarget} "${stampFile}"
 		)
 
-		set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/pipeline")
+		set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/test")
 
 		set(${runTargetNameArg} ${runTargetName} PARENT_SCOPE)
 

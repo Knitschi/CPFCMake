@@ -213,7 +213,8 @@ cpfAddCppPackage()
       [ENABLE_RUN_TESTS_TARGET bool]
       [ENABLE_VALGRIND_TARGET bool]
       [ENABLE_VERSION_RC_FILE_GENERATION bool]
-      [HAS_GOOGLE_TEST_EXE]
+      [TEST_EXE_ARGUMENTS arg1 [arg2 ...]]
+      [HAS_GOOGLE_TEST_EXE bool]
   )
 
 
@@ -697,6 +698,22 @@ with this option and provide your custom made :code:`.rc` file.
 Setting this argument overrides the value of the global :code:`CPF_ENABLE_VERSION_RC_FILE_GENERATION` variable for this package.
 
 
+TEST_EXE_ARGUMENTS
+^^^^^^^^^^^^^^^^^^
+
+This option can be used to pass a list of arguments to the test executable when building the :ref:`runAllTests_package` or :ref:`runFastTests_package` targets.
+This can be usefull in cases where the test executable needs information from the build-system like a directory for test files etc.
+When using the "Visual Studio" generator family, these arguments are also set to the "Debugging -> Command Arguments" option to make sure that the same arguments
+are passed to the test executable during debugging.
+
+
+Example
+.. code-block:: none
+  TEST_EXE_ARGUMENTS
+    --TestWorkingDirectory "${CMAKE_BINARY_DIR}/TestFiles"
+    --TestDataDirectory "${CMAKE_SOURCE_DIR}/TestData"
+
+
 HAS_GOOGLE_TEST_EXE
 ^^^^^^^^^^^^^^^^^^^
 
@@ -704,6 +721,7 @@ This option only has an effect when using a Visual Studio Generator.
 When this option is set to true, :code:`cpfAddCppPackage()` will create an empty file :code:`<test-exe>.is_google_test` that lies beside the
 create test executable. Set this option to true when you use the <a href="https://github.com/csoltenborn/GoogleTestAdapter">GoogleTestAdapter</a> 
 and it fails to find your tests.
+
 
 
 .. _cpfQt5AddUIAndQrcFiles:

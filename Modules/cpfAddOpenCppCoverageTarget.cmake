@@ -43,12 +43,14 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
             set( stampFile ${CMAKE_CURRENT_BINARY_DIR}/${targetName}/${targetName}.stamp )
             set( stampFileCommand "cmake -E touch \"${stampFile}\"")
 
+			cpfGetFirstMSVCDebugConfig( msvcDebugConfig )
             cpfAddConfigurationDependendCommand(
                 TARGET ${targetName}
                 OUTPUT "${stampFile}"
-                DEPENDS ${covFiles} ${opencppcoverageTargets}
+				# TODO files einzeln in config generator expressions wrappen.
+                DEPENDS $<$<CONFIG:${msvcDebugConfig}>:"${covFiles}"> $<$<CONFIG:${msvcDebugConfig}>:"${opencppcoverageTargets}">
                 COMMENT ${command}
-                CONFIG Debug
+                CONFIG ${msvcDebugConfig}
                 COMMANDS_CONFIG ${cleanDirCommand} ${runOpenCppCoverageCommand} ${stampFileCommand}
                 COMMANDS_NOT_CONFIG ${stampFileCommand}
             )
@@ -109,7 +111,7 @@ function( cpfAddOpenCppCoverageTarget package)
 
 			cpfAddConfigurationDependendCommand(
 				TARGET ${targetName}
-				OUTPUT ${stampFile} ${coverageOutput}
+				OUTPUT ${stampFile} # ${coverageOutput} The cov files are only created for debug configs so this causes warnings with visual studio when building configs that do not create the files.
 				DEPENDS "$<TARGET_FILE:${testTarget}>" "${prodLibFile}"
 				COMMENT "Run OpenCppCoverage for ${testTarget}."
 				CONFIG ${msvcDebugConfig}

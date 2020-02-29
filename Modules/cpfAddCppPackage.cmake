@@ -87,6 +87,7 @@ function( cpfAddCppPackage )
 		PLUGIN_DEPENDENCIES
 		DISTRIBUTION_PACKAGES
 		COMPILE_OPTIONS
+		TEST_EXE_ARGUMENTS
 	)
 
 	# parse level 0 keywords
@@ -199,7 +200,7 @@ function( cpfAddCppPackage )
 	endif()
 	
 	if(${ARG_ENABLE_RUN_TESTS_TARGET})
-		cpfAddRunCppTestsTargets(${package})
+		cpfAddRunCppTestsTargets(${package} "${ARG_TEST_EXE_ARGUMENTS}")
 	endif()
 
 	if(${ARG_ENABLE_VALGRIND_TARGET})
