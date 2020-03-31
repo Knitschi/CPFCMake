@@ -15,6 +15,7 @@ include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDistributionPackageTarget)
 include(cpfAddValgrindTarget)
 include(cpfAddOpenCppCoverageTarget)
+include(cpfGTAUtilities)
 
 
 #----------------------------------------------------------------------------------------
@@ -83,6 +84,9 @@ function( cpfAddPackages )
 	cpfAddGlobalInstallTarget("${packages}")
 	# pipeline
 	cpfAddPipelineTargetDependencies("${packages}")
+
+	# Generate GoogleTestAdapter settings
+	cpfGenerateGoogleTestAdapterSettingsFile("${packages}")
 
 
 endfunction()
