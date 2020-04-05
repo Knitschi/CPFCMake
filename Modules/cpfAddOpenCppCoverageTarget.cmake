@@ -44,11 +44,13 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
             set( stampFileCommand "cmake -E touch \"${stampFile}\"")
 
 			cpfGetFirstMSVCDebugConfig( msvcDebugConfig )
+			cpfWrapInConfigGeneratorExpressions(wrappedCovFiles "${covFiles}" ${msvcDebugConfig})
+			cpfWrapInConfigGeneratorExpressions(wrappedTargets "${opencppcoverageTargets}" ${msvcDebugConfig})
+			
             cpfAddConfigurationDependendCommand(
                 TARGET ${targetName}
                 OUTPUT "${stampFile}"
-				# TODO files einzeln in config generator expressions wrappen.
-                DEPENDS $<$<CONFIG:${msvcDebugConfig}>:"${covFiles}"> $<$<CONFIG:${msvcDebugConfig}>:"${opencppcoverageTargets}">
+                DEPENDS ${wrappedCovFiles} ${wrappedTargets}
                 COMMENT ${command}
                 CONFIG ${msvcDebugConfig}
                 COMMANDS_CONFIG ${cleanDirCommand} ${runOpenCppCoverageCommand} ${stampFileCommand}

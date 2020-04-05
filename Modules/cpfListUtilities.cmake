@@ -163,3 +163,14 @@ function( cpfGetElementsMatching listOut list regexp )
 	set(${listOut} "${matchingElements}" PARENT_SCOPE)
 
 endfunction()
+
+#----------------------------------------------------------------------------------------
+# Puts a $<$<CONFIG:${config}>:${element}> generator expression around each list element.
+#
+function( cpfWrapInConfigGeneratorExpressions listOut list config )
+	set(wrappedList)
+	foreach(element ${list})
+		cpfListAppend(wrappedList $<$<CONFIG:${config}>:${element}>)
+	endforeach()
+	set(${listOut} ${wrappedList} PARENT_SCOPE)
+endfunction()

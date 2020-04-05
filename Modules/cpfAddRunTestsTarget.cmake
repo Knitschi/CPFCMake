@@ -75,7 +75,7 @@ function( cpfAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix te
 		cpfAddStandardCustomCommand(
 			DEPENDS "$<TARGET_FILE:${testTarget}>" ${prodLibFile} ${productionLib} ${testTarget}
 			OUTPUT "${stampFile}" 
-			COMMAND $<TARGET_FILE:${testTarget}> ${arguments} --gtest_filter="${testFilter}"
+			COMMAND $<TARGET_FILE:${testTarget}> ${arguments} --gtest_filter=${testFilter}
 			COMMAND cmake -E touch "${stampFile}"
 		)
 
