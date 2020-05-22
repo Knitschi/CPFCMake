@@ -41,7 +41,7 @@ CPF_CLANG_FORMAT_EXE
 
 Setting this may only be required when setting \ref cpfArgEnableClangFormatTargets true.
 The value is used when the CPF looks for the clang-format tool. For example you may set it to
-\c clang-format-6.0 if the executable has that name on your system.
+\c clang-format-10 if the executable has that name on your system.
 
 
 CPF_CLANG_TIDY_EXE
@@ -49,7 +49,7 @@ CPF_CLANG_TIDY_EXE
 
 Setting this may only be required when setting \ref cpfArgEnableClangTidyTarget true.
 The value is used when the CPF looks for the clang-tidy tool. For example you can set it to
-\c clang-tidy-6.0 if the executable has that name on your system.
+\c clang-tidy-10 if the executable has that name on your system.
 
 
 CPF_WEBSERVER_BASE_DIR
