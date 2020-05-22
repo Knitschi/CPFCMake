@@ -87,7 +87,7 @@ function( cpfGetRecursiveLinkedLibraries linkedLibsOut target config )
 			elseif( ${lib} MATCHES "[-].+" ) # ignore libraries that are linked via linker options for now.
 			else()
 				# The dependency does not seem to be a generator expression, so it should be available here.
-				message(FATAL_ERROR "Linked library ${lib} is not an existing target. Maybe you need to add another find_package() call.")
+				# message(FATAL_ERROR "Linked library ${lib} is not an existing target. Maybe you need to add another find_package() call.")
 			endif()
 		endif()
 
