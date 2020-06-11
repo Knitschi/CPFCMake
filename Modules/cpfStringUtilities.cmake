@@ -20,7 +20,7 @@ endfunction()
 # The separator will not be contained in the returned substrings
 # 
 function( cpfSplitString VAR string separator)
-	string(REPLACE "${separator}" ";" list ${string})
+	string(REPLACE "${separator}" ";" list "${string}")
 	set(${VAR} "${list}" PARENT_SCOPE)
 endfunction()
 
