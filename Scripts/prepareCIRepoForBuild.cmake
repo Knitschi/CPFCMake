@@ -169,7 +169,7 @@ else()
                 message(STATUS "Run clang-format")
                 cpfExecuteProcess( unused "python3 Sources/CPFBuildscripts/0_CopyScripts.py" ${ROOT_DIR})
                 cpfExecuteProcess( unused "conan install -pr \"${ROOT_DIR}/Sources/CIBuildConfigurations/ConanProfile-${CONFIG}\" -if \"${ROOT_DIR}/Configuration/${CONFIG}\" Sources --build=missing" ${ROOT_DIR})
-                cpfExecuteProcess( unused "python3 3_Make.py ${CONFIG} --target clang-format" ${ROOT_DIR})
+                cpfExecuteProcess( unused "python3 4_Make.py ${CONFIG} --target clang-format" ${ROOT_DIR})
 
                 # Commit the changes made to the packges.
                 foreach(package ${ownedLoosePackages})

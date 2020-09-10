@@ -9,7 +9,7 @@ The custom targets in a CPF project
 
 The build pipeline of a CPF project is implemented with CMake *custom-targets*. In order to execute
 one of those tasks separately from the whole pipeline, one has to build that *target* with the
-\ref BuildStep "3_Make.py" script. The advantage of the custom-target mechanism is, that the used build-system
+\ref BuildStep "4_Make.py" script. The advantage of the custom-target mechanism is, that the used build-system
 handles dependency issues, rebuilding outdated targets and parallelizing task execution.
 
 The availability of custom-targets in a CPF project depends on the projects configuration and its source files.
