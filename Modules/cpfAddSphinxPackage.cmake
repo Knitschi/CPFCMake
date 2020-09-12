@@ -112,7 +112,7 @@ function( cpfFindSphinxBuild )
 
     # We require python to look for sphinx-build
     if(NOT TOOL_PYTHON3)
-        messge(FATAL_ERROR "Error! Python 3 is required when using cpfAddSphinxPackage().")
+        message(FATAL_ERROR "Error! Python 3 is required when using cpfAddSphinxPackage().")
     endif()
 
     # I expect the user site to be something like
