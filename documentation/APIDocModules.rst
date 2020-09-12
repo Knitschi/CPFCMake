@@ -709,6 +709,7 @@ are passed to the test executable during debugging.
 
 Example
 .. code-block:: none
+
   TEST_EXE_ARGUMENTS
     --TestWorkingDirectory "${CMAKE_BINARY_DIR}/TestFiles"
     --TestDataDirectory "${CMAKE_SOURCE_DIR}/TestData"
