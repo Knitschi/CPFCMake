@@ -42,9 +42,14 @@ function( cpfFindRequiredTools )
 	endif()
 
 	# python is optional
-	find_program(Python3_Interpreter python HINTS ${Python3_DIR})
+	find_program(Python3_Interpreter NAMES python python3 HINTS ${Python3_DIR})
 	if(Python3_Interpreter)
-		set(TOOL_PYTHON3 "${Python3_Interpreter}" CACHE PATH "The used python3 interpreter.")
+		cpfExecuteProcess(pythonVersion "\"${Python3_Interpreter}\" --version" "")
+		# Get the pure version number from the returned string.
+		cpfRightSideOfString( pythonVersion ${pythonVersion} 7)
+		if(${pythonVersion} VERSION_GREATER_EQUAL 3.0.0)
+			set(TOOL_PYTHON3 "${Python3_Interpreter}" CACHE PATH "The used python3 interpreter.")
+		endif()
 	endif()
 
 endfunction()
