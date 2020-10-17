@@ -57,7 +57,7 @@ function( cpfAddPackages )
 		)
 	endif()
 
-	add_custom_target( globalFiles SOURCES ${SOLUTION_FILES})
+	set_property(TARGET pipeline PROPERTY SOURCES ${SOLUTION_FILES})
 
 	cpfGetAllPackages(packages)
 	cpfGetOwnedPackages(ownedPackages "${CPF_ROOT_DIR}")
