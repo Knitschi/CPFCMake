@@ -41,7 +41,6 @@ Here is a list of targets that can exist once per CPF project.
 - `clang-format`_
 - `clang-tidy`_
 - `distributionPackages`_
-- `globalFiles`_
 - `install`_
 - `install_all`_
 - `opencppcoverage`_
@@ -122,16 +121,6 @@ distributionPackages
 This target bundles the \ref distributionPackages_package targets.
 
 
-.. _globalFiles:
-
-globalFiles
-"""""""""""
-
-This is only a file container target that does not execute any commands.
-It holds all source files that are of global scope like tool configuration
-files, global documentation, etc..
-
-
 .. _install:
 
 install
@@ -166,6 +155,7 @@ pipeline
 """"""""
 
 The top-level bundle target that will make sure that all other targets are built.
+This file also holds the global files that are handed to the :ref:`cpfAddPackages` function.
 
 runAllTests
 """""""""""

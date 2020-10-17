@@ -106,7 +106,9 @@ Arguments
 GLOBAL_FILES
 ^^^^^^^^^^^^
 
-This option can be used to add further files to the :ref:`globalFiles` target.
+This option can be used to add further files to the :ref:`pipeline` target.
+This can be useful to make global files like a :code:`README.md`  or :code:`LICENSE.txt` visible
+in a Visual Studio solution.
 
 
 
