@@ -9,7 +9,7 @@ The custom targets in a CPF project
 
 The build pipeline of a CPF project is implemented with CMake *custom-targets*. In order to execute
 one of those tasks separately from the whole pipeline, one has to build that *target* with the
-\ref BuildStep "4_Make.py" script. The advantage of the custom-target mechanism is, that the used build-system
+BuildStep "4_Make.py" script. The advantage of the custom-target mechanism is, that the used build-system
 handles dependency issues, rebuilding outdated targets and parallelizing task execution.
 
 The availability of custom-targets in a CPF project depends on the projects configuration and its source files.
@@ -150,6 +150,9 @@ opencppcoverage
 This target bundles the \ref opencppcoverage_package targets. It also
 combines the temporary output of the \ref opencppcoverage_package targets
 into the final html report that can be found in the html output directory.
+
+
+.. _pipeline:
 
 pipeline
 """"""""
