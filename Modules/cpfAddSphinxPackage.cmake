@@ -2,8 +2,6 @@ include_guard(GLOBAL)
 
 include(cpfMiscUtilities)
 
-include(GNUInstallDirs)
-
 #----------------------------------------------------------------------------------------
 # See api docs for documentation
 #         

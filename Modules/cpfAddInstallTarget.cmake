@@ -6,7 +6,6 @@ include(cpfCustomTargetUtilities)
 include(cpfLocations)
 include(cpfProjectUtilities)
 include(cpfAddDeploySharedLibrariesTarget)
-include(GNUInstallDirs)
 
 #---------------------------------------------------------------------------------------------
 # Adds a bundle target for all install_<package> targets
