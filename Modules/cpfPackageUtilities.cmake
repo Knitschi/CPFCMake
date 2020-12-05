@@ -2,10 +2,37 @@ include_guard(GLOBAL)
 
 
 #-----------------------------------------------------------
-# Returns the name of the current source directory.
-function( cpfGetPackageName packageNameOut )
+# Returns the name of the current source directory as packageNameOut.
+#
+function(cpfGetPackageName packageNameOut)
+
     cpfGetParentDirectory( package "${CMAKE_CURRENT_SOURCE_DIR}/blub")
     set(${packageNameOut} "${package}" PARENT_SCOPE)
+
+endfunction()
+
+#-----------------------------------------------------------------------------------------
+# Checks if the package name matches the pattern that has the version added in a postfix
+# e.g. myPackage_6_344_65_232_asd5434f3
+# If that is the case it splits the name into the unversioned part and the version postfix
+# and returns it.
+#
+function( cpfGetUnversionedPackageName isVersionedNameOut unversionedNameOut versionPostfixOut package)
+
+	set(versionPostfixRegexp "^(_[0-9]*_[a-z0-9]*)?" )
+
+	string(REGEX MATCH "^(.*)(_[0-9]*_[0-9]*_[0-9]*)(_[0-9]*_[a-z0-9]*)?$" dummy "${package}")
+
+	if(CMAKE_MATCH_2)
+		set(${isVersionedNameOut} FALSE PARENT_SCOPE)
+		set(${unversionedNameOut} ${CMAKE_MATCH_1} PARENT_SCOPE)
+		set(${versionPostfixOut} ${CMAKE_MATCH_2} PARENT_SCOPE)
+	elseif()
+		set(${isVersionedNameOut} FALSE PARENT_SCOPE)
+		set(${unversionedNameOut} "" PARENT_SCOPE)
+		set(${versionPostfixOut} "" PARENT_SCOPE)
+	endif()
+
 endfunction()
 
 #---------------------------------------------------------------------------------------------
