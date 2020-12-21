@@ -108,3 +108,5 @@ function( cpfGetLastBuildAndLastReleaseVersion lastBuildVersionOut lastReleaseVe
 	set(${lastReleaseVersionOut} "${lastReleaseVersion}" PARENT_SCOPE)
 	
 endfunction()
+
+

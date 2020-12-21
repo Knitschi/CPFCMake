@@ -39,14 +39,15 @@ endfunction()
 # Recursively get either imported or non-imported linked shared libraries of the target.
 # config:	Can be "all" or a specific configuration. This option is used when the libraries list contains
 # targets that are only linked for a special configuration via generator expression $<$<CONFIG:Release>:lib1;lib2>
+# interfaceOnly: Only get the publicly linked tree. This are the dependencies whichs headers are visible to target.
 #
-function( cpfGetRecursiveLinkedLibraries linkedLibsOut target config )
+function( cpfGetRecursiveLinkedLibraries linkedLibsOut target config)
 
 	set(allLinkedLibraries)
     set(outputLocal)
 
 	get_property(linkedLibrariesTemp TARGET ${target} PROPERTY INTERFACE_LINK_LIBRARIES) # The linked libraries for non imported targets
-	removeConfigGeneratorExpressions(allLinkedLibraries "${linkedLibrariesTemp}" ${config})
+	cpfRemoveConfigGeneratorExpressions(allLinkedLibraries "${linkedLibrariesTemp}" ${config})
 
 	get_property(type TARGET ${target} PROPERTY TYPE)	
 	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )		# The following properties can not be accessed for interface libraries.
@@ -61,6 +62,7 @@ function( cpfGetRecursiveLinkedLibraries linkedLibsOut target config )
 			
 			get_property(importedPrivateLibraries TARGET ${target} PROPERTY IMPORTED_LINK_DEPENDENT_LIBRARIES_${configSuffix})
 			list(APPEND allLinkedLibraries ${importedPrivateLibraries})
+
 		endforeach()
 
 	endif()
@@ -83,7 +85,7 @@ function( cpfGetRecursiveLinkedLibraries linkedLibsOut target config )
 			# we can not follow these so we ignore them for now
 			cpfContainsGeneratorExpressions( containsGenExp ${lib})
 			if( containsGenExp )
-				cpfDebugMessage("Ignored dependency ${lib} while setting up shared library deployment targets. The deployment mechanism can not handle generator expressions.")
+				cpfDebugMessage("Ignored dependency ${lib} while accumulating the dependency tree. Function cpfGetRecursiveLinkedLibraries() can not handle generator expressions.")
 			elseif( ${lib} MATCHES "[-].+" ) # ignore libraries that are linked via linker options for now.
 			else()
 				# The dependency does not seem to be a generator expression, so it should be available here.
@@ -105,7 +107,7 @@ endfunction()
 # The function removes libraries from the list that are wrapped in config generator expressions like
 # $<$<CONFIG:Release>:CONAN_LIB::GTest_gmock_mainrelease;CONAN_LIB::GTest_gmockrelease;CONAN_LIB::GTest_gtestrelease>
 #
-function( removeConfigGeneratorExpressions libsOut libs config)
+function( cpfRemoveConfigGeneratorExpressions libsOut libs config)
 
 	cpfGetConfigGenExpRegExp(configRegexp ${config})
 

@@ -179,12 +179,16 @@ function( cpfAddCppPackage )
 		"${ARG_HAS_GOOGLE_TEST_EXE}"
 	)
 
-	#set some package properties
+	# set some package properties
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_LONG_PACKAGE_DESCRIPTION ${ARG_LONG_DESCRIPTION} )
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_WEBPAGE_URL ${ARG_WEBPAGE_URL} )
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
 	
+	# Generate the "<package>DependencyNames.h" header file.
+	if(CPF_ENABLE_DEPENDENCY_NAMES_HEADER_GENERATION)
+		cpfGenerateDependencyNamesHeader(${package})
+	endif()
 	
 	# add other custom targets
 
@@ -511,6 +515,9 @@ function( cpfAddBinaryTarget )
 		endif()
 		
     endif()
+
+	# Set the package name to the target. With this we can check if an imported target is from a CPF package.
+	set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_CPF_PACKAGE_NAME ${ARG_PACKAGE_NAME})
 
     # Link with other libraries
 	# This must be done before setting up the precompiled headers.

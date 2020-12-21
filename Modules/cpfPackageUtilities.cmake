@@ -19,8 +19,6 @@ endfunction()
 #
 function( cpfGetUnversionedPackageName isVersionedNameOut unversionedNameOut versionPostfixOut package)
 
-	set(versionPostfixRegexp "^(_[0-9]*_[a-z0-9]*)?" )
-
 	string(REGEX MATCH "^(.*)(_[0-9]*_[0-9]*_[0-9]*)(_[0-9]*_[a-z0-9]*)?$" dummy "${package}")
 
 	if(CMAKE_MATCH_2)
@@ -29,7 +27,7 @@ function( cpfGetUnversionedPackageName isVersionedNameOut unversionedNameOut ver
 		set(${versionPostfixOut} ${CMAKE_MATCH_2} PARENT_SCOPE)
 	elseif()
 		set(${isVersionedNameOut} FALSE PARENT_SCOPE)
-		set(${unversionedNameOut} "" PARENT_SCOPE)
+		set(${unversionedNameOut} "${package}" PARENT_SCOPE)
 		set(${versionPostfixOut} "" PARENT_SCOPE)
 	endif()
 
@@ -473,5 +471,126 @@ function( cpfAppendPackageExeRPaths package rpath )
 
 endfunction()
 
+#---------------------------------------------------------------------------------------------
+function( cpfGenerateDependencyNamesHeader package )
+
+	set(fileContent)
+
+	# Add macro names and values for this package
+	cpfGetUnversionedPackageName(unused unversionedPackage unused ${package})
+	set(packages ${package})
+	set(macroNames ${unversionedPackage})
+
+	# Add macro names and values for linked packages
+	cpfGetCPFPackagesInPubliclyLinkedTree(linkedPackages linkedMacroNames ${package} TRUE)
+	list(APPEND packages ${linkedPackages})
+	list(APPEND macroNames ${linkedMacroNames})
+
+	foreach(macroName package IN ZIP_LISTS macroNames packages)
+		string(APPEND fileContent "#undef ${macroName}\n")
+		string(APPEND fileContent "#define ${macroName} ${package}\n")
+		string(APPEND fileContent "\n")
+	endforeach()
+	
+	if(packages)
+		set(dependencyNamesHeader "${CMAKE_CURRENT_SOURCE_DIR}/${unversionedPackage}DependencyNames.h")
+		file(CONFIGURE OUTPUT ${dependencyNamesHeader} CONTENT ${fileContent} NEWLINE_STYLE LF)
+	endif()
+
+	set_property(TARGET ${package} APPEND PROPERTY SOURCES ${dependencyNamesHeader} )
+	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${dependencyNamesHeader} )
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetCPFPackagesInPubliclyLinkedTree packagesOut macroNamesOut package isRoot )
+
+	# Get directly linked packages.
+	cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(linkedPackages macroNames ${package} ${isRoot})
+
+	# Recurse through the linked packages.
+	foreach(linkedPackage ${linkedPackages})
+		cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(indirectlyLinkedPackages macroNamesOfIndirectPackages ${linkedPackage} FALSE)
+		list(APPEND linkedPackages ${indirectlyLinkedPackages})
+		list(APPEND macroNames ${macroNamesOfIndirectPackages})
+	endforeach()
+	
+	set(${packagesOut} "${linkedPackages}" PARENT_SCOPE)
+	set(${macroNamesOut} "${macroNames}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages packagesOut packageVersionMacroNamesOut package isRoot)
+
+	# Get visible linked targets
+	cpfGetPubliclyLinkedTargets(linkedTargets ${package})
+
+	# Get all linked CPF packages
+	set(linkedCPFPackages)
+	foreach(target ${linkedTargets})
+		get_property(packageName TARGET ${target} PROPERTY INTERFACE_CPF_PACKAGE_NAME)
+		if(packageName)
+			list(APPEND linkedCPFPackages ${packageName})
+		endif()
+	endforeach()
+
+	# Get macro names for the linked packages
+	set(packageMacroNames)
+	cpfGetUnversionedPackageName(unused unversionedNameThisPackage unused ${package})
+	foreach(linkedPackage ${linkedCPFPackages})
+		cpfGetUnversionedPackageName(unused unversionedNameLinkedPackage unused ${linkedPackage})
+		if(isRoot)
+			# Use a shorter macro name for directly linked packages to reduce clutter in the code.
+			list(APPEND packageMacroNames "${unversionedNameLinkedPackage}")
+		else()
+			list(APPEND packageMacroNames "${unversionedNameLinkedPackage}_from_${unversionedNameThisPackage}")
+		endif()
+	endforeach()
+
+	set(${packagesOut} "${linkedCPFPackages}" PARENT_SCOPE)
+	set(${packageVersionMacroNamesOut} "${packageMacroNames}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetPubliclyLinkedTargets targetsOut package)
+
+	set(allLinkedLibraries)
+
+	get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
+	foreach(binaryTarget ${binaryTargets})
+
+		set(allLinkedLibraries)
+		get_property(linkedLibrariesTemp TARGET ${binaryTarget} PROPERTY INTERFACE_LINK_LIBRARIES) # The linked libraries for non imported targets
+		cpfRemoveConfigGeneratorExpressions(allLinkedLibraries "${linkedLibrariesTemp}" all)
 
 
+		# The following property can not be accessed for interface libraries.
+		get_property(type TARGET ${binaryTarget} PROPERTY TYPE)	
+		if(NOT ${type} STREQUAL INTERFACE_LIBRARY )	
+		
+			cpfGetConfigVariableSuffixes(configSuffixes)
+			foreach(configSuffix ${configSuffixes})
+				get_property(importedInterfaceLibraries TARGET ${binaryTarget} PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES_${configSuffix})		# the libraries that are used in the header files of the target
+				list(APPEND allLinkedLibraries ${importedInterfaceLibraries})
+			endforeach()
+		endif()
+
+	endforeach()
+
+	if(allLinkedLibraries)
+		list(REMOVE_DUPLICATES allLinkedLibraries)
+	endif()
+
+	# Ignore libaries that are linked via generator expression or library file name.
+	set(allLinkedTargets)
+	foreach(linkedLib ${allLinkedLibraries})
+		if(TARGET ${linkedLib})
+			list(APPEND allLinkedTargets ${linkedLib})
+		endif()
+	endforeach()
+
+	set(${targetsOut} "${allLinkedTargets}" PARENT_SCOPE)
+
+endfunction()

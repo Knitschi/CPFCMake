@@ -154,7 +154,7 @@ endfunction()
 function( cpfGetElementsMatching listOut list regexp )
 
 	set(matchingElements)
-	foreach(element ${list})
+	foreach(element IN LISTS list)
 		if("${element}" MATCHES "${regexp}")
 			cpfListAppend(matchingElements ${element})
 		endif()
@@ -173,4 +173,27 @@ function( cpfWrapInConfigGeneratorExpressions listOut list config )
 		cpfListAppend(wrappedList $<$<CONFIG:${config}>:${element}>)
 	endforeach()
 	set(${listOut} ${wrappedList} PARENT_SCOPE)
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetNonUniqueElements listOut listIn )
+
+	set(nonUniqueElements)
+
+	set(workList "${listIn}")
+	foreach(element IN LISTS listIn)
+
+		list(LENGTH workList lengthBefore)
+		list(REMOVE_ITEM workList "${element}")
+		list(LENGTH workList lengthAfter)
+
+		math(EXPR lengthDiff "${lengthBefore} - ${lengthAfter}")  
+		if(${lengthDiff} GREATER 1)
+			cpfListAppend(nonUniqueElements "${element}")
+		endif()
+		
+	endforeach()
+
+	set(${listOut} "${nonUniqueElements}" PARENT_SCOPE)
+
 endfunction()

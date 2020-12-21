@@ -17,6 +17,7 @@ function( cpfRunListUtilitiesTests )
     test_cpfContainsOneOf()
     test_cpfGetFirstMatch()
     test_cpfGetList1WithoutList2()
+    test_cpfGetNonUniqueElements()
 
 endfunction()
 
@@ -212,3 +213,16 @@ function( test_cpfGetList1WithoutList2 )
 
 endfunction()
 
+#----------------------------------------------------------------------------------------
+function( test_cpfGetNonUniqueElements )
+
+    # Setup
+    set(list bli bla "" blub "" bla bleb bleb)
+
+    # Execute
+    cpfGetNonUniqueElements(nonUniqueElements "${list}")
+
+    # Verify
+    cpfAssertListsEqual("${nonUniqueElements}" "bla;;bleb")
+
+endfunction()
