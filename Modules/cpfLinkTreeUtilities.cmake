@@ -43,56 +43,13 @@ endfunction()
 #
 function( cpfGetRecursiveLinkedLibraries linkedLibsOut target config)
 
-	set(allLinkedLibraries)
-    set(outputLocal)
-
-	get_property(linkedLibrariesTemp TARGET ${target} PROPERTY INTERFACE_LINK_LIBRARIES) # The linked libraries for non imported targets
-	cpfRemoveConfigGeneratorExpressions(allLinkedLibraries "${linkedLibrariesTemp}" ${config})
-
-	get_property(type TARGET ${target} PROPERTY TYPE)	
-	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )		# The following properties can not be accessed for interface libraries.
-
-		get_property(linkedLibraries TARGET ${target} PROPERTY LINK_LIBRARIES)		# The linked libraries for non imported targets
-		list(APPEND allLinkedLibraries ${linkedLibraries})
-
-		cpfGetConfigVariableSuffixes(configSuffixes)
-		foreach(configSuffix ${configSuffixes})
-			get_property(importedInterfaceLibraries TARGET ${target} PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES_${configSuffix})		# the libraries that are used in the header files of the target
-			list(APPEND allLinkedLibraries ${importedInterfaceLibraries})
-			
-			get_property(importedPrivateLibraries TARGET ${target} PROPERTY IMPORTED_LINK_DEPENDENT_LIBRARIES_${configSuffix})
-			list(APPEND allLinkedLibraries ${importedPrivateLibraries})
-
-		endforeach()
-
-	endif()
-
-	if(allLinkedLibraries)
-		list(REMOVE_DUPLICATES allLinkedLibraries)
-	endif()
+	cpfGetLinkedTargets(linkedTargets ${target} ${config} FALSE)
 
 	set(outputLocal)
-	foreach( lib ${allLinkedLibraries})
-
-		if(TARGET ${lib})
-			
-			list( APPEND outputLocal ${lib} )
-			cpfGetRecursiveLinkedLibraries( subLibs ${lib} ${config})
-			list( APPEND outputLocal ${subLibs} )
-
-		else()
-			# dependencies can be given as generator expressions
-			# we can not follow these so we ignore them for now
-			cpfContainsGeneratorExpressions( containsGenExp ${lib})
-			if( containsGenExp )
-				cpfDebugMessage("Ignored dependency ${lib} while accumulating the dependency tree. Function cpfGetRecursiveLinkedLibraries() can not handle generator expressions.")
-			elseif( ${lib} MATCHES "[-].+" ) # ignore libraries that are linked via linker options for now.
-			else()
-				# The dependency does not seem to be a generator expression, so it should be available here.
-				# message(FATAL_ERROR "Linked library ${lib} is not an existing target. Maybe you need to add another find_package() call.")
-			endif()
-		endif()
-
+	foreach( lib ${linkedTargets})
+		list( APPEND outputLocal ${lib} )
+		cpfGetRecursiveLinkedLibraries( subLibs ${lib} ${config})
+		list( APPEND outputLocal ${subLibs} )
 	endforeach()
 
 	if(outputLocal)
@@ -100,6 +57,57 @@ function( cpfGetRecursiveLinkedLibraries linkedLibsOut target config)
 	endif()
 
 	set(${linkedLibsOut} ${outputLocal} PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetLinkedTargets targetsOut target config onlyPublicLinkage)
+
+	set(allLinkedLibraries)
+	get_property(linkedLibrariesTemp TARGET ${target} PROPERTY INTERFACE_LINK_LIBRARIES) # The linked libraries for non imported targets
+	# Remove some of the possible generator expressions that can appear in the link tree.
+	cpfRemoveConfigGeneratorExpressions(allLinkedLibraries "${linkedLibrariesTemp}" ${config})
+
+	# The following property can not be accessed for interface libraries.
+	get_property(type TARGET ${target} PROPERTY TYPE)	
+	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )	
+		
+		if(NOT onlyPublicLinkage)
+			get_property(linkedLibraries TARGET ${target} PROPERTY LINK_LIBRARIES)		# The linked libraries for non imported targets
+			list(APPEND allLinkedLibraries ${linkedLibraries})
+		endif()
+
+		cpfGetConfigVariableSuffixes(configSuffixes)
+		foreach(configSuffix ${configSuffixes})
+			
+			# The libraries that are used in the header files of the target
+			get_property(importedInterfaceLibraries TARGET ${target} PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES_${configSuffix})		
+			list(APPEND allLinkedLibraries ${importedInterfaceLibraries})
+
+			# Private link libraries
+			if(NOT onlyPublicLinkage)
+				get_property(importedPrivateLibraries TARGET ${target} PROPERTY IMPORTED_LINK_DEPENDENT_LIBRARIES_${configSuffix})
+				list(APPEND allLinkedLibraries ${importedPrivateLibraries})
+			endif()
+
+		endforeach()
+	endif()
+
+	if(allLinkedLibraries)
+		list(REMOVE_DUPLICATES allLinkedLibraries)
+	endif()
+
+	# Ignore libaries that are linked via generator expression or library file name.
+	set(allLinkedTargets)
+	foreach(lib ${allLinkedLibraries})
+		if(TARGET ${lib})
+			list(APPEND allLinkedTargets ${lib})
+		else()
+			cpfDebugMessage("Ignored dependency ${lib} while accumulating the dependency tree because it is not a cmake target.")
+		endif()
+	endforeach()
+
+	set(${targetsOut} "${allLinkedTargets}" PARENT_SCOPE)
 
 endfunction()
 

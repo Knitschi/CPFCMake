@@ -299,10 +299,6 @@ endfunction()
 # Returns FALSE if there are no changes in the current working directory
 function( cpfWorkingDirectoryIsDirty isDirtyOut repositoryDir)
 
-	#cpfExecuteProcess( diffIndex "git diff-index HEAD" "${repositoryDir}")
-	#devMessage("diff index:")
-	#devMessage("${diffIndex}")
-
 	execute_process(
 		COMMAND git;diff-index;--quiet;HEAD
 		WORKING_DIRECTORY "${repositoryDir}"
@@ -323,8 +319,6 @@ endfunction()
 function( cpfGitStatus repositoryDir )
 
 	cpfExecuteProcess( status "git status" "${repositoryDir}")
-	#devMessage("status in ${repositoryDir}:")
-	#devMessage("${status}")
 
 endfunction()
 

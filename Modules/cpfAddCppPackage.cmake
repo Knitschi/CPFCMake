@@ -779,6 +779,13 @@ function( cpfStripTargetAliases deAliasedTargetsOut targets)
 	
 	set(deAliasedTargets)
 	foreach(target ${targets})
+
+		cpfIsLinkVisibilityKeyword(isKeyword ${target})
+		if(isKeyword)
+			cpfListAppend(deAliasedTargets ${target})
+			continue()
+		endif()
+
 		get_property(aliasedTarget TARGET ${target} PROPERTY ALIASED_TARGET)
 		if(aliasedTarget)
 			cpfListAppend(deAliasedTargets ${aliasedTarget})

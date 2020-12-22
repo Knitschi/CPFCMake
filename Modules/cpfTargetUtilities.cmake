@@ -466,12 +466,15 @@ endfunction()
 #
 function( cpfNormalizeImportedTargetProperties targets )
 
+	# Remove the visibility keywords
+	list(REMOVE_ITEM targets PRIVATE PUBLIC INTERFACE)
+
 	# also get indirectly linked targets
 	cpfGetAllTargetsInLinkTree( allLinkedTargets "${targets}")
 	
 	cpfFilterInTargetsWithProperty( importedTargets "${allLinkedTargets}" IMPORTED TRUE)
 	foreach(target ${importedTargets})
-	
+
 		# make sure the location property does not point to a symbolic link but to the real file on linux
 		if( ${CMAKE_SYSTEM_NAME} STREQUAL Linux)
 			cpfIsSingleConfigGenerator( isSingleConfig )

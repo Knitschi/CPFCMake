@@ -65,13 +65,40 @@ endfunction()
 function( cpfDebugAssertLinkedLibrariesExists linkedLibrariesOut package linkedLibrariesIn )
 
 	foreach(lib ${linkedLibrariesIn})
-		if(NOT TARGET ${lib} )
+
+		# Make sur no empty strings were given.
+		if("${lib}" STREQUAL "")
+			message(FATAL_ERROR "Values for argument keywords LINKED_LIBRARIES and LINKED_TEST_LIBRARIES can not be emtpy strings.")
+		endif()
+
+		# Ignore the visibility keywords
+		cpfIsLinkVisibilityKeyword(isKeyword ${lib})
+		if(isKeyword)
+			# Pass the keyword on
+			list(APPEND linkedLibraries ${lib})
+			continue()
+		endif()
+
+		if(NOT TARGET ${lib})
 			cpfDebugMessage("${lib} is not a Target when creating package ${package}. If it should be available, make sure to have target ${lib} added before adding this package.")
 		else()
 			list(APPEND linkedLibraries ${lib})
 		endif()
+
 	endforeach()
+
 	set(${linkedLibrariesOut} ${linkedLibraries} PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------
+function( cpfIsLinkVisibilityKeyword isKeywordOut linkedTarget )
+
+	if((${linkedTarget} STREQUAL "PRIVATE") OR (${linkedTarget} STREQUAL "PUBLIC") OR (${linkedTarget} STREQUAL "INTERFACE"))
+		set(${isKeywordOut} TRUE PARENT_SCOPE)
+	else()
+		set(${isKeywordOut} FALSE PARENT_SCOPE)
+	endif()
 
 endfunction()
 

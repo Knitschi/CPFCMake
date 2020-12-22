@@ -512,7 +512,7 @@ function( cpfGetCPFPackagesInPubliclyLinkedTree packagesOut macroNamesOut packag
 
 	# Recurse through the linked packages.
 	foreach(linkedPackage ${linkedPackages})
-		cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(indirectlyLinkedPackages macroNamesOfIndirectPackages ${linkedPackage} FALSE)
+		cpfGetCPFPackagesInPubliclyLinkedTree(indirectlyLinkedPackages macroNamesOfIndirectPackages ${linkedPackage} FALSE)
 		list(APPEND linkedPackages ${indirectlyLinkedPackages})
 		list(APPEND macroNames ${macroNamesOfIndirectPackages})
 	endforeach()
@@ -526,13 +526,23 @@ endfunction()
 function( cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages packagesOut packageVersionMacroNamesOut package isRoot)
 
 	# Get visible linked targets
-	cpfGetPubliclyLinkedTargets(linkedTargets ${package})
+	set(linkedTargets)
+	get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
+	foreach(target ${binaryTargets})
+		if(isRoot)
+			cpfGetLinkedTargets(linkedTargetsTemp ${target} all FALSE)
+		else()
+			cpfGetLinkedTargets(linkedTargetsTemp ${target} all TRUE)
+		endif()
+		list(APPEND linkedTargets ${linkedTargetsTemp})
+	endforeach()
+	list(REMOVE_DUPLICATES linkedTargets)
 
-	# Get all linked CPF packages
+	# Get the packages of the targets
 	set(linkedCPFPackages)
 	foreach(target ${linkedTargets})
 		get_property(packageName TARGET ${target} PROPERTY INTERFACE_CPF_PACKAGE_NAME)
-		if(packageName)
+		if(packageName AND (NOT (${packageName} STREQUAL ${package})))
 			list(APPEND linkedCPFPackages ${packageName})
 		endif()
 	endforeach()
@@ -555,44 +565,3 @@ function( cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages packagesOut packageVer
 
 endfunction()
 
-#---------------------------------------------------------------------------------------------
-function( cpfGetPubliclyLinkedTargets targetsOut package)
-
-	set(allLinkedLibraries)
-
-	get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
-	foreach(binaryTarget ${binaryTargets})
-
-		set(allLinkedLibraries)
-		get_property(linkedLibrariesTemp TARGET ${binaryTarget} PROPERTY INTERFACE_LINK_LIBRARIES) # The linked libraries for non imported targets
-		cpfRemoveConfigGeneratorExpressions(allLinkedLibraries "${linkedLibrariesTemp}" all)
-
-
-		# The following property can not be accessed for interface libraries.
-		get_property(type TARGET ${binaryTarget} PROPERTY TYPE)	
-		if(NOT ${type} STREQUAL INTERFACE_LIBRARY )	
-		
-			cpfGetConfigVariableSuffixes(configSuffixes)
-			foreach(configSuffix ${configSuffixes})
-				get_property(importedInterfaceLibraries TARGET ${binaryTarget} PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES_${configSuffix})		# the libraries that are used in the header files of the target
-				list(APPEND allLinkedLibraries ${importedInterfaceLibraries})
-			endforeach()
-		endif()
-
-	endforeach()
-
-	if(allLinkedLibraries)
-		list(REMOVE_DUPLICATES allLinkedLibraries)
-	endif()
-
-	# Ignore libaries that are linked via generator expression or library file name.
-	set(allLinkedTargets)
-	foreach(linkedLib ${allLinkedLibraries})
-		if(TARGET ${linkedLib})
-			list(APPEND allLinkedTargets ${linkedLib})
-		endif()
-	endforeach()
-
-	set(${targetsOut} "${allLinkedTargets}" PARENT_SCOPE)
-
-endfunction()

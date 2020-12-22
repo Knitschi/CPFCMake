@@ -53,9 +53,6 @@ function( cpfAddDeploySharedLibsToBuildStageTarget package libs subdirectory)
 
 	endforeach()
 
-	#devMessage("${targetName}")
-	#devMessage("${outputs}")
-
 	cpfAddDeployTarget( ${targetName} ${package} "${outputs}" "${libs}" )
 
 endfunction()
