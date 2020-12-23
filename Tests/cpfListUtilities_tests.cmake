@@ -18,6 +18,7 @@ function( cpfRunListUtilitiesTests )
     test_cpfGetFirstMatch()
     test_cpfGetList1WithoutList2()
     test_cpfGetNonUniqueElements()
+    test_cpfSetDifference()
 
 endfunction()
 
@@ -224,5 +225,20 @@ function( test_cpfGetNonUniqueElements )
 
     # Verify
     cpfAssertListsEqual("${nonUniqueElements}" "bla;;bleb")
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( test_cpfSetDifference )
+
+    # Setup
+    set(list1 bli bla "" blub "" bla bleb bleb)
+    set(list2 "" foo bla bar )
+
+    # Execute
+    cpfSetDifference(difference "${list1}" "${list2}")
+
+    # Verify
+    cpfAssertListsEqual("${difference}" "bli;blub;bleb;bleb")
 
 endfunction()

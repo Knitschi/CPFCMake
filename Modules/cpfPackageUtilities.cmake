@@ -482,9 +482,26 @@ function( cpfGenerateDependencyNamesHeader package )
 	set(macroNames ${unversionedPackage})
 
 	# Add macro names and values for linked packages
-	cpfGetCPFPackagesInPubliclyLinkedTree(linkedPackages linkedMacroNames ${package} TRUE)
-	list(APPEND packages ${linkedPackages})
-	list(APPEND macroNames ${linkedMacroNames})
+	cpfGetCPFPackagesInPubliclyLinkedTree(interfacePackages interfaceMacroNames ${package} TRUE)
+	list(APPEND packages ${interfacePackages})
+	list(APPEND macroNames ${interfaceMacroNames})
+
+	# Write the public names file
+	cpfWriteDependencyNamesToFile("${CMAKE_CURRENT_SOURCE_DIR}/${unversionedPackage}DependencyNames.h" "${packages}" "${macroNames}")
+
+	# The private names header can also contain the names of privatly linked dependencies. 
+	# They can not appear in the public header because it will make the short macro names ambigious.
+	cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(privatePackages privateMacroNames ${package} PRIVATE TRUE)
+	list(APPEND packages ${privatePackages})
+	list(APPEND macroNames ${privateMacroNames})
+
+	# Write the private names file
+	cpfWriteDependencyNamesToFile("${CMAKE_CURRENT_SOURCE_DIR}/${unversionedPackage}DependencyNamesPrivate.h" "${packages}" "${macroNames}")
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfWriteDependencyNamesToFile absFilename packages macroNames )
 
 	foreach(macroName package IN ZIP_LISTS macroNames packages)
 		string(APPEND fileContent "#undef ${macroName}\n")
@@ -493,22 +510,21 @@ function( cpfGenerateDependencyNamesHeader package )
 	endforeach()
 	
 	if(packages)
-		set(dependencyNamesHeader "${CMAKE_CURRENT_SOURCE_DIR}/${unversionedPackage}DependencyNames.h")
-		file(CONFIGURE OUTPUT ${dependencyNamesHeader} CONTENT ${fileContent} NEWLINE_STYLE LF)
+		file(CONFIGURE OUTPUT ${absFilename} CONTENT ${fileContent} NEWLINE_STYLE LF)
 	endif()
 
 	get_property(productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
-	set_property(TARGET ${productionLib} APPEND PROPERTY SOURCES ${dependencyNamesHeader} )
-	set_property(TARGET ${productionLib} APPEND PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${dependencyNamesHeader} )
-	source_group("" FILES ${dependencyNamesHeader})
+	set_property(TARGET ${productionLib} APPEND PROPERTY SOURCES ${absFilename} )
+	set_property(TARGET ${productionLib} APPEND PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${absFilename} )
+	source_group("" FILES ${absFilename})
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetCPFPackagesInPubliclyLinkedTree packagesOut macroNamesOut package isRoot )
+function( cpfGetCPFPackagesInPubliclyLinkedTree packagesOut macroNamesOut package isRoot)
 
 	# Get directly linked packages.
-	cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(linkedPackages macroNames ${package} ${isRoot})
+	cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(linkedPackages macroNames ${package} INTERFACE ${isRoot})
 
 	# Recurse through the linked packages.
 	foreach(linkedPackage ${linkedPackages})
@@ -523,18 +539,13 @@ function( cpfGetCPFPackagesInPubliclyLinkedTree packagesOut macroNamesOut packag
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages packagesOut packageVersionMacroNamesOut package isRoot)
+function( cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages packagesOut packageVersionMacroNamesOut package linkVisibility isRoot)
 
 	# Get visible linked targets
 	set(linkedTargets)
 	get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
 	foreach(target ${binaryTargets})
-		if(isRoot)
-			cpfGetLinkedTargets(linkedTargetsTemp ${target} all FALSE)
-		else()
-			cpfGetLinkedTargets(linkedTargetsTemp ${target} all TRUE)
-		endif()
-		list(APPEND linkedTargets ${linkedTargetsTemp})
+		cpfGetLinkedTargets(linkedTargets ${target} all ${linkVisibility})
 	endforeach()
 	list(REMOVE_DUPLICATES linkedTargets)
 

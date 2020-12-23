@@ -349,7 +349,7 @@ function( cpfAddPackageBinaryTargets
 			TARGET_TYPE ${type}
 			NAME ${exeTarget}
 			FILES ${MAIN_CPP} ${exeFiles}
-			LINKED_LIBRARIES ${linkedLibraries} ${productionTarget}
+			LINKED_LIBRARIES ${linkedLibraries} PRIVATE ${productionTarget}
 			IDE_FOLDER ${package}/exe
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
@@ -376,7 +376,7 @@ function( cpfAddPackageBinaryTargets
 			NAME ${fixtureTarget}
 			PUBLIC_HEADER ${publicFixtureHeaderFiles}
 			FILES ${fixtureFiles}
-			LINKED_LIBRARIES ${productionTarget} ${linkedTestLibraries}
+			LINKED_LIBRARIES PUBLIC ${productionTarget} ${linkedTestLibraries}
 			IDE_FOLDER ${package}/${VSTestFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
@@ -404,7 +404,7 @@ function( cpfAddPackageBinaryTargets
 			TARGET_TYPE CONSOLE_APP
 			NAME ${unitTestsTarget}
 			FILES ${testFiles}
-			LINKED_LIBRARIES ${productionTarget} ${fixtureTarget} ${linkedTestLibraries}
+			LINKED_LIBRARIES PRIVATE ${productionTarget} ${fixtureTarget} ${linkedTestLibraries}
 			IDE_FOLDER ${package}/${VSTestFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}

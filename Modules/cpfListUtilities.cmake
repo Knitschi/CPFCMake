@@ -176,6 +176,8 @@ function( cpfWrapInConfigGeneratorExpressions listOut list config )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Returns a list with the elements in listIn that appear more than once.
+#
 function( cpfGetNonUniqueElements listOut listIn )
 
 	set(nonUniqueElements)
@@ -197,3 +199,18 @@ function( cpfGetNonUniqueElements listOut listIn )
 	set(${listOut} "${nonUniqueElements}" PARENT_SCOPE)
 
 endfunction()
+
+#----------------------------------------------------------------------------------------
+# Returns listA without the elements that also occur in listB.
+#
+function( cpfSetDifference listOut listA listB )
+
+	foreach(bElement IN LISTS listB)
+		list(REMOVE_ITEM listA "${bElement}")
+	endforeach()
+
+	set(${listOut} "${listA}" PARENT_SCOPE)
+
+endfunction()
+
+

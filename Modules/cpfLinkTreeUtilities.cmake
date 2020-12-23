@@ -43,7 +43,7 @@ endfunction()
 #
 function( cpfGetRecursiveLinkedLibraries linkedLibsOut target config)
 
-	cpfGetLinkedTargets(linkedTargets ${target} ${config} FALSE)
+	cpfGetLinkedTargets(linkedTargets ${target} ${config} BOTH)
 
 	set(outputLocal)
 	foreach( lib ${linkedTargets})
@@ -61,53 +61,58 @@ function( cpfGetRecursiveLinkedLibraries linkedLibsOut target config)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetLinkedTargets targetsOut target config onlyPublicLinkage)
+function( cpfGetLinkedTargets targetsOut target config linkVisibility)
 
-	set(allLinkedLibraries)
-	get_property(linkedLibrariesTemp TARGET ${target} PROPERTY INTERFACE_LINK_LIBRARIES) # The linked libraries for non imported targets
+	get_property(interfaceLibrariesTemp TARGET ${target} PROPERTY INTERFACE_LINK_LIBRARIES) # The linked libraries for non imported targets
 	# Remove some of the possible generator expressions that can appear in the link tree.
-	cpfRemoveConfigGeneratorExpressions(allLinkedLibraries "${linkedLibrariesTemp}" ${config})
+	cpfRemoveConfigGeneratorExpressions(interfaceLibraries "${interfaceLibrariesTemp}" ${config})
 
 	# The following property can not be accessed for interface libraries.
 	get_property(type TARGET ${target} PROPERTY TYPE)	
 	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )	
-		
-		if(NOT onlyPublicLinkage)
-			get_property(linkedLibraries TARGET ${target} PROPERTY LINK_LIBRARIES)		# The linked libraries for non imported targets
-			list(APPEND allLinkedLibraries ${linkedLibraries})
-		endif()
+
+		get_property(allLinkedLibraries TARGET ${target} PROPERTY LINK_LIBRARIES)		# The linked libraries for non imported targets
 
 		cpfGetConfigVariableSuffixes(configSuffixes)
 		foreach(configSuffix ${configSuffixes})
 			
 			# The libraries that are used in the header files of the target
 			get_property(importedInterfaceLibraries TARGET ${target} PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES_${configSuffix})		
-			list(APPEND allLinkedLibraries ${importedInterfaceLibraries})
+			list(APPEND interfaceLibraries ${importedInterfaceLibraries})
 
-			# Private link libraries
-			if(NOT onlyPublicLinkage)
-				get_property(importedPrivateLibraries TARGET ${target} PROPERTY IMPORTED_LINK_DEPENDENT_LIBRARIES_${configSuffix})
-				list(APPEND allLinkedLibraries ${importedPrivateLibraries})
-			endif()
+			get_property(importedPrivateLibraries TARGET ${target} PROPERTY IMPORTED_LINK_DEPENDENT_LIBRARIES_${configSuffix})
+			list(APPEND allLinkedLibraries ${importedPrivateLibraries})
 
 		endforeach()
 	endif()
 
-	if(allLinkedLibraries)
-		list(REMOVE_DUPLICATES allLinkedLibraries)
+	list(APPEND allLinkedLibraries ${interfaceLibraries})
+	if(${linkVisibility} STREQUAL INTERFACE)
+		set(linkedLibraries ${interfaceLibraries})
+	elseif(${linkVisibility} STREQUAL PRIVATE)
+		cpfSetDifference(privateLibraries "${allLinkedLibraries}" "${interfaceLibraries}")
+		set(linkedLibraries ${privateLibraries})
+	elseif(${linkVisibility} STREQUAL BOTH)
+		set(linkedLibraries ${allLinkedLibraries})
+	else()
+		message(FATAL_ERROR "Unexpected value for argument linkVisibility.")
+	endif()
+
+	if(linkedLibraries)
+		list(REMOVE_DUPLICATES linkedLibraries)
 	endif()
 
 	# Ignore libaries that are linked via generator expression or library file name.
-	set(allLinkedTargets)
-	foreach(lib ${allLinkedLibraries})
+	set(linkedTargets)
+	foreach(lib ${linkedLibraries})
 		if(TARGET ${lib})
-			list(APPEND allLinkedTargets ${lib})
+			list(APPEND linkedTargets ${lib})
 		else()
 			cpfDebugMessage("Ignored dependency ${lib} while accumulating the dependency tree because it is not a cmake target.")
 		endif()
 	endforeach()
 
-	set(${targetsOut} "${allLinkedTargets}" PARENT_SCOPE)
+	set(${targetsOut} "${linkedTargets}" PARENT_SCOPE)
 
 endfunction()
 
@@ -121,7 +126,7 @@ function( cpfRemoveConfigGeneratorExpressions libsOut libs config)
 
 	set(cleanLibs)
 	if(${config} STREQUAL all)
-		
+
 		set(openRegexp FALSE)
 		foreach(lib ${libs})
 
@@ -171,7 +176,7 @@ function( cpfRemoveConfigGeneratorExpressions libsOut libs config)
 
 	endif()
 
-	set(${libsOut} ${cleanLibs} PARENT_SCOPE)
+	set(${libsOut} "${cleanLibs}" PARENT_SCOPE)
 
 endfunction()
 
