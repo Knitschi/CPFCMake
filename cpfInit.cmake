@@ -1,7 +1,7 @@
 
 
 # This needs to be done as early as possible,
-set( CPF_MINIMUM_CMAKE_VERSION 3.12.1)
+set( CPF_MINIMUM_CMAKE_VERSION 3.20.0)
 cmake_minimum_required(VERSION ${CPF_MINIMUM_CMAKE_VERSION})
 cmake_policy(SET CMP0007 NEW) # Do not ignore empty list elements
 cmake_policy(SET CMP0011 NEW) # Policy settings from included files do not affect the including context.
