@@ -165,14 +165,19 @@ function( cpfGetElementsMatching listOut list regexp )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Puts a $<$<CONFIG:${config}>:${element}> generator expression around each list element.
+# Puts a $<$<CONFIG:${configs}>:${element}> generator expression around each list element.
+# This means that all elements in the list will evalutate to nothing if the compiled
+# configuration is not the given configuration.
 #
-function( cpfWrapInConfigGeneratorExpressions listOut list config )
+function( cpfWrapInConfigGeneratorExpressions listOut list configs )
+	
+	cpfJoinString(configCommaList "${configs}" ",")
 	set(wrappedList)
 	foreach(element ${list})
-		cpfListAppend(wrappedList $<$<CONFIG:${config}>:${element}>)
+		cpfListAppend(wrappedList "$<$<CONFIG:${configCommaList}>:${element}>")
 	endforeach()
 	set(${listOut} ${wrappedList} PARENT_SCOPE)
+
 endfunction()
 
 #----------------------------------------------------------------------------------------
