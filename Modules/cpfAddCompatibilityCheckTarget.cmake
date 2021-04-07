@@ -599,7 +599,7 @@ function( cpfAddCleanOutputDirsCommands cleanStampsOut target reportFiles )
 		if( NOT ${dir} STREQUAL "${currentDir}")
 			# add clear command for all files from the current dir
 			if(currentDir)
-				cpfAddClearDirExceptCommand( stampFile ${currentDir} ${names} ${targetName} ${filesInDir})
+				cpfAddClearDirExceptCommand( stampFile ${currentDir} "${names}" ${targetName} ${filesInDir})
 				cpfListAppend( stampFiles ${stampFile})
 			endif()
 			
