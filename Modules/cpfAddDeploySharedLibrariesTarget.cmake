@@ -43,7 +43,7 @@ function( cpfAddDeploySharedLibsToBuildStageTarget package libs subdirectory)
 			cpfGetLibFilePath( libFile ${lib} ${config})
 			cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${subdirectory}" ${lib} ${libFile} "${outputs}")
 
-			# Deploy the liner pdb files if they are available.
+			# Deploy the linker pdb files if they are available.
 			cpfGetImportedLibPdbFilePath( libPdbFile ${lib} ${config})
 			if(libPdbFile)
 				cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${subdirectory}" ${lib} ${libPdbFile} "${outputs}")
