@@ -13,7 +13,10 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
         return()
     endif()
 
-    if(MSVC)
+	cpfGetMSVCDebugConfigs( msvcDebugConfigs )
+
+    if(msvcDebugConfigs)
+
         set(targetName OpenCppCoverage)
 
         #Locations
@@ -41,10 +44,8 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
 
             set(mainOutputFile "${htmlReportDir}/index.html")
 
-			cpfGetFirstMSVCDebugConfig( msvcDebugConfig )
-			
             cpfAddConfigurationDependendCommand(
-                CONFIGS ${msvcDebugConfig}
+                CONFIGS ${msvcDebugConfigs}
 				DEPENDS ${covFiles} ${opencppcoverageTargets}
 				COMMANDS ${cleanDirCommand} ${runOpenCppCoverageCommand}
 				OUTPUT ${mainOutputFile}
@@ -85,8 +86,8 @@ function( cpfAddOpenCppCoverageTarget package)
 	if(TARGET ${testTarget})
 
 		# add OpenCppCoverage commands if possible
-		cpfGetFirstMSVCDebugConfig( msvcDebugConfig )
-		if(msvcDebugConfig) 
+		cpfGetMSVCDebugConfigs( msvcDebugConfigs )
+		if(msvcDebugConfigs) 
 				
 			cpfFindRequiredProgram( TOOL_OPENCPPCOVERAGE OpenCppCoverage "A tool that creates coverage reports for C++ binaries." "")
 
@@ -102,7 +103,7 @@ function( cpfAddOpenCppCoverageTarget package)
 			cpfGetTargetFileGeneratorExpression(prodLibFile ${productionLib})
 
 			cpfAddConfigurationDependendCommand(
-                CONFIGS ${msvcDebugConfig}
+                CONFIGS ${msvcDebugConfigs}
 				DEPENDS "$<TARGET_FILE:${testTarget}>" "${prodLibFile}"
 				COMMANDS ${removeTempCovFileComand} ${runOpenCppCoverageCommand} ${cmakeRenameCommand}
 				OUTPUT ${coverageOutput}

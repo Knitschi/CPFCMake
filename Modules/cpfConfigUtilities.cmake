@@ -211,16 +211,17 @@ function( cpfPrintToolchainVariables )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetFirstMSVCDebugConfig configOut )
+function( cpfGetMSVCDebugConfigs configsOut )
+	
+	set(foundConfigs)
 	cpfGetConfigurations( configs )
 	foreach(config ${configs})
 		cpfIsMSVCDebugConfig(isDebugConfig ${config})
 		if( isDebugConfig )
-			set( ${configOut} ${config} PARENT_SCOPE)
-			return()
+			list(APPEND foundConfigs ${config})
 		endif()		
 	endforeach()
-	set( ${configOut} "" PARENT_SCOPE)
+	set( ${configsOut} "${foundConfigs}" PARENT_SCOPE)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
