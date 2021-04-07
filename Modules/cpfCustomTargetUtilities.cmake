@@ -196,43 +196,47 @@ function( cpfGetWriteFileCommands commandsOut absFilePath fileContent )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# add a custom command that executes a file in the script directory with the given variable definitions
+# Adds a custom command that is only run when the given CONFIGS are build.
+# The function wraps all elements in the arguments DEPENDS, COMMANDS and OUTPUT in 
+# generator expressions of the form $<$<CONFIG:${configs}>:${element}>
 #
-# target				- The name of the target to which to command belongs. 
-# OUTPUT				- Forwarded to add_custom_command()
-# DEPENDS				- Forwarded to add_custom_command(). Note that for correct dependency propagation you need to depend on a target, and the files that it is producing.
-# COMMENT				- Forwarded to add_custom_command()
-# CONFIG				- The configuration for which COMMAND_CONFIG is executed.
-# COMMANDS_CONFIG		- The commands (as a single strings) that are executed when the current configuration is CONFIG
-# COMMANDS_NOT_CONFIG	- The commands (as a single strings) that are executed when the current configuration is not CONFIG
+# CONFIGS			A subset of the configurations that are defined with the CMAKE_CONFIGURATION_TYPES variable.
+#					The custom command will only be run when the built configuration is one of the given configurations.
+# DEPENDS			Equivalent to the add_custum_command(DEPENDS) argument.
+# COMMANDS			A list of commands in string form. This is internally then separated into command lists.
+# OUTPUT			Equivalent to the add_custum_command(DEPENDS) argument.
+# [COMMENT]			If this is given, the given string is printed when the command is run. Otherwise a default
+#					string is printed that contains the given commands.
 #
-# Escaped characters in the commands:
-# If a " is needed in the final command, set it with \"
-# If a \ is needed in the final command, set it with \\
-# if a \\ or \" is needed -> only god, or improving this function can help you. Welcome to CMake-escape-hell.
-# If a ; is needed in the final command, set it with $<SEMICOLON>
 function( cpfAddConfigurationDependendCommand )
 
 	cmake_parse_arguments(
 		ARG 
 		"" 
-		"COMMENT;CONFIG;TARGET" 
-		"OUTPUT;DEPENDS;COMMANDS_CONFIG;COMMANDS_NOT_CONFIG"
+		"COMMENT"
+		"CONFIGS;DEPENDS;COMMANDS;OUTPUT"
 		${ARGN} 
 	)
 
-	set(variableDefinitions)
-	cpfListAppend( variableDefinitions DEFINITION VARIABLE COMMANDS_CONFIG VALUES ${ARG_COMMANDS_CONFIG} )
-	cpfListAppend( variableDefinitions DEFINITION VARIABLE COMMANDS_NOT_CONFIG VALUES ${ARG_COMMANDS_NOT_CONFIG} )
+	# Wrap the dependencies.
+	cpfWrapInConfigGeneratorExpressions(dependsWrapped "${ARG_DEPENDS}" "${ARG_CONFIGS}")
 
-    cpfSetupArgumentFile( argumentFile ${ARG_TARGET} "${ARG_DEPENDS}" "${variableDefinitions}")
-    file(RELATIVE_PATH relPathArgFile "${CPF_ROOT_DIR}" "${argumentFile}")
+	# Wrap the command lists in generator expressions.
+	set(allCommandLists)
+	foreach(command ${ARG_COMMANDS})
+		separate_arguments(commandList NATIVE_COMMAND ${command})
+		cpfWrapInConfigGeneratorExpressions(commandListWrapped "${commandList}" "${ARG_CONFIGS}")
+		cpfListAppend(allCommandLists "COMMAND;${commandListWrapped}")
+	endforeach()
+
+	# Wrap the output.
+	cpfWrapInConfigGeneratorExpressions(outputWrapped "${ARG_OUTPUT}" "${ARG_CONFIGS}")
 
 	cpfAddStandardCustomCommand(
-		OUTPUT ${ARG_OUTPUT}
-		DEPENDS "${argumentFile}" ${ARG_DEPENDS}
+		DEPENDS ${dependsWrapped}
+		${allCommandLists}
+		OUTPUT ${outputWrapped}
 		COMMENT ${ARG_COMMENT}
-		COMMANDS "\"${CMAKE_COMMAND}\" -DCMAKE_HOST_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME} -DCURRENT_CONFIG=$<CONFIG> -DSTATIC_CONFIG=${ARG_CONFIG} -DARGUMENT_FILE=${relPathArgFile} -DPRINT_SKIPPED_INSTEAD_OF_NON_CONFIG_OUTPUT=TRUE -P \"${CPF_ABS_SCRIPT_DIR}/executeCommandForConfig.cmake\""
 	)
 
 endfunction()

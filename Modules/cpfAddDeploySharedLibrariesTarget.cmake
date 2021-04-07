@@ -104,13 +104,11 @@ function( cpfAddDeployCommand outputsOut targetName package config outputSubDir 
 			set(touchCommand "cmake -E touch \"${output}\"")
 
 			cpfAddConfigurationDependendCommand(
-				TARGET ${targetName}
+				CONFIGS ${config}
+				DEPENDS ${lib} ${libFile}
+				COMMANDS ${copyCommand}
 				OUTPUT ${output}
-				DEPENDS $<$<CONFIG:${config}>:${lib}> $<$<CONFIG:${config}>:${libFile}>	
 				COMMENT "Copy \"${libFile}\" to \"${output}\""
-				CONFIG ${config}
-				COMMANDS_CONFIG ${copyCommand}
-				COMMANDS_NOT_CONFIG ${touchCommand}
 			)
 
 		endif()

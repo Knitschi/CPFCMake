@@ -14,10 +14,10 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
     endif()
 
     if(MSVC)
-        set(targetName opencppcoverage)
+        set(targetName OpenCppCoverage)
 
         #Locations
-        set(htmlReportDir ${CMAKE_BINARY_DIR}/${targetName}/${html}/${CPF_OPENCPPCOVERAGE_DIR})
+        set(htmlReportDir ${CMAKE_BINARY_DIR}/${targetName}/$<CONFIG>/${html})
 
         cpfGetSubtargets(opencppcoverageTargets "${packages}" INTERFACE_CPF_OPENCPPCOVERAGE_SUBTARGET)
         if(opencppcoverageTargets)
@@ -29,7 +29,7 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
 
             # delete output command
             # OpenCppCoverage will issue an error if the output directory already exists.
-            set( cleanDirCommand "cmake -E remove_directory \"${htmlReportDir}\"")
+            set( cleanDirCommand "\"${CMAKE_COMMAND}\" -E remove_directory \"${htmlReportDir}\"")
 
             # assemble OpenCppCoverage command
             set( runOpenCppCoverageCommand "\"${TOOL_OPENCPPCOVERAGE}\" ")
@@ -39,27 +39,20 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
             string(APPEND runOpenCppCoverageCommand "--export_type=html:\"${htmlReportDir}\" ")
             string(APPEND runOpenCppCoverageCommand "--quiet")
 
-            # stampfile command
-            set( stampFile ${CMAKE_CURRENT_BINARY_DIR}/${targetName}/${targetName}.stamp )
-            set( stampFileCommand "cmake -E touch \"${stampFile}\"")
+            set(mainOutputFile "${htmlReportDir}/index.html")
 
 			cpfGetFirstMSVCDebugConfig( msvcDebugConfig )
-			cpfWrapInConfigGeneratorExpressions(wrappedCovFiles "${covFiles}" ${msvcDebugConfig})
-			cpfWrapInConfigGeneratorExpressions(wrappedTargets "${opencppcoverageTargets}" ${msvcDebugConfig})
 			
             cpfAddConfigurationDependendCommand(
-                TARGET ${targetName}
-                OUTPUT "${stampFile}"
-                DEPENDS ${wrappedCovFiles} ${wrappedTargets}
-                COMMENT ${command}
-                CONFIG ${msvcDebugConfig}
-                COMMANDS_CONFIG ${cleanDirCommand} ${runOpenCppCoverageCommand} ${stampFileCommand}
-                COMMANDS_NOT_CONFIG ${stampFileCommand}
+                CONFIGS ${msvcDebugConfig}
+				DEPENDS ${covFiles} ${opencppcoverageTargets}
+				COMMANDS ${cleanDirCommand} ${runOpenCppCoverageCommand}
+				OUTPUT ${mainOutputFile}
             )
 
             add_custom_target(
                 ${targetName}
-                DEPENDS ${opencppcoverageTargets} ${stampFile}
+                DEPENDS ${opencppcoverageTargets} ${mainOutputFile}
             )
 
 		endif()
@@ -98,32 +91,27 @@ function( cpfAddOpenCppCoverageTarget package)
 			cpfFindRequiredProgram( TOOL_OPENCPPCOVERAGE OpenCppCoverage "A tool that creates coverage reports for C++ binaries." "")
 
 			# add OpenCppCoverage commands
-			set(coverageOutputTemp "${binaryDir}/${testTarget}_temp.cov")
-			set(coverageOutput "${binaryDir}/${testTarget}.cov")
+			set(coverageOutputTemp "${binaryDir}/${testTarget}_temp_$<CONFIG>.cov")
+			set(coverageOutput "${binaryDir}/${testTarget}_$<CONFIG>.cov")
 			cpfListAppend( coverageOutputFiles ${coverageOutput})
 
-			set(removeTempCovFileComand "cmake -E remove -f \"${coverageOutputTemp}\"") # we need to try to remove this to cover cases where the OpenCppCoverage command fails and the temp file does not get renamed.
+			set(removeTempCovFileComand "\"${CMAKE_COMMAND}\" -E remove -f \"${coverageOutputTemp}\"") # we need to try to remove this to cover cases where the OpenCppCoverage command fails and the temp file does not get renamed.
 			set(runOpenCppCoverageCommand "\"${TOOL_OPENCPPCOVERAGE}\" --export_type=binary:\"${coverageOutputTemp}\" --sources=\"**\\${CPF_SOURCE_DIR}\\${package}\" --quiet -- \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")
-			set(cmakeRenameCommand "cmake -E rename \"${coverageOutputTemp}\" \"${coverageOutput}\"")
-			# we use an extra stampfile to make sure that marking the target done works even if the commands are only the echos for non debug configs.
-			set(stampFile ${binaryDir}/OpenCppCoverage_${testTarget}.stamp )
-			set(stampFileCommand "cmake -E touch \"${stampFile}\"")
+			set(cmakeRenameCommand "\"${CMAKE_COMMAND}\" -E rename \"${coverageOutputTemp}\" \"${coverageOutput}\"")
 
 			cpfGetTargetFileGeneratorExpression(prodLibFile ${productionLib})
 
 			cpfAddConfigurationDependendCommand(
-				TARGET ${targetName}
-				OUTPUT ${stampFile} # ${coverageOutput} The cov files are only created for debug configs so this causes warnings with visual studio when building configs that do not create the files.
+                CONFIGS ${msvcDebugConfig}
 				DEPENDS "$<TARGET_FILE:${testTarget}>" "${prodLibFile}"
+				COMMANDS ${removeTempCovFileComand} ${runOpenCppCoverageCommand} ${cmakeRenameCommand}
+				OUTPUT ${coverageOutput}
 				COMMENT "Run OpenCppCoverage for ${testTarget}."
-				CONFIG ${msvcDebugConfig}
-				COMMANDS_CONFIG ${removeTempCovFileComand} ${runOpenCppCoverageCommand} ${cmakeRenameCommand} ${stampFileCommand}
-				COMMANDS_NOT_CONFIG ${stampFileCommand}
-			)
+            )
 
 			add_custom_target(
 				${targetName}
-				DEPENDS ${productionLib} ${testTarget} ${stampFile}
+				DEPENDS ${productionLib} ${testTarget} ${coverageOutput}
 			)
 
 			# set properties related to the static analysis target

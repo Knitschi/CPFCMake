@@ -8,20 +8,6 @@ Problems that are encountered in Development
 CMake induced Problems
 **********************
 
-
-CMake's add_custom_command() does not support generator expressions in the OUTPUT argument
-==========================================================================================
-
-This limitation is the reason why we have the ugly workaround where we loop over
-all configurations and use the :code:`cpfAddConfigurationDependendCommand()` function.
-
-.. seealso::
-
-    `CMake Issue 12877`_
-
-
-.. _no_dependencies_for_install_target:
-
 It is not possible to add dependencies to the CMake generated INSTALL target
 ============================================================================
 
