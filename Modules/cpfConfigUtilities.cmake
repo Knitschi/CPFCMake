@@ -125,7 +125,7 @@ endfunction()
 function( cpfCompilerProducesPdbFiles hasPdbOutput config )
 
 	set( hasPdbFlag FALSE )
-	if(MSVC)
+	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL MSVC) # note that clang-cl does not produce compiler.pdb files so we can not simply use MSVC
 		cpfToConfigSuffix(configSuffix ${config})
 		cpfSplitString( flagsList "${CMAKE_CXX_FLAGS_${configSuffix}}" " ")
 		cpfContainsOneOf( hasPdbFlag "${flagsList}" /Zi;/ZI )
