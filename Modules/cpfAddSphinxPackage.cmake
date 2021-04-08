@@ -71,7 +71,7 @@ function( cpfAddSphinxPackage )
 	# All relevant depended on source files from other packages in the project.
 	cpfGetSphinxSourceFilesFromAllPackages(otherPackageFiles "${ARG_SOURCE_SUFFIXES}")
 
-    set(sphinxCommand "\"${TOOL_SPHINX-BUILD}\" -c \"${absConfigDir}\" \"${sphinxSourceDir}\" \"${outputDir}\" -j auto ${ARG_ADDITIONAL_SPHINX_ARGUMENTS}")
+    set(sphinxCommand "\"${TOOL_PYTHON3}\" -m sphinx -c \"${absConfigDir}\" \"${sphinxSourceDir}\" \"${outputDir}\" -j auto ${ARG_ADDITIONAL_SPHINX_ARGUMENTS}")
     # We create a stampfile here for outdating the target because we do not know what the users shpinx configuration will produce.
     set(stampCommand "\"${CMAKE_COMMAND}\" -E touch \"${keyOutputFile}\"")
 
