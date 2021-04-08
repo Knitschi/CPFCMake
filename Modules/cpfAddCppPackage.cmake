@@ -511,7 +511,7 @@ function( cpfAddBinaryTarget )
 
 		# make sure that clients have the /D <target>_IMPORTS compile option set.
 		if( ${BUILD_SHARED_LIBS} AND MSVC)
-			target_compile_definitions(${ARG_NAME} INTERFACE /D ${ARG_NAME}_IMPORTS )
+			target_compile_definitions(${ARG_NAME} INTERFACE ${ARG_NAME}_IMPORTS )
 		endif()
 		
     endif()

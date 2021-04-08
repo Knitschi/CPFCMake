@@ -5,7 +5,7 @@
 # before running cmake when not using the "Visual Studio" generator. 
 
 #file(TO_CMAKE_PATH "$ENV{VS140COMNTOOLS}" vs140comntools)
-set(compilerPath "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.24.28314/bin/Hostx64/x64/cl.exe" )
+set(compilerPath "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29910/bin/Hostx64/x64/cl.exe" )
 
 set(CMAKE_CXX_COMPILER "${compilerPath}" CACHE FILEPATH "Microsoft cpp compiler" FORCE)
 set(CMAKE_C_COMPILER "${compilerPath}" CACHE FILEPATH "Microsoft c compiler" FORCE)
