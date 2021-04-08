@@ -21,7 +21,7 @@ include(cpfAddInstallTarget)
 include(cpfAddDistributionPackageTarget)
 include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDoxygenPackage)
-include(cpfAddVersionRcPreBuildEvent)
+include(cpfAddVersionRcTarget)
 
 
 # cotire must be included on the global scope or we get errors that target xyz already has a custom rule
@@ -583,17 +583,6 @@ function( cpfAddBinaryTarget )
 			cpfAddPrecompiledHeader(${ARG_NAME})
 		endif()
 
-		# Setup automatic creation of a version.rc file on windows
-		if(NOT ARG_DISABLE_VERSION_RC_GENERATION)
-			cpfAddVersionRcPreBuildEvent(
-				PACKAGE	${ARG_PACKAGE_NAME}
-				BINARY_TARGET ${ARG_NAME}
-				VERSION ${PROJECT_VERSION}
-				BRIEF_DESCRIPTION ${ARG_BRIEF_DESCRIPTION}
-				OWNER ${ARG_OWNER}
-			)
-		endif()
-
 	endif()
 
 	# public header
@@ -611,6 +600,17 @@ function( cpfAddBinaryTarget )
 	# Adds a clang-format target
 	if(ARG_ENABLE_CLANG_FORMAT_TARGETS)
 		cpfAddClangFormatTarget(${ARG_PACKAGE_NAME} ${ARG_NAME})
+	endif()
+
+	# Setup automatic creation of a version.rc file on windows
+	if((NOT ARG_DISABLE_VERSION_RC_GENERATION) AND (NOT isInterfaceLib))
+		cpfAddVersionRcTarget(
+			PACKAGE	${ARG_PACKAGE_NAME}
+			BINARY_TARGET ${ARG_NAME}
+			VERSION ${PROJECT_VERSION}
+			BRIEF_DESCRIPTION ${ARG_BRIEF_DESCRIPTION}
+			OWNER ${ARG_OWNER}
+		)
 	endif()
 
 endfunction()

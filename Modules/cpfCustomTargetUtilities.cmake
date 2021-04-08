@@ -8,9 +8,10 @@ include(cpfTestUtilities)
 # to reduce code repetition.
 # It only takes the DEPENDS OUTPUT and COMMANDS and COMMAND options.
 # The COMMANDS option contains full commands as strings.
-# DEPENDS - Note that for correct dependency propagation you need to depend on a target, and the files that it is producing.
-# COMMAND	This can be used when the command is available as a list rather then a single string. This can be
-#			be used multiple times to add multiple commands.
+# [DEPENDS]				Note that for correct dependency propagation you need to depend on a target, and the files that it is producing.
+# COMMAND				This can be used when the command is available as a list rather then a single string. This can be
+#						be used multiple times to add multiple commands.
+# [WORKING_DIRECTORY]	The current directory that is used when running the command. If defaults to CPF_ROOT_DIR
 #
 function( cpfAddStandardCustomCommand )
 
@@ -65,6 +66,10 @@ function( cpfAddStandardCustomTarget )
 		TARGET
 	)
 
+	set( optionalSingleValueKeywords
+		VS_SUBDIR
+	)
+
 	set( optionalMultiValueKeywords
 		SOURCES
 		TARGET_DEPENDENCIES
@@ -75,7 +80,7 @@ function( cpfAddStandardCustomTarget )
 	cmake_parse_arguments(
 		ARG 
 		""
-		"${requiredSingleValueKeywords}"
+		"${requiredSingleValueKeywords};${optionalSingleValueKeywords}"
 		"${optionalMultiValueKeywords}"
 		${ARGN} 
 	)
@@ -89,7 +94,12 @@ function( cpfAddStandardCustomTarget )
 	)
 	
 	# Set properties
-	set_property( TARGET ${ARG_TARGET} PROPERTY FOLDER ${ARG_PACKAGE} )
+	if(ARG_VS_SUBDIR)
+		set_property( TARGET ${ARG_TARGET} PROPERTY FOLDER ${ARG_PACKAGE}/${ARG_VS_SUBDIR} )
+	else()
+		set_property( TARGET ${ARG_TARGET} PROPERTY FOLDER ${ARG_PACKAGE} )
+	endif()
+
 	set_property( TARGET ${ARG_TARGET} PROPERTY CPF_OUTPUT_FILES ${ARG_PRODUCED_FILES} )
 	set_property( TARGET ${ARG_TARGET} PROPERTY PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS ${ARG_INSTALL_COMPONENTS})
 	cpfSetIDEDirectoriesForTargetSources(${ARG_TARGET})

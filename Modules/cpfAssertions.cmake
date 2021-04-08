@@ -20,6 +20,15 @@ function( cpfAssertDefinedMessage variableName message )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Triggers an error if the value is empty or FALSE of OFF.
+#
+function( cpfAssertTrue variableName )
+	if(NOT ${${variableName}})
+		message(FATAL_ERROR "Assertion failed! Variable ${variableName} had \"false\" value \"${${${variableName}}}\".")
+	endif()
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # Asserts the the variable PROJECT_VERSION is defined.
 #
 function( cpfAssertProjectVersionDefined )

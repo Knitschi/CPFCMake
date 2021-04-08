@@ -48,7 +48,7 @@ set( files
 	Modules/cpfAddRunUicTarget.cmake
 	Modules/cpfAddSphinxPackage.cmake
 	Modules/cpfAddValgrindTarget.cmake
-	Modules/cpfAddVersionRcPreBuildEvent.cmake
+	Modules/cpfAddVersionRcTarget.cmake
 	Modules/cpfCustomTargetUtilities.cmake
 	Modules/cpfGitUtilities.cmake
 	Modules/cpfAddPackages.cmake

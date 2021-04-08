@@ -11,7 +11,7 @@ include(cpfMiscUtilities)
 #
 # Arguments see API doc.
 # 
-function( cpfAddVersionRcPreBuildEvent )
+function( cpfAddVersionRcTarget )
 
     set( requiredSingleValueKeywords
         PACKAGE
@@ -25,7 +25,7 @@ function( cpfAddVersionRcPreBuildEvent )
     )
 
     cmake_parse_arguments( ARG "" "${requiredSingleValueKeywords};${optionalSingleValueKeywords}" "" ${ARGN} )
-    cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords}" ARG "cpfAddVersionRcPreBuildEvent()")
+    cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords}" ARG "cpfAddVersionRcTarget()")
 
 	# Interface libs have no binary file to which we could write version information.
 	# Static libraries do not seem to have the version info attributes.
@@ -39,7 +39,7 @@ function( cpfAddVersionRcPreBuildEvent )
 	if(NOT MSVC)
 		return()
     endif()
-    
+
     set(targetName ${ARG_BINARY_TARGET}_versionRc )
 
     # Locations
@@ -65,11 +65,16 @@ function( cpfAddVersionRcPreBuildEvent )
 		set(fileFlagsString "0x0L")	# The build files if no flag is given. This is the null flag.
 	endif()
 
-    # Add a pre-build event to run the configure file script
-	# Note that we can not use a custom-command + custom-target 
-	# here because the command depends on the $<TARGET_FILE_NAME:target>
-	# generator expression which implicitly makes the custom-command depend 
-	# on the binary target.
+    # We can not use the $<TARGET_FILE_NAME:${ARG_BINARY_TARGET}> generator expression here
+	# to get the filename of the binary target because that would introduce a cyclic dependency.
+	# In order to work around this we get the static output filenames here an wrap them in config generator expressions.
+	set(targetFileName)
+	cpfGetConfigurations(configs)
+	foreach(config ${configs})
+		cpfGetTargetOutputFileName(shortName ${ARG_BINARY_TARGET} ${config})
+		string(APPEND targetFileName "$<$<CONFIG:${config}>:${shortName}>")
+	endforeach()
+
     set( dOptions 
         "ABS_SOURCE_PATH=\"${versionRcTemplate}\""
 		"ABS_DEST_PATH=\"${versionRcGenerated}\""
@@ -79,25 +84,30 @@ function( cpfAddVersionRcPreBuildEvent )
 		"PACKAGE_VERSION_SHORT=\"${major}, ${minor}, ${patch}, ${commitNr}\""
         "BRIEF_DESCRIPTION=\"${ARG_BRIEF_DESCRIPTION}\""
         "TARGET=${ARG_BINARY_TARGET}"
-        "FILE_NAME=$<TARGET_FILE_NAME:${ARG_BINARY_TARGET}>"
+        "FILE_NAME=${targetFileName}"
 		"FILE_TYPE=${FILE_TYPE}"
 		"FILE_FLAGS=\"${fileFlagsString}\""
         "COPY_RIGHT=\"${COPY_RIGHT}\""
     )
 
 	cpfGetRunCMakeScriptCommand( createRcFileCommand "${configureScript}" "${dOptions}")
-	separate_arguments(commandList NATIVE_COMMAND ${createRcFileCommand})
 
-    add_custom_command(
-		TARGET ${ARG_BINARY_TARGET}
-		PRE_BUILD
-		COMMAND ${commandList}
-		BYPRODUCTS ${versionRcGenerated}
-		VERBATIM
-		COMMENT ${createRcFileCommand}
+	cpfAddStandardCustomCommand(
+		COMMANDS ${createRcFileCommand}
+		OUTPUT ${versionRcGenerated}
 	)
 
-    # Add the generated files to the targets sources to ensure the information is compiled into it.
+	cpfAddStandardCustomTarget(
+		PACKAGE ${ARG_PACKAGE}
+		TARGET ${targetName}
+		VS_SUBDIR private
+		PRODUCED_FILES ${versionRcGenerated}
+	)
+
+	# Make sure the file is generated before the binary target is build.
+	add_dependencies(${ARG_BINARY_TARGET} ${targetName})
+
+    # Add the generated files to the binary targets sources to ensure the information is compiled into it.
 	set_property(TARGET ${ARG_BINARY_TARGET} APPEND PROPERTY SOURCES ${versionRcGenerated} )
 
 endfunction()
