@@ -3,7 +3,7 @@ API Global Variables
 ====================
 
 This page holds the documentation of global CMake variables that can be set by the clients of
-CPFCMake to influence it's behavior.
+CPFCMake to influence its behavior.
 
 Global variables and cache variables
 ------------------------------------
@@ -116,7 +116,7 @@ Allowed CMake Variables
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 CMake introduces its own set of global variables. Many of them can still be used.
-Others may be overridden by CPFCMake while implementing it's functionality.
+Others may be overridden by CPFCMake while implementing its functionality.
 Here is a list of CMake variables that CPFCMake expects you to set.
 
 - <b>BUILD_SHARED_LIBS:</b> This can still be used as a global switch for creating
@@ -138,7 +138,7 @@ Here is a list of CMake variables that CPFCMake expects you to set.
   for that variable.
 - <b>CMAKE_TOOLCHAIN_FILE:</b> The value of that variable must be set to a \c .cmake file
   that specifies the used compiler and the ABI relevant compiler flags.
-  CPFCMake provides tool-chain-files for it's default configurations which you can
+  CPFCMake provides tool-chain-files for its default configurations which you can
   use as templates to create your own ones if needed. The CPF uses a toolchain file
   to foster the use of the package manager *hunter* which requires abi relevant compiler options
   to be bundled in one file to determine if dependencies need to be re-build.
