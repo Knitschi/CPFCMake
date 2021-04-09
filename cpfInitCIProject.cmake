@@ -9,8 +9,8 @@ include(cpfAssertions)
 
 # We include the config file here to retrigger the cmake generate step when the config changes.
 cpfAssertDefined(CPF_CONFIG)    # CPF config must be either defined by the buildscripts or in the cache file.
-#cpfFindConfigFile(configFile "${CPF_CONFIG}" TRUE)
-#include("${configFile}")
+cpfFindConfigFile(configFile "${CPF_CONFIG}" TRUE)
+include("${configFile}")
 
 cpfAssertDefined(CMAKE_TOOLCHAIN_FILE)  # The config file must define the CMAKE_TOOLCHAIN_FILE
 include("${CMAKE_TOOLCHAIN_FILE}")      # Make sure the compiler is set before the project call.

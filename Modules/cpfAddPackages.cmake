@@ -46,8 +46,8 @@ function( cpfAddPackages )
 	set( SOLUTION_FILES 
 		${ARG_GLOBAL_FILES}
 		CMakeLists.txt
-		#"${configFile}"
-		CMakePresets.json
+		"${configFile}"
+		#CMakePresets.json
 		"${CMAKE_BINARY_DIR}/CMakeCache.txt"
 		"${CPF_PACKAGES_FILE}"
 	)
