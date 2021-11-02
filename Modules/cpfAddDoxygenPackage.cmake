@@ -30,6 +30,7 @@ function( cpfAddDoxygenPackage )
 		HTML_FOOTER
 		PROJECT_LOGO
 		PLANTUML_JAR_PATH
+		DOXYGEN_BIN_DIR
 	)
 
 	set( requiredMultiValueKeywords 
@@ -53,8 +54,8 @@ function( cpfAddDoxygenPackage )
 	cpfAssertKeywordArgumentsHaveValue( "${singleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddDoxygenPackage()")
 	cpfAssertProjectVersionDefined()
 
-	cpfFindRequiredProgram( TOOL_DOXYGEN doxygen "A tool that generates documentation files by reading in-code comments" "")
-	cpfFindRequiredProgram( TOOL_DOXYINDEXER doxyindexer "A tool that generates search indexes for doxygen generated html files" "")
+	cpfFindRequiredProgram( TOOL_DOXYGEN doxygen "A tool that generates documentation files by reading in-code comments" "${ARG_DOXYGEN_BIN_DIR}")
+	cpfFindRequiredProgram( TOOL_DOXYINDEXER doxyindexer "A tool that generates search indexes for doxygen generated html files" "${ARG_DOXYGEN_BIN_DIR}")
 	cpfFindRequiredProgram( TOOL_TRED tred "A tool from the graphviz library that creates a transitive reduced version of a graphviz graph" "")
 
 	if(NOT ARG_PROJECT_NAME)
