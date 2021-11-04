@@ -286,30 +286,103 @@ function( cpfAddPackageBinaryTargets
 
 	# Modify variables if the package creates an executable
 	if("${type}" STREQUAL GUI_APP OR "${type}" STREQUAL CONSOLE_APP)
-
 		set(isExe TRUE)
-		set( productionTarget lib${package})
+		set(libraryTarget lib${package})
+		set(exeTarget ${package})
+	else()
+		set(isExe FALSE)
+		set(libraryTarget ${package})
+	endif()
+
+	if(isExe)
+
 		#remove main.cpp from the files
 		cpfAssertDefinedMessage(MAIN_CPP "A package of executable type must contain a main.cpp file.")
 		list(REMOVE_ITEM productionFiles ${MAIN_CPP})
-		foreach( iconFile ${iconFiles})
-			list(REMOVE_ITEM productionFiles ${iconFile})
-		endforeach()
-		set(fileDescriptionExe ${shortDescription})
-		set(fileDescriptionLib "Contains the functionality of the ${package} application.")
+
+		###################### Create Exe as package main target ##############################
+		# The main target must be created first because cpfAddBinaryTarget() needs to set the
+		# main target properties when adding helper targets.
+		cpfAddBinaryTarget(
+			PACKAGE_NAME ${package}
+			PACKAGE_NAMESPACE ${packageNamespace}
+			TARGET_TYPE ${type}
+			NAME ${exeTarget}
+			FILES ${MAIN_CPP} ${exeFiles}
+			#LINKED_LIBRARIES ${linkedLibraries}
+			IDE_FOLDER ${package}/exe
+			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
+			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
+			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
+			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
+			BRIEF_DESCRIPTION ${shortDescription}
+			OWNER ${owner}
+			COMPILE_OPTIONS ${compileOptions}
+	    )
+
+		###################### Create implementation library target ##############################
+		# This is created to allow linking the implementation of the exe to a test executable.
+		if(productionFiles OR publicHeaderFiles)  
+
+			cpfAddBinaryTarget(
+				PACKAGE_NAME ${package}  
+				PACKAGE_NAMESPACE ${packageNamespace}
+				EXPORT_MACRO_PREFIX ${packageNamespace}
+				TARGET_TYPE LIB
+				NAME ${libraryTarget}
+				PUBLIC_HEADER ${publicHeaderFiles}
+				FILES ${productionFiles}
+				LINKED_LIBRARIES ${linkedLibraries}
+				IDE_FOLDER ${package}
+				VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
+				ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
+				ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
+				ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
+				BRIEF_DESCRIPTION "Contains the functionality of the ${package} application."
+				OWNER ${owner}
+				COMPILE_OPTIONS ${compileOptions}
+			)
+
+			# todo link with prod lib
+			target_link_libraries(${package} PRIVATE ${libraryTarget})
+
+		endif()
 
 	else()
 
-		set(isExe FALSE)
-		set(productionTarget ${package})
 		if(exeFiles)
 			message(FATAL_ERROR "Error! The option EXE_FILES in cpfAddCppPackage() is only relevant for packages of type GUI_APP or CONSOLE_APP.")
 		endif()
-		set(fileDescriptionLib ${shortDescription})
+
+		###################### Create a library target as package main target ##############################
+		# This is created to allow linking the implementation of the exe to a test executable.
+		if(productionFiles OR publicHeaderFiles)  
+
+			cpfAddBinaryTarget(
+				PACKAGE_NAME ${package}  
+				PACKAGE_NAMESPACE ${packageNamespace}
+				EXPORT_MACRO_PREFIX ${packageNamespace}
+				TARGET_TYPE ${type}
+				NAME ${package} 
+				PUBLIC_HEADER ${publicHeaderFiles}
+				FILES ${productionFiles}
+				LINKED_LIBRARIES ${linkedLibraries}
+				IDE_FOLDER ${package}
+				VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
+				ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
+				ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
+				ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
+				BRIEF_DESCRIPTION ${shortDescription}
+				OWNER ${owner}
+				COMPILE_OPTIONS ${compileOptions}
+			)
+
+		endif()
 
 	endif()
 	
 
+	#[[
 	###################### Create production library target ##############################
     if(productionFiles OR publicHeaderFiles)  
 
@@ -323,7 +396,7 @@ function( cpfAddPackageBinaryTargets
 			PACKAGE_NAMESPACE ${packageNamespace}
 			EXPORT_MACRO_PREFIX ${packageNamespace}
 			TARGET_TYPE ${libType}
-			NAME ${productionTarget}
+			NAME ${libraryTarget}
 			PUBLIC_HEADER ${publicHeaderFiles}
 			FILES ${productionFiles}
 			LINKED_LIBRARIES ${linkedLibraries}
@@ -349,7 +422,7 @@ function( cpfAddPackageBinaryTargets
 			TARGET_TYPE ${type}
 			NAME ${exeTarget}
 			FILES ${MAIN_CPP} ${exeFiles}
-			LINKED_LIBRARIES ${linkedLibraries} PRIVATE ${productionTarget}
+			LINKED_LIBRARIES ${linkedLibraries} PRIVATE ${libraryTarget}
 			IDE_FOLDER ${package}/exe
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
@@ -361,13 +434,14 @@ function( cpfAddPackageBinaryTargets
 	    )
 
 	endif()
+	]]
 	
 	########################## Test Targets ###############################
 	set( VSTestFolder test)		# the name of the test targets folder in the visual studio solution
 
     ################### Create fixture library ##############################	
 	if( fixtureFiles OR publicFixtureHeaderFiles )
-        set( fixtureTarget ${productionTarget}${CPF_FIXTURE_TARGET_ENDING})
+        set( fixtureTarget ${libraryTarget}${CPF_FIXTURE_TARGET_ENDING})
 	    cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}
 			PACKAGE_NAMESPACE ${packageNamespace}
@@ -376,13 +450,13 @@ function( cpfAddPackageBinaryTargets
 			NAME ${fixtureTarget}
 			PUBLIC_HEADER ${publicFixtureHeaderFiles}
 			FILES ${fixtureFiles}
-			LINKED_LIBRARIES PUBLIC ${productionTarget} ${linkedTestLibraries}
+			LINKED_LIBRARIES PUBLIC ${libraryTarget} ${linkedTestLibraries}
 			IDE_FOLDER ${package}/${VSTestFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
-			BRIEF_DESCRIPTION "A library that contains utilities for tests of the ${productionTarget} library."
+			BRIEF_DESCRIPTION "A library that contains utilities for tests of the ${libraryTarget} library."
 			OWNER ${owner}
 			COMPILE_OPTIONS ${compileOptions}
         )
@@ -397,20 +471,20 @@ function( cpfAddPackageBinaryTargets
 
     ################### Create unit test exe ##############################
 	if( testFiles )
-        set( unitTestsTarget ${productionTarget}${CPF_TESTS_TARGET_ENDING})
+        set( unitTestsTarget ${libraryTarget}${CPF_TESTS_TARGET_ENDING})
         cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}
 			PACKAGE_NAMESPACE ${packageNamespace}
 			TARGET_TYPE CONSOLE_APP
 			NAME ${unitTestsTarget}
 			FILES ${testFiles}
-			LINKED_LIBRARIES PRIVATE ${productionTarget} ${fixtureTarget} ${linkedTestLibraries}
+			LINKED_LIBRARIES PRIVATE ${libraryTarget} ${fixtureTarget} ${linkedTestLibraries}
 			IDE_FOLDER ${package}/${VSTestFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
-			BRIEF_DESCRIPTION "Runs tests of the ${productionTarget} library."
+			BRIEF_DESCRIPTION "Runs tests of the ${libraryTarget} library."
 			OWNER ${owner}
 			COMPILE_OPTIONS ${compileOptions}
         )
@@ -428,11 +502,11 @@ function( cpfAddPackageBinaryTargets
     endif()
     
 	# Set some properties
-	set(binaryTargets ${exeTarget} ${fixtureTarget} ${productionTarget} ${unitTestsTarget})
+	set(binaryTargets ${libraryTarget} ${exeTarget} ${fixtureTarget} ${unitTestsTarget})
     set_property(TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS ${binaryTargets})
 	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${binaryTargets})
-    set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET ${productionTarget})
-	set( ${outProductionLibrary} ${productionTarget} PARENT_SCOPE)
+    set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET ${libraryTarget})
+	set( ${outProductionLibrary} ${libraryTarget} PARENT_SCOPE)
 
 endfunction()
 
