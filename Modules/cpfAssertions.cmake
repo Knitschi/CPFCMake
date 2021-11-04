@@ -73,6 +73,7 @@ endfunction()
 #
 function( cpfDebugAssertLinkedLibrariesExists linkedLibrariesOut package linkedLibrariesIn )
 
+	set(linkedLibraries)
 	foreach(lib ${linkedLibrariesIn})
 
 		# Make sur no empty strings were given.
