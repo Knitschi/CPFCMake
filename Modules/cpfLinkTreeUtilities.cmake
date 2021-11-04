@@ -68,6 +68,7 @@ function( cpfGetLinkedTargets targetsOut target config linkVisibility)
 	cpfRemoveConfigGeneratorExpressions(interfaceLibraries "${interfaceLibrariesTemp}" ${config})
 
 	# The following property can not be accessed for interface libraries.
+	set(allLinkedLibraries)
 	get_property(type TARGET ${target} PROPERTY TYPE)	
 	if(NOT ${type} STREQUAL INTERFACE_LIBRARY )	
 
