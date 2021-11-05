@@ -194,6 +194,7 @@ function( cpfAddDoxygenPackage )
 		DEPENDS ${allDependedOnFiles}
 		COMMANDS ${clearDoxygenDirCommand} ${doxygenCommand}
 		OUTPUT ${searchDataXmlFile}
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}	# The doxygen.db directory is created in the working directory.
 	)
 
 	# Now add the target

@@ -25,8 +25,7 @@ To make it work these points must be implemented.
   from the same version of doxygen that is used to generate the html files and the \c doxysearch.db search database.
 - The webserver must be configured to use cgi scripts, which is done by providing the serve-cgi-bin.conf file with the docker-image of the webserver.
   The Dockerfile makes sure the file is copied into the container.
-- The help generation needs to execute the \c doxyindexer.exe to create the \c doxysearch.db serach-index for the \c doxysearch.cgi. This is done in
-  the python script \c 7_GenerateDocumentation.py
+- The help generation needs to execute the \c doxyindexer.exe to create the \c doxysearch.db serach-index for the \c doxysearch.cgi.
 - The generated files must be copied to the documentation server container with the command
 
 .. code-block:: bash
