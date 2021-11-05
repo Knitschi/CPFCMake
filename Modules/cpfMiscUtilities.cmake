@@ -94,6 +94,15 @@ function( cpfFindRequiredProgram VAR name comment hints)
         message( FATAL_ERROR "The required program \"${name}\" could not be found.\nThe following search-paths were given: ${hints}" )
     endif()
 
+	# Get the tools version.
+	if(CPF_VERBOSE)
+		cpfExecuteProcess(
+			stdOut "${${VAR}} --version" "" 
+			IGNORE_ERROR
+		)
+		cpfDebugMessage("Found ${name} with version: ${stdOut}")
+	endif()
+
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -103,7 +112,7 @@ endfunction()
 #
 function( cpfDebugMessage var)
 	if(CPF_VERBOSE)
-		message("-- [CPF] ${var}")
+		message("-- [CPF-DEBUG] ${var}")
 	endif()
 endfunction()
 
@@ -146,10 +155,13 @@ endfunction()
 # A common variant of executing a process that will cause an cmake error when the command fails.
 # You can add an optional argument PRINT to display the output of the command.
 # Note that the function strips trailing whitespaces (line-endings) from the output.
+# Arguments:
+# PRINT			The output of the command will be printed.
+# IGNORE_ERROR  Set this to not cause cmake to fail when the command fails.
 #
 function( cpfExecuteProcess stdOut commandString workingDir)
 
-	cmake_parse_arguments(ARG "PRINT;DONT_INTERCEPT_OUTPUT" "" "" ${ARGN})
+	cmake_parse_arguments(ARG "PRINT;DONT_INTERCEPT_OUTPUT;IGNORE_ERROR" "" "" ${ARGN})
 
 	if(NOT ARG_DONT_INTERCEPT_OUTPUT)
 		set( ouputInterceptArguments 
@@ -170,7 +182,7 @@ function( cpfExecuteProcess stdOut commandString workingDir)
 		message("${textOutput}")
 	endif()
 
-	if(NOT ${resultValue} STREQUAL 0)
+	if((NOT ${resultValue} STREQUAL 0) AND (NOT ARG_IGNORE_ERROR))
 		# print all the output if something went wrong.
 		if(NOT ARG_PRINT)
 			message("${textOutput}")
