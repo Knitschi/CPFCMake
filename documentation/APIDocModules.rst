@@ -305,9 +305,9 @@ and the version.cmake files that are used to import the library.
 
 
 
-*****************************
+**************************************
 Module cpfAddCppPackageComponent.cmake
-*****************************
+**************************************
 
 This module provides the following functions.
 
@@ -319,7 +319,7 @@ This module provides the following functions.
 .. _cpfAddCppPackageComponent:
 
 cpfAddCppPackageComponent()
-==================
+===========================
 
 .. code-block:: cmake
 
@@ -779,9 +779,9 @@ The function can be used like shown below before calling :ref:`cpfAddCppPackageC
 
 
 
-******************************
+***************************************
 Module cpfAddFilePackageComponent.cmake
-******************************
+***************************************
 
 This module provides the following function.
 
@@ -789,7 +789,7 @@ This module provides the following function.
 
 
 cpfAddFilePackageComponent()
-===================
+============================
 
 .. code-block:: cmake
 
@@ -811,9 +811,9 @@ A list of files that are added to the package. The paths must be relative to the
 current source directory or absolute.
 
 
-*********************************
+******************************************
 Module cpfAddDoxygenPackageComponent.cmake
-*********************************
+******************************************
 
 This module provides the following function.
 
@@ -823,7 +823,7 @@ This module provides the following function.
 .. _cpfAddDoxygenPackageComponent:
 
 cpfAddDoxygenPackageComponent()
-======================
+===============================
 
 .. code-block:: cmake
 
@@ -946,16 +946,16 @@ directory that is required when using the server-side search feature of doxygen.
 The directory will be created in the :code:`Generated/\<config\>/html/cgi-bin` directory.
 
 
-********************************
+*****************************************
 Module cpfAddSphinxPackageComponent.cmake
-********************************
+*****************************************
 
 This module provides the following function.
 
 - cpfAddSphinxPackageComponent()
 
 cpfAddSphinxPackageComponent()
-=====================
+==============================
 
 .. code-block:: cmake
 

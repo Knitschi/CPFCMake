@@ -93,7 +93,7 @@ This option can be used to disable the global \ref acyclic target.
 
 
 Global defaults for the cpfAddCppPackageComponent() function
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :ref:`cpfAddCppPackageComponent` function has a lot of parameters. Many of them
 are likely to take the same value across most packages and package-components in your CI-project. The CPF provides
