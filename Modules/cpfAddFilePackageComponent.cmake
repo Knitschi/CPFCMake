@@ -1,4 +1,4 @@
-# This module provides the cpfAddFilePackage function, that adds a custom target that only contains files
+# This module provides the cpfAddFilePackageComponent function, that adds a custom target that only contains files
 # without doing anything.
 
 include_guard(GLOBAL)
@@ -11,7 +11,7 @@ include(cpfCustomTargetUtilities)
 #-----------------------------------------------------------
 # Documentation in APIDocs.dox
 #
-function( cpfAddFilePackage )
+function( cpfAddFilePackageComponent )
 
     cmake_parse_arguments(
         ARG 
@@ -26,7 +26,10 @@ function( cpfAddFilePackage )
     cpfAssertProjectVersionDefined()
 
     cpfGetCurrentSourceDir(packageComponent)
+    cpfAddPackageSources(ARG_SOURCES ${CPF_CURRENT_PACKAGE})
+
     cpfAddStandardCustomTarget(
+        PACKAGE ${CPF_CURRENT_PACKAGE}
         PACKAGE_COMPONENT ${packageComponent}
         TARGET ${packageComponent}
         SOURCES ${ARG_SOURCES}

@@ -2,7 +2,7 @@
 
 include(cpfLocations)
 include(cpfPackageProject)
-include(cpfAddFilePackage)
+include(cpfAddFilePackageComponent)
 include(cpfAddRunTestsTarget)
 
 cpfPackageProject(
@@ -42,15 +42,15 @@ set( files
 	Modules/cpfAddCompatibilityCheckTarget.cmake
 	Modules/cpfAddDeploySharedLibrariesTarget.cmake
 	Modules/cpfAddDistributionPackageTarget.cmake
-	Modules/cpfAddDoxygenPackage.cmake
-	Modules/cpfAddFilePackage.cmake
+	Modules/cpfAddDoxygenPackageComponent.cmake
+	Modules/cpfAddFilePackageComponent.cmake
 	Modules/cpfAddInstallTarget.cmake
 	Modules/cpfAddOpenCppCoverageTarget.cmake
 	Modules/cpfAddCppPackageComponent.cmake
 	Modules/cpfAddPipelineTargetDependencies.cmake
 	Modules/cpfAddRunTestsTarget.cmake
 	Modules/cpfAddRunUicTarget.cmake
-	Modules/cpfAddSphinxPackage.cmake
+	Modules/cpfAddSphinxPackageComponent.cmake
 	Modules/cpfAddValgrindTarget.cmake
 	Modules/cpfAddVersionRcTarget.cmake
 	Modules/cpfCustomTargetUtilities.cmake
@@ -101,7 +101,7 @@ set( files
 	Tests/run_tests.cmake
 )
 
-cpfAddFilePackage(
+cpfAddFilePackageComponent(
     SOURCES ${files}
 )
 

@@ -33,6 +33,33 @@ function( cpfGetUnversionedPackageComponentName isVersionedNameOut unversionedNa
 
 endfunction()
 
+#------------------------------------------------------------------------------------------
+function( cpfIsMultiComponentPackage isMultiOut package )
+
+	cpfGetAbsPackageDirectory(packageDir ${package} "${CPF_ROOT_DIR}")
+	get_property(components DIRECTORY ${packageDir} PROPERTY CPF_PACKAGE_COMPONENTS)
+	if("${components}" STREQUAL SINGLE_COMPONENT)
+		set(${isMultiOut} FALSE PARENT_SCOPE)
+	endif()
+	set(${isMultiOut} TRUE PARENT_SCOPE)
+
+endfunction()
+
+#------------------------------------------------------------------------------------------
+# Takes the variable name of the source file variable and appends the package level files
+# to it if the package is a single component package.
+#
+function( cpfAddPackageSources sourcesVarName package )
+
+	cpfIsMultiComponentPackage(isMulti ${package})
+	if(NOT isMulti)
+		cpfGetAbsPackageDirectory(packageDir ${package} "${CPF_ROOT_DIR}")
+		get_property(packageSources DIRECTORY ${CMAKE_CURRENT_LIST_DIR} PROPERTY CPF_PACKAGE_SOURCES ${packageSources})
+		set(${sourcesVarName} "${sourcesVarName};${packageSources}" PARENT_SCOPE)
+	endif()
+
+endfunction()
+
 #---------------------------------------------------------------------------------------------
 function( cpfGetExecutableTargets exeTargetsOut packageComponent )
 	
@@ -288,8 +315,8 @@ function( cpfAddPackageSubdirectories )
 	cpfGetPackageVariableLists( listNames ${CPF_ROOT_DIR} packageVariables)
 	foreach(listName ${listNames})
 		
-		# The second element must be the package-component name.
-		list(GET ${listName} 1 packageComponent )
+		# The second element must be the package name.
+		list(GET ${listName} 1 package )
 		cmake_parse_arguments(ARG "" "${overridableVariables}" "" ${${listName}})
 
 		# Override the global variables with the values from the list.
@@ -301,7 +328,7 @@ function( cpfAddPackageSubdirectories )
 		endforeach()
 
 		# Now add the subdirectory.
-		add_subdirectory(${packageComponent})
+		add_subdirectory(${package})
 
 	endforeach()
 
@@ -335,11 +362,11 @@ endfunction()
 function( cpfGetOwnedLoosePackages loosePackagesOut rootDir )
 
 	set(loosePackages)
-	cpfGetOwnedPackages( ownedPackageComponents ${rootDir})
-	foreach(packageComponent ${ownedPackageComponents})
-		cpfIsLoosePackage( isLoose ${packageComponent} ${rootDir})
+	cpfGetOwnedPackages( ownedPackages ${rootDir})
+	foreach(package ${ownedPackages})
+		cpfIsLoosePackage( isLoose ${package} ${rootDir})
 		if(isLoose)
-			list(APPEND loosePackages ${packageComponent})
+			list(APPEND loosePackages ${package})
 		endif()
 	endforeach()
 	set(${loosePackagesOut} ${loosePackages} PARENT_SCOPE)
@@ -348,9 +375,9 @@ endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Returns true if the package-component is not in the same repository as the ci-project.
-function( cpfIsLoosePackage isLooseOut packageComponent rootDir)
+function( cpfIsLoosePackage isLooseOut package rootDir)
 
-	cpfGetAbsPackageDirectory( packageDir ${packageComponent} ${rootDir})
+	cpfGetAbsPackageDirectory( packageDir ${package} ${rootDir})
 	cpfGetHashOfTag( packageHash HEAD "${packageDir}")
 	cpfGetHashOfTag( rootHash HEAD "${rootDir}")
 	if( ${packageHash} STREQUAL ${rootHash} )
@@ -371,7 +398,7 @@ function( cpfPrintAddPackageComponentStatusMessage packageType )
 		set(tagged "tagged ")
 	endif()
 
-	message(STATUS "Add ${packageType} package-component ${packageComponent} at ${tagged}version ${PROJECT_VERSION}")
+	message(STATUS "Add ${packageType} package-component ${packageComponent}")
 
 endfunction()
 
@@ -384,7 +411,7 @@ function( cpfPrintAddPackageStatusMessage package version)
 		set(tagged "tagged ")
 	endif()
 
-	message(STATUS "Added package ${package} at ${tagged}version ${version}")
+	message(STATUS "Add package ${package} at ${tagged}version ${version}")
 
 endfunction()
 

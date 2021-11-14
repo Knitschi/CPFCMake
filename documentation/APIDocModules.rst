@@ -780,20 +780,20 @@ The function can be used like shown below before calling :ref:`cpfAddCppPackageC
 
 
 ******************************
-Module cpfAddFilePackage.cmake
+Module cpfAddFilePackageComponent.cmake
 ******************************
 
 This module provides the following function.
 
-- cpfAddFilePackage()
+- cpfAddFilePackageComponent()
 
 
-cpfAddFilePackage()
+cpfAddFilePackageComponent()
 ===================
 
 .. code-block:: cmake
 
-  cpfAddFilePackage(
+  cpfAddFilePackageComponent(
       SOURCES file1 ...    
   )
 
@@ -812,22 +812,22 @@ current source directory or absolute.
 
 
 *********************************
-Module cpfAddDoxygenPackage.cmake
+Module cpfAddDoxygenPackageComponent.cmake
 *********************************
 
 This module provides the following function.
 
-- cpfAddDoxygenPackage()
+- cpfAddDoxygenPackageComponent()
 
 
-.. _cpfAddDoxygenPackage:
+.. _cpfAddDoxygenPackageComponent:
 
-cpfAddDoxygenPackage()
+cpfAddDoxygenPackageComponent()
 ======================
 
 .. code-block:: cmake
 
-  cpfAddFilePackage(
+  cpfAddFilePackageComponent(
       [PROJECT_NAME name]
       DOXYGEN_CONFIG_FILE absPath
       DOXYGEN_LAYOUT_FILE absPath
@@ -849,7 +849,7 @@ any other package.
 All files specified with the key-word arguments are added to the targets source files.
 
 More information about the documentation generation can be found on the page :ref:`DocumentationGeneration` and in the 
-:ref:`CPFAddDoxygenPackage` tutorial.
+:ref:`cpfAddDoxygenPackageComponent` tutorial.
 
 Arguments
 ---------
@@ -947,19 +947,19 @@ The directory will be created in the :code:`Generated/\<config\>/html/cgi-bin` d
 
 
 ********************************
-Module cpfAddSphinxPackage.cmake
+Module cpfAddSphinxPackageComponent.cmake
 ********************************
 
 This module provides the following function.
 
-- cpfAddSphinxPackage()
+- cpfAddSphinxPackageComponent()
 
-cpfAddSphinxPackage()
+cpfAddSphinxPackageComponent()
 =====================
 
 .. code-block:: cmake
 
-  cpfAddSphinxPackage(
+  cpfAddSphinxPackageComponent(
       [SOURCE_DIR]                    absDir
       [CONFIG_FILE_DIR]               absDir
       [OTHER_FILES]                   file1 ...

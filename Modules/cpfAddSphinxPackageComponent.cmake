@@ -5,7 +5,7 @@ include(cpfMiscUtilities)
 #----------------------------------------------------------------------------------------
 # See api docs for documentation
 #         
-function( cpfAddSphinxPackage )
+function( cpfAddSphinxPackageComponent )
 
     set( requiredSingleValueKeywords
     )
@@ -34,7 +34,7 @@ function( cpfAddSphinxPackage )
 
     cpfPrintAddPackageComponentStatusMessage("Sphinx")
 
-	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddSphinxPackage()")
+	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddSphinxPackageComponent()")
     cpfAssertProjectVersionDefined()
     cpfFindSphinxBuild()
 
@@ -82,7 +82,10 @@ function( cpfAddSphinxPackage )
     )
 
     cpfGetCurrentSourceDir(packageComponent)
+	cpfAddPackageSources(sourceFiles ${CPF_CURRENT_PACKAGE})
+
 	cpfAddStandardCustomTarget(
+		PACKAGE ${CPF_CURRENT_PACKAGE}
 		PACKAGE_COMPONENT ${packageComponent}
 		TARGET ${packageComponent}
 		SOURCES ${configFile} ${sourceFiles}
@@ -110,7 +113,7 @@ function( cpfFindSphinxBuild )
 
     # We require python to look for sphinx-build
     if(NOT TOOL_PYTHON3)
-        message(FATAL_ERROR "Error! Python 3 is required when using cpfAddSphinxPackage().")
+        message(FATAL_ERROR "Error! Python 3 is required when using cpfAddSphinxPackageComponent().")
     endif()
 
     # I expect the user site to be something like

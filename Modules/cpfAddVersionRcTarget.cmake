@@ -98,6 +98,7 @@ function( cpfAddVersionRcTarget )
 	)
 
 	cpfAddStandardCustomTarget(
+		PACKAGE ${CPF_CURRENT_PACKAGE}
 		PACKAGE_COMPONENT ${ARG_PACKAGE_COMPONENT}
 		TARGET ${targetName}
 		VS_SUBDIR private

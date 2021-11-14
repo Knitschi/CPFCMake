@@ -281,4 +281,24 @@ function( cpfDefineProperties )
 
     endforeach()
 
+
+    # A property that is set on the package directory.
+    # For a single component package it will hold the values SINGLE_COMPONENT.
+    # For a multi component package it will hold the names of the package components.
+    define_property(
+        DIRECTORY
+        PROPERTY CPF_PACKAGE_COMPONENTS
+        BRIEF_DOCS "Contains the package-component names that belong to the package."
+        FULL_DOCS " "
+    )
+
+    # A property that is set on the package directory.
+    # It holds the package wide source files.
+    define_property(
+        DIRECTORY
+        PROPERTY CPF_PACKAGE_SOURCES
+        BRIEF_DOCS "Contains the paths of the source files that exist on the package level."
+        FULL_DOCS " "
+    )
+
 endfunction()

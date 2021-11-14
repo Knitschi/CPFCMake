@@ -13,7 +13,7 @@ include(cpfPackageUtilities)
 #-----------------------------------------------------------
 # Documentation in APIDocs.dox
 #
-function( cpfAddDoxygenPackage )
+function( cpfAddDoxygenPackageComponent )
 
 	set( optionalBoolKeywords
 	) 
@@ -51,7 +51,7 @@ function( cpfAddDoxygenPackage )
 
 	cpfPrintAddPackageComponentStatusMessage("Doxygen")
 
-	cpfAssertKeywordArgumentsHaveValue( "${singleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddDoxygenPackage()")
+	cpfAssertKeywordArgumentsHaveValue( "${singleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddDoxygenPackageComponent()")
 	cpfAssertProjectVersionDefined()
 
 	cpfFindRequiredProgram( TOOL_DOXYGEN doxygen "A tool that generates documentation files by reading in-code comments" "${ARG_DOXYGEN_BIN_DIR}")
@@ -63,6 +63,8 @@ function( cpfAddDoxygenPackage )
 	endif()
 
 	cpfGetCurrentSourceDir( packageComponent )
+	cpfAddPackageSources(ARG_SOURCES ${CPF_CURRENT_PACKAGE})
+
 
 	# Locations
 	set(tempDoxygenConfigFile "${CMAKE_CURRENT_BINARY_DIR}/tempDoxygenConfig.txt" )
@@ -213,6 +215,7 @@ function( cpfAddDoxygenPackage )
 	)
 
 	cpfAddStandardCustomTarget( 
+		PACKAGE ${CPF_CURRENT_PACKAGE}
 		PACKAGE_COMPONENT ${packageComponent}
 		TARGET ${packageComponent}
 		SOURCES ${targetSources}

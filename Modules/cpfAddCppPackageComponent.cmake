@@ -20,7 +20,7 @@ include(cpfAddDeploySharedLibrariesTarget)
 include(cpfAddInstallTarget)
 include(cpfAddDistributionPackageTarget)
 include(cpfAddCompatibilityCheckTarget)
-include(cpfAddDoxygenPackage)
+include(cpfAddDoxygenPackageComponent)
 include(cpfAddVersionRcTarget)
 
 

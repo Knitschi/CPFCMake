@@ -31,6 +31,7 @@ macro( cpfPackageProject )
 	set(optionalMultiValueKeywords
 		LANGUAGES
 		DISTRIBUTION_PACKAGES
+		PACKAGE_FILES 
 	)
 
 	cmake_parse_arguments(ARG "" "${requiredSingleValueKeywords};$optionalSingleValueKeywords}" "${requiredMultiValueKeywords};${optionalMultiValueKeywords}" ${ARGN})
@@ -72,12 +73,33 @@ macro( cpfPackageProject )
 	set(PROJECT_VERSION_PATCH ${patch})
 	set(PROJECT_VERSION_TWEAK ${commitId})
 
+	cpfGetPackageVersionFileName(versionFile ${package})
+
+	set(packageSources
+		${ARG_PACKAGE_FILES}
+		CMakeLists.txt
+		${versionFile}
+	)
+
+	set_property(DIRECTORY ${CMAKE_CURRENT_LIST_DIR} PROPERTY CPF_PACKAGE_COMPONENTS ${ARG_COMPONENTS})
+	set_property(DIRECTORY ${CMAKE_CURRENT_LIST_DIR} PROPERTY CPF_PACKAGE_SOURCES ${packageSources})
+
 	if(NOT ("${ARG_COMPONENTS}" STREQUAL "SINGLE_COMPONENT"))
+
+		# For multi component packages we add an extra target that holds the package level files.
+		add_custom_target(
+			${package}
+			SOURCES ${packageSources}
+		)
+
+		set_property(TARGET ${package} PROPERTY FOLDER ${package})
+
 		foreach(component ${ARG_COMPONENTS})
 			add_subdirectory(${component})
 		endforeach()
-	endif()
 
+	endif()
+	
 endmacro()
 
 #-----------------------------------------------------------
