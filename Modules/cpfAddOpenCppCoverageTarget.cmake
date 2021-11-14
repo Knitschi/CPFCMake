@@ -68,7 +68,7 @@ endfunction()
 # The configuration must use MSVC enable this. OpenCppCoverage will only be run
 # when compiling with debug flags.
 # 
-function( cpfAddOpenCppCoverageTarget package)
+function( cpfAddOpenCppCoverageTarget packageComponent)
 
 	if(NOT CPF_ENABLE_OPENCPPCOVERAGE_TARGET)
 		return()
@@ -76,13 +76,13 @@ function( cpfAddOpenCppCoverageTarget package)
 	# check preconditions
 	cpfAssertDefined(CPF_TEST_FILES_DIR)
 
-	set(targetName opencppcoverage_${package})
+	set(targetName opencppcoverage_${packageComponent})
 	set(binaryDir ${CMAKE_CURRENT_BINARY_DIR}/${targetName})
 	file(MAKE_DIRECTORY ${binaryDir})
 
 	# get related targets
-	get_property(productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
-	get_property(testTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
+	get_property(productionLib TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
+	get_property(testTarget TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
 	if(TARGET ${testTarget})
 
 		# add OpenCppCoverage commands if possible
@@ -97,7 +97,7 @@ function( cpfAddOpenCppCoverageTarget package)
 			cpfListAppend( coverageOutputFiles ${coverageOutput})
 
 			set(removeTempCovFileComand "\"${CMAKE_COMMAND}\" -E remove -f \"${coverageOutputTemp}\"") # we need to try to remove this to cover cases where the OpenCppCoverage command fails and the temp file does not get renamed.
-			set(runOpenCppCoverageCommand "\"${TOOL_OPENCPPCOVERAGE}\" --export_type=binary:\"${coverageOutputTemp}\" --sources=\"**\\${CPF_SOURCE_DIR}\\${package}\" --quiet -- \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")
+			set(runOpenCppCoverageCommand "\"${TOOL_OPENCPPCOVERAGE}\" --export_type=binary:\"${coverageOutputTemp}\" --sources=\"**\\${CPF_SOURCE_DIR}\\${packageComponent}\" --quiet -- \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")
 			set(cmakeRenameCommand "\"${CMAKE_COMMAND}\" -E rename \"${coverageOutputTemp}\" \"${coverageOutput}\"")
 
 			cpfGetTargetFileGeneratorExpression(prodLibFile ${productionLib})
@@ -116,8 +116,8 @@ function( cpfAddOpenCppCoverageTarget package)
 			)
 
 			# set properties related to the static analysis target
-			set_property( TARGET ${package} PROPERTY INTERFACE_CPF_OPENCPPCOVERAGE_SUBTARGET ${targetName})
-			set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
+			set_property( TARGET ${packageComponent} PROPERTY INTERFACE_CPF_OPENCPPCOVERAGE_SUBTARGET ${targetName})
+			set_property( TARGET ${targetName} PROPERTY FOLDER "${packageComponent}/pipeline")
 			set_property( TARGET ${targetName} PROPERTY CPF_CPPCOVERAGE_OUTPUT ${coverageOutputFiles} )
 		endif()
 

@@ -30,25 +30,25 @@ endfunction()
 # Note that this function will add no target if the global CPF_ENABLE_RUN_TESTS_TARGET is set to FALSE
 # 
 # unitTestTarget : The name of t
-function( cpfAddRunCppTestsTargets package arguments)
+function( cpfAddRunCppTestsTargets packageComponent arguments)
 
 	if(CPF_ENABLE_RUN_TESTS_TARGET)
 
 		cpfAssertDefined(CPF_TEST_FILES_DIR)
 		
 		# add target that runs all tests
-		cpfAddRunCppTestTarget( runTargetName ${package} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX} "*" "${arguments}" )
-        set_property( TARGET ${package} PROPERTY INTERFACE_CPF_RUN_CPP_TESTS_SUBTARGET ${runTargetName})
+		cpfAddRunCppTestTarget( runTargetName ${packageComponent} ${CPF_RUN_ALL_TESTS_TARGET_PREFIX} "*" "${arguments}" )
+        set_property( TARGET ${packageComponent} PROPERTY INTERFACE_CPF_RUN_CPP_TESTS_SUBTARGET ${runTargetName})
 
 		# add target that runs only the fast tests
-		cpfAddRunCppTestTarget( runTargetName ${package} runFastTests_ "*FastFixture*:*FastTests*" "${arguments}")
-        set_property( TARGET ${package} PROPERTY INTERFACE_CPF_RUN_FAST_TESTS_SUBTARGET ${runTargetName})
+		cpfAddRunCppTestTarget( runTargetName ${packageComponent} runFastTests_ "*FastFixture*:*FastTests*" "${arguments}")
+        set_property( TARGET ${packageComponent} PROPERTY INTERFACE_CPF_RUN_FAST_TESTS_SUBTARGET ${runTargetName})
 
 	endif()
 
 	cpfIsVisualStudioGenerator(isVS)
 	if(isVS)
-	    get_property(testTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
+	    get_property(testTarget TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
 		if(TARGET ${testTarget})
 			cpfJoinArguments(argumentString "${arguments}")
 			set_property(TARGET ${testTarget} PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS ${argumentString})
@@ -58,14 +58,14 @@ function( cpfAddRunCppTestsTargets package arguments)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix testFilter arguments )
+function( cpfAddRunCppTestTarget runTargetNameArg packageComponent runTargetNamePrefix testFilter arguments )
 
 	# get related targets
-	get_property(productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
-    get_property(testTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
+	get_property(productionLib TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
+    get_property(testTarget TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
 	if(TARGET ${testTarget})
 
-		set(runTargetName ${runTargetNamePrefix}${package})
+		set(runTargetName ${runTargetNamePrefix}${packageComponent})
 		getRunTestStampFile( stampFile ${runTargetName} ${runTargetNamePrefix})
 
 		cpfGetTargetFileGeneratorExpression(prodLibFile ${productionLib})
@@ -84,7 +84,7 @@ function( cpfAddRunCppTestTarget runTargetNameArg package runTargetNamePrefix te
 			DEPENDS ${productionLib} ${testTarget} "${stampFile}"
 		)
 
-		set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/test")
+		set_property( TARGET ${runTargetName} PROPERTY FOLDER "${packageComponent}/test")
 
 		set(${runTargetNameArg} ${runTargetName} PARENT_SCOPE)
 
@@ -136,13 +136,13 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfAddCustomTestTarget runTestsCommand sourceFiles dependedOnExternalFiles )
 
-	cpfGetCurrentSourceDir(package)
-	set(runTargetName ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${package})
+	cpfGetCurrentSourceDir(packageComponent)
+	set(runTargetName ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${packageComponent})
 
 	cpfAddCustomTestTargetWithName(${runTargetName} ${runTestsCommand} "${sourceFiles}" "${dependedOnExternalFiles}")
 
-	set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/pipeline")
-	set_property( TARGET ${package} PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET ${runTargetName})
+	set_property( TARGET ${runTargetName} PROPERTY FOLDER "${packageComponent}/pipeline")
+	set_property( TARGET ${packageComponent} PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET ${runTargetName})
 
 endfunction()
 
@@ -193,7 +193,7 @@ endfunction()
 function( cpfAddRunPython3TestTargetForEachModule testScript modules args sourceFiles dependedOnTargets dependedOnExternalFiles)
 	if(TOOL_PYTHON3)
 
-		cpfGetCurrentSourceDir(package)
+		cpfGetCurrentSourceDir(packageComponent)
 		set(runModuleTestsTargets)
 
 		# Add one run target for each test module
@@ -213,15 +213,15 @@ function( cpfAddRunPython3TestTargetForEachModule testScript modules args source
 			set(runTargetName run_${module})
 			cpfListAppend(runModuleTestsTargets ${runTargetName})
 			cpfAddCustomTestTargetWithName( ${runTargetName} ${runTestsCommand} "${sourceFilesPlusModule}" "${dependedOnExternalFiles}")
-			set_property( TARGET ${runTargetName} PROPERTY FOLDER "${package}/private")
+			set_property( TARGET ${runTargetName} PROPERTY FOLDER "${packageComponent}/private")
 
 		endforeach()
 
 		# Add a bundle target to run all module test targets.
-		set(bundleTestTarget ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${package})
+		set(bundleTestTarget ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${packageComponent})
 		cpfAddBundleTarget(${bundleTestTarget} "${runModuleTestsTargets}")
-		set_property( TARGET ${bundleTestTarget} PROPERTY FOLDER "${package}/pipeline")
-		set_property( TARGET ${package} PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET ${bundleTestTarget})
+		set_property( TARGET ${bundleTestTarget} PROPERTY FOLDER "${packageComponent}/pipeline")
+		set_property( TARGET ${packageComponent} PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET ${bundleTestTarget})
 
 	endif()
 endfunction()

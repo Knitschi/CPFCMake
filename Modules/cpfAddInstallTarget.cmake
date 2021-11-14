@@ -16,16 +16,16 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Adds an install_<package> target that installs all components of the package.
 # 
-function( cpfAddPackageInstallTarget package )
+function( cpfAddPackageInstallTarget packageComponent )
 	
 	cpfAssertDefined(CMAKE_INSTALL_PREFIX)	# The install targets require the definition of the CMAKE_INSTALL_PREFIX path.
 	
 	# Add the install_<package> target that installs all components of the package to the install prefix.
 	cpfGetPossibleInstallComponents(components)
-	set(installTargetName install_${package})
-	cpfAddInstallTarget( ${package} ${installTargetName} "${components}" ${CMAKE_INSTALL_PREFIX} FALSE ${package}/pipeline)
-	# Add the target to the package property.
-	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET ${installTargetName} )
+	set(installTargetName install_${packageComponent})
+	cpfAddInstallTarget( ${packageComponent} ${installTargetName} "${components}" ${CMAKE_INSTALL_PREFIX} FALSE ${packageComponent}/pipeline)
+	# Add the target to the packaget property.
+	set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET ${installTargetName} )
 
 endfunction()
 
@@ -44,9 +44,9 @@ function(cpfGetPossibleInstallComponents componentsOut)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function(cpfAddInstallTarget package installTargetName components destDir clearDestDir vsTargetFolder )
+function(cpfAddInstallTarget packageComponent installTargetName components destDir clearDestDir vsTargetFolder )
 
-	cpfGetInstallTargetDependencies( fileDependencies targetDependencies ${package} "${components}")
+	cpfGetInstallTargetDependencies( fileDependencies targetDependencies ${packageComponent} "${components}")
 
 	# Get the commands
 	set(clearDestDirCommands)
@@ -72,18 +72,18 @@ function(cpfAddInstallTarget package installTargetName components destDir clearD
 	# Set target properties
 	set_property(TARGET ${installTargetName} PROPERTY CPF_OUTPUT_FILES ${stampFile} )
 	set_property(TARGET ${installTargetName} PROPERTY FOLDER ${vsTargetFolder} )
-	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${installTargetName} )
+	set_property(TARGET ${packageComponent} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${installTargetName} )
 
 endfunction()
 
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetInstallTargetDependencies fileDependenciesOut targetDependenciesOut package components )
+function( cpfGetInstallTargetDependencies fileDependenciesOut targetDependenciesOut packageComponent components )
 
 	set(fileDependencies)
 	set(targetDependencies)
 
-	get_property(subtargets TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS)
+	get_property(subtargets TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS)
 
 	foreach(target ${subtargets})
 

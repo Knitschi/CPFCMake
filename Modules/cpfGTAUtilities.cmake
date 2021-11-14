@@ -24,8 +24,8 @@ function(cpfGenerateGoogleTestAdapterSettingsFile packages)
 
 	# Add one command line parameter section for each test executable.
 	foreach(package ${packages})
-		if(TARGET ${package})
-			get_property(testTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
+		if(TARGET ${packageComponent})
+			get_property(testTarget TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
 			if(testTarget)
 				get_property(testExeArguments TARGET ${testTarget} PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS)
 				if(testExeArguments)

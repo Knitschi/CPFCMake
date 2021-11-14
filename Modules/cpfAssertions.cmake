@@ -71,7 +71,7 @@ endfunction()
 # We allow adding dependencies to non existing targets so we can link to targets that may only be available
 # for some configurations.
 #
-function( cpfDebugAssertLinkedLibrariesExists linkedLibrariesOut package linkedLibrariesIn )
+function( cpfDebugAssertLinkedLibrariesExists linkedLibrariesOut packageComponent linkedLibrariesIn )
 
 	set(linkedLibraries)
 	foreach(lib ${linkedLibrariesIn})
@@ -90,7 +90,7 @@ function( cpfDebugAssertLinkedLibrariesExists linkedLibrariesOut package linkedL
 		endif()
 
 		if(NOT TARGET ${lib})
-			cpfDebugMessage("${lib} is not a Target when creating package ${package}. If it should be available, make sure to have target ${lib} added before adding this package.")
+			cpfDebugMessage("${lib} is not a Target when creating package ${packageComponent}. If it should be available, make sure to have target ${lib} added before adding this package.")
 		else()
 			list(APPEND linkedLibraries ${lib})
 		endif()

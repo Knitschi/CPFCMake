@@ -94,26 +94,26 @@ function( cpfGetTargetOutputBaseName nameOut target config)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetAbsOutputDir absDirOut package outputType config )
-	cpfGetRelativeOutputDir(relativeDir ${package} ${outputType})
+function( cpfGetAbsOutputDir absDirOut packageComponent outputType config )
+	cpfGetRelativeOutputDir(relativeDir ${packageComponent} ${outputType})
 	set(${absDirOut} "${CMAKE_BINARY_DIR}/BuildStage/${config}/${relativeDir}" PARENT_SCOPE)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Note that this function defines a part of the directory structure of the deployed files
 #
-function( cpfGetRelativeOutputDir relativeDirOut package outputType )
+function( cpfGetRelativeOutputDir relativeDirOut packageComponent outputType )
 
-	cpfGetPackagePrefixOutputDir( packagePrefixDir ${package} )
-	cpfGetTypePartOfOutputDir(typeDir ${package} ${outputType})
+	cpfGetPackagePrefixOutputDir( packagePrefixDir ${packageComponent} )
+	cpfGetTypePartOfOutputDir(typeDir ${packageComponent} ${outputType})
 	set(${relativeDirOut} ${packagePrefixDir}/${typeDir} PARENT_SCOPE )
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
 # 
-function( cpfGetPackagePrefixOutputDir outputDir package )
-	set(${outputDir} ${package} PARENT_SCOPE )
+function( cpfGetPackagePrefixOutputDir outputDir packageComponent )
+	set(${outputDir} ${packageComponent} PARENT_SCOPE )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
@@ -130,7 +130,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # This function defines the part of the output directory that comes after the config/package add_subdirectory
 #
-function( cpfGetTypePartOfOutputDir typeDir package outputType )
+function( cpfGetTypePartOfOutputDir typeDir packageComponent outputType )
 
 	# handle relative dirs that are the same on all platforms
 	if(${outputType} STREQUAL ARCHIVE)
@@ -142,11 +142,11 @@ function( cpfGetTypePartOfOutputDir typeDir package outputType )
 		# We put the linker pdb files parallel to the dll, because msvc looks for them there.
 		set(typeDirLocal . )
 	elseif(${outputType} STREQUAL INCLUDE)
-		set(typeDirLocal include/${package})
+		set(typeDirLocal include/${packageComponent})
 	elseif(${outputType} STREQUAL CMAKE_PACKAGE_FILES)
-		set(typeDirLocal lib/cmake/${package}) 
+		set(typeDirLocal lib/cmake/${packageComponent}) 
 	elseif(${outputType} STREQUAL SOURCE )
-		set(typeDirLocal src/${package}) 
+		set(typeDirLocal src/${packageComponent}) 
 	elseif(${outputType} STREQUAL DISTRIBUTION_PACKAGE_FILES)
 		set(typeDirLocal DistributionPackages)
 	elseif(${outputType} STREQUAL OTHER )
@@ -182,17 +182,17 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Sets the <binary-type>_OUTOUT_DIRECTORY_<config> properties of the given target.
 #
-function( cpfSetTargetOutputDirectoriesAndNames package target )
+function( cpfSetTargetOutputDirectoriesAndNames packageComponent target )
 
 	cpfGetConfigurations( configs)
 	foreach(config ${configs})
-		cpfSetAllOutputDirectoriesAndNames(${target} ${package} ${config} )
+		cpfSetAllOutputDirectoriesAndNames(${target} ${packageComponent} ${config} )
 	endforeach()
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfSetAllOutputDirectoriesAndNames target package config )
+function( cpfSetAllOutputDirectoriesAndNames target packageComponent config )
 
 	# The output directory properties can not be set on interface libraries.
 	cpfIsInterfaceLibrary(isIntLib ${target})
@@ -206,13 +206,13 @@ function( cpfSetAllOutputDirectoriesAndNames target package config )
 	string(TOUPPER ${config} uConfig)
 	set_property( TARGET ${target} PROPERTY ${uConfig}_POSTFIX "" )
 
-	cpfSetOutputDirAndName( ${target} ${package} ${config} RUNTIME)
-	cpfSetOutputDirAndName( ${target} ${package} ${config} LIBRARY)
-	cpfSetOutputDirAndName( ${target} ${package} ${config} ARCHIVE)
+	cpfSetOutputDirAndName( ${target} ${packageComponent} ${config} RUNTIME)
+	cpfSetOutputDirAndName( ${target} ${packageComponent} ${config} LIBRARY)
+	cpfSetOutputDirAndName( ${target} ${packageComponent} ${config} ARCHIVE)
 
 	cpfCompilerProducesPdbFiles(hasOutput ${config})
 	if(hasOutput)
-		cpfSetOutputDirAndName( ${target} ${package} ${config} COMPILE_PDB)
+		cpfSetOutputDirAndName( ${target} ${packageComponent} ${config} COMPILE_PDB)
 		set_property(TARGET ${target} PROPERTY COMPILE_PDB_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX}-compiler) # we overwrite the filename to make it more meaningful
 	endif()
 
@@ -220,7 +220,7 @@ function( cpfSetAllOutputDirectoriesAndNames target package config )
 	if(hasOutput)
 		# Note that we use the same name and path for linker as are used for the dlls files.
 		# When consuming imported targets we guess that the pdb files have these locations. 
-		cpfSetOutputDirAndName( ${target} ${package} ${config} PDB)
+		cpfSetOutputDirAndName( ${target} ${packageComponent} ${config} PDB)
 		set_property(TARGET ${target} PROPERTY PDB_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX})
 	endif()
 
@@ -229,9 +229,9 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # This function sets the output name property to make sure that the same target file names are
 # achieved across all platforms.
-function( cpfSetOutputDirAndName target package config outputType )
+function( cpfSetOutputDirAndName target packageComponent config outputType )
 
-	cpfGetAbsOutputDir(outputDir ${package} ${outputType} ${config})
+	cpfGetAbsOutputDir(outputDir ${packageComponent} ${outputType} ${config})
 	cpfToConfigSuffix(configSuffix ${config})
 	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_DIRECTORY_${configSuffix} ${outputDir})
 	# use the config postfix for all target types

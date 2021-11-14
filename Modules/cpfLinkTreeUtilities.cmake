@@ -4,7 +4,7 @@ include_guard(GLOBAL)
 #---------------------------------------------------------------------------------------------
 function( cpfGetSharedLibrariesRequiredByPackageExecutables librariesOut package config )
 
-	cpfGetExecutableTargets( exeTargets ${package})
+	cpfGetExecutableTargets( exeTargets ${packageComponent})
 	set(allLinkedLibraries)
 	foreach(exeTarget ${exeTargets})
 		cpfGetRecursiveLinkedLibraries( targetLinkedLibraries ${exeTarget} ${config})
@@ -21,9 +21,9 @@ function( cpfGetSharedLibrariesRequiredByPackageExecutables librariesOut package
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetSharedLibrariesRequiredByPackageProductionLib librariesOut package )
+function( cpfGetSharedLibrariesRequiredByPackageProductionLib librariesOut packageComponent )
 
-	get_property( productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET )
+	get_property( productionLib TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET )
 	cpfGetRecursiveLinkedLibraries( linkedLibraries ${productionLib} all)
 	if(linkedLibraries)
 		list(REMOVE_DUPLICATES linkedLibraries)

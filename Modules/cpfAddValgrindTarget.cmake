@@ -29,7 +29,7 @@ function( cpfAddValgrindTarget package)
 		return()
 	endif()
 
-	set(targetName valgrind_${package})
+	set(targetName valgrind_${packageComponent})
 	set(binaryDir ${CMAKE_CURRENT_BINARY_DIR}/${targetName})
 	file(MAKE_DIRECTORY ${binaryDir})
 		
@@ -37,8 +37,8 @@ function( cpfAddValgrindTarget package)
 	cpfAssertDefined(CPF_TEST_FILES_DIR)
 
 	# get related targets
-	get_property(productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
-	get_property(testTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
+	get_property(productionLib TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
+	get_property(testTarget TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET)
 	if(TARGET ${testTarget})
 	
 		# add Valgrind commands if possible
@@ -49,7 +49,7 @@ function( cpfAddValgrindTarget package)
 
 			# add valgrind commands
 			set(stampFile "${binaryDir}/Valgrind_${testTarget}.stamp")
-			set(suppressionsFile "${CMAKE_CURRENT_SOURCE_DIR}/Other/${package}ValgrindSuppressions.supp")
+			set(suppressionsFile "${CMAKE_CURRENT_SOURCE_DIR}/Other/${packageComponent}ValgrindSuppressions.supp")
 			set(valgrindCommand "\"${TOOL_VALGRIND}\" --show-reachable=yes --error-limit=no --leak-check=full --track-origins=yes --smc-check=all --error-exitcode=1 --gen-suppressions=all --suppressions=\"${suppressionsFile}\" \"$<TARGET_FILE:${testTarget}>\" -TestFilesDir \"${CPF_TEST_FILES_DIR}/${CPF_CONFIG}/dynmicAnalysis_${testTarget}\"")
 				
 			cpfIsInterfaceLibrary(isInterfaceLib ${productionLib})
@@ -69,8 +69,8 @@ function( cpfAddValgrindTarget package)
 				DEPENDS ${productionLib} ${testTarget} ${stampFile}
 			)
 
-			set_property( TARGET ${package} PROPERTY INTERFACE_CPF_VALGRIND_SUBTARGET ${targetName})
-			set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
+			set_property( TARGET ${packageComponent} PROPERTY INTERFACE_CPF_VALGRIND_SUBTARGET ${targetName})
+			set_property( TARGET ${targetName} PROPERTY FOLDER "${packageComponent}/pipeline")
 
 		endif()
 	endif()

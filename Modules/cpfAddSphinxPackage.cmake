@@ -81,15 +81,15 @@ function( cpfAddSphinxPackage )
         OUTPUT ${keyOutputFile}
     )
 
-    cpfGetCurrentSourceDir(package)
+    cpfGetCurrentSourceDir(packageComponent)
 	cpfAddStandardCustomTarget(
-		PACKAGE ${package}
-		TARGET ${package}
+		PACKAGE ${packageComponent}
+		TARGET ${packageComponent}
 		SOURCES ${configFile} ${sourceFiles}
 		PRODUCED_FILES ${keyOutputFile}
 		INSTALL_COMPONENTS documentation
 	)
-	add_dependencies(pipeline ${package})
+	add_dependencies(pipeline ${packageComponent})
 	
 
 	# Add install rules to create the cmake_install.cmake script.
@@ -101,7 +101,7 @@ function( cpfAddSphinxPackage )
 	)
 
 	# Add a custom install target.
-	cpfAddPackageInstallTarget(${package})
+	cpfAddPackageInstallTarget(${packageComponent})
 
 endfunction()
 

@@ -4,10 +4,10 @@ include_guard(GLOBAL)
 #-----------------------------------------------------------
 # Returns the name of the current source directory as packageNameOut.
 #
-function(cpfGetCurrentSourceDir packageNameOut)
+function(cpfGetCurrentSourceDir dirOut)
 
-    cpfGetParentDirectory( package "${CMAKE_CURRENT_SOURCE_DIR}/blub")
-    set(${packageNameOut} "${package}" PARENT_SCOPE)
+    cpfGetParentDirectory( dir "${CMAKE_CURRENT_SOURCE_DIR}/blub")
+    set(${dirOut} "${dir}" PARENT_SCOPE)
 
 endfunction()
 
@@ -17,9 +17,9 @@ endfunction()
 # If that is the case it splits the name into the unversioned part and the version postfix
 # and returns it.
 #
-function( cpfGetUnversionedPackageName isVersionedNameOut unversionedNameOut versionPostfixOut package)
+function( cpfGetUnversionedPackageName isVersionedNameOut unversionedNameOut versionPostfixOut packageComponent)
 
-	string(REGEX MATCH "^(.*)(_[0-9]*_[0-9]*_[0-9]*)(_[0-9]*_[a-z0-9]*)?$" dummy "${package}")
+	string(REGEX MATCH "^(.*)(_[0-9]*_[0-9]*_[0-9]*)(_[0-9]*_[a-z0-9]*)?$" dummy "${packageComponent}")
 
 	if(CMAKE_MATCH_2)
 		set(${isVersionedNameOut} FALSE PARENT_SCOPE)
@@ -27,23 +27,23 @@ function( cpfGetUnversionedPackageName isVersionedNameOut unversionedNameOut ver
 		set(${versionPostfixOut} ${CMAKE_MATCH_2} PARENT_SCOPE)
 	elseif()
 		set(${isVersionedNameOut} FALSE PARENT_SCOPE)
-		set(${unversionedNameOut} "${package}" PARENT_SCOPE)
+		set(${unversionedNameOut} "${packageComponent}" PARENT_SCOPE)
 		set(${versionPostfixOut} "" PARENT_SCOPE)
 	endif()
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetExecutableTargets exeTargetsOut package )
+function( cpfGetExecutableTargets exeTargetsOut packageComponent )
 	
 	set(exeTargets)
 
-	cpfIsExecutable(isExe ${package})
+	cpfIsExecutable(isExe ${packageComponent})
 	if(isExe)
-		cpfListAppend( exeTargets ${package})
+		cpfListAppend( exeTargets ${packageComponent})
 	endif()
 
-	get_property( testTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET )
+	get_property( testTarget TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET )
 	if(testTarget)
 		list(APPEND exeTargets ${testTarget})
 	endif()
@@ -53,13 +53,13 @@ function( cpfGetExecutableTargets exeTargetsOut package )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetProductionTargets productionTargetsOut package)
+function( cpfGetProductionTargets productionTargetsOut packageComponent)
 	
-	set(targets ${package})
+	set(targets ${packageComponent})
 	
-	cpfIsExecutable(isExe ${package})
+	cpfIsExecutable(isExe ${packageComponent})
 	if(isExe)
-		get_property( prodLibTarget TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET )
+		get_property( prodLibTarget TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET )
 		cpfListAppend(targets ${prodLibTarget})
 	endif()
 
@@ -69,10 +69,10 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Returns a list with the binary sub-targets that are of type SHARED_LIBRARY or MODULE_LIBRARY.
-function( cpfGetSharedLibrarySubTargets librarySubTargetsOut package)
+function( cpfGetSharedLibrarySubTargets librarySubTargetsOut packageComponent)
 
 	set(libraryTargets)
-	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
+	get_property( binaryTargets TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
 	foreach( binaryTarget ${binaryTargets})
 		cpfIsDynamicLibrary( isDynamic ${binaryTarget})
 		if(isDynamic)
@@ -87,16 +87,16 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns a list with the binary sub-targets that will be shared libraries if
 # the BUILD_SHARED_LIBS option is set to ON.
-function( cpfGetPossiblySharedLibrarySubTargets librarySubTargetsOut package)
+function( cpfGetPossiblySharedLibrarySubTargets librarySubTargetsOut packageComponent)
 
 	set(libraryTargets)
 
-	cpfIsExecutable(isExe ${package})
+	cpfIsExecutable(isExe ${packageComponent})
 	if(NOT isExe)
-		cpfListAppend( libraryTargets ${package})
+		cpfListAppend( libraryTargets ${packageComponent})
 	endif()
 
-	get_property( fixtureTarget TARGET ${package} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET)
+	get_property( fixtureTarget TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET)
 	if(TARGET ${fixtureTarget})
 		cpfListAppend( libraryTargets ${fixtureTarget})
 	endif()
@@ -106,16 +106,16 @@ function( cpfGetPossiblySharedLibrarySubTargets librarySubTargetsOut package)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetTestTargets testTargetsOut package )
+function( cpfGetTestTargets testTargetsOut packageComponent )
 
 	set(targets)
 
-	get_property( fixtureTarget TARGET ${package} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET )
+	get_property( fixtureTarget TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET )
 	if(fixtureTarget)
 		cpfListAppend(targets ${fixtureTarget})
 	endif()
 
-	get_property( testExeTarget TARGET ${package} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET )
+	get_property( testExeTarget TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET )
 	if(testExeTarget)
 		cpfListAppend(targets ${testExeTarget})
 	endif()
@@ -125,18 +125,18 @@ function( cpfGetTestTargets testTargetsOut package )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetSubtargets subTargetsOut packages subtargetProperty)
+function( cpfGetSubtargets subTargetsOut packageComponents subtargetProperty)
 
 	set(targets)
-	foreach(package ${packages})
-		if(TARGET ${package}) # not all packages have targets
+	foreach(packageComponent ${packageComponents})
+		if(TARGET ${packageComponent}) # not all packages have targets
 			
 			# check for subtargets that belong to the main package target
-			get_property(subTarget TARGET ${package} PROPERTY ${subtargetProperty})
+			get_property(subTarget TARGET ${packageComponent} PROPERTY ${subtargetProperty})
 			cpfListAppend( targets ${subTarget} )
 
 			# check for subtargets that belong to the binary targets
-			get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
+			get_property(binaryTargets TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
 			foreach(binaryTarget ${binaryTargets})
 				get_property(subTarget TARGET ${binaryTarget} PROPERTY ${subtargetProperty})
 				cpfListAppend( targets ${subTarget} )
@@ -289,7 +289,7 @@ function( cpfAddPackageSubdirectories )
 	foreach(listName ${listNames})
 		
 		# The second element must be the package name.
-		list(GET ${listName} 1 package )
+		list(GET ${listName} 1 packageComponent )
 		cmake_parse_arguments(ARG "" "${overridableVariables}" "" ${${listName}})
 
 		# Override the global variables with the values from the list.
@@ -301,7 +301,7 @@ function( cpfAddPackageSubdirectories )
 		endforeach()
 
 		# Now add the subdirectory.
-		add_subdirectory(${package})
+		add_subdirectory(${packageComponent})
 
 	endforeach()
 
@@ -335,11 +335,11 @@ endfunction()
 function( cpfGetOwnedLoosePackages loosePackagesOut rootDir )
 
 	set(loosePackages)
-	cpfGetOwnedPackages( ownedPackages ${rootDir})
-	foreach(package ${ownedPackages})
-		cpfIsLoosePackage( isLoose ${package} ${rootDir})
+	cpfGetOwnedPackages( ownedPackageComponents ${rootDir})
+	foreach(packageComponent ${ownedPackageComponents})
+		cpfIsLoosePackage( isLoose ${packageComponent} ${rootDir})
 		if(isLoose)
-			list(APPEND loosePackages ${package})
+			list(APPEND loosePackages ${packageComponent})
 		endif()
 	endforeach()
 	set(${loosePackagesOut} ${loosePackages} PARENT_SCOPE)
@@ -348,9 +348,9 @@ endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Returns true if the package is not in the same repository as the ci-project.
-function( cpfIsLoosePackage isLooseOut package rootDir)
+function( cpfIsLoosePackage isLooseOut packageComponent rootDir)
 
-	cpfGetAbsPackageDirectory( packageDir ${package} ${rootDir})
+	cpfGetAbsPackageDirectory( packageDir ${packageComponent} ${rootDir})
 	cpfGetHashOfTag( packageHash HEAD "${packageDir}")
 	cpfGetHashOfTag( rootHash HEAD "${rootDir}")
 	if( ${packageHash} STREQUAL ${rootHash} )
@@ -435,13 +435,13 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # read all sources from all binary targets of the given packages
-function( cpfGetAllNonGeneratedPackageSources sourceFiles packages )
+function( cpfGetAllNonGeneratedPackageSources sourceFiles packageComponents )
 
-	foreach( package ${packages} globalFiles) # we also get the global files from the globalFiles target
-		if(TARGET ${package}) # non-cpf packages may not have targets set to them
-			get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
+	foreach( packageComponent ${packageComponents} globalFiles) # we also get the global files from the globalFiles target
+		if(TARGET ${packageComponent}) # non-cpf packages may not have targets set to them
+			get_property(binaryTargets TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
 			# explicitly include the package itself, because it may not be a binary target.
-			set(targets ${binaryTargets} ${package})
+			set(targets ${binaryTargets} ${packageComponent})
 			list(REMOVE_DUPLICATES targets)
 			foreach( target ${targets} )
 				cpfIsInterfaceLibrary( isIntLib ${target})
@@ -460,13 +460,13 @@ function( cpfGetAllNonGeneratedPackageSources sourceFiles packages )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetAllDependedOnSourceFiles filesOut sourceFiles dependedOnPackages )
+function( cpfGetAllDependedOnSourceFiles filesOut sourceFiles dependedOnPackageComponents )
 
 	cpfPrependMulti( absSourceFiles "${CMAKE_CURRENT_SOURCE_DIR}/" "${sourceFiles}")
 
 	# Get the sources from the depended on packages.
-	foreach( package ${dependedOnPackages})
-		getAbsPathsOfTargetSources( absSources ${package})
+	foreach( packageComponent ${dependedOnPackageComponents})
+		getAbsPathsOfTargetSources( absSources ${packageComponent})
 		cpfListAppend( absSourceFiles ${absSources})
 	endforeach()
 
@@ -475,9 +475,9 @@ function( cpfGetAllDependedOnSourceFiles filesOut sourceFiles dependedOnPackages
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAppendPackageExeRPaths package rpath )
+function( cpfAppendPackageExeRPaths packageComponent rpath )
 
-	cpfGetExecutableTargets( exeTargets ${package})
+	cpfGetExecutableTargets( exeTargets ${packageComponent})
 	foreach(target ${exeTargets})
 		set_property(TARGET ${target} APPEND PROPERTY INSTALL_RPATH "${rpath}")
 	endforeach()
@@ -485,17 +485,17 @@ function( cpfAppendPackageExeRPaths package rpath )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGenerateDependencyNamesHeader package )
+function( cpfGenerateDependencyNamesHeader packageComponent )
 
 	set(fileContent "// This file is generated by the CMakeProjectFramework.\n// Manual changes will be overwritten.\n\n")
 
 	# Add macro names and values for this package
-	cpfGetUnversionedPackageName(unused unversionedPackage unused ${package})
-	set(packages ${package})
+	cpfGetUnversionedPackageName(unused unversionedPackage unused ${packageComponent})
+	set(packages ${packageComponent})
 	set(macroNames ${unversionedPackage})
 
 	# Add macro names and values for linked packages
-	cpfGetCPFPackagesInPubliclyLinkedTree(interfacePackages interfaceMacroNames ${package} TRUE)
+	cpfGetCPFPackagesInPubliclyLinkedTree(interfacePackages interfaceMacroNames ${packageComponent} TRUE)
 	list(APPEND packages ${interfacePackages})
 	list(APPEND macroNames ${interfaceMacroNames})
 
@@ -504,7 +504,7 @@ function( cpfGenerateDependencyNamesHeader package )
 
 	# The private names header can also contain the names of privatly linked dependencies. 
 	# They can not appear in the public header because it will make the short macro names ambigious.
-	cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(privatePackages privateMacroNames ${package} PRIVATE TRUE)
+	cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(privatePackages privateMacroNames ${packageComponent} PRIVATE TRUE)
 	list(APPEND packages ${privatePackages})
 	list(APPEND macroNames ${privateMacroNames})
 
@@ -516,9 +516,9 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 function( cpfWriteDependencyNamesToFile absFilename packages macroNames )
 
-	foreach(macroName package IN ZIP_LISTS macroNames packages)
+	foreach(macroName packageComponent IN ZIP_LISTS macroNames packages)
 		string(APPEND fileContent "#undef ${macroName}\n")
-		string(APPEND fileContent "#define ${macroName} ${package}\n")
+		string(APPEND fileContent "#define ${macroName} ${packageComponent}\n")
 		string(APPEND fileContent "\n")
 	endforeach()
 	
@@ -526,7 +526,7 @@ function( cpfWriteDependencyNamesToFile absFilename packages macroNames )
 		file(CONFIGURE OUTPUT ${absFilename} CONTENT ${fileContent} NEWLINE_STYLE LF)
 	endif()
 
-	get_property(productionLib TARGET ${package} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
+	get_property(productionLib TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
 	set_property(TARGET ${productionLib} APPEND PROPERTY SOURCES ${absFilename} )
 	set_property(TARGET ${productionLib} APPEND PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${absFilename} )
 	source_group("" FILES ${absFilename})
@@ -534,10 +534,10 @@ function( cpfWriteDependencyNamesToFile absFilename packages macroNames )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetCPFPackagesInPubliclyLinkedTree packagesOut macroNamesOut package isRoot)
+function( cpfGetCPFPackagesInPubliclyLinkedTree packagesOut macroNamesOut packageComponent isRoot)
 
 	# Get directly linked packages.
-	cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(linkedPackages macroNames ${package} INTERFACE ${isRoot})
+	cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(linkedPackages macroNames ${packageComponent} INTERFACE ${isRoot})
 
 	# Recurse through the linked packages.
 	foreach(linkedPackage ${linkedPackages})
@@ -552,11 +552,11 @@ function( cpfGetCPFPackagesInPubliclyLinkedTree packagesOut macroNamesOut packag
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages packagesOut packageVersionMacroNamesOut package linkVisibility isRoot)
+function( cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages packagesOut packageVersionMacroNamesOut packageComponent linkVisibility isRoot)
 
 	# Get visible linked targets
 	set(linkedTargets)
-	get_property(binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
+	get_property(binaryTargets TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
 	foreach(target ${binaryTargets})
 		cpfGetLinkedTargets(linkedTargets ${target} all ${linkVisibility})
 	endforeach()
@@ -566,14 +566,14 @@ function( cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages packagesOut packageVer
 	set(linkedCPFPackages)
 	foreach(target ${linkedTargets})
 		get_property(packageName TARGET ${target} PROPERTY INTERFACE_CPF_PACKAGE_NAME)
-		if(packageName AND (NOT (${packageName} STREQUAL ${package})))
+		if(packageName AND (NOT (${packageName} STREQUAL ${packageComponent})))
 			list(APPEND linkedCPFPackages ${packageName})
 		endif()
 	endforeach()
 
 	# Get macro names for the linked packages
 	set(packageMacroNames)
-	cpfGetUnversionedPackageName(unused unversionedNameThisPackage unused ${package})
+	cpfGetUnversionedPackageName(unused unversionedNameThisPackage unused ${packageComponent})
 	foreach(linkedPackage ${linkedCPFPackages})
 		cpfGetUnversionedPackageName(unused unversionedNameLinkedPackage unused ${linkedPackage})
 		if(isRoot)
