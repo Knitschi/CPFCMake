@@ -83,7 +83,7 @@ function( cpfAddSphinxPackage )
 
     cpfGetCurrentSourceDir(packageComponent)
 	cpfAddStandardCustomTarget(
-		PACKAGE ${packageComponent}
+		PACKAGE_COMPONENT ${packageComponent}
 		TARGET ${packageComponent}
 		SOURCES ${configFile} ${sourceFiles}
 		PRODUCED_FILES ${keyOutputFile}

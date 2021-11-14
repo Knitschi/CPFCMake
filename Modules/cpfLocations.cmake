@@ -43,7 +43,7 @@ function( cpfGetPackageVersionFileName filenameOut package )
 endfunction()
 
 # This function defines the name of a package-components c++ header version file. 
-function( cpfGetPackageVersionCppHeaderFileName filenameOut packageComponent )
+function( cpfGetPackageComponentVersionCppHeaderFileName filenameOut packageComponent )
 	set( ${filenameOut} cpfPackageVersion_${packageComponent}.h PARENT_SCOPE)
 endfunction()
 

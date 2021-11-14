@@ -14,7 +14,7 @@ function( cpfDefineProperties )
 	# A property that is set on all package-component targets.
     define_property(
         TARGET
-        PROPERTY INTERFACE_CPF_PACKAGE_NAME
+        PROPERTY INTERFACE_CPF_PACKAGE_COMPONENT_NAME
         BRIEF_DOCS "Contains the package-component name including the version postfix."
         FULL_DOCS " "
     )

@@ -14,7 +14,7 @@ include(cpfMiscUtilities)
 function( cpfAddVersionRcTarget )
 
     set( requiredSingleValueKeywords
-        PACKAGE
+        PACKAGE_COMPONENT
         BINARY_TARGET
         VERSION
     )
@@ -79,7 +79,7 @@ function( cpfAddVersionRcTarget )
         "ABS_SOURCE_PATH=\"${versionRcTemplate}\""
 		"ABS_DEST_PATH=\"${versionRcGenerated}\""
 		"OWNER=\"${ARG_OWNER}\""
-        "PACKAGE=${ARG_PACKAGE}"
+        "PACKAGE=${ARG_PACKAGE_COMPONENT}"
         "PACKAGE_VERSION=${ARG_VERSION}"
 		"PACKAGE_VERSION_SHORT=\"${major}, ${minor}, ${patch}, ${commitNr}\""
         "BRIEF_DESCRIPTION=\"${ARG_BRIEF_DESCRIPTION}\""
@@ -98,7 +98,7 @@ function( cpfAddVersionRcTarget )
 	)
 
 	cpfAddStandardCustomTarget(
-		PACKAGE ${ARG_PACKAGE}
+		PACKAGE_COMPONENT ${ARG_PACKAGE_COMPONENT}
 		TARGET ${targetName}
 		VS_SUBDIR private
 		PRODUCED_FILES ${versionRcGenerated}

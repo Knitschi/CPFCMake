@@ -102,7 +102,7 @@ function( cpfAddCppPackageComponent )
 	cpfGetCurrentSourceDir(packageComponent)
 
 	# Use values of global variables for unset arguments.
-	cpfGetRequiredPackageOption( ARG_TARGET_NAMESPACE ${CPF_CURRENT_PACKAGE} ${packageComponent} TARGET_NAMESPACE)
+	cpfGetRequiredPackageComponentOption( ARG_TARGET_NAMESPACE ${CPF_CURRENT_PACKAGE} ${packageComponent} TARGET_NAMESPACE)
 	cpfGetOptionalPackageOption( ARG_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS False)
 	cpfGetOptionalPackageOption( ARG_ENABLE_ABI_API_STABILITY_CHECK_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_ABI_API_STABILITY_CHECK_TARGETS False)
 	cpfGetOptionalPackageOption( ARG_ENABLE_CLANG_FORMAT_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_CLANG_FORMAT_TARGETS False)
@@ -276,7 +276,7 @@ function( cpfAddPackageBinaryTargets
 
 	# add version header and cmake files to the production files
 	list(APPEND productionFiles ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt )
-	cpfGetPackageVersionCppHeaderFileName( versionHeader ${packageComponent} )
+	cpfGetPackageComponentVersionCppHeaderFileName( versionHeader ${packageComponent} )
 	list(APPEND publicHeaderFiles ${CMAKE_CURRENT_BINARY_DIR}/${versionHeader} )
 	
 
@@ -300,7 +300,7 @@ function( cpfAddPackageBinaryTargets
 		# The main target must be created first because cpfAddBinaryTarget() needs to set the
 		# main target properties when adding helper targets.
 		cpfAddBinaryTarget(
-			PACKAGE_NAME ${packageComponent}
+			PACKAGE_COMPONENT ${packageComponent}
 			TARGET_NAMESPACE ${targetNamespace}
 			TARGET_TYPE ${type}
 			NAME ${exeTarget}
@@ -321,7 +321,7 @@ function( cpfAddPackageBinaryTargets
 		if(productionFiles OR publicHeaderFiles)  
 
 			cpfAddBinaryTarget(
-				PACKAGE_NAME ${packageComponent}  
+				PACKAGE_COMPONENT ${packageComponent}  
 				TARGET_NAMESPACE ${targetNamespace}
 				TARGET_TYPE LIB
 				NAME ${libraryTarget}
@@ -354,7 +354,7 @@ function( cpfAddPackageBinaryTargets
 		if(productionFiles OR publicHeaderFiles)  
 
 			cpfAddBinaryTarget(
-				PACKAGE_NAME ${packageComponent}  
+				PACKAGE_COMPONENT ${packageComponent}  
 				TARGET_NAMESPACE ${targetNamespace}
 				TARGET_TYPE ${type}
 				NAME ${packageComponent} 
@@ -382,7 +382,7 @@ function( cpfAddPackageBinaryTargets
 	if( fixtureFiles OR publicFixtureHeaderFiles )
         set( fixtureTarget ${libraryTarget}${CPF_FIXTURE_TARGET_ENDING})
 	    cpfAddBinaryTarget(
-			PACKAGE_NAME ${packageComponent}
+			PACKAGE_COMPONENT ${packageComponent}
 			TARGET_NAMESPACE ${targetNamespace}
 			TARGET_TYPE LIB
 			NAME ${fixtureTarget}
@@ -411,7 +411,7 @@ function( cpfAddPackageBinaryTargets
 	if( testFiles )
         set( unitTestsTarget ${libraryTarget}${CPF_TESTS_TARGET_ENDING})
         cpfAddBinaryTarget(
-			PACKAGE_NAME ${packageComponent}
+			PACKAGE_COMPONENT ${packageComponent}
 			TARGET_NAMESPACE ${targetNamespace}
 			TARGET_TYPE CONSOLE_APP
 			NAME ${unitTestsTarget}
@@ -471,7 +471,7 @@ function( cpfAddBinaryTarget )
 	cmake_parse_arguments(
 		ARG 
 		"" 
-		"PACKAGE_NAME;NAME;TARGET_NAMESPACE;TARGET_TYPE;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME;ENABLE_CLANG_FORMAT_TARGETS;ENABLE_PRECOMPILED_HEADER;ENABLE_VERSION_RC_FILE_GENERATION;BRIEF_DESCRIPTION;OWNER" 
+		"PACKAGE_COMPONENT;NAME;TARGET_NAMESPACE;TARGET_TYPE;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME;ENABLE_CLANG_FORMAT_TARGETS;ENABLE_PRECOMPILED_HEADER;ENABLE_VERSION_RC_FILE_GENERATION;BRIEF_DESCRIPTION;OWNER" 
 		"PUBLIC_HEADER;FILES;LINKED_LIBRARIES;COMPILE_OPTIONS" 
 		${ARGN} 
 	)
@@ -529,7 +529,7 @@ function( cpfAddBinaryTarget )
     endif()
 
 	# Set the package-component name to the target. With this we can check if an imported target is from a CPF package-component.
-	set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_CPF_PACKAGE_NAME ${ARG_PACKAGE_NAME})
+	set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_CPF_PACKAGE_COMPONENT_NAME ${ARG_PACKAGE_COMPONENT})
 
     # Link with other libraries
 	# This must be done before setting up the precompiled headers.
@@ -601,7 +601,7 @@ function( cpfAddBinaryTarget )
 	set_property( TARGET ${ARG_NAME} APPEND PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${ARG_PUBLIC_HEADER})
 
 	# sets all the <bla>_OUTPUT_DIRECTORY_<config> options
-	cpfSetTargetOutputDirectoriesAndNames(${ARG_PACKAGE_NAME} ${ARG_NAME})
+	cpfSetTargetOutputDirectoriesAndNames(${ARG_PACKAGE_COMPONENT} ${ARG_NAME})
 
 	# sort files into folders in visual studio
 	cpfSetIDEDirectoriesForTargetSources(${ARG_NAME})
@@ -611,13 +611,13 @@ function( cpfAddBinaryTarget )
 
 	# Adds a clang-format target
 	if(ARG_ENABLE_CLANG_FORMAT_TARGETS)
-		cpfAddClangFormatTarget(${ARG_PACKAGE_NAME} ${ARG_NAME})
+		cpfAddClangFormatTarget(${ARG_PACKAGE_COMPONENT} ${ARG_NAME})
 	endif()
 
 	# Setup automatic creation of a version.rc file on windows
 	if((NOT ARG_DISABLE_VERSION_RC_GENERATION) AND (NOT isInterfaceLib))
 		cpfAddVersionRcTarget(
-			PACKAGE	${ARG_PACKAGE_NAME}
+			PACKAGE_COMPONENT ${ARG_PACKAGE_COMPONENT}
 			BINARY_TARGET ${ARG_NAME}
 			VERSION ${PROJECT_VERSION}
 			BRIEF_DESCRIPTION ${ARG_BRIEF_DESCRIPTION}

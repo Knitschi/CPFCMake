@@ -142,25 +142,25 @@ function( test_cpfGetRequiredPackageOption )
     
     # Check that global CPF option is picked up.
     set(CPF_MY_OPTION bla)
-    cpfGetRequiredPackageOption(var ${package} ${component} MY_OPTION)
+    cpfGetRequiredPackageComponentOption(var ${package} ${component} MY_OPTION)
     cpfAssertStrEQ(${var} bla)
 
     # Check that package wide variable takes precedence
     # over the global one.
     set(MyPackage_MY_OPTION blub)
-    cpfGetRequiredPackageOption(var ${package} ${component} MY_OPTION)
+    cpfGetRequiredPackageComponentOption(var ${package} ${component} MY_OPTION)
     cpfAssertStrEQ(${var} blub)
 
     # Check that the package-component wide variable takes
     # precedence over the global and the package wide ones.
     set(MyPackage_MyComponent_MY_OPTION foo)
-    cpfGetRequiredPackageOption(var ${package} ${component} MY_OPTION)
+    cpfGetRequiredPackageComponentOption(var ${package} ${component} MY_OPTION)
     cpfAssertStrEQ(${var} foo)
     
     # Check that the function argument takes
     # precedence over all the variables.
     set(ARG_MY_OPTION bar)
-    cpfGetRequiredPackageOption(var ${package} ${component} MY_OPTION)
+    cpfGetRequiredPackageComponentOption(var ${package} ${component} MY_OPTION)
     cpfAssertStrEQ(${var} bar)
 
 endfunction()

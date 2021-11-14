@@ -62,7 +62,7 @@ endfunction()
 function( cpfAddStandardCustomTarget )
 
 	set( requiredSingleValueKeywords
-		PACKAGE
+		PACKAGE_COMPONENT
 		TARGET
 	)
 
@@ -95,16 +95,16 @@ function( cpfAddStandardCustomTarget )
 	
 	# Set properties
 	if(ARG_VS_SUBDIR)
-		set_property( TARGET ${ARG_TARGET} PROPERTY FOLDER ${ARG_PACKAGE}/${ARG_VS_SUBDIR} )
+		set_property( TARGET ${ARG_TARGET} PROPERTY FOLDER ${PACKAGE_COMPONENT}/${ARG_VS_SUBDIR} )
 	else()
-		set_property( TARGET ${ARG_TARGET} PROPERTY FOLDER ${ARG_PACKAGE} )
+		set_property( TARGET ${ARG_TARGET} PROPERTY FOLDER ${PACKAGE_COMPONENT} )
 	endif()
 
 	set_property( TARGET ${ARG_TARGET} PROPERTY CPF_OUTPUT_FILES ${ARG_PRODUCED_FILES} )
 	set_property( TARGET ${ARG_TARGET} PROPERTY PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS ${ARG_INSTALL_COMPONENTS})
 	cpfSetIDEDirectoriesForTargetSources(${ARG_TARGET})
 
-	set_property( TARGET ${ARG_PACKAGE} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${ARG_TARGET})
+	set_property( TARGET ${PACKAGE_COMPONENT} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${ARG_TARGET})
 
 endfunction()
 

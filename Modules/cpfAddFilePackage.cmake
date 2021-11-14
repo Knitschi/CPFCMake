@@ -27,7 +27,7 @@ function( cpfAddFilePackage )
 
     cpfGetCurrentSourceDir(packageComponent)
     cpfAddStandardCustomTarget(
-        PACKAGE ${packageComponent}
+        PACKAGE_COMPONENT ${packageComponent}
         TARGET ${packageComponent}
         SOURCES ${ARG_SOURCES}
     )

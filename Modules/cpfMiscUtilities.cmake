@@ -145,7 +145,7 @@ endfunction()
 # This function can be used to get the values of options that can be defined with different
 # global variables or with a key-word argument.
 #
-function(cpfGetRequiredPackageOption optionOut package packageComponent optionKeyword)
+function(cpfGetRequiredPackageComponentOption optionOut package packageComponent optionKeyword)
 	
 	cpfGetOptionalPackageOption(option ${package} ${packageComponent} ${optionKeyword} "")
 	if("${option}" STREQUAL "")
@@ -156,7 +156,7 @@ function(cpfGetRequiredPackageOption optionOut package packageComponent optionKe
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Similar to cpfGetRequiredPackageOption() but does not fail if neither of the variables
+# Similar to cpfGetRequiredPackageComponentOption() but does not fail if neither of the variables
 # is set. In this case it will return the provided default argument.
 function(cpfGetOptionalPackageOption optionOut package packageComponent optionKeyword defaultValue)
 	

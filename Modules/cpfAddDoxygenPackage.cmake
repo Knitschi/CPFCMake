@@ -213,7 +213,7 @@ function( cpfAddDoxygenPackage )
 	)
 
 	cpfAddStandardCustomTarget( 
-		PACKAGE ${packageComponent}
+		PACKAGE_COMPONENT ${packageComponent}
 		TARGET ${packageComponent}
 		SOURCES ${targetSources}
 		TARGET_DEPENDENCIES ${targetDependencies}
