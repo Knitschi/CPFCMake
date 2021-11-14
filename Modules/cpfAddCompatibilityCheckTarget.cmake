@@ -13,11 +13,11 @@ include(cpfVersionUtilities)
 
 #----------------------------------------------------------------------------------------
 # Adds a bundle target, that can be used to run the abi-compliance-check targets for all packages. 
-function( cpfAddGlobalAbiCheckerTarget packages )
+function( cpfAddGlobalAbiCheckerTarget packageComponents )
 	
 	set(targets)
-	foreach( package ${packages})
-		cpfGetPackageVersionCompatibilityCheckTarget( target ${package})
+	foreach( packageComponent ${packageComponents})
+		cpfGetPackageVersionCompatibilityCheckTarget( target ${packageComponent})
 		if(TARGET ${target})
 			cpfListAppend( targets ${target})
 		endif()
@@ -28,9 +28,9 @@ function( cpfAddGlobalAbiCheckerTarget packages )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetPackageVersionCompatibilityCheckTarget targetNameOut package )
+function( cpfGetPackageVersionCompatibilityCheckTarget targetNameOut packageComponent )
 	cpfGetAbiComplianceCheckerBundleTargetBaseName(targetName)
-	set( ${targetNameOut} ${targetName}_${package} PARENT_SCOPE)
+	set( ${targetNameOut} ${targetName}_${packageComponent} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -40,10 +40,10 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # This function adds custom targets which call the abi-compliance-checker tool.
-function( cpfAddAbiCheckerTargets package distributionPackageOptionLists enableCompatibilityReportTargets enableStabilityCheckTargets )
+function( cpfAddAbiCheckerTargets packageComponent distributionPackageOptionLists enableCompatibilityReportTargets enableStabilityCheckTargets )
 	
 	cpfAssertUserSettingsForCompatibilityChecksMakeSense( 
-		${package}
+		${packageComponent}
 		"${distributionPackageOptionLists}"
 		${enableCompatibilityReportTargets}
 		${enableStabilityCheckTargets} 
@@ -53,40 +53,40 @@ function( cpfAddAbiCheckerTargets package distributionPackageOptionLists enableC
 
 		cpfGetLastBuildAndLastReleaseVersion( lastBuildVersion lastReleaseVersion)
 		cpfHasDevBinDistributionPackage( unused packageFormat "${distributionPackageOptionLists}" )
-		cpfDownloadOldAbiDumps( ${package} ${packageFormat} ${lastBuildVersion} ${lastReleaseVersion} )
+		cpfDownloadOldAbiDumps( ${packageComponent} ${packageFormat} ${lastBuildVersion} ${lastReleaseVersion} )
 		
 		# Add The targets that create and use the abi-dumps.
-		cpfGetSharedLibrarySubTargets( libraryTargets ${package})
+		cpfGetSharedLibrarySubTargets( libraryTargets ${packageComponent})
 		foreach( libraryTarget ${libraryTargets})
 			
-			cpfWritePublicHeaderListFile( headerListFile ${package} ${libraryTarget})
+			cpfWritePublicHeaderListFile( headerListFile ${packageComponent} ${libraryTarget})
 
-			cpfAddAbiDumpTarget( ${package} ${libraryTarget} ${headerListFile} )
+			cpfAddAbiDumpTarget( ${packageComponent} ${libraryTarget} ${headerListFile} )
 			set( comparedToVersions ${lastBuildVersion} ${lastReleaseVersion} )
 			list(REMOVE_DUPLICATES comparedToVersions) # this is required for the case when lastBuild == lastRelease
-			cpfAddCompatibilityReportTargets( reportFiles ${package} ${libraryTarget} ${packageFormat} "${comparedToVersions}" )
+			cpfAddCompatibilityReportTargets( reportFiles ${packageComponent} ${libraryTarget} ${packageFormat} "${comparedToVersions}" )
 			
 			# Add the abi-compliance-checker targets that enforce the compatibility when the configuration options are set.
 			if(enableStabilityCheckTargets)
-				cpfAddApiCompatibilityCheckTarget( reportFileApiCheck ${package} ${libraryTarget} ${packageFormat} ${lastReleaseVersion})
-				cpfAddAbiCompatibilityCheckTarget( reportFileAbiCheck ${package} ${libraryTarget} ${packageFormat} ${lastReleaseVersion})
+				cpfAddApiCompatibilityCheckTarget( reportFileApiCheck ${packageComponent} ${libraryTarget} ${packageFormat} ${lastReleaseVersion})
+				cpfAddAbiCompatibilityCheckTarget( reportFileAbiCheck ${packageComponent} ${libraryTarget} ${packageFormat} ${lastReleaseVersion})
 			endif()
 
 		endforeach()
 
-		# Add a target to bundle all abi check targets of one package into one and to remove old reports.
-		cpfGetPackageVersionCompatibilityCheckTarget( targetName ${package})
+		# Add a target to bundle all abi check targets of one packageComponent into one and to remove old reports.
+		cpfGetPackageVersionCompatibilityCheckTarget( targetName ${packageComponent})
 		cpfAddCleanOutputDirsCommands( cleanStamps ${targetName} "${reportFiles};${reportFileApiCheck};${reportFileAbiCheck}" )
-		cpfAddSubTargetBundleTarget( ${targetName} ${package} INTERFACE_CPF_ABI_CHECK_SUBTARGETS "${cleanStamps}")
+		cpfAddSubTargetBundleTarget( ${targetName} ${packageComponent} INTERFACE_CPF_ABI_CHECK_SUBTARGETS "${cleanStamps}")
 
 		# Add install rules
-		cpfAddInstallRuleForAbiDumpFiles(${package})
+		cpfAddInstallRuleForAbiDumpFiles(${packageComponent})
 
 	endif()
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAssertUserSettingsForCompatibilityChecksMakeSense package distributionPackageOptionLists enableCompatibilityReportTargets enableStabilityCheckTargets )
+function( cpfAssertUserSettingsForCompatibilityChecksMakeSense packageComponent distributionPackageOptionLists enableCompatibilityReportTargets enableStabilityCheckTargets )
 
 	# If user requests compatibility checks, the compiler settings must support it. 
 	if(enableCompatibilityReportTargets)
@@ -142,7 +142,7 @@ The compatibility check targets require the version information from to reposito
 		if(NOT hasDevBinPackage)
 			set(errorMessage "\
 Error with project settings!\n\
-Option [CPF_]ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS was set to ON but package ${package} does not create a distribution package with content type CT_DEVELOPER. \
+Option [CPF_]ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS was set to ON but package ${packageComponent} does not create a distribution package with content type CT_DEVELOPER. \
 The packages with content type CT_DEVELOPER contain the abi dump files for previously build libraries which are needed to compare the abi-compliance. \
 You need to add an DISTRIBUTION_PACKAGES to your call of cpfAddCppPackageComponent() with the DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_DEVELOPER sub-option to remove this error.\n\
 			")
@@ -228,30 +228,30 @@ function( cpfGetArchiveFormats archiveFormatsOut )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfDownloadOldAbiDumps package packageFormat lastBuildVersion lastReleaseVersion )
+function( cpfDownloadOldAbiDumps packageComponent packageFormat lastBuildVersion lastReleaseVersion )
 	
 	# get url of LastBuild package	
 	cpfIsReleaseVersion( lastBuildIsRelease ${lastBuildVersion} )
 	if(NOT lastBuildIsRelease)
-		cpfGetShortDevBinPackageName( packageLastBuild ${package} ${CMAKE_BUILD_TYPE} ${lastBuildVersion} ${packageFormat} )
-		cpfGetRelLastBuildPackagesDir( lastBuildPackageDir ${package})
+		cpfGetShortDevBinPackageName( packageLastBuild ${packageComponent} ${CMAKE_BUILD_TYPE} ${lastBuildVersion} ${packageFormat} )
+		cpfGetRelLastBuildPackagesDir( lastBuildPackageDir ${packageComponent})
 		set( urlLastBuild "${CPF_WEBSERVER_BASE_DIR}/${lastBuildPackageDir}/${packageLastBuild}")
-		cpfDownloadAndExtractPackage( ${package} ${packageFormat} ${urlLastBuild})
+		cpfDownloadAndExtractPackage( ${packageComponent} ${packageFormat} ${urlLastBuild})
 	endif()
 
 	# get url of last release package
-	cpfGetShortDevBinPackageName( packageLastRelease ${package} ${CMAKE_BUILD_TYPE} ${lastReleaseVersion} ${packageFormat} )
-	cpfGetRelReleasePackagesDir( releasePackageDir ${package} ${lastReleaseVersion})
+	cpfGetShortDevBinPackageName( packageLastRelease ${packageComponent} ${CMAKE_BUILD_TYPE} ${lastReleaseVersion} ${packageFormat} )
+	cpfGetRelReleasePackagesDir( releasePackageDir ${packageComponent} ${lastReleaseVersion})
 	set( urlLastRelease "${CPF_WEBSERVER_BASE_DIR}/${releasePackageDir}/${packageLastRelease}")
-	cpfDownloadAndExtractPackage( ${package} ${packageFormat} ${urlLastRelease})
+	cpfDownloadAndExtractPackage( ${packageComponent} ${packageFormat} ${urlLastRelease})
 
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetShortDevBinPackageName shortNameOut package config version packageFormat )
+function( cpfGetShortDevBinPackageName shortNameOut packageComponent config version packageFormat )
 
 	cpfGetDistributionPackageContentId( contentId CT_DEVELOPER "")
-	cpfGetBasePackageFilename( basePackageFileName ${package} ${config} ${version} ${contentId} ${packageFormat})
+	cpfGetBasePackageFilename( basePackageFileName ${packageComponent} ${config} ${version} ${contentId} ${packageFormat})
 	cpfGetDistributionPackageExtension( extension ${packageFormat})
 	set( ${shortNameOut} ${basePackageFileName}.${extension} PARENT_SCOPE)
 
@@ -283,7 +283,7 @@ function( cpfGetDistributionPackageExtension extensionOut packageFormat )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfDownloadAndExtractPackage package packageFormat packageUrl  )
+function( cpfDownloadAndExtractPackage packageComponent packageFormat packageUrl  )
 
 	# downlaod the package
 	get_filename_component( shortName "${packageUrl}" NAME )
@@ -312,10 +312,10 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # 
-function( cpfWritePublicHeaderListFile headerListFileOut package target )
+function( cpfWritePublicHeaderListFile headerListFileOut packageComponent target )
 
 	cpfGetAbiDumpTargetName( abiDumpTarget ${target})
-	set(headerListFile "${CMAKE_BINARY_DIR}/${package}/${abiDumpTarget}/PublicHeaderList.txt")
+	set(headerListFile "${CMAKE_BINARY_DIR}/${packageComponent}/${abiDumpTarget}/PublicHeaderList.txt")
 	
 	get_property( publicHeader TARGET ${target} PROPERTY INTERFACE_CPF_PUBLIC_HEADER )
 	set(fileContent)
@@ -341,13 +341,13 @@ endfunction()
 # The target will only be available when using "g++ -g -Og" or "clang -g -O0" because the
 # tool requires DWARF debug information.
 # 
-function( cpfAddAbiDumpTarget package binaryTarget headerListFile )
+function( cpfAddAbiDumpTarget packageComponent binaryTarget headerListFile )
 
 	cpfGetAbiDumpTargetName( targetName ${binaryTarget})
 	
 	# Locations
 	cpfGetAbsPathOfTargetOutputFile( targetBinaryFile ${binaryTarget} ${CMAKE_BUILD_TYPE} )
-	cpfGetCurrentDumpFile( abiDumpFile ${package} ${binaryTarget})
+	cpfGetCurrentDumpFile( abiDumpFile ${packageComponent} ${binaryTarget})
 	
 	# Setup the command
 	get_property( version TARGET ${binaryTarget} PROPERTY VERSION)
@@ -369,24 +369,24 @@ function( cpfAddAbiDumpTarget package binaryTarget headerListFile )
 	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${abiDumpFile} )
 	set_property(TARGET ${targetName} PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS developer )
 	set_property(TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_ABI_DUMP_SUBTARGET ${targetName} )
-	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${targetName} )
+	set_property(TARGET ${packageComponent} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${targetName} )
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAddInstallRuleForAbiDumpFiles package )
+function( cpfAddInstallRuleForAbiDumpFiles packageComponent )
 
 	set(installedPackageFiles)
 
 	# get files from abiDump targets
-	get_property( binaryTargets TARGET ${package} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
+	get_property( binaryTargets TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
 	foreach(binaryTarget ${binaryTargets})
 		get_property( abiDumpTarget TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_ABI_DUMP_SUBTARGET )
 		if(abiDumpTarget)
 
-			cpfGetCurrentDumpFile( dumpFile ${package} ${binaryTarget})
+			cpfGetCurrentDumpFile( dumpFile ${packageComponent} ${binaryTarget})
 			get_filename_component( shortDumpFile "${dumpFile}" NAME )
-			cpfGetRelativeOutputDir( relDumpFileDir ${package} OTHER)
+			cpfGetRelativeOutputDir( relDumpFileDir ${packageComponent} OTHER)
 
 			install(
 				FILES ${dumpFile}
@@ -402,11 +402,11 @@ function( cpfAddInstallRuleForAbiDumpFiles package )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetCurrentDumpFile dumpFileOut package binaryTarget )
+function( cpfGetCurrentDumpFile dumpFileOut packageComponent binaryTarget )
 	get_property( currentVersion TARGET ${binaryTarget} PROPERTY VERSION )
 	cpfGetAbiDumpTargetName( abiDumpTarget ${binaryTarget})
 	cpfGetAbiDumpFileName( dumpFile ${binaryTarget} ${currentVersion})
-	set( ${dumpFileOut} "${CMAKE_BINARY_DIR}/${package}/${abiDumpTarget}/${dumpFile}" PARENT_SCOPE)
+	set( ${dumpFileOut} "${CMAKE_BINARY_DIR}/${packageComponent}/${abiDumpTarget}/${dumpFile}" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -416,10 +416,10 @@ function( cpfGetAbiDumpFileName shortNameOut binaryTarget version )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetDumpFilePathRelativeToPackageDir pathOut package binaryTarget )
+function( cpfGetDumpFilePathRelativeToPackageDir pathOut packageComponent binaryTarget )
 	get_property( version TARGET ${binaryTarget} PROPERTY VERSION )
 	cpfGetAbiDumpFileName( dumpFile ${binaryTarget} ${version})
-	cpfGetRelativeOutputDir( relativeDir ${package} OTHER )
+	cpfGetRelativeOutputDir( relativeDir ${packageComponent} OTHER )
 	set( ${pathOut} ${relativeDir}/${dumpFile} PARENT_SCOPE)
 endfunction()
 
@@ -427,10 +427,10 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Adds targets that create api-compliance-checker compatibilty reports for the given binaryTarget
 # comparing the current version to each version in comparedToVersion. 
-function( cpfAddCompatibilityReportTargets reportFilesOut package binaryTarget packageFormat comparedToVersions )
+function( cpfAddCompatibilityReportTargets reportFilesOut packageComponent binaryTarget packageFormat comparedToVersions )
 	
 	get_property( version TARGET ${binaryTarget} PROPERTY VERSION)
-	cpfGetReportBaseNamesAndOutputDirs( reportOutputDirs reportBaseNames ${package} ${binaryTarget} ${version} "${comparedToVersions}")
+	cpfGetReportBaseNamesAndOutputDirs( reportOutputDirs reportBaseNames ${packageComponent} ${binaryTarget} ${version} "${comparedToVersions}")
 	
 	set(index 0)
 	set(reportFiles)
@@ -438,7 +438,7 @@ function( cpfAddCompatibilityReportTargets reportFilesOut package binaryTarget p
 		list(GET reportOutputDirs ${index} reportOutputDir)
 		list(GET reportBaseNames ${index} reportBaseName)
 		cpfIncrement(index)
-		cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${comparedToVersion} ${reportBaseName} "${CPF_PROJECT_HTML_ABS_DIR}/${reportOutputDir}" NONE)
+		cpfAddAbiComplianceCheckerTarget( reportFile ${packageComponent} ${binaryTarget} ${packageFormat} ${comparedToVersion} ${reportBaseName} "${CPF_PROJECT_HTML_ABS_DIR}/${reportOutputDir}" NONE)
 		cpfListAppend( reportFiles ${reportFile})
 	endforeach()
 	
@@ -447,7 +447,7 @@ function( cpfAddCompatibilityReportTargets reportFilesOut package binaryTarget p
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetReportBaseNamesAndOutputDirs reportDirsOut reportBaseNamesOut package binaryTarget newVersion comparedToVersions )
+function( cpfGetReportBaseNamesAndOutputDirs reportDirsOut reportBaseNamesOut packageComponent binaryTarget newVersion comparedToVersions )
 
 	cpfIsReleaseVersion( newVersionIsRelease ${newVersion})
 	
@@ -458,11 +458,11 @@ function( cpfGetReportBaseNamesAndOutputDirs reportDirsOut reportBaseNamesOut pa
 		# Get report directory depending on the compared versions
 		cpfIsReleaseVersion( comparedToVersionIsRelease ${comparedToVersion})
 		if(NOT newVersionIsRelease AND (NOT comparedToVersionIsRelease))
-			cpfGetRelCurrentToLastBuildReportDir( reportOutputDir ${package})
+			cpfGetRelCurrentToLastBuildReportDir( reportOutputDir ${packageComponent})
 		elseif(NOT newVersionIsRelease AND comparedToVersionIsRelease)
-			cpfGetRelCurrentToLastReleaseReportDir( reportOutputDir ${package})
+			cpfGetRelCurrentToLastReleaseReportDir( reportOutputDir ${packageComponent})
 		else()	# both versions are release versions
-			cpfGetRelVersionToVersionReportDir( reportOutputDir ${package} ${newVersion} ${comparedToVersion} )
+			cpfGetRelVersionToVersionReportDir( reportOutputDir ${packageComponent} ${newVersion} ${comparedToVersion} )
 		endif()
 		cpfListAppend( reportOutputDirs ${reportOutputDir})
 		
@@ -485,13 +485,13 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # reportOutputDir is an absolute path to the directory that will contain the generated report.
 # enforceOption must be one of NONE, API, ABI
-function( cpfAddAbiComplianceCheckerTarget reportFileOut package binaryTarget packageFormat comparedToVersion reportBaseName reportOutputDir enforceOption )
+function( cpfAddAbiComplianceCheckerTarget reportFileOut packageComponent binaryTarget packageFormat comparedToVersion reportBaseName reportOutputDir enforceOption )
 
 	set(targetName ${reportBaseName})
 	cpfGetAbiDumpTargetName( abiDumpTarget ${binaryTarget} )
 	
 	# Get locations of the compared dump files
-	cpfGetLocationOfDownloadedDumpFile( oldVersionDumpFile ${package} ${binaryTarget} ${packageFormat} ${comparedToVersion} )
+	cpfGetLocationOfDownloadedDumpFile( oldVersionDumpFile ${packageComponent} ${binaryTarget} ${packageFormat} ${comparedToVersion} )
 	if(NOT EXISTS "${oldVersionDumpFile}")
 		if( ${enforceOption} STREQUAL "NONE" ) 
 			# We have to allow missing previous old dumps, because that will happen if we switch the compatibility report target on.
@@ -510,7 +510,7 @@ to ensure that abi dump files become available for following builds." )
 		endif()
 	endif()
 
-	cpfGetCurrentDumpFile( abiDumpFile ${package} ${binaryTarget})
+	cpfGetCurrentDumpFile( abiDumpFile ${packageComponent} ${binaryTarget})
 	set( shortReportFile ${reportBaseName}.html)
 	set( reportFile "${reportOutputDir}/${shortReportFile}" )
 	
@@ -536,20 +536,20 @@ to ensure that abi dump files become available for following builds." )
 		DEPENDS ${abiDumpTarget} ${reportFile} ${stampFile}
 	)
 
-	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_ABI_CHECK_SUBTARGETS ${targetName} )
+	set_property(TARGET ${packageComponent} APPEND PROPERTY INTERFACE_CPF_ABI_CHECK_SUBTARGETS ${targetName} )
 	
 	set(${reportFileOut} ${reportFile} PARENT_SCOPE)
 
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetLocationOfDownloadedDumpFile dumpFileOut package binaryTarget packageFormat version )
+function( cpfGetLocationOfDownloadedDumpFile dumpFileOut packageComponent binaryTarget packageFormat version )
 	
 	# get the path to the dumpfile within the extracted package
-	cpfGetDumpFilePathRelativeToPackageDir( relDumpFilePath ${package} ${binaryTarget})
+	cpfGetDumpFilePathRelativeToPackageDir( relDumpFilePath ${packageComponent} ${binaryTarget})
 	
 	# get the name of the directory that is created when the package is extracted (the archive filename without the archive extensions)
-	cpfGetShortDevBinPackageName( archiveFileName ${package} ${CMAKE_BUILD_TYPE} ${version} ${packageFormat} )
+	cpfGetShortDevBinPackageName( archiveFileName ${packageComponent} ${CMAKE_BUILD_TYPE} ${version} ${packageFormat} )
 	cpfGetDistributionPackageExtension( archiveExtension ${packageFormat})
 	# remove the extension
 	string(LENGTH ${archiveExtension} length)
@@ -562,21 +562,21 @@ function( cpfGetLocationOfDownloadedDumpFile dumpFileOut package binaryTarget pa
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAddApiCompatibilityCheckTarget reportFileOut package binaryTarget packageFormat lastReleaseVersion )
+function( cpfAddApiCompatibilityCheckTarget reportFileOut packageComponent binaryTarget packageFormat lastReleaseVersion )
 	
 	set(reportFile)
 	set(targetName checkApiCompatibility_${binaryTarget} )
-	cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_CURRENT_BINARY_DIR}/${targetName}" API)
+	cpfAddAbiComplianceCheckerTarget( reportFile ${packageComponent} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_CURRENT_BINARY_DIR}/${targetName}" API)
 	set(${reportFileOut} "${reportFile}" PARENT_SCOPE)
 	
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAddAbiCompatibilityCheckTarget reportFileOut package binaryTarget packageFormat lastReleaseVersion )
+function( cpfAddAbiCompatibilityCheckTarget reportFileOut packageComponent binaryTarget packageFormat lastReleaseVersion )
 	
 	set(reportFile)
 	set(targetName checkAbiCompatibility_${binaryTarget} )
-	cpfAddAbiComplianceCheckerTarget( reportFile ${package} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_CURRENT_BINARY_DIR}/${targetName}" ABI)
+	cpfAddAbiComplianceCheckerTarget( reportFile ${packageComponent} ${binaryTarget} ${packageFormat} ${lastReleaseVersion} ${targetName} "${CMAKE_CURRENT_BINARY_DIR}/${targetName}" ABI)
 	set(${reportFileOut} "${reportFile}" PARENT_SCOPE)
 	
 endfunction()

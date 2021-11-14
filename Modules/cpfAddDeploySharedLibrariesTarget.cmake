@@ -10,22 +10,22 @@ include(cpfOutputPathUtilities)
 # linkedLibrarie can contain all linked libraries of the target. The function will pick
 # the shared libraries by itself. 
 #
-function( cpfAddDeploySharedLibrariesTarget package )
+function( cpfAddDeploySharedLibrariesTarget packageComponent )
 
 	# Only deploy shared libraries on windows. On Linux CMake uses the RPATH to make it work.
 	if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL Windows)
 		return()
 	endif()
 
-	cpfAddDeploySharedLibsToBuildStageTarget( ${package} "" "" ) 
+	cpfAddDeploySharedLibsToBuildStageTarget( ${packageComponent} "" "" ) 
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAddDeploySharedLibsToBuildStageTarget package libs subdirectory)
+function( cpfAddDeploySharedLibsToBuildStageTarget packageComponent libs subdirectory)
 
 	# Add one custom target to copy all external libs.
-	cpfGetIndexedTargetName(targetName deployExternal_${package})
+	cpfGetIndexedTargetName(targetName deployExternal_${packageComponent})
 
 	set(outputs)
 
@@ -34,26 +34,26 @@ function( cpfAddDeploySharedLibsToBuildStageTarget package libs subdirectory)
 	foreach(config ${configs})
 
 		if(NOT libs)
-			cpfGetSharedLibrariesRequiredByPackageExecutables( libs ${package} ${config} )
+			cpfGetSharedLibrariesRequiredByPackageExecutables( libs ${packageComponent} ${config} )
 		endif()
 
 		foreach(lib ${libs})
 
 			# Deploy the dll files
 			cpfGetLibFilePath( libFile ${lib} ${config})
-			cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${subdirectory}" ${lib} ${libFile} "${outputs}")
+			cpfAddDeployCommand( outputs ${targetName} ${packageComponent} ${config} "${subdirectory}" ${lib} ${libFile} "${outputs}")
 
 			# Deploy the linker pdb files if they are available.
 			cpfGetImportedLibPdbFilePath( libPdbFile ${lib} ${config})
 			if(libPdbFile)
-				cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${subdirectory}" ${lib} ${libPdbFile} "${outputs}")
+				cpfAddDeployCommand( outputs ${targetName} ${packageComponent} ${config} "${subdirectory}" ${lib} ${libPdbFile} "${outputs}")
 			endif()
 
 		endforeach()
 
 	endforeach()
 
-	cpfAddDeployTarget( ${targetName} ${package} "${outputs}" "${libs}" )
+	cpfAddDeployTarget( ${targetName} ${packageComponent} "${outputs}" "${libs}" )
 
 endfunction()
 
@@ -70,9 +70,9 @@ function( cpfGetIndexedTargetName indexedName baseName )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAddDeployCommand outputsOut targetName package config outputSubDir lib libFile existingOutputs )
+function( cpfAddDeployCommand outputsOut targetName packageComponent config outputSubDir lib libFile existingOutputs )
 
-	cpfGetSharedLibraryOutputDir( targetDir ${package} ${config} )
+	cpfGetSharedLibraryOutputDir( targetDir ${packageComponent} ${config} )
 
 	get_filename_component( shortName ${libFile} NAME)
 
@@ -123,7 +123,7 @@ function( cpfAddDeployCommand outputsOut targetName package config outputSubDir 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAddDeployTarget targetName package outputs libs ) 
+function( cpfAddDeployTarget targetName packageComponent outputs libs ) 
 
 	if(outputs)
 
@@ -131,10 +131,10 @@ function( cpfAddDeployTarget targetName package outputs libs )
 			${targetName}
 			DEPENDS ${outputs} ${libs}
 		)
-		set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/private)
+		set_property(TARGET ${targetName} PROPERTY FOLDER ${packageComponent}/private)
 
 		# make sure the copying is done before the target is build
-		cpfGetExecutableTargets(exeTargets ${package})
+		cpfGetExecutableTargets(exeTargets ${packageComponent})
 		foreach(exeTarget ${exeTargets})
 			add_dependencies( ${exeTarget} ${targetName} )
 		endforeach()

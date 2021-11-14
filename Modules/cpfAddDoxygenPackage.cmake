@@ -62,7 +62,7 @@ function( cpfAddDoxygenPackage )
 		set(ARG_PROJECT_NAME ${CPF_CI_PROJECT})
 	endif()
 
-	cpfGetCurrentSourceDir( package )
+	cpfGetCurrentSourceDir( packageComponent )
 
 	# Locations
 	set(tempDoxygenConfigFile "${CMAKE_CURRENT_BINARY_DIR}/tempDoxygenConfig.txt" )
@@ -77,8 +77,8 @@ function( cpfAddDoxygenPackage )
 	set(generatedDoxFiles)
 	set(targetDependencies)
 	set(hasGeneratedDocumentation FALSE)
-	foreach( package ${documentedPackages})
-		cpfGetPackageDoxFilesTargetName( doxFilesTarget ${package} )
+	foreach( packageComponent ${documentedPackages})
+		cpfGetPackageDoxFilesTargetName( doxFilesTarget ${packageComponent} )
 		if( TARGET ${doxFilesTarget}) # not all packages may have the doxFilesTarget
 			list(APPEND targetDependencies ${doxFilesTarget})
 			get_property( doxFiles TARGET ${doxFilesTarget} PROPERTY CPF_OUTPUT_FILES )
@@ -141,11 +141,11 @@ function( cpfAddDoxygenPackage )
 	endif()
 
 	# Exclude non-owned packages from the documentation unless they were not explicitly added to the documentation.
-	cpfGetAllPackages( allPackages )
-	foreach( package ${allPackages})
-		cpfContains( isDocumented "${documentedPackages}" ${package} )
+	cpfGetAllPackages( allPackageComponents )
+	foreach( packageComponent ${allPackageComponents})
+		cpfContains( isDocumented "${documentedPackages}" ${packageComponent} )
 		if(NOT isDocumented)
-			list(APPEND appendedLines "EXCLUDE += \"${CMAKE_SOURCE_DIR}/${package}\"")
+			list(APPEND appendedLines "EXCLUDE += \"${CMAKE_SOURCE_DIR}/${packageComponent}\"")
 		endif()
 	endforeach()
 
@@ -213,25 +213,25 @@ function( cpfAddDoxygenPackage )
 	)
 
 	cpfAddStandardCustomTarget( 
-		PACKAGE ${package}
-		TARGET ${package}
+		PACKAGE ${packageComponent}
+		TARGET ${packageComponent}
 		SOURCES ${targetSources}
 		TARGET_DEPENDENCIES ${targetDependencies}
 		INSTALL_COMPONENTS documentation
 	)
 	
-	add_dependencies(pipeline ${package})
+	add_dependencies(pipeline ${packageComponent})
 
 	# Set an install rule for the generated files.
 	install( 
 		DIRECTORY ${absDoxygenOutputDir}
-		DESTINATION ${package}/doc
+		DESTINATION ${packageComponent}/doc
 		COMPONENT documentation
 		EXCLUDE_FROM_ALL					# Must be exluded from all, because all custom targets are excluded from all.
 	)
 
 	# Add an install target for the package.
-	cpfAddPackageInstallTarget(${package})
+	cpfAddPackageInstallTarget(${packageComponent})
 
 endfunction()
 
@@ -254,15 +254,15 @@ endfunction()
 # 
 # Despite all these problems, this solution seemed to be the most practical one.
 # 
-function( cpfAddPackageDocsTarget package packageNamespace )
+function( cpfAddPackageDocsTarget packageComponent packageNamespace )
 
 	cpfGetGeneratedDoxygenDirectory(documentationDir)
 	file(MAKE_DIRECTORY ${documentationDir} )
 
-	cpfGetPackageDoxFilesTargetName( targetName ${package} )
+	cpfGetPackageDoxFilesTargetName( targetName ${packageComponent} )
 
 	# Always create the basic package documentation page.	
-	cpfAddPackageDocumentationDoxFileCommands( documentationFile ${package} ${packageNamespace})
+	cpfAddPackageDocumentationDoxFileCommands( documentationFile ${packageComponent} ${packageNamespace})
 
 	add_custom_target(
 		${targetName}
@@ -271,13 +271,13 @@ function( cpfAddPackageDocsTarget package packageNamespace )
 	)
 
 	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${documentationFile}  )
-	set_property(TARGET ${targetName} PROPERTY FOLDER "${package}/private" )
+	set_property(TARGET ${targetName} PROPERTY FOLDER "${packageComponent}/private" )
 
 endfunction()
 
 #-------------------------------------------------------------------------
-function( cpfGetPackageDoxFilesTargetName targetNameOut package)
-	set(${targetNameOut} packageDoxFiles_${package} PARENT_SCOPE)
+function( cpfGetPackageDoxFilesTargetName targetNameOut packageComponent)
+	set(${targetNameOut} packageDoxFiles_${packageComponent} PARENT_SCOPE)
 endfunction()
 
 #-------------------------------------------------------------------------
@@ -286,18 +286,18 @@ function( cpfGetGeneratedDoxygenDirectory dirOut )
 endfunction()
 
 #-------------------------------------------------------------------------
-function( cpfAddPackageDocumentationDoxFileCommands fileOut package packageNamespace )
+function( cpfAddPackageDocumentationDoxFileCommands fileOut packageComponent packageNamespace )
 
-	get_property( briefDescription TARGET ${package} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION )
-	get_property( longDescription TARGET ${package} PROPERTY INTERFACE_CPF_LONG_PACKAGE_DESCRIPTION )
+	get_property( briefDescription TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION )
+	get_property( longDescription TARGET ${packageComponent} PROPERTY INTERFACE_CPF_LONG_PACKAGE_DESCRIPTION )
 
 	set( fileContent "
-/// The namespace of the ${package} package.
+/// The namespace of the ${packageComponent} package.
 namespace ${packageNamespace} {
 
 /**
 
-\\defgroup ${package}Group ${package}
+\\defgroup ${packageComponent}Group ${packageComponent}
 \\brief ${briefDescription}
 
 ${longDescription}
@@ -306,22 +306,22 @@ ${longDescription}
 
 \\note The links can be broken if no project configuration creates the linked pages.
 
-- <a href=\"../${CPF_DOWNLOADS_DIR}/${package}\">Downloads</a> (Will work if distribution packages are created.)
+- <a href=\"../${CPF_DOWNLOADS_DIR}/${packageComponent}\">Downloads</a> (Will work if distribution packages are created.)
 - <a href=\"../${CPF_OPENCPPCOVERAGE_DIR}/index.html\">OpenCppCoverage Reports</a> (Will work if at least one test target and the CPF_ENABLE_OPENCPPCOVERAGE_TARGET option is enabled for a windows build)
 
 "
 )
 
 	# executable packages do never have compatibility reports.
-	cpfIsExecutable(isExe ${package})
+	cpfIsExecutable(isExe ${packageComponent})
 	if(NOT isExe)
-		cpfGetCompatiblityReportLinks(linksOut ${package})
+		cpfGetCompatiblityReportLinks(linksOut ${packageComponent})
 		string(APPEND fileContent ${linksOut})
 	endif()
 
 	string(APPEND fileContent "\n*/}\n") # close the doxygen comment and the namespace
 	
-	cpfGetPackageDocumentationFileName( fileName ${package} )
+	cpfGetPackageDocumentationFileName( fileName ${packageComponent} )
 	cpfGetWriteFileCommands( commands ${fileName} ${fileContent} )
 	add_custom_command(
 		OUTPUT "${fileName}"
@@ -336,20 +336,20 @@ ${longDescription}
 endfunction()
 
 #-------------------------------------------------------------------------
-function( cpfGetPackageDocumentationFileName fileOut package )
+function( cpfGetPackageDocumentationFileName fileOut packageComponent )
 	cpfGetGeneratedDoxygenDirectory(documentationDir)
-	set( ${fileOut} "${documentationDir}/${package}Documentation.dox" PARENT_SCOPE)
+	set( ${fileOut} "${documentationDir}/${packageComponent}Documentation.dox" PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetCompatiblityReportLinks linksOut package )
+function( cpfGetCompatiblityReportLinks linksOut packageComponent )
 		
 	cpfGetGeneratedDoxygenDirectory(documentationDir)
-	set(doxFile "${documentationDir}/${package}CompatibilityReportLinks.dox" )
+	set(doxFile "${documentationDir}/${packageComponent}CompatibilityReportLinks.dox" )
 
 	set(linkLines)
 
-	cpfGetPossiblySharedLibrarySubTargets( libraryTargets ${package})
+	cpfGetPossiblySharedLibrarySubTargets( libraryTargets ${packageComponent})
 	foreach( libraryTarget ${libraryTargets})
 	
 		string(APPEND linkLines "\n")
@@ -357,7 +357,7 @@ function( cpfGetCompatiblityReportLinks linksOut package )
 		string(APPEND linkLines "The links will work if the package has a test target and the CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS option is set for a Linux debug configuration.\n")
 		string(APPEND linkLines "\n")
 
-		cpfGetPossiblyAvailableCompatibilityReports( reports titles ${package} ${libraryTarget} )
+		cpfGetPossiblyAvailableCompatibilityReports( reports titles ${packageComponent} ${libraryTarget} )
 
 		set(index 0)
 		foreach(report ${reports})
@@ -373,7 +373,7 @@ function( cpfGetCompatiblityReportLinks linksOut package )
 endfunction()
 
 #-------------------------------------------------------------------------
-function( cpfGetPossiblyAvailableCompatibilityReports reportsOut titlesOut package binaryTarget)
+function( cpfGetPossiblyAvailableCompatibilityReports reportsOut titlesOut packageComponent binaryTarget)
 
 	cpfIsInterfaceLibrary(isIntLib ${binaryTarget})
 	if(NOT isIntLib) # Currently interface libs have no compatibility reports.
@@ -387,7 +387,7 @@ function( cpfGetPossiblyAvailableCompatibilityReports reportsOut titlesOut packa
 		# We always add links for those because they will be created with this build.
 		get_property( currentVersion TARGET ${binaryTarget} PROPERTY VERSION )
 		cpfGetLastBuildAndLastReleaseVersion( lastBuildVersion lastReleaseVersion)
-		cpfGetReportBaseNamesAndOutputDirs( reportDirs reportBaseNames ${package} ${binaryTarget} ${currentVersion} "${lastBuildVersion};${lastReleaseVersion}")
+		cpfGetReportBaseNamesAndOutputDirs( reportDirs reportBaseNames ${packageComponent} ${binaryTarget} ${currentVersion} "${lastBuildVersion};${lastReleaseVersion}")
 		set( thisBuildReportsTitles "Last build to current build" "Last release to current build" )
 			
 		set(index 0)
@@ -409,7 +409,7 @@ function( cpfGetPossiblyAvailableCompatibilityReports reportsOut titlesOut packa
 		foreach( version ${releaseVersions})
 			if(youngerVersion)
 
-				cpfGetReportBaseNamesAndOutputDirs( reportDir reportBaseName ${package} ${binaryTarget} ${youngerVersion} ${version} )
+				cpfGetReportBaseNamesAndOutputDirs( reportDir reportBaseName ${packageComponent} ${binaryTarget} ${youngerVersion} ${version} )
 				set( relReportPath "${reportDir}/${reportBaseName}.html" )
 				set( reportWebUrl "${CPF_WEBSERVER_BASE_DIR}/${relReportPath}")
 					

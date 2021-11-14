@@ -25,10 +25,10 @@ function( cpfAddFilePackage )
 
     cpfAssertProjectVersionDefined()
 
-    cpfGetCurrentSourceDir(package)
+    cpfGetCurrentSourceDir(packageComponent)
     cpfAddStandardCustomTarget(
-        PACKAGE ${package}
-        TARGET ${package}
+        PACKAGE ${packageComponent}
+        TARGET ${packageComponent}
         SOURCES ${ARG_SOURCES}
     )
 
