@@ -131,7 +131,7 @@ function( cpfGetSubtargets subTargetsOut packageComponents subtargetProperty)
 	foreach(packageComponent ${packageComponents})
 		if(TARGET ${packageComponent}) # not all packages have targets
 			
-			# check for subtargets that belong to the main package target
+			# check for subtargets that belong to the main package-component target
 			get_property(subTarget TARGET ${packageComponent} PROPERTY ${subtargetProperty})
 			cpfListAppend( targets ${subTarget} )
 
@@ -288,7 +288,7 @@ function( cpfAddPackageSubdirectories )
 	cpfGetPackageVariableLists( listNames ${CPF_ROOT_DIR} packageVariables)
 	foreach(listName ${listNames})
 		
-		# The second element must be the package name.
+		# The second element must be the package-component name.
 		list(GET ${listName} 1 packageComponent )
 		cmake_parse_arguments(ARG "" "${overridableVariables}" "" ${${listName}})
 
@@ -347,7 +347,7 @@ function( cpfGetOwnedLoosePackages loosePackagesOut rootDir )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# Returns true if the package is not in the same repository as the ci-project.
+# Returns true if the package-component is not in the same repository as the ci-project.
 function( cpfIsLoosePackage isLooseOut packageComponent rootDir)
 
 	cpfGetAbsPackageDirectory( packageDir ${packageComponent} ${rootDir})
@@ -371,12 +371,12 @@ function( cpfPrintAddPackageComponentStatusMessage packageType )
 		set(tagged "tagged ")
 	endif()
 
-	message(STATUS "Add ${packageType} package-component ${packageComponent}. at ${tagged}version ${PROJECT_VERSION}")
+	message(STATUS "Add ${packageType} package-component ${packageComponent} at ${tagged}version ${PROJECT_VERSION}")
 
 endfunction()
 
 #--------------------------------------------------------------------------------------------
-function( cpfPrintAddPackageStatusMessage package )
+function( cpfPrintAddPackageStatusMessage package version)
 
 	cpfGetTagsOfHEAD( tags "${CMAKE_CURRENT_SOURCE_DIR}" )
 	set(tagged)
@@ -384,7 +384,7 @@ function( cpfPrintAddPackageStatusMessage package )
 		set(tagged "tagged ")
 	endif()
 
-	message(STATUS "Added package ${package} at ${tagged}version ${PROJECT_VERSION}")
+	message(STATUS "Added package ${package} at ${tagged}version ${version}")
 
 endfunction()
 
@@ -440,7 +440,7 @@ function( cpfGetAllNonGeneratedPackageSources sourceFiles packageComponents )
 	foreach( packageComponent ${packageComponents} globalFiles) # we also get the global files from the globalFiles target
 		if(TARGET ${packageComponent}) # non-cpf packages may not have targets set to them
 			get_property(binaryTargets TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
-			# explicitly include the package itself, because it may not be a binary target.
+			# explicitly include the package-component itself, because it may not be a binary target.
 			set(targets ${binaryTargets} ${packageComponent})
 			list(REMOVE_DUPLICATES targets)
 			foreach( target ${targets} )

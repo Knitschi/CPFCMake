@@ -8,7 +8,7 @@ The Doxygen Package
 -------------------
 
 Currently the CPF provides the \ref cpfAddDoxygenPackage function to integrate <a href="http://www.stack.nl/~dimitri/doxygen/download.html">Doxygen</a>
-based documentation generation into the CI-pipeline. Adding a doxygen package adds a custom
+based documentation generation into the CI-pipeline. Adding a doxygen package-component adds a custom
 target that runs doxygen with all the owned packages as input.
 
 Searching

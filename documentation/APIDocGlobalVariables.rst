@@ -9,10 +9,10 @@ Global variables and cache variables
 ------------------------------------
 
 CPFCMake introduces some variables of global scope that provide CI-project wide defaults 
-for recurring package settings. 
+for recurring package and package-component settings. 
 Most of them can be overridden with optional parameters when adding individual packages. 
 This spares the user from repeatedly specifying the same values while at the same time allowing 
-individual values for each package where necessary. The best place to set these variables is
+individual values for each package-component where necessary. The best place to set these variables is
 in your projects default configuration files in the \c CIBuildConfigurations directory.
 
 CPF Variables
@@ -122,7 +122,7 @@ Here is a list of CMake variables that CPFCMake expects you to set.
 
 - <b>BUILD_SHARED_LIBS:</b> This can still be used as a global switch for creating
   shared or static libraries. If you provide library packages for other developers, you should
-  not set this variable on the package level. This allows clients to choose the library
+  not set this variable on the package-component level. This allows clients to choose the library
   linkage they want to use.
 - <b>CMAKE_<config>_POSTFIX:</b> CPFCMake sets default values for this variable. You can
   change the values if you do not like them or have added your own compiler configurations.

@@ -9,7 +9,7 @@ include(cpfAddInstallTarget)
 
 
 #----------------------------------------------------------------------------------------
-# Adds a global target that makes sure that all the per package createArchivePackage targets are build.
+# Adds a global target that makes sure that all the per package-component createArchivePackage targets are build.
 #
 function( cpfAddGlobalCreatePackagesTarget packageComponents)
 
@@ -65,7 +65,7 @@ Remove that distribution package configuration from the cpfAddCppPackageComponen
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# This function defines the names of the package sub-targets that occur in a CMakeProjectFramework project.
+# This function defines the names of the package-component sub-targets that occur in a CMakeProjectFramework project.
 # The contentIdOut is a shorter string that can be used in output names to identifiy the content type.
 #
 function( cpfGetCollectPackageContentTargetNameAnId targetNameOut contentIdOut packageComponent contentType excludedTargets )

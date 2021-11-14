@@ -15,11 +15,11 @@ function( cpfAddPipelineTargetDependencies packages)
 	# A collection of the targets that should be contained in the pipeline.
 	set( targets
 		acyclic
-		distributionPackages 	# Because of the global nature of the clearLastBuild command that is included in this target, we can not depend on the package targets directly.
+		distributionPackages 	# Because of the global nature of the clearLastBuild command that is included in this target, we can not depend on the package-component targets directly.
 		opencppcoverage			# Because the global target assembles the OpenCppCoverage report from the individual reports, we can not use properties for this.
 	)
 	
-	# A set package properties that contain custom targets that should be
+	# A set package-component properties that contain custom targets that should be
 	# included in the pipeline.
 	set( pipelineSubTargetProperties
 		INTERFACE_CPF_BINARY_SUBTARGETS

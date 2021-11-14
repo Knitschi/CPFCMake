@@ -14,7 +14,7 @@ handles dependency issues, rebuilding outdated targets and parallelizing task ex
 
 The availability of custom-targets in a CPF project depends on the projects configuration and its source files.
 Most custom targets can be disabled via the configuration file. This may be helpful if a custom implementation of the
-task is preferred. Some tasks require a test executable which is only created if the package has
+task is preferred. Some tasks require a test executable which is only created if the package-component has
 a source file that defines the main function of a test-executable.
 
 In some IDEs like Visual Studio or KDevelop, targets are visualized and can be directly *build*
@@ -192,9 +192,9 @@ project configurations that use *Gcc* with debug flags and for shared library pa
 
 **Report compatibility**
 The basic functionality is to create html reports that compare the abi/api-compatibility of
-a previous libray package version with the current one. The reporst are added to the project
+a previous libray package-component version with the current one. The reporst are added to the project
 web-page. To enable this, the target must be able to download previously generated distribution 
-packages of that package from the project web-page, which must contain generated abi-dump files. 
+packages of that package-component from the project web-page, which must contain generated abi-dump files. 
 This complex requirement makes the target somewhat fragile. This functionality can be 
 disabled with the \c CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS config variable.
 

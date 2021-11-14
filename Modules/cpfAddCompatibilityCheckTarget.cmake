@@ -548,7 +548,7 @@ function( cpfGetLocationOfDownloadedDumpFile dumpFileOut packageComponent binary
 	# get the path to the dumpfile within the extracted package
 	cpfGetDumpFilePathRelativeToPackageDir( relDumpFilePath ${packageComponent} ${binaryTarget})
 	
-	# get the name of the directory that is created when the package is extracted (the archive filename without the archive extensions)
+	# get the name of the directory that is created when the package-component is extracted (the archive filename without the archive extensions)
 	cpfGetShortDevBinPackageName( archiveFileName ${packageComponent} ${CMAKE_BUILD_TYPE} ${version} ${packageFormat} )
 	cpfGetDistributionPackageExtension( archiveExtension ${packageFormat})
 	# remove the extension

@@ -20,7 +20,7 @@ function( cpfAddPackageInstallTarget packageComponent )
 	
 	cpfAssertDefined(CMAKE_INSTALL_PREFIX)	# The install targets require the definition of the CMAKE_INSTALL_PREFIX path.
 	
-	# Add the install_<package> target that installs all components of the package to the install prefix.
+	# Add the install_<package> target that installs all install-components of the package-component to the install prefix.
 	cpfGetPossibleInstallComponents(components)
 	set(installTargetName install_${packageComponent})
 	cpfAddInstallTarget( ${packageComponent} ${installTargetName} "${components}" ${CMAKE_INSTALL_PREFIX} FALSE ${packageComponent}/pipeline)

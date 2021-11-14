@@ -85,7 +85,7 @@ function( cpfAddDeployCommand outputsOut targetName packageComponent config outp
 	set(outputs)
 	cpfContains( alreadyCopied existingOutputs ${output})
 
-	if(NOT ("${libFile}" STREQUAL "${output}") AND NOT alreadyCopied )  # Do not deploy the library that belongs to the same package or one that has already been copied.
+	if(NOT ("${libFile}" STREQUAL "${output}") AND NOT alreadyCopied )  # Do not deploy the library that belongs to the same package-component or one that has already been copied.
 
 		get_property( isImported TARGET ${lib} PROPERTY IMPORTED)
 		if(isImported)

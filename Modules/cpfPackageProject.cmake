@@ -47,12 +47,14 @@ macro( cpfPackageProject )
 	# The package name is defined by the sub-directory name
     cpfGetCurrentSourceDir(package)
 
-	cpfConfigurePackageVersionFile( ${package} )
+	cpfConfigurePackageVersionFile(${package})
 
 	# get the version number of the packages version file
 	cpfGetPackageVersionFromFile( packageVersion ${package} ${CMAKE_CURRENT_LIST_DIR})
 
 	cpfSplitVersion( major minor patch commitId ${packageVersion})
+
+	cpfPrintAddPackageStatusMessage(${package} ${packageVersion})
 
 	# create a sub-project for the package
 	project( 
@@ -69,8 +71,6 @@ macro( cpfPackageProject )
 	set(PROJECT_VERSION_MINOR ${minor})
 	set(PROJECT_VERSION_PATCH ${patch})
 	set(PROJECT_VERSION_TWEAK ${commitId})
-
-	cpfPrintAddPackageStatusMessage(${package})
 
 	if(NOT ("${ARG_COMPONENTS}" STREQUAL "SINGLE_COMPONENT"))
 		foreach(component ${ARG_COMPONENTS})

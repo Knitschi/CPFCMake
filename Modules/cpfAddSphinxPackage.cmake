@@ -58,7 +58,7 @@ function( cpfAddSphinxPackage )
 	endif()
 
 	if(NOT EXISTS ${sphinxSourceDir}/index.rst )
-		message(FATAL_ERROR "Error! The Sphinx package requires an index.rst file to be present in the build projects source directory.")
+		message(FATAL_ERROR "Error! The Sphinx package-component requires an index.rst file to be present in the build projects source directory.")
 	endif()
 
     # locations

@@ -2,7 +2,7 @@ include_guard(GLOBAL)
 
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetSharedLibrariesRequiredByPackageExecutables librariesOut package config )
+function( cpfGetSharedLibrariesRequiredByPackageExecutables librariesOut packageComponent config )
 
 	cpfGetExecutableTargets( exeTargets ${packageComponent})
 	set(allLinkedLibraries)

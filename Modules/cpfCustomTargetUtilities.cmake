@@ -419,7 +419,7 @@ function( cpfGetRunCMakeScriptCommand commandOut script dOptions )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Adds a bundle-target that bundles all the subtargets from the package property
+# Adds a bundle-target that bundles all the subtargets from the package-component property
 function( cpfAddSubTargetBundleTarget targetName packages subtargetProperty additionalDependencies )
 	cpfGetSubtargets( dependedOnTargets "${packages}" ${subtargetProperty})
 	if(dependedOnTargets)

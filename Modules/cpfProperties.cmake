@@ -11,43 +11,43 @@ include(cpfConstants)
 # 
 function( cpfDefineProperties )
 
-	# A property that is set on all package targets.
+	# A property that is set on all package-component targets.
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_PACKAGE_NAME
-        BRIEF_DOCS "Contains the package name including the version postfix."
+        BRIEF_DOCS "Contains the package-component name including the version postfix."
         FULL_DOCS " "
     )
 
-	# A property that is set on all package main targets.
+	# A property that is set on all package-component main targets.
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION
-        BRIEF_DOCS "Contains a short description about what the package is good for."
+        BRIEF_DOCS "Contains a short description about what the package-component is good for."
         FULL_DOCS " "
     )
     
-	# A property that is set on all package main targets.
+	# A property that is set on all package-component main targets.
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_LONG_PACKAGE_DESCRIPTION
-        BRIEF_DOCS "Contains a long description about what the package is good for."
+        BRIEF_DOCS "Contains a long description about what the package-component is good for."
         FULL_DOCS " "
     )
 
-	# A property that is set on all package main targets.
+	# A property that is set on all package-component main targets.
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_PACKAGE_WEBPAGE_URL
-        BRIEF_DOCS "A web address from where the source-code and/or the documentation of the package can be obtained."
+        BRIEF_DOCS "A web address from where the source-code and/or the documentation of the package-component can be obtained."
         FULL_DOCS " "
     )
     
-	# A property that is set on all package main targets.
+	# A property that is set on all package-component main targets.
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL
-        BRIEF_DOCS "An email address under which the maintainers of the package can be reached."
+        BRIEF_DOCS "An email address under which the maintainers of the package-component can be reached."
         FULL_DOCS " "
     )
 
@@ -67,11 +67,11 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-	# A property that is set on all package main targets that have the same name as their package.
+	# A property that is set on all package-component main targets that have the same name as their package.
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS
-        BRIEF_DOCS "A list of all targets that are associated with the package including the main target."
+        BRIEF_DOCS "A list of all targets that are associated with the package-component including the main target."
         FULL_DOCS " "
     )
 
@@ -79,7 +79,7 @@ function( cpfDefineProperties )
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS
-        BRIEF_DOCS "A list of all binary targets that are associated with the package including the main target."
+        BRIEF_DOCS "A list of all binary targets that are associated with the package-component including the main target."
         FULL_DOCS " "
     )
 
@@ -123,11 +123,11 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-	# A property that is set on all package main targets
+	# A property that is set on all package-component main targets
 	define_property(
         TARGET
         PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET
-        BRIEF_DOCS "The name of the target that installs all package components to the location defined by CMAKE_INSTALL_PREFIX."
+        BRIEF_DOCS "The name of the target that installs all package-component components to the location defined by CMAKE_INSTALL_PREFIX."
         FULL_DOCS " "
     )
 
@@ -155,7 +155,7 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-	# A property that is set on all package main targets.
+	# A property that is set on all package-component main targets.
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_VALGRIND_SUBTARGET
@@ -163,7 +163,7 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-    # A property that is set on all package main targets.
+    # A property that is set on all package-component main targets.
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_OPENCPPCOVERAGE_SUBTARGET
@@ -179,7 +179,7 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-    # A property that is set on some package main targets
+    # A property that is set on some package-component main targets
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_RUN_CPP_TESTS_SUBTARGET
@@ -187,7 +187,7 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-    # A property that is set on some package main targets
+    # A property that is set on some package-component main targets
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET
@@ -195,7 +195,7 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-	# A property that is set on all package main targets
+	# A property that is set on all package-component main targets
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_RUN_FAST_TESTS_SUBTARGET
@@ -235,7 +235,7 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-	# A property that is set on all package main targets
+	# A property that is set on all package-component main targets
 	define_property(
         TARGET
         PROPERTY INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS
@@ -251,7 +251,7 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
     
-    # A property that is set on all package main targets
+    # A property that is set on all package-component main targets
     define_property(
 		TARGET
 		PROPERTY INTERFACE_CPF_ABI_CHECK_SUBTARGETS

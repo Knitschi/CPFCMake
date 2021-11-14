@@ -32,8 +32,8 @@ set( CPF_PACKAGES_FILE "packages.cmake")
 ###### Parameterized locations ######
 
 # returns the root directory of a package in a CPF project
-function( cpfGetAbsPackageDirectory packageDirOut packageComponent cpfRootDir )
-	set( ${packageDirOut} "${cpfRootDir}/${CPF_SOURCE_DIR}/${packageComponent}" PARENT_SCOPE)
+function( cpfGetAbsPackageDirectory packageDirOut package cpfRootDir )
+	set( ${packageDirOut} "${cpfRootDir}/${CPF_SOURCE_DIR}/${package}" PARENT_SCOPE)
 endfunction()
 
 # This function defines the name of a packages version file. 
@@ -53,13 +53,13 @@ function( cpfGetFullConfigFilePath filenameOut config)
 endfunction()
 
 # This function defines the relative dir from the html directory to the package release files of the last build
-function( cpfGetRelLastBuildPackagesDir dirOut packageComponent)
-	set( ${dirOut} ${CPF_DOWNLOADS_DIR}/${packageComponent}/${CPF_LAST_BUILD_DIR} PARENT_SCOPE)
+function( cpfGetRelLastBuildPackagesDir dirOut package)
+	set( ${dirOut} ${CPF_DOWNLOADS_DIR}/${package}/${CPF_LAST_BUILD_DIR} PARENT_SCOPE)
 endfunction()
 
 # This function defines the relative dir from the html directory to the package release files of the release versions.
-function( cpfGetRelReleasePackagesDir dirOut packageComponent version )
-	set( ${dirOut} ${CPF_DOWNLOADS_DIR}/${packageComponent}/${version} PARENT_SCOPE)
+function( cpfGetRelReleasePackagesDir dirOut package version )
+	set( ${dirOut} ${CPF_DOWNLOADS_DIR}/${package}/${version} PARENT_SCOPE)
 endfunction()
 
 # This function defines the relative path from the html directory to the directory that holds the abi compatibility report that compares the current build to the last build.

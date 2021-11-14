@@ -155,7 +155,7 @@ function( cpfGetTypePartOfOutputDir typeDir packageComponent outputType )
 
 	# handle platform specific relative dirs
 	if( ${CMAKE_SYSTEM_NAME} STREQUAL Windows  )
-		# on windows we put executables and dlls directly in the package directory.
+		# on windows we put executables and dlls directly in the package-component directory.
 		if(${outputType} STREQUAL RUNTIME)
 			set(typeDirLocal . )
 		elseif(${outputType} STREQUAL LIBRARY)

@@ -113,7 +113,7 @@ in a Visual Studio solution.
 
 
 *********************************
-Module cpfInitPackageModule.cmake
+Module cpfPackageProject.cmake
 *********************************
 
 This module provides the following function.
@@ -129,7 +129,23 @@ cpfPackageProject()
 .. code-block:: cmake
 
   cpfPackageProject(
-      [LANGUAGES]
+      COMPONENTS component_subdir1 component_subdir2 ...
+      TARGET_NAMESPACE string
+      [BRIEF_DESCRIPTION string]
+      [LONG_DESCRIPTION string]
+      [OWNER string]
+      [WEBPAGE_URL string]
+      [MAINTAINER_EMAIL string]
+      [LANGUAGES language1 language2 ...]
+      [DISTRIBUTION_PACKAGES
+          DISTRIBUTION_PACKAGE_CONTENT_TYPE <CT_RUNTIME|CT_RUNTIME_PORTABLE excludedTargets|CT_DEVELOPER|CT_SOURCES>
+          DISTRIBUTION_PACKAGE_FORMATS <7Z|TBZ2|TGZ|TXZ|TZ|ZIP|DEB ...>
+          [DISTRIBUTION_PACKAGE_FORMAT_OPTIONS 
+              [SYSTEM_PACKAGES_DEB packageListString ]
+          ]
+          [DISTRIBUTION_PACKAGE_CONTENT_TYPE ...] 
+      ...]
+      [VERSION_COMPATIBILITY_SCHEME [ExactVersion] ]
   )
 
 
@@ -175,6 +191,120 @@ cmake code ignorant to the fact if a target is imported or *inlined*.
 
 
 
+OWNER
+^^^^^
+
+The value is only used when compiling with MSVC. It is than used in the copyright notice 
+that is displayed on the *Details* tab of the file-properties window of the generated binary
+files. 
+
+If you plan to allow using a package as :code:`EXTERNAL` package in some other CI-project,
+you have to hard-code this value in the packages CMakeLists file. Using a variable from the
+CI-project in order to remove duplication between your packages will not work, because clients
+will not have the value of that variable.
+
+
+WEBPAGE_URL
+^^^^^^^^^^^
+
+A web address from where the source-code and/or the documentation of the package can be obtained.
+This is required for Debian packages.
+
+If you plan to allow using a package as :code:`EXTERNAL` package in some other CI-project,
+you have to hard-code this value in the packages CMakeLists file. Using a variable from the
+CI-project in order to remove duplication between your packages will not work, because clients
+will not have the value of that variable.
+
+
+MAINTAINER_EMAIL
+^^^^^^^^^^^^^^^^
+
+An email address under which the maintainers of the package can be reached.
+This is required for Debian packages.
+Setting this argument overrides the value of the global :code:`CPF_MAINTAINER_EMAIL` variable for this package.
+
+If you plan to allow using a package as :code:`EXTERNAL` package in some other CI-project,
+you have to hard-code this value in the packages CMakeLists file. Using a variable from the
+CI-project in order to remove duplication between your packages will not work, because clients
+will not have the value of that variable.
+
+
+DISTRIBUTION_PACKAGES
+^^^^^^^^^^^^^^^^^^^^^
+
+This keyword opens a sub-list of arguments that are used to specify a list of packages that have the same content, but different formats.
+The argument can be given multiple times, in order to define a variety of package formats and content types.
+The argument takes two lists as sub-arguments. A distribution package is created for each combination of the
+elements in the sub-argument lists.
+For example: 
+argument :code:`DISTRIBUTION_PACKAGES DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_RUNTIME_PORTABLE DISTRIBUTION_PACKAGE_FORMATS ZIP;7Z`
+will cause the creation of a zip and a 7z archive that both contain the packages executables and all depended on shared libraries.
+Adding another argument :code:`DISTRIBUTION_PACKAGES DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_RUNTIME DISTRIBUTION_PACKAGE_FORMATS DEB`
+will cause the additional creation of a debian package that relies on external dependencies being provided by other packages.
+
+**Sub-Options:**
+
+DISTRIBUTION_PACKAGE_CONTENT_TYPE 
+"""""""""""""""""""""""""""""""""               
+
+- :code:`CT_RUNTIME`: The distribution-package contains the executables and shared libraries that are produced by this package.
+  This can be used for packages that either do not depend on any shared libraries or only on shared libraries that
+  are provided externally by the system.
+
+- :code:`CT_RUNTIME_PORTABLE listExcludedTargets`: The distribution-package will include the packages executables 
+  and shared libraries and all depended on shared libraries. This is useful for creating *portable* packages
+  that do not rely on any system provided shared libraries.
+  The :code:`CT_RUNTIME_PORTABLE` keyword can be followed by a list of depended on targets that belong
+  to shared libraries that should not be included in the package, because they are provided by the system. 
+
+- :code:`CT_DEVELOPER`: The distribution-package will include all package binaries, header files and cmake config files for 
+  importing the package in another project. This content type is supposed to be used for binary library packages
+  that are used in other projects. Note that for msvc debug configurations the package will also include source files
+  to allow debugging into the package. The package does not include dependencies which are supposed to be imported
+  separately by consuming projects.
+
+- :code:`CT_SOURCES`: The distribution-package contains the files that are needed to compile the package.
+
+
+DISTRIBUTION_PACKAGE_FORMATS
+""""""""""""""""""""""""""""
+
+- :code:`7Z |TBZ2 | TGZ | TXZ | TZ | ZIP`: Packs the distributed files into one of the following archive formats: .7z, .tar.bz2, .tar.gz, .tar.xz, tar.Z, .zip
+- :code:`DEB`: Creates a debian package .deb file. This will only be created when the dpkg tool is available.
+
+DISTRIBUTION_PACKAGE_FORMAT_OPTIONS
+"""""""""""""""""""""""""""""""""""
+
+A list of keyword arguments that contain further options for the creation of the distribution packages.
+
+- :code:`[SYSTEM_PACKAGES_DEB]`: This is only relevant when using the DEB package format. 
+  The option must be a string that contains the names and versions of the debian packages 
+  that provide the excluded shared libraries from the :code:`CT_RUNTIME` option. E.g. :code:`libc6 (>= 2.3.1-6), libc6 (< 2.4)`
+  on which the package depends.
+
+
+VERSION_COMPATIBILITY_SCHEME
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This option determines which versions of the package are can compatible to each other. This is only
+of interest for shared library packages. For compatible versions it should be possible to replace
+an older version with a newer one by simply replacing the library file or on linux by changing the symlink
+that points to the used library. Not that it is still the developers responsibility to implement the
+library in a compatible way. This option will only influence which symlinks are created, output file names
+and the version.cmake files that are used to import the library.
+
+.. note:: 
+
+  Currently only :code:`ExactVersion` scheme is available, so you do not need to set this option.
+
+
+**Schemes:**
+
+- :code:`ExactVersion`: This option means, that different versions of the library are not compatible.
+  This is the most simple scheme and relieves developers from the burdon of keeping things compatible.
+
+
+
 *****************************
 Module cpfAddCppPackageComponent.cmake
 *****************************
@@ -194,13 +324,7 @@ cpfAddCppPackageComponent()
 .. code-block:: cmake
 
   cpfAddCppPackageComponent(
-      PACKAGE_NAMESPACE string
       TYPE <GUI_APP|CONSOLE_APP|LIB|INTERFACE_LIB>
-      [BRIEF_DESCRIPTION string]
-      [LONG_DESCRIPTION string]
-      [OWNER string]
-      [WEBPAGE_URL string]
-      [MAINTAINER_EMAIL string]
       [PUBLIC_HEADER file1 [file2 ...]]
       [PRODUCTION_FILES file1 [file2 ...]]
       [EXE_FILES file1 [file2 ...]]
@@ -214,15 +338,6 @@ cpfAddCppPackageComponent()
           PLUGIN_DIRECTORY dir
           PLUGIN_TARGETS target1 [target2 ...]
       ...]
-      [DISTRIBUTION_PACKAGES
-          DISTRIBUTION_PACKAGE_CONTENT_TYPE <CT_RUNTIME|CT_RUNTIME_PORTABLE excludedTargets|CT_DEVELOPER|CT_SOURCES>
-          DISTRIBUTION_PACKAGE_FORMATS <7Z|TBZ2|TGZ|TXZ|TZ|ZIP|DEB ...>
-          [DISTRIBUTION_PACKAGE_FORMAT_OPTIONS 
-              [SYSTEM_PACKAGES_DEB packageListString ]
-          ]
-          [DISTRIBUTION_PACKAGE_CONTENT_TYPE ...] 
-      ...]
-      [VERSION_COMPATIBILITY_SCHEME [ExactVersion] ]
       [ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS bool]
       [ENABLE_ABI_API_STABILITY_CHECK_TARGETS bool]
       [ENABLE_CLANG_FORMAT_TARGETS bool]
@@ -238,26 +353,26 @@ cpfAddCppPackageComponent()
   )
 
 
-Adds a C++ package to a CPF project. The name of the package is the same as the
-name of the directory in which the packages CMakeLists.txt file is located.
-The function provides a large list of options that allow defining the features that the package should provide.
+Adds a C++ package-component to a CPF project. The name of the package-component is the same as the
+name of the directory in which the package-components CMakeLists.txt file is located.
+The function provides a large list of options that allow defining the features that the package-component should provide.
 
-A C++ package consists of a main binary target that has the same name as the package and some helper binary targets for tests and test utilities.
+A C++ package-component consists of a main binary target that has the same name as the package-component and some helper binary targets for tests and test utilities.
 The names of the created targets are:
 
 .. code-block:: none
 
   # Binary Targets of MyPackage
-  MyPackage             # The executable or library
-  libMyPackage          # The implementation library.
-  MyPackage_fixtures    # A library for test test utility code.
-  MyPackage_tests       # A text executabl.
+  MyComponent             # The executable or library
+  libMyComponent          # The implementation library.
+  MyComponent_fixtures    # A library for test test utility code.
+  MyComponent_tests       # A text executabl.
 
-  # Alias Targets of MyPackage with PACKAGE_NAMESPACE mypckg
-  mypckg::MyPackage
-  mypckg::libMyPackage
-  mypckg::MyPackage_fixtures
-  mypckg::MyPackage_tests
+  # Alias Targets of MyComponent with TARGET_NAMESPACE mypckg
+  mypckg::MyComponent
+  mypckg::libMyComponent
+  mypckg::MyComponent_fixtures
+  mypckg::MyComponent_tests
 
 
 The function will create alias targets for all binary targets that have the package namespace prepended.
@@ -296,7 +411,7 @@ Here is an example that uses :code:`cpfAddCppPackageComponent()` in a :code:`CMa
 	  ${PACKAGE_NAMESPACE}
   )
 
-  ################# Define package files #################
+  ################# Define package-component files #################
   set( PACKAGE_PUBLIC_HEADERS
       MyFunction.h
   )
@@ -393,8 +508,8 @@ The type of the main binary target of the package.
 BRIEF_DESCRIPTION
 ^^^^^^^^^^^^^^^^^
 
-A short description in one sentence about what the package does. This is included
-in the generated documentation page of the package and in some distribution package
+A short description in one sentence about what the package-component does. This is included
+in the generated documentation page of the package-component and in some distribution package
 types. It is also displayed on the *Details* tab of the file-properties window of 
 the generated main binary file when compiling with MSVC.
 
@@ -403,46 +518,8 @@ LONG_DESCRIPTION
 ^^^^^^^^^^^^^^^^
 
 A longer description of the package. This is included
-in the generated documentation page of the package and in some distribution package
+in the generated documentation page of the package-component and in some distribution package
 types.
-
-
-OWNER
-^^^^^
-
-The value is only used when compiling with MSVC. It is than used in the copyright notice 
-that is displayed on the *Details* tab of the file-properties window of the generated binary
-files. 
-
-If you plan to allow using a package as :code:`EXTERNAL` package in some other CI-project,
-you have to hard-code this value in the packages CMakeLists file. Using a variable from the
-CI-project in order to remove duplication between your packages will not work, because clients
-will not have the value of that variable.
-
-
-WEBPAGE_URL
-^^^^^^^^^^^
-
-A web address from where the source-code and/or the documentation of the package can be obtained.
-This is required for Debian packages.
-
-If you plan to allow using a package as :code:`EXTERNAL` package in some other CI-project,
-you have to hard-code this value in the packages CMakeLists file. Using a variable from the
-CI-project in order to remove duplication between your packages will not work, because clients
-will not have the value of that variable.
-
-
-MAINTAINER_EMAIL
-^^^^^^^^^^^^^^^^
-
-An email address under which the maintainers of the package can be reached.
-This is required for Debian packages.
-Setting this argument overrides the value of the global :code:`CPF_MAINTAINER_EMAIL` variable for this package.
-
-If you plan to allow using a package as :code:`EXTERNAL` package in some other CI-project,
-you have to hard-code this value in the packages CMakeLists file. Using a variable from the
-CI-project in order to remove duplication between your packages will not work, because clients
-will not have the value of that variable.
 
 
 PUBLIC_HEADER
@@ -536,81 +613,6 @@ must be deployed so they are found by the executable. This if often a :code:`plu
 :code:`PLUGIN_TARGETS`: The name of the targets that provide the plugin libraries.
 
 
-DISTRIBUTION_PACKAGES
-^^^^^^^^^^^^^^^^^^^^^
-
-This keyword opens a sub-list of arguments that are used to specify a list of packages that have the same content, but different formats.
-The argument can be given multiple times, in order to define a variety of package formats and content types.
-The argument takes two lists as sub-arguments. A distribution package is created for each combination of the
-elements in the sub-argument lists.
-For example: 
-argument :code:`DISTRIBUTION_PACKAGES DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_RUNTIME_PORTABLE DISTRIBUTION_PACKAGE_FORMATS ZIP;7Z`
-will cause the creation of a zip and a 7z archive that both contain the packages executables and all depended on shared libraries.
-Adding another argument :code:`DISTRIBUTION_PACKAGES DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_RUNTIME DISTRIBUTION_PACKAGE_FORMATS DEB`
-will cause the additional creation of a debian package that relies on external dependencies being provided by other packages.
-
-**Sub-Options:**
-
-DISTRIBUTION_PACKAGE_CONTENT_TYPE 
-"""""""""""""""""""""""""""""""""               
-
-- :code:`CT_RUNTIME`: The distribution-package contains the executables and shared libraries that are produced by this package.
-  This can be used for packages that either do not depend on any shared libraries or only on shared libraries that
-  are provided externally by the system.
-
-- :code:`CT_RUNTIME_PORTABLE listExcludedTargets`: The distribution-package will include the packages executables 
-  and shared libraries and all depended on shared libraries. This is useful for creating *portable* packages
-  that do not rely on any system provided shared libraries.
-  The :code:`CT_RUNTIME_PORTABLE` keyword can be followed by a list of depended on targets that belong
-  to shared libraries that should not be included in the package, because they are provided by the system. 
-
-- :code:`CT_DEVELOPER`: The distribution-package will include all package binaries, header files and cmake config files for 
-  importing the package in another project. This content type is supposed to be used for binary library packages
-  that are used in other projects. Note that for msvc debug configurations the package will also include source files
-  to allow debugging into the package. The package does not include dependencies which are supposed to be imported
-  separately by consuming projects.
-
-- :code:`CT_SOURCES`: The distribution-package contains the files that are needed to compile the package.
-
-
-DISTRIBUTION_PACKAGE_FORMATS
-""""""""""""""""""""""""""""
-
-- :code:`7Z |TBZ2 | TGZ | TXZ | TZ | ZIP`: Packs the distributed files into one of the following archive formats: .7z, .tar.bz2, .tar.gz, .tar.xz, tar.Z, .zip
-- :code:`DEB`: Creates a debian package .deb file. This will only be created when the dpkg tool is available.
-
-DISTRIBUTION_PACKAGE_FORMAT_OPTIONS
-"""""""""""""""""""""""""""""""""""
-
-A list of keyword arguments that contain further options for the creation of the distribution packages.
-
-- :code:`[SYSTEM_PACKAGES_DEB]`: This is only relevant when using the DEB package format. 
-  The option must be a string that contains the names and versions of the debian packages 
-  that provide the excluded shared libraries from the :code:`CT_RUNTIME` option. E.g. :code:`libc6 (>= 2.3.1-6), libc6 (< 2.4)`
-  on which the package depends.
-
-
-VERSION_COMPATIBILITY_SCHEME
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This option determines which versions of the package are can compatible to each other. This is only
-of interest for shared library packages. For compatible versions it should be possible to replace
-an older version with a newer one by simply replacing the library file or on linux by changing the symlink
-that points to the used library. Not that it is still the developers responsibility to implement the
-library in a compatible way. This option will only influence which symlinks are created, output file names
-and the version.cmake files that are used to import the library.
-
-.. note:: 
-
-  Currently only :code:`ExactVersion` scheme is available, so you do not need to set this option.
-
-
-**Schemes:**
-
-- :code:`ExactVersion`: This option means, that different versions of the library are not compatible.
-  This is the most simple scheme and relieves developers from the burdon of keeping things compatible.
-
-
 ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -663,8 +665,8 @@ Setting this argument overrides the value of the global :code:`CPF_ENABLE_OPENCP
 ENABLE_PACKAGE_DOX_FILE_GENERATION
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If this option is given, the package will generate a standard package documentation :code:`.dox` file.
-The file contains the brief and long package description as well as some links to other generated
+If this option is given, the package-component will generate a standard package-component documentation :code:`.dox` file.
+The file contains the brief and long package-component description as well as some links to other generated
 html content like test-coverage reports or abi-compatibility reports.
 Setting this argument overrides the value of the global :code:`CPF_ENABLE_PACKAGE_DOX_FILE_GENERATION` variable for this package.
 
@@ -681,7 +683,7 @@ ENABLE_RUN_TESTS_TARGET
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 This option can be used to enable or disable the :ref:`runAllTests_package` and :ref:`runFastTests_package`
-targets. The option is ignored if the package does not have a test executable.
+targets. The option is ignored if the package-component does not have a test executable.
 Setting this argument overrides the value of the global :code:`CPF_ENABLE_RUN_TESTS_TARGET` variable for this package.
 
 
@@ -840,8 +842,8 @@ cpfAddDoxygenPackage()
   )
 
 
-This function adds a package that runs the doxygen documentation generator on the owned packages of your CI-project.
-The package can also contain extra files containing global documentation that does not belong to
+This function adds a package-component that runs the doxygen documentation generator on the owned packages of your CI-project.
+The package-component can also contain extra files containing global documentation that does not belong to
 any other package.
 
 All files specified with the key-word arguments are added to the targets source files.
@@ -866,7 +868,7 @@ DOXYGEN_CONFIG_FILE
 This must be set to the absolute path of the Doxygen configuration file. You should be aware that the file
 is not directly passed to Doxygen. In order to inject the values of CMake variables into the Doxygen configuration,
 the file is used as a template to generate the file :code:`Generated/\<config\>/_CPF/documentation/tempDoxygenConfig.txt`.
-This generated file is the one that is used as the input for the call of Doxygen. After building the new package for the first
+This generated file is the one that is used as the input for the call of Doxygen. After building the new package-component for the first
 time you can open the file and see that it overwrites some values of the configuration variables at the bottom of the file.
 
 The following variables in the configuration file are overwritten.
@@ -877,7 +879,7 @@ Changing them in the given template will have no effect.
   PROJECT_NAME                (set to the value of the PROJECT_NAME option)
   OUTPUT_DIRECTORY            (set to "Generated/<config>/html/doxygen")
   HTML_OUTPUT                 (set to "html")
-  INPUT                       (set to Sources and the directories with the generated package documentation dox files)
+  INPUT                       (set to Sources and the directories with the generated package-component documentation dox files)
   EXCLUDE                     (set to the external packages source directories that are not listed in ADDITIONAL_PACKAGES)
   DOTFILE_DIRS                (set to "Generated/<config>/html/doxygen/external")
   LAYOUT_FILE                 (set to the path of the DOXYGEN_LAYOUT_FILE option)
@@ -985,7 +987,7 @@ CONFIG_FILE_DIR
 ^^^^^^^^^^^^^^^
 
 A relative path to the directory that holds the :code:`conf.py` file that configures your
-sphinx project. When not given, the source directory of the package is used.
+sphinx project. When not given, the source directory of the package-component is used.
 
 OTHER_FILES
 ^^^^^^^^^^^

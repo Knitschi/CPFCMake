@@ -90,7 +90,7 @@ function( cpfDebugAssertLinkedLibrariesExists linkedLibrariesOut packageComponen
 		endif()
 
 		if(NOT TARGET ${lib})
-			cpfDebugMessage("${lib} is not a Target when creating package ${packageComponent}. If it should be available, make sure to have target ${lib} added before adding this package.")
+			cpfDebugMessage("${lib} is not a Target when creating package-component ${packageComponent}. If it should be available, make sure to have target ${lib} added before adding this package.")
 		else()
 			list(APPEND linkedLibraries ${lib})
 		endif()

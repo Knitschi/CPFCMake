@@ -261,7 +261,7 @@ function( cpfAddPackageDocsTarget packageComponent packageNamespace )
 
 	cpfGetPackageDoxFilesTargetName( targetName ${packageComponent} )
 
-	# Always create the basic package documentation page.	
+	# Always create the basic package-component documentation page.	
 	cpfAddPackageDocumentationDoxFileCommands( documentationFile ${packageComponent} ${packageNamespace})
 
 	add_custom_target(
@@ -354,7 +354,7 @@ function( cpfGetCompatiblityReportLinks linksOut packageComponent )
 	
 		string(APPEND linkLines "\n")
 		string(APPEND linkLines "#### ABI/API Compatibility Reports ${libraryTarget} ####\n")
-		string(APPEND linkLines "The links will work if the package has a test target and the CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS option is set for a Linux debug configuration.\n")
+		string(APPEND linkLines "The links will work if the package-component has a test target and the CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS option is set for a Linux debug configuration.\n")
 		string(APPEND linkLines "\n")
 
 		cpfGetPossiblyAvailableCompatibilityReports( reports titles ${packageComponent} ${libraryTarget} )
