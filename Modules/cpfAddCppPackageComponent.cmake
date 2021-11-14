@@ -278,7 +278,7 @@ function( cpfAddPackageBinaryTargets
 	list(APPEND productionFiles ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt )
 	cpfGetPackageComponentVersionCppHeaderFileName( versionHeader ${packageComponent} )
 	list(APPEND publicHeaderFiles ${CMAKE_CURRENT_BINARY_DIR}/${versionHeader} )
-	
+	cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
 
 	# Modify variables if the package-component creates an executable
 	if("${type}" STREQUAL GUI_APP OR "${type}" STREQUAL CONSOLE_APP)
@@ -306,7 +306,7 @@ function( cpfAddPackageBinaryTargets
 			NAME ${exeTarget}
 			FILES ${MAIN_CPP} ${exeFiles}
 			#LINKED_LIBRARIES ${linkedLibraries}
-			IDE_FOLDER ${packageComponent}/exe
+			IDE_FOLDER ${packageFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
@@ -328,7 +328,7 @@ function( cpfAddPackageBinaryTargets
 				PUBLIC_HEADER ${publicHeaderFiles}
 				FILES ${productionFiles}
 				LINKED_LIBRARIES ${linkedLibraries}
-				IDE_FOLDER ${packageComponent}
+				IDE_FOLDER ${packageFolder}
 				VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 				ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
 				ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
@@ -361,7 +361,7 @@ function( cpfAddPackageBinaryTargets
 				PUBLIC_HEADER ${publicHeaderFiles}
 				FILES ${productionFiles}
 				LINKED_LIBRARIES ${linkedLibraries}
-				IDE_FOLDER ${packageComponent}
+				IDE_FOLDER ${packageFolder}
 				VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 				ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
 				ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
@@ -389,7 +389,7 @@ function( cpfAddPackageBinaryTargets
 			PUBLIC_HEADER ${publicFixtureHeaderFiles}
 			FILES ${fixtureFiles}
 			LINKED_LIBRARIES PUBLIC ${libraryTarget} ${linkedTestLibraries}
-			IDE_FOLDER ${packageComponent}/${VSTestFolder}
+			IDE_FOLDER ${packageFolder}/${VSTestFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
@@ -417,7 +417,7 @@ function( cpfAddPackageBinaryTargets
 			NAME ${unitTestsTarget}
 			FILES ${testFiles}
 			LINKED_LIBRARIES PRIVATE ${libraryTarget} ${fixtureTarget} ${linkedTestLibraries}
-			IDE_FOLDER ${packageComponent}/${VSTestFolder}
+			IDE_FOLDER ${packageFolder}/${VSTestFolder}
 			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
 			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}

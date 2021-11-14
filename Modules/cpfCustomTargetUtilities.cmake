@@ -95,14 +95,11 @@ function( cpfAddStandardCustomTarget )
 	)
 	
 	# Set properties
-	set(solutionFolder ${ARG_PACKAGE})
-	cpfIsMultiComponentPackage(isMulti ${ARG_PACKAGE})
-	if(isMulti)
-		string(APPEND solutionFolder /${ARG_PACKAGE_COMPONENT})
-	endif()
+	cpfGetComponentVSFolder(solutionFolder ${ARG_PACKAGE} ${ARG_PACKAGE_COMPONENT})
 	if(ARG_VS_SUBDIR)
 		string(APPEND solutionFolder /${ARG_VS_SUBDIR})
 	endif()
+
 	set_property( TARGET ${ARG_TARGET} PROPERTY FOLDER ${solutionFolder} )
 
 	set_property( TARGET ${ARG_TARGET} PROPERTY CPF_OUTPUT_FILES ${ARG_PRODUCED_FILES} )

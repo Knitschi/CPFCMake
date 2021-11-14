@@ -84,7 +84,8 @@ function( cpfAddRunCppTestTarget runTargetNameArg packageComponent runTargetName
 			DEPENDS ${productionLib} ${testTarget} "${stampFile}"
 		)
 
-		set_property( TARGET ${runTargetName} PROPERTY FOLDER "${packageComponent}/test")
+		cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
+		set_property( TARGET ${runTargetName} PROPERTY FOLDER "${packageFolder}/test")
 
 		set(${runTargetNameArg} ${runTargetName} PARENT_SCOPE)
 
@@ -141,7 +142,8 @@ function( cpfAddCustomTestTarget runTestsCommand sourceFiles dependedOnExternalF
 
 	cpfAddCustomTestTargetWithName(${runTargetName} ${runTestsCommand} "${sourceFiles}" "${dependedOnExternalFiles}")
 
-	set_property( TARGET ${runTargetName} PROPERTY FOLDER "${packageComponent}/pipeline")
+	cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
+	set_property( TARGET ${runTargetName} PROPERTY FOLDER "${packageFolder}/pipeline")
 	set_property( TARGET ${packageComponent} PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET ${runTargetName})
 
 endfunction()
@@ -213,14 +215,16 @@ function( cpfAddRunPython3TestTargetForEachModule testScript modules args source
 			set(runTargetName run_${module})
 			cpfListAppend(runModuleTestsTargets ${runTargetName})
 			cpfAddCustomTestTargetWithName( ${runTargetName} ${runTestsCommand} "${sourceFilesPlusModule}" "${dependedOnExternalFiles}")
-			set_property( TARGET ${runTargetName} PROPERTY FOLDER "${packageComponent}/private")
+			cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
+			set_property( TARGET ${runTargetName} PROPERTY FOLDER "${packageFolder}/private")
 
 		endforeach()
 
 		# Add a bundle target to run all module test targets.
 		set(bundleTestTarget ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${packageComponent})
 		cpfAddBundleTarget(${bundleTestTarget} "${runModuleTestsTargets}")
-		set_property( TARGET ${bundleTestTarget} PROPERTY FOLDER "${packageComponent}/pipeline")
+		cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
+		set_property( TARGET ${bundleTestTarget} PROPERTY FOLDER "${packageFolder}/pipeline")
 		set_property( TARGET ${packageComponent} PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET ${bundleTestTarget})
 
 	endif()

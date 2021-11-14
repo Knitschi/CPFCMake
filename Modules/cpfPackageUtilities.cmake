@@ -40,8 +40,9 @@ function( cpfIsMultiComponentPackage isMultiOut package )
 	get_property(components DIRECTORY ${packageDir} PROPERTY CPF_PACKAGE_COMPONENTS)
 	if("${components}" STREQUAL SINGLE_COMPONENT)
 		set(${isMultiOut} FALSE PARENT_SCOPE)
+	else()
+		set(${isMultiOut} TRUE PARENT_SCOPE)
 	endif()
-	set(${isMultiOut} TRUE PARENT_SCOPE)
 
 endfunction()
 
@@ -54,8 +55,23 @@ function( cpfAddPackageSources sourcesVarName package )
 	cpfIsMultiComponentPackage(isMulti ${package})
 	if(NOT isMulti)
 		cpfGetAbsPackageDirectory(packageDir ${package} "${CPF_ROOT_DIR}")
-		get_property(packageSources DIRECTORY ${CMAKE_CURRENT_LIST_DIR} PROPERTY CPF_PACKAGE_SOURCES ${packageSources})
-		set(${sourcesVarName} "${sourcesVarName};${packageSources}" PARENT_SCOPE)
+		get_property(packageSources DIRECTORY ${packageDir} PROPERTY CPF_PACKAGE_SOURCES)
+		set(${sourcesVarName} "${${sourcesVarName}};${packageSources}" PARENT_SCOPE)
+	endif()
+
+endfunction()
+
+#------------------------------------------------------------------------------------------
+# Returns either ${package} for single component packages and  ${package}/${packageComponent} 
+# for multi component packages
+#
+function( cpfGetComponentVSFolder folderOut package packageComponent )
+
+	cpfIsMultiComponentPackage(isMulti ${package})
+	if(isMulti)
+		set(${folderOut} ${package}/${packageComponent} PARENT_SCOPE)
+	else()
+		set(${folderOut} ${package} PARENT_SCOPE)
 	endif()
 
 endfunction()

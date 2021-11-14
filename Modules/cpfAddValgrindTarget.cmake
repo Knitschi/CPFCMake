@@ -70,7 +70,8 @@ function( cpfAddValgrindTarget package)
 			)
 
 			set_property( TARGET ${packageComponent} PROPERTY INTERFACE_CPF_VALGRIND_SUBTARGET ${targetName})
-			set_property( TARGET ${targetName} PROPERTY FOLDER "${packageComponent}/pipeline")
+			cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
+			set_property( TARGET ${targetName} PROPERTY FOLDER "${packageFolder}/pipeline")
 
 		endif()
 	endif()

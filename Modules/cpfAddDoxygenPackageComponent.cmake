@@ -274,7 +274,8 @@ function( cpfAddPackageDocsTarget packageComponent packageNamespace )
 	)
 
 	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${documentationFile}  )
-	set_property(TARGET ${targetName} PROPERTY FOLDER "${packageComponent}/private" )
+	cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
+	set_property(TARGET ${targetName} PROPERTY FOLDER "${packageFolder}/private" )
 
 endfunction()
 

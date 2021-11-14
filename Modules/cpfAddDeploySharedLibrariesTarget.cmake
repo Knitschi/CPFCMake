@@ -131,7 +131,9 @@ function( cpfAddDeployTarget targetName packageComponent outputs libs )
 			${targetName}
 			DEPENDS ${outputs} ${libs}
 		)
-		set_property(TARGET ${targetName} PROPERTY FOLDER ${packageComponent}/private)
+
+		cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
+		set_property(TARGET ${targetName} PROPERTY FOLDER ${packageFolder}/private)
 
 		# make sure the copying is done before the target is build
 		cpfGetExecutableTargets(exeTargets ${packageComponent})

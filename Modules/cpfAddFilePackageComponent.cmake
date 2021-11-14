@@ -26,6 +26,7 @@ function( cpfAddFilePackageComponent )
     cpfAssertProjectVersionDefined()
 
     cpfGetCurrentSourceDir(packageComponent)
+
     cpfAddPackageSources(ARG_SOURCES ${CPF_CURRENT_PACKAGE})
 
     cpfAddStandardCustomTarget(

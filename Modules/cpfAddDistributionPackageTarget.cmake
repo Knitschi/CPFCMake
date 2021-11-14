@@ -97,7 +97,8 @@ function( cpfAddDistributionPackagesTarget packageComponent )
 			DEPENDS ${createPackagesTargets}
 		)
 
-		set_property(TARGET ${targetName} PROPERTY FOLDER "${packageComponent}/pipeline")
+		cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
+		set_property(TARGET ${targetName} PROPERTY FOLDER "${packageFolder}/pipeline")
 
 	endif()
 
@@ -119,7 +120,8 @@ function( cpfAddPackageContentTarget targetName packageComponent contentId conte
 
 	cpfGetPackageContentStagingDir( destDir ${packageComponent} ${contentId})
 	cpfGetPackageComponents( components ${contentType} ${contentId} )
-	cpfAddInstallTarget( ${packageComponent} ${targetName} "${components}" ${destDir} TRUE ${packageComponent}/private)
+	cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
+	cpfAddInstallTarget( ${packageComponent} ${targetName} "${components}" ${destDir} TRUE ${packageFolder}/private)
 
 endfunction()
 
@@ -214,7 +216,8 @@ function( cpfAddDistributionPackageTarget packageComponent contentTarget content
 
 	set_property( TARGET ${packageComponent} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${targetName})
 	set_property( TARGET ${packageComponent} APPEND PROPERTY INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS ${targetName})
-	set_property( TARGET ${targetName} PROPERTY FOLDER "${packageComponent}/private")
+	cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
+	set_property( TARGET ${targetName} PROPERTY FOLDER "${packageFolder}/private")
 	set_property( TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${stampFile})
 	set_property( TARGET ${targetName} PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS distributionPackages)
 

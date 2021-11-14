@@ -51,7 +51,8 @@ function( cpfAddClangFormatTarget packageComponent target )
         )
 
     add_custom_target( ${targetName} DEPENDS ${stampFile} )
-    set_property(TARGET ${targetName} PROPERTY FOLDER ${packageComponent}/pipeline )
+    cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
+    set_property(TARGET ${targetName} PROPERTY FOLDER ${packageFolder}/pipeline )
     set_property(TARGET ${target} PROPERTY INTERFACE_CPF_CLANG_FORMAT_SUBTARGET ${targetName} )
 
 endfunction()
