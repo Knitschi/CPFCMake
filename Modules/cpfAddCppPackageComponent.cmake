@@ -999,20 +999,20 @@ endfunction()
 function( cpfInstallSourceFiles installedFilesOut packageComponent sources outputType installComponent config )
 
     # Create header pathes relative to the install include directory.
-    set( sourceDir ${${packageComponent}_SOURCE_DIR})
-	set( binaryDir ${${packageComponent}_BINARY_DIR})
+    set( sourceDir ${${CPF_CURRENT_PACKAGE}_SOURCE_DIR})
+	set( binaryDir ${${CPF_CURRENT_PACKAGE}_BINARY_DIR})
 	cpfGetRelativeOutputDir( relIncludeDir ${packageComponent} ${outputType})
 
 	set(installedFiles)
 	foreach( file ${sources})
 		
-		cpfToAbsSourcePath(absFile ${file} ${${packageComponent}_SOURCE_DIR})
+		cpfToAbsSourcePath(absFile ${file} ${sourceDir})
 
 		# When building, the include directories are the packages binary and source directory.
 		# This means we need the path of the header relative to one of the two in order to get the
 		# relative path to the distribution packages install directory right.
-		file(RELATIVE_PATH relPathSource ${${packageComponent}_SOURCE_DIR} ${absFile} )
-		file(RELATIVE_PATH relPathBinary ${${packageComponent}_BINARY_DIR} ${absFile} )
+		file(RELATIVE_PATH relPathSource ${sourceDir} ${absFile} )
+		file(RELATIVE_PATH relPathBinary ${binaryDir} ${absFile} )
 		cpfGetShorterString( relFilePath ${relPathSource} ${relPathBinary}) # assume the shorter path is the correct one
 
 		# prepend the include/<package-component> directory

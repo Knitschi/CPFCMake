@@ -72,8 +72,6 @@ macro( cpfPackageProject )
 
 	cpfPrintAddPackageStatusMessage(${package})
 
-	devMessage("${ARG_COMPONENTS}")
-
 	if(NOT ("${ARG_COMPONENTS}" STREQUAL "SINGLE_COMPONENT"))
 		foreach(component ${ARG_COMPONENTS})
 			add_subdirectory(${component})

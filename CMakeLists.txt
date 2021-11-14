@@ -46,7 +46,7 @@ set( files
 	Modules/cpfAddFilePackage.cmake
 	Modules/cpfAddInstallTarget.cmake
 	Modules/cpfAddOpenCppCoverageTarget.cmake
-	Modules/cpfAddCppPackageComponentComponent.cmake
+	Modules/cpfAddCppPackageComponent.cmake
 	Modules/cpfAddPipelineTargetDependencies.cmake
 	Modules/cpfAddRunTestsTarget.cmake
 	Modules/cpfAddRunUicTarget.cmake
