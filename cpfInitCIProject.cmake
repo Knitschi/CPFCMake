@@ -17,6 +17,6 @@ include("${CMAKE_TOOLCHAIN_FILE}")      # Make sure the compiler is set before t
 
 # Include some commonly used modules.
 include(cpfAddPackages)
-include(cpfInitPackageProject)
-include(cpfAddCppPackage)
+include(cpfPackageProject)
+include(cpfAddCppPackageComponent)
 

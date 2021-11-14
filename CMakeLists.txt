@@ -1,11 +1,15 @@
 # This file bundles the cmake code file into a custom target to make them visible in the vs solution.
 
 include(cpfLocations)
-include(cpfInitPackageProject)
+include(cpfPackageProject)
 include(cpfAddFilePackage)
 include(cpfAddRunTestsTarget)
 
-cpfInitPackageProject(LANGUAGES NONE)
+cpfPackageProject(
+	TARGET_NAMESPACE CIConfig
+	COMPONENTS SINGLE_COMPONENT
+	LANGUAGES NONE
+)
 
 # Files that define variables.
 set( files
@@ -42,7 +46,7 @@ set( files
 	Modules/cpfAddFilePackage.cmake
 	Modules/cpfAddInstallTarget.cmake
 	Modules/cpfAddOpenCppCoverageTarget.cmake
-	Modules/cpfAddCppPackage.cmake
+	Modules/cpfAddCppPackageComponentComponent.cmake
 	Modules/cpfAddPipelineTargetDependencies.cmake
 	Modules/cpfAddRunTestsTarget.cmake
 	Modules/cpfAddRunUicTarget.cmake
@@ -52,7 +56,7 @@ set( files
 	Modules/cpfCustomTargetUtilities.cmake
 	Modules/cpfGitUtilities.cmake
 	Modules/cpfAddPackages.cmake
-	Modules/cpfInitPackageProject.cmake
+	Modules/cpfPackageProject.cmake
 	Modules/cpfListUtilities.cmake
 	Modules/cpfMiscUtilities.cmake
 	Modules/cpfNumericUtilities.cmake

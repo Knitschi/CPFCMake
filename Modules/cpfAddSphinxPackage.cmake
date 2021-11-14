@@ -32,7 +32,7 @@ function( cpfAddSphinxPackage )
 		${ARGN} 
 	)
 
-    cpfPrintAddPackageStatusMessage("Sphinx")
+    cpfPrintAddPackageComponentStatusMessage("Sphinx")
 
 	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddSphinxPackage()")
     cpfAssertProjectVersionDefined()
@@ -81,7 +81,7 @@ function( cpfAddSphinxPackage )
         OUTPUT ${keyOutputFile}
     )
 
-    cpfGetPackageName(package)
+    cpfGetCurrentSourceDir(package)
 	cpfAddStandardCustomTarget(
 		PACKAGE ${package}
 		TARGET ${package}

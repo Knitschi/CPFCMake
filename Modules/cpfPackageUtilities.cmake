@@ -4,7 +4,7 @@ include_guard(GLOBAL)
 #-----------------------------------------------------------
 # Returns the name of the current source directory as packageNameOut.
 #
-function(cpfGetPackageName packageNameOut)
+function(cpfGetCurrentSourceDir packageNameOut)
 
     cpfGetParentDirectory( package "${CMAKE_CURRENT_SOURCE_DIR}/blub")
     set(${packageNameOut} "${package}" PARENT_SCOPE)
@@ -362,16 +362,29 @@ function( cpfIsLoosePackage isLooseOut package rootDir)
 endfunction()
 
 #--------------------------------------------------------------------------------------------
-function( cpfPrintAddPackageStatusMessage packageType )
+function( cpfPrintAddPackageComponentStatusMessage packageType )
 
-	cpfGetPackageName(package)
+	cpfGetCurrentSourceDir(packageComponent)
 	cpfGetTagsOfHEAD( tags "${CMAKE_CURRENT_SOURCE_DIR}" )
 	set(tagged)
 	if(tags)
 		set(tagged "tagged ")
 	endif()
 
-	message(STATUS "Add C++ package ${package} at ${tagged}version ${PROJECT_VERSION}")
+	message(STATUS "Add ${packageType} package-component ${packageComponent}. at ${tagged}version ${PROJECT_VERSION}")
+
+endfunction()
+
+#--------------------------------------------------------------------------------------------
+function( cpfPrintAddPackageStatusMessage package )
+
+	cpfGetTagsOfHEAD( tags "${CMAKE_CURRENT_SOURCE_DIR}" )
+	set(tagged)
+	if(tags)
+		set(tagged "tagged ")
+	endif()
+
+	message(STATUS "Added package ${package} at ${tagged}version ${PROJECT_VERSION}")
 
 endfunction()
 

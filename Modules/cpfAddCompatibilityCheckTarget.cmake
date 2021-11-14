@@ -144,7 +144,7 @@ The compatibility check targets require the version information from to reposito
 Error with project settings!\n\
 Option [CPF_]ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS was set to ON but package ${package} does not create a distribution package with content type CT_DEVELOPER. \
 The packages with content type CT_DEVELOPER contain the abi dump files for previously build libraries which are needed to compare the abi-compliance. \
-You need to add an DISTRIBUTION_PACKAGES to your call of cpfAddCppPackage() with the DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_DEVELOPER sub-option to remove this error.\n\
+You need to add an DISTRIBUTION_PACKAGES to your call of cpfAddCppPackageComponent() with the DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_DEVELOPER sub-option to remove this error.\n\
 			")
 			message(FATAL_ERROR ${errorMessage} )
 		endif()

@@ -80,7 +80,7 @@ assuming that you have a package \c MyPackage with namespace \c mp.
 
 The package version can be accessed in the \c CMakeLists.txt file of
 the package via the \c PROJECT_VERSION variable after the call of the
-\c cpfInitPackageProject() function if you want to generate your own
+\c cpfPackageProject() function if you want to generate your own
 version files.
 
 

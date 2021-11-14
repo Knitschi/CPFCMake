@@ -5,8 +5,8 @@ include(cpfProjectUtilities)
 include(cpfGitUtilities)
 include(cpfCustomTargetUtilities)
 include(cpfAddCompatibilityCheckTarget)
-include(cpfInitPackageProject)
-include(cpfAddCppPackage)
+include(cpfPackageProject)
+include(cpfAddCppPackageComponent)
 include(cpfPackageUtilities)
 
 
@@ -49,7 +49,7 @@ function( cpfAddDoxygenPackage )
 		${ARGN}
 	)
 
-	cpfPrintAddPackageStatusMessage("Doxygen")
+	cpfPrintAddPackageComponentStatusMessage("Doxygen")
 
 	cpfAssertKeywordArgumentsHaveValue( "${singleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddDoxygenPackage()")
 	cpfAssertProjectVersionDefined()
@@ -62,7 +62,7 @@ function( cpfAddDoxygenPackage )
 		set(ARG_PROJECT_NAME ${CPF_CI_PROJECT})
 	endif()
 
-	cpfGetPackageName( package )
+	cpfGetCurrentSourceDir( package )
 
 	# Locations
 	set(tempDoxygenConfigFile "${CMAKE_CURRENT_BINARY_DIR}/tempDoxygenConfig.txt" )

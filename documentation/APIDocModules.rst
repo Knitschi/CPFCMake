@@ -43,7 +43,7 @@ In a function call this could look like this:
 
 .. code-block:: cmake
 
-  cpfAddCppPackage(
+  cpfAddCppPackageComponent(
       ...
       PLUGIN_DEPENDENCIES  
           PLUGIN_DIRECTORY plugin
@@ -118,17 +118,17 @@ Module cpfInitPackageModule.cmake
 
 This module provides the following function.
 
-- cpfInitPackageProject()
+- cpfPackageProject()
 
 
 .. _cpfInitPackageProject:
 
-cpfInitPackageProject()
+cpfPackageProject()
 =======================
 
 .. code-block:: cmake
 
-  cpfInitPackageProject(
+  cpfPackageProject(
       [LANGUAGES]
   )
 
@@ -176,24 +176,24 @@ cmake code ignorant to the fact if a target is imported or *inlined*.
 
 
 *****************************
-Module cpfAddCppPackage.cmake
+Module cpfAddCppPackageComponent.cmake
 *****************************
 
 This module provides the following functions.
 
 
-- `cpfAddCppPackage()`_
+- `cpfAddCppPackageComponent()`_
 - :ref:`cpfQt5AddUIAndQrcFiles`
 
 
-.. _cpfAddCppPackage:
+.. _cpfAddCppPackageComponent:
 
-cpfAddCppPackage()
+cpfAddCppPackageComponent()
 ==================
 
 .. code-block:: cmake
 
-  cpfAddCppPackage(
+  cpfAddCppPackageComponent(
       PACKAGE_NAMESPACE string
       TYPE <GUI_APP|CONSOLE_APP|LIB|INTERFACE_LIB>
       [BRIEF_DESCRIPTION string]
@@ -274,13 +274,13 @@ documentation generation.
 Example
 -------
 
-Here is an example that uses :code:`cpfAddCppPackage()` in a :code:`CMakeLists.txt` file to create C++ library package.
+Here is an example that uses :code:`cpfAddCppPackageComponent()` in a :code:`CMakeLists.txt` file to create C++ library package.
 
 .. code-block:: cmake
 
   # MyLib/CMakeLists.txt
 
-  include(cpfAddCppPackage)
+  include(cpfAddCppPackageComponent)
   include(cpfConstants)
 
   set( PACKAGE_NAMESPACE myl )
@@ -291,7 +291,7 @@ Here is an example that uses :code:`cpfAddCppPackage()` in a :code:`CMakeLists.t
   "Here you can go on in length about how awsome your library is."
   )
 
-  cpfInitPackageProject(
+  cpfPackageProject(
 	  PACKAGE_NAME
 	  ${PACKAGE_NAMESPACE}
   )
@@ -353,7 +353,7 @@ Here is an example that uses :code:`cpfAddCppPackage()` in a :code:`CMakeLists.t
   )
 
   ################# Add Package #################
-  cpfAddCppPackage( 
+  cpfAddCppPackageComponent( 
       PACKAGE_NAME            ${PACKAGE_NAME}
       WEBPAGE_URL             "http://www.awsomelib.com/index.html"
       MAINTAINER_EMAIL        "hans@awsomelib.com"
@@ -374,7 +374,7 @@ Here is an example that uses :code:`cpfAddCppPackage()` in a :code:`CMakeLists.t
   )
 
 
-.. _cpfAddCppPackage_arguments:
+.. _cpfAddCppPackageComponent_arguments:
 
 Arguments
 ---------
@@ -724,7 +724,7 @@ HAS_GOOGLE_TEST_EXE
 ^^^^^^^^^^^^^^^^^^^
 
 This option only has an effect when using a Visual Studio Generator.
-When this option is set to true, :code:`cpfAddCppPackage()` will create an empty file :code:`<test-exe>.is_google_test` that lies beside the
+When this option is set to true, :code:`cpfAddCppPackageComponent()` will create an empty file :code:`<test-exe>.is_google_test` that lies beside the
 create test executable. Set this option to true when you use the <a href="https://github.com/csoltenborn/GoogleTestAdapter">GoogleTestAdapter</a> 
 and it fails to find your tests.
 
@@ -750,7 +750,7 @@ function when Qt is used in combination with pre-compiled headers.
 
   :ref:`CotireQtIncompatibility`
 
-The function can be used like shown below before calling :ref:`cpfAddCppPackage`.
+The function can be used like shown below before calling :ref:`cpfAddCppPackageComponent`.
 
 .. code-block:: cmake
 
@@ -769,7 +769,7 @@ The function can be used like shown below before calling :ref:`cpfAddCppPackage`
 
   cpfQt5AddUIAndQrcFiles( sources )
 
-  cpfAddCppPackage( 
+  cpfAddCppPackageComponent( 
       ...
       PRODUCTION_FILES ${sources}
       ...

@@ -5,11 +5,37 @@ include_guard(GLOBAL)
 include(cpfPathUtilities)
 include(cpfMiscUtilities)
 
+
+
 #-------------------------------------------------------------------------
 # Documentation in APIDocs.dox
-macro( cpfInitPackageProject )
+macro( cpfPackageProject )
 
-	cmake_parse_arguments(ARG "" "TARGET_NAMESPACE" "LANGUAGES" ${ARGN})
+	set(requiredSingleValueKeywords
+		TARGET_NAMESPACE
+	)
+
+	set(optionalSingleValueKeywords
+		BRIEF_DESCRIPTION
+		LONG_DESCRIPTION
+		WEBPAGE_URL
+		OWNER
+		MAINTAINER_EMAIL
+		VERSION_COMPATIBILITY_SCHEME
+	)
+
+	set(requiredMultiValueKeywords
+		COMPONENTS
+	)
+
+	set(optionalMultiValueKeywords
+		LANGUAGES
+		DISTRIBUTION_PACKAGES
+	)
+
+	cmake_parse_arguments(ARG "" "${requiredSingleValueKeywords};$optionalSingleValueKeywords}" "${requiredMultiValueKeywords};${optionalMultiValueKeywords}" ${ARGN})
+
+	cpfAssertKeywordArgumentsHaveValue("${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfPackageProject()")
 
 	# Look for CXX and C by default.
 	if(NOT ARG_LANGUAGES)
@@ -19,7 +45,7 @@ macro( cpfInitPackageProject )
 	endif()
 
 	# The package name is defined by the sub-directory name
-    cpfGetPackageName(package)
+    cpfGetCurrentSourceDir(package)
 
 	cpfConfigurePackageVersionFile( ${package} )
 
@@ -35,6 +61,7 @@ macro( cpfInitPackageProject )
 		${languageOption}
     )
     
+	set(CPF_CURRENT_PACKAGE ${package})
 	set(${package}_TARGET_NAMESPACE ${ARG_TARGET_NAMESPACE})
 
 	set(PROJECT_VERSION ${packageVersion})
@@ -42,6 +69,16 @@ macro( cpfInitPackageProject )
 	set(PROJECT_VERSION_MINOR ${minor})
 	set(PROJECT_VERSION_PATCH ${patch})
 	set(PROJECT_VERSION_TWEAK ${commitId})
+
+	cpfPrintAddPackageStatusMessage(${package})
+
+	devMessage("${ARG_COMPONENTS}")
+
+	if(NOT ("${ARG_COMPONENTS}" STREQUAL "SINGLE_COMPONENT"))
+		foreach(component ${ARG_COMPONENTS})
+			add_subdirectory(${component})
+		endforeach()
+	endif()
 
 endmacro()
 

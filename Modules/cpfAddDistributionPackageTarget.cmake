@@ -29,7 +29,7 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 #
-# For argument documentation see the cpfAddCppPackage() function.
+# For argument documentation see the cpfAddCppPackageComponent() function.
 function( cpfAddDistributionPackageTargets package packageOptionLists )
 
 	foreach( list ${packageOptionLists})
@@ -45,7 +45,7 @@ function( cpfAddDistributionPackageTargets package packageOptionLists )
 		if(isIntLib AND (${contentType} STREQUAL CT_RUNTIME OR ${contentType} STREQUAL CT_RUNTIME_PORTABLE))
 			message(FATAL_ERROR 
 "The interface library ${package} can not have a distribution package with DISTRIBUTION_PACKAGE_CONTENT_TYPE ${contentType} because it has no binary files. \
-Remove that distribution package configuration from the cpfAddCppPackage() call to fix the problem."
+Remove that distribution package configuration from the cpfAddCppPackageComponent() call to fix the problem."
 			)
 		endif()
 		

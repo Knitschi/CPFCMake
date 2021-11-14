@@ -21,11 +21,11 @@ function( cpfAddFilePackage )
         ${ARGN} 
     )
 
-    cpfPrintAddPackageStatusMessage("file")
+    cpfPrintAddPackageComponentStatusMessage("file")
 
     cpfAssertProjectVersionDefined()
 
-    cpfGetPackageName(package)
+    cpfGetCurrentSourceDir(package)
     cpfAddStandardCustomTarget(
         PACKAGE ${package}
         TARGET ${package}

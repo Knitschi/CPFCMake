@@ -27,7 +27,7 @@ function( getExistingPackageVersionFile absPathOut package )
 	elseif(EXISTS "${binaryTreePath}")
 		set(${absPathOut} "${binaryTreePath}" PARENT_SCOPE)
 	else()
-		message(FATAL_ERROR "File ${verisonFile} is missing! It should be in the source or binary directory of package ${package}." )
+		message(FATAL_ERROR "File \"${verisonFile}\" is missing! It should be in the source or binary directory of package ${package}." )
 	endif()
 
 endfunction()

@@ -32,7 +32,7 @@ endfunction()
 # Asserts the the variable PROJECT_VERSION is defined.
 #
 function( cpfAssertProjectVersionDefined )
-	cpfAssertDefinedMessage(PROJECT_VERSION "The variable PROJECT_VERSION is not defined. Did you forget to call cpfInitPackageProject() before adding the package?")
+	cpfAssertDefinedMessage(PROJECT_VERSION "The variable PROJECT_VERSION is not defined. Did you forget to call cpfPackageProject() before adding the package?")
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -116,6 +116,6 @@ endfunction()
 # Checks that the compatibility scheme option contains one of the allowed values.
 function( cpfAssertCompatibilitySchemeOption scheme )
 	if( NOT ( "${scheme}" STREQUAL ExactVersion ) )
-		message(FATAL_ERROR "Invalid argument to cpfAddCppPackage()!. Value \"${scheme}\" for option VERSION_COMPATIBILITY_SCHEME is not allowed.")
+		message(FATAL_ERROR "Invalid argument to cpfAddCppPackageComponent()!. Value \"${scheme}\" for option VERSION_COMPATIBILITY_SCHEME is not allowed.")
 	endif()
 endfunction()

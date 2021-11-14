@@ -136,7 +136,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfAddCustomTestTarget runTestsCommand sourceFiles dependedOnExternalFiles )
 
-	cpfGetPackageName(package)
+	cpfGetCurrentSourceDir(package)
 	set(runTargetName ${CPF_RUN_ALL_TESTS_TARGET_PREFIX}${package})
 
 	cpfAddCustomTestTargetWithName(${runTargetName} ${runTestsCommand} "${sourceFiles}" "${dependedOnExternalFiles}")
@@ -193,7 +193,7 @@ endfunction()
 function( cpfAddRunPython3TestTargetForEachModule testScript modules args sourceFiles dependedOnTargets dependedOnExternalFiles)
 	if(TOOL_PYTHON3)
 
-		cpfGetPackageName(package)
+		cpfGetCurrentSourceDir(package)
 		set(runModuleTestsTargets)
 
 		# Add one run target for each test module

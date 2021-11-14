@@ -86,10 +86,10 @@ CPF_ENABLE_ACYCLIC_TARGET
 This option can be used to disable the global \ref acyclic target.
 
 
-Global defaults for the cpfAddCppPackage() function
+Global defaults for the cpfAddCppPackageComponent() function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :ref:`cpfAddCppPackage` function has a lot of parameters. Many of them
+The :ref:`cpfAddCppPackageComponent` function has a lot of parameters. Many of them
 are likely to take the same value across most packages in your CI-project. The CPF provides
 a list of global variables that you can set in your configuration file
 in order to provide defaults for these arguments.
@@ -162,7 +162,7 @@ Overridden target properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 CPFCMake sets some target properties to its own values. Resetting those
-properties to other values after calling \ref cpfAddCppPackage may cause
+properties to other values after calling \ref cpfAddCppPackageComponent may cause
 errors.
 
 - <b>CONFIG_OUTPUT_NAME</b>
