@@ -157,6 +157,24 @@ the default value :code:`CXX C` is used.
   :ref:`CIProjectAndPackageProjects`
 
 
+TARGET_NAMESPACE
+^^^^^^^^^^^^^^^^^
+
+As a namespace for the packages cmake target names.
+When clients of your package import your targets they will have to use that namespace like this:
+
+.. code-block:: cmake
+
+    find_package(YourPackage COMPONENTS YourLib)
+
+    add_executable(TheirExe)
+    target_link_libraries(TheirExe yourTargetNamespace::YourLib)
+
+It is also reccomended that you use this internally as well because it makes your
+cmake code ignorant to the fact if a target is imported or *inlined*.
+
+
+
 *****************************
 Module cpfAddCppPackage.cmake
 *****************************
@@ -337,7 +355,6 @@ Here is an example that uses :code:`cpfAddCppPackage()` in a :code:`CMakeLists.t
   ################# Add Package #################
   cpfAddCppPackage( 
       PACKAGE_NAME            ${PACKAGE_NAME}
-      PACKAGE_NAMESPACE       ${PACKAGE_NAMESPACE}
       WEBPAGE_URL             "http://www.awsomelib.com/index.html"
       MAINTAINER_EMAIL        "hans@awsomelib.com"
       TYPE                    LIB
@@ -361,20 +378,6 @@ Here is an example that uses :code:`cpfAddCppPackage()` in a :code:`CMakeLists.t
 
 Arguments
 ---------
-
-PACKAGE_NAMESPACE
-^^^^^^^^^^^^^^^^^
-
-The parameter is used in the following ways:
-
-- CPFCMake assumes, this is the C++ namespace that you use in the package.
-- The name is used as a namespace in the packages generated C++ version header file.
-- As a namespace for the packages cmake target names.
-- The value is used as a part of the packages generated export macro which must be 
-  prepended to all exported classes and functions in a library.
-- If you use the :code:`ENABLE_PACKAGE_DOX_FILES_GENERATION` option, the default package documentation 
-  page will generate a documentation of that namespace.
-
 
 TYPE
 ^^^^

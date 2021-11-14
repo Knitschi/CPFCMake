@@ -48,11 +48,11 @@ function( cpfAddCppPackage )
 	) 
 	
 	set( requiredSingleValueKeywords
-		PACKAGE_NAMESPACE
 		TYPE
 	)
 
 	set( optionalSingleValueKeywords
+		TARGET_NAMESPACE
 		BRIEF_DESCRIPTION
 		LONG_DESCRIPTION
 		OWNER
@@ -99,23 +99,30 @@ function( cpfAddCppPackage )
 		${ARGN} 
 	)
 
+	if(DEFINED ARG_PACKAGE_NAMESPACE)
+		message(FATAL_ERROR "Error! ${CMAKE_CURRENT_FUNCTION}() no longer accepts the PACKAGE_NAMESPACE option. Use variable CPF_<package>_TARGET_NAMESPACE instead.")
+	endif()
+
 	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddCppPackage()")
 	
 	cpfAssertProjectVersionDefined()
 
+	cpfGetPackageName(package)
+
 	# Use values of global variables for unset arguments.
-	cpfSetIfNotSet( ARG_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS "${CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS}")
-	cpfSetIfNotSet( ARG_ENABLE_ABI_API_STABILITY_CHECK_TARGETS "${CPF_ENABLE_ABI_API_STABILITY_CHECK_TARGETS}")
-	cpfSetIfNotSet( ARG_ENABLE_CLANG_FORMAT_TARGETS "${CPF_ENABLE_CLANG_FORMAT_TARGETS}")
-	cpfSetIfNotSet( ARG_ENABLE_CLANG_TIDY_TARGET "${CPF_ENABLE_CLANG_TIDY_TARGET}")
-	cpfSetIfNotSet( ARG_ENABLE_OPENCPPCOVERAGE_TARGET "${CPF_ENABLE_OPENCPPCOVERAGE_TARGET}")
-	cpfSetIfNotSet( ARG_ENABLE_PACKAGE_DOX_FILE_GENERATION "${CPF_ENABLE_PACKAGE_DOX_FILE_GENERATION}")
-	cpfSetIfNotSet( ARG_ENABLE_PRECOMPILED_HEADER "${CPF_ENABLE_PRECOMPILED_HEADER}")
-	cpfSetIfNotSet( ARG_ENABLE_RUN_TESTS_TARGET "${CPF_ENABLE_RUN_TESTS_TARGET}")
-	cpfSetIfNotSet( ARG_ENABLE_VALGRIND_TARGET "${CPF_ENABLE_VALGRIND_TARGET}")
-	cpfSetIfNotSet( ARG_ENABLE_VERSION_RC_FILE_GENERATION "${CPF_ENABLE_VERSION_RC_FILE_GENERATION}")
-	cpfSetIfNotSet( ARG_COMPILE_OPTIONS "${CPF_COMPILE_OPTIONS}")
-	cpfSetIfNotSet( ARG_IS_GOOGLE_TEST_EXE "${CPF_HAS_GOOGLE_TEST_EXE}")
+	cpfGetRequiredPackageOption( ARG_TARGET_NAMESPACE ${package} ${package} TARGET_NAMESPACE)
+	cpfGetOptionalPackageOption( ARG_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS ${package} ${package} ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS False)
+	cpfGetOptionalPackageOption( ARG_ENABLE_ABI_API_STABILITY_CHECK_TARGETS ${package} ${package} ENABLE_ABI_API_STABILITY_CHECK_TARGETS False)
+	cpfGetOptionalPackageOption( ARG_ENABLE_CLANG_FORMAT_TARGETS ${package} ${package} ENABLE_CLANG_FORMAT_TARGETS False)
+	cpfGetOptionalPackageOption( ARG_ENABLE_CLANG_TIDY_TARGET ${package} ${package} ENABLE_CLANG_TIDY_TARGET False)
+	cpfGetOptionalPackageOption( ARG_ENABLE_OPENCPPCOVERAGE_TARGET ${package} ${package} ENABLE_OPENCPPCOVERAGE_TARGET False)
+	cpfGetOptionalPackageOption( ARG_ENABLE_PACKAGE_DOX_FILE_GENERATION ${package} ${package} ENABLE_PACKAGE_DOX_FILE_GENERATION False)
+	cpfGetOptionalPackageOption( ARG_ENABLE_PRECOMPILED_HEADER ${package} ${package} ENABLE_PRECOMPILED_HEADER False)
+	cpfGetOptionalPackageOption( ARG_ENABLE_RUN_TESTS_TARGET ${package} ${package} ENABLE_RUN_TESTS_TARGET True)
+	cpfGetOptionalPackageOption( ARG_ENABLE_VALGRIND_TARGET ${package} ${package} ENABLE_VALGRIND_TARGET False)
+	cpfGetOptionalPackageOption( ARG_ENABLE_VERSION_RC_FILE_GENERATION ${package} ${package} ENABLE_VERSION_RC_FILE_GENERATION True)
+	cpfGetOptionalPackageOption( ARG_COMPILE_OPTIONS ${package} ${package} COMPILE_OPTIONS "" False)
+	cpfGetOptionalPackageOption( ARG_IS_GOOGLE_TEST_EXE ${package} ${package} IS_GOOGLE_TEST_EXE False)
 
 	# parse argument sublists
 	set( allKeywords ${optionKeywords} ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
@@ -124,7 +131,6 @@ function( cpfAddCppPackage )
 
 	# By default build test targets.
 	# Hunter sets this to off in order to skip test building.
-	cpfGetPackageName(package)
 	if( NOT "${${package}_BUILD_TESTS}" STREQUAL OFF )
 		set( ${package}_BUILD_TESTS ON)
 	endif()
@@ -153,7 +159,7 @@ function( cpfAddCppPackage )
 	cpfNormalizeImportedTargetProperties( "${linkedLibraries};${linkedTestLibraries}" )
 
 	# Configure the c++ header file with the version.
-	cpfConfigurePackageVersionHeader( ${package} ${PROJECT_VERSION} ${ARG_PACKAGE_NAMESPACE})
+	cpfConfigurePackageVersionHeader(${package} ${PROJECT_VERSION} ${ARG_TARGET_NAMESPACE})
 
 	# Add the binary targets
 	cpfAddPackageBinaryTargets( 
@@ -161,7 +167,7 @@ function( cpfAddCppPackage )
 		${package} 
 		"${ARG_BRIEF_DESCRIPTION}"
 		"${ARG_OWNER}"
-		${ARG_PACKAGE_NAMESPACE} 
+		${ARG_TARGET_NAMESPACE} 
 		${ARG_TYPE} 
 		"${ARG_PUBLIC_HEADER}" 
 		"${ARG_PRODUCTION_FILES}"
@@ -217,7 +223,7 @@ function( cpfAddCppPackage )
 
 	# A target to generate a .dox file that is used to add links to the packages build results to the package documentation.
 	if(${ARG_ENABLE_PACKAGE_DOX_FILE_GENERATION})
-		cpfAddPackageDocsTarget( ${package} ${ARG_PACKAGE_NAMESPACE} )
+		cpfAddPackageDocsTarget( ${package} ${ARG_TARGET_NAMESPACE} )
 	endif()
 
 	# Plugins must be added before the install targets
@@ -232,7 +238,7 @@ function( cpfAddCppPackage )
 	)
 	
 	# Adds the install rules and the per package install targets.
-	cpfAddInstallRulesForCppPackage( ${package} ${ARG_PACKAGE_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${ARG_VERSION_COMPATIBILITY_SCHEME} )
+	cpfAddInstallRulesForCppPackage( ${package} ${ARG_TARGET_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${ARG_VERSION_COMPATIBILITY_SCHEME} )
 
 	# Adds the targets that create the distribution packages.
 	cpfAddDistributionPackageTargets( ${package} "${distributionPackageOptionLists}" )
@@ -248,7 +254,7 @@ function( cpfAddPackageBinaryTargets
 	package
 	shortDescription
 	owner
-	packageNamespace 
+	targetNamespace 
 	type 
 	publicHeaderFiles 
 	productionFiles 
@@ -305,7 +311,7 @@ function( cpfAddPackageBinaryTargets
 		# main target properties when adding helper targets.
 		cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}
-			PACKAGE_NAMESPACE ${packageNamespace}
+			TARGET_NAMESPACE ${targetNamespace}
 			TARGET_TYPE ${type}
 			NAME ${exeTarget}
 			FILES ${MAIN_CPP} ${exeFiles}
@@ -326,8 +332,7 @@ function( cpfAddPackageBinaryTargets
 
 			cpfAddBinaryTarget(
 				PACKAGE_NAME ${package}  
-				PACKAGE_NAMESPACE ${packageNamespace}
-				EXPORT_MACRO_PREFIX ${packageNamespace}
+				TARGET_NAMESPACE ${targetNamespace}
 				TARGET_TYPE LIB
 				NAME ${libraryTarget}
 				PUBLIC_HEADER ${publicHeaderFiles}
@@ -360,8 +365,7 @@ function( cpfAddPackageBinaryTargets
 
 			cpfAddBinaryTarget(
 				PACKAGE_NAME ${package}  
-				PACKAGE_NAMESPACE ${packageNamespace}
-				EXPORT_MACRO_PREFIX ${packageNamespace}
+				TARGET_NAMESPACE ${targetNamespace}
 				TARGET_TYPE ${type}
 				NAME ${package} 
 				PUBLIC_HEADER ${publicHeaderFiles}
@@ -381,61 +385,6 @@ function( cpfAddPackageBinaryTargets
 
 	endif()
 	
-
-	#[[
-	###################### Create production library target ##############################
-    if(productionFiles OR publicHeaderFiles)  
-
-		set( libType ${type} )
-		if(isExe)	# for executables the implementation lib is a normal lib.
-			set(libType LIB)
-		endif()
-
-        cpfAddBinaryTarget(
-			PACKAGE_NAME ${package}  
-			PACKAGE_NAMESPACE ${packageNamespace}
-			EXPORT_MACRO_PREFIX ${packageNamespace}
-			TARGET_TYPE ${libType}
-			NAME ${libraryTarget}
-			PUBLIC_HEADER ${publicHeaderFiles}
-			FILES ${productionFiles}
-			LINKED_LIBRARIES ${linkedLibraries}
-			IDE_FOLDER ${package}
-			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
-			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
-			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
-			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
-			BRIEF_DESCRIPTION ${fileDescriptionLib}
-			OWNER ${owner}
-			COMPILE_OPTIONS ${compileOptions}
-	    )
-
-    endif()
-
-	###################### Create exe target ##############################
-	if(isExe)
-		
-		set( exeTarget ${package})
-		cpfAddBinaryTarget(
-			PACKAGE_NAME ${package}
-			PACKAGE_NAMESPACE ${packageNamespace}
-			TARGET_TYPE ${type}
-			NAME ${exeTarget}
-			FILES ${MAIN_CPP} ${exeFiles}
-			LINKED_LIBRARIES ${linkedLibraries} PRIVATE ${libraryTarget}
-			IDE_FOLDER ${package}/exe
-			VERSION_COMPATIBILITY_SCHEME ${versionCompatibilityScheme}
-			ENABLE_CLANG_FORMAT_TARGETS ${enableClangFormatTargets}
-			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
-			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
-			BRIEF_DESCRIPTION ${fileDescriptionExe}
-			OWNER ${owner}
-			COMPILE_OPTIONS ${compileOptions}
-	    )
-
-	endif()
-	]]
-	
 	########################## Test Targets ###############################
 	set( VSTestFolder test)		# the name of the test targets folder in the visual studio solution
 
@@ -444,8 +393,7 @@ function( cpfAddPackageBinaryTargets
         set( fixtureTarget ${libraryTarget}${CPF_FIXTURE_TARGET_ENDING})
 	    cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}
-			PACKAGE_NAMESPACE ${packageNamespace}
-			EXPORT_MACRO_PREFIX ${packageNamespace}_TESTS
+			TARGET_NAMESPACE ${targetNamespace}
 			TARGET_TYPE LIB
 			NAME ${fixtureTarget}
 			PUBLIC_HEADER ${publicFixtureHeaderFiles}
@@ -474,7 +422,7 @@ function( cpfAddPackageBinaryTargets
         set( unitTestsTarget ${libraryTarget}${CPF_TESTS_TARGET_ENDING})
         cpfAddBinaryTarget(
 			PACKAGE_NAME ${package}
-			PACKAGE_NAMESPACE ${packageNamespace}
+			TARGET_NAMESPACE ${targetNamespace}
 			TARGET_TYPE CONSOLE_APP
 			NAME ${unitTestsTarget}
 			FILES ${testFiles}
@@ -533,7 +481,7 @@ function( cpfAddBinaryTarget )
 	cmake_parse_arguments(
 		ARG 
 		"" 
-		"PACKAGE_NAME;PACKAGE_NAMESPACE;EXPORT_MACRO_PREFIX;TARGET_TYPE;NAME;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME;ENABLE_CLANG_FORMAT_TARGETS;ENABLE_PRECOMPILED_HEADER;ENABLE_VERSION_RC_FILE_GENERATION;BRIEF_DESCRIPTION;OWNER" 
+		"PACKAGE_NAME;NAME;TARGET_NAMESPACE;TARGET_TYPE;IDE_FOLDER;VERSION_COMPATIBILITY_SCHEME;ENABLE_CLANG_FORMAT_TARGETS;ENABLE_PRECOMPILED_HEADER;ENABLE_VERSION_RC_FILE_GENERATION;BRIEF_DESCRIPTION;OWNER" 
 		"PUBLIC_HEADER;FILES;LINKED_LIBRARIES;COMPILE_OPTIONS" 
 		${ARGN} 
 	)
@@ -649,7 +597,7 @@ function( cpfAddBinaryTarget )
 		endif()
 
 		# Generate the header file with the dll export and import macros
-		cpfGenerateExportMacroHeader(${ARG_NAME} "${ARG_EXPORT_MACRO_PREFIX}")
+		cpfGenerateExportMacroHeader(${ARG_NAME} "${ARG_NAME}")
 
 		# set target to use pre-compiled header
 		# compile flags can not be changed after this call
@@ -669,7 +617,7 @@ function( cpfAddBinaryTarget )
 	cpfSetIDEDirectoriesForTargetSources(${ARG_NAME})
 
 	# Add an alias target to allow using namespaced names for inlined packages.
-	cpfAddAliasTarget(${ARG_NAME} ${ARG_PACKAGE_NAMESPACE})
+	cpfAddAliasTarget(${ARG_NAME} ${ARG_TARGET_NAMESPACE})
 
 	# Adds a clang-format target
 	if(ARG_ENABLE_CLANG_FORMAT_TARGETS)

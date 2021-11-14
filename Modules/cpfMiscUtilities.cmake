@@ -142,14 +142,37 @@ endfunction()
 
 
 #----------------------------------------------------------------------------------------
-# This function will set the value of a variable if it is not already set.
+# This function can be used to get the values of options that can be defined with different
+# global variables or with a key-word argument.
 #
-function( cpfSetIfNotSet variable value )
-	if("${${variable}}" STREQUAL "")
-		set(${variable} "${value}" PARENT_SCOPE)
+function(cpfGetRequiredPackageOption optionOut package packageComponent optionKeyword)
+	
+	cpfGetOptionalPackageOption(option ${package} ${packageComponent} ${optionKeyword} "")
+	if("${option}" STREQUAL "")
+		message(FATAL_ERROR "Error! Missing variable option. You need to set one of the following variables CPF_${optionKeyword}, ${package}_${optionKeyword}, ${package}_${packageComponent}_${optionKeyword} or the function key-word-argument.")
 	endif()
+	set(${optionOut} "${option}" PARENT_SCOPE)
+
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# Similar to cpfGetRequiredPackageOption() but does not fail if neither of the variables
+# is set. In this case it will return the provided default argument.
+function(cpfGetOptionalPackageOption optionOut package packageComponent optionKeyword defaultValue)
+	
+	if(NOT ("${ARG_${optionKeyword}}" STREQUAL ""))
+		set(${optionOut} "${ARG_${optionKeyword}}" PARENT_SCOPE)
+	elseif(NOT ("${${package}_${packageComponent}_${optionKeyword}}" STREQUAL ""))
+		set(${optionOut} "${${package}_${packageComponent}_${optionKeyword}}" PARENT_SCOPE)
+	elseif(NOT ("${${package}_${optionKeyword}}" STREQUAL ""))
+		set(${optionOut} "${${package}_${optionKeyword}}" PARENT_SCOPE)
+	elseif(NOT ("${CPF_${optionKeyword}}" STREQUAL ""))
+		set(${optionOut} "${CPF_${optionKeyword}}" PARENT_SCOPE)
+	else()
+		set(${optionOut} "${defaultValue}" PARENT_SCOPE)
+	endif()
+
+endfunction()
 
 #----------------------------------------------------------------------------------------
 # A common variant of executing a process that will cause an cmake error when the command fails.

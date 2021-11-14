@@ -17,7 +17,7 @@ function( cpfRunMiscUtilitiesTests )
     test_cpfIsReleaseVersion()
     test_cpfGetKeywordValueLists()
     test_cpfGetCommitsSinceLastRelease()
-    test_cpfSetIfNotSet()
+    test_cpfGetRequiredPackageOption()
 
 endfunction()
 
@@ -132,18 +132,35 @@ function( test_cpfGetCommitsSinceLastRelease )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( test_cpfSetIfNotSet )
+function( test_cpfGetRequiredPackageOption )
 
-    set(var "blib")
-    cpfSetIfNotSet(var "blub")
-    cpfAssertStrEQ(${var} "blib")
+    # Setup
+    set(package MyPackage)
+    set(component MyComponent)
+    
+    # Execute
+    
+    # Check that global CPF option is picked up.
+    set(CPF_MY_OPTION bla)
+    cpfGetRequiredPackageOption(var ${package} ${component} MY_OPTION)
+    cpfAssertStrEQ(${var} bla)
 
-    set(var "")
-    cpfSetIfNotSet(var "blub")
-    cpfAssertStrEQ(${var} "blub")
+    # Check that package wide variable takes precedence
+    # over the global one.
+    set(MyPackage_MY_OPTION blub)
+    cpfGetRequiredPackageOption(var ${package} ${component} MY_OPTION)
+    cpfAssertStrEQ(${var} blub)
 
-    set(var)
-    cpfSetIfNotSet(var "blub")
-    cpfAssertStrEQ(${var} "blub")
+    # Check that the package-component wide variable takes
+    # precedence over the global and the package wide ones.
+    set(MyPackage_MyComponent_MY_OPTION foo)
+    cpfGetRequiredPackageOption(var ${package} ${component} MY_OPTION)
+    cpfAssertStrEQ(${var} foo)
+    
+    # Check that the function argument takes
+    # precedence over all the variables.
+    set(ARG_MY_OPTION bar)
+    cpfGetRequiredPackageOption(var ${package} ${component} MY_OPTION)
+    cpfAssertStrEQ(${var} bar)
 
 endfunction()
