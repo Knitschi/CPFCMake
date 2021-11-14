@@ -42,7 +42,7 @@ function( cpfGetPackageVersionFileName filenameOut package )
 	set( ${filenameOut} cpfPackageVersion_${package}.cmake PARENT_SCOPE)
 endfunction()
 
-# This function defines the name of a packages c++ header version file. 
+# This function defines the name of a package-components c++ header version file. 
 function( cpfGetPackageVersionCppHeaderFileName filenameOut packageComponent )
 	set( ${filenameOut} cpfPackageVersion_${packageComponent}.h PARENT_SCOPE)
 endfunction()

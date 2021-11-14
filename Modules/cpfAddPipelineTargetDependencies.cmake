@@ -7,7 +7,7 @@ include(cpfCustomTargetUtilities)
 # Adds a target that will build the complete pipeline, meaning all targets.
 # 
 # Arguments
-# Takes a list of all the packages that belong to the project
+# Takes a list of all the package-components that belong to the project
 function( cpfAddPipelineTargetDependencies packages)
 
 	set( targetName pipeline)
@@ -57,11 +57,11 @@ endfunction()
 
 #---------------------------------------------------------------------
 # Retrieves all sub-targets that are stored in the given subTargetProperties, which must be set
-# on the packages main target.
-function( cpfGetTargetsFromProperties targetsOut packages subTargetProperties )
+# on the package-components main target.
+function( cpfGetTargetsFromProperties targetsOut packageComponents subTargetProperties )
 	set(subTargets)
 	foreach( property ${subTargetProperties})
-		cpfGetSubtargets(targets "${packages}" ${property})
+		cpfGetSubtargets(targets "${packageComponents}" ${property})
 		cpfListAppend(subTargets ${targets})
 	endforeach()
 	set(${targetsOut} ${subTargets} PARENT_SCOPE)

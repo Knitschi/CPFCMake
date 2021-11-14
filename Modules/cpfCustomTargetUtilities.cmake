@@ -420,8 +420,8 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Adds a bundle-target that bundles all the subtargets from the package-component property
-function( cpfAddSubTargetBundleTarget targetName packages subtargetProperty additionalDependencies )
-	cpfGetSubtargets( dependedOnTargets "${packages}" ${subtargetProperty})
+function( cpfAddSubTargetBundleTarget targetName packageComponents subtargetProperty additionalDependencies )
+	cpfGetSubtargets( dependedOnTargets "${packageComponents}" ${subtargetProperty})
 	if(dependedOnTargets)
 		cpfAddBundleTarget( ${targetName} "${dependedOnTargets};${additionalDependencies}" )
 	endif()

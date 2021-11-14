@@ -5,7 +5,7 @@ include(cpfLocations)
 
 #----------------------------------------------------------------------------------------
 # Creates a target that runs all the static analysis targets that are added by the given packages
-# The target will also check that the target dependency graph of all packages is acyclic.
+# The target will also check that the target dependency graph is acyclic.
 #
 function( cpfAddGlobalClangTidyTarget packages)
 

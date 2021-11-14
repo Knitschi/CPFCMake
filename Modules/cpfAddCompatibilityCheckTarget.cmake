@@ -294,7 +294,7 @@ function( cpfDownloadAndExtractPackage packageComponent packageFormat packageUrl
 
 	list(GET resultValues 0 returnCode )
 	if( NOT ${returnCode} EQUAL 0)
-		# We only issue a warning here to not break builds when the packages are not available.
+		# We only issue a warning here to not break builds when the package-components are not available.
 		# This can happen when the variable CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS has been switched ON, or parts of the build have
 		# been disabled during maintanance.
 		message( "Warning: Could not download released distribution package from ${packageUrl}. Comparing the current ABI/API with that package will not be possible.")

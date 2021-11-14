@@ -129,7 +129,7 @@ function( cpfGetSubtargets subTargetsOut packageComponents subtargetProperty)
 
 	set(targets)
 	foreach(packageComponent ${packageComponents})
-		if(TARGET ${packageComponent}) # not all packages have targets
+		if(TARGET ${packageComponent}) # not all package-components have targets
 			
 			# check for subtargets that belong to the main package-component target
 			get_property(subTarget TARGET ${packageComponent} PROPERTY ${subtargetProperty})
@@ -438,7 +438,7 @@ endfunction()
 function( cpfGetAllNonGeneratedPackageSources sourceFiles packageComponents )
 
 	foreach( packageComponent ${packageComponents} globalFiles) # we also get the global files from the globalFiles target
-		if(TARGET ${packageComponent}) # non-cpf packages may not have targets set to them
+		if(TARGET ${packageComponent}) # non-cpf package-components may not have targets set to them
 			get_property(binaryTargets TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS )
 			# explicitly include the package-component itself, because it may not be a binary target.
 			set(targets ${binaryTargets} ${packageComponent})
@@ -491,12 +491,12 @@ function( cpfGenerateDependencyNamesHeader packageComponent )
 
 	# Add macro names and values for this package
 	cpfGetUnversionedPackageName(unused unversionedPackage unused ${packageComponent})
-	set(packages ${packageComponent})
+	set(packageComponents ${packageComponent})
 	set(macroNames ${unversionedPackage})
 
 	# Add macro names and values for linked packages
-	cpfGetCPFPackagesInPubliclyLinkedTree(interfacePackages interfaceMacroNames ${packageComponent} TRUE)
-	list(APPEND packages ${interfacePackages})
+	cpfGetCPFPackagesInPubliclyLinkedTree(interfacePackageComponents interfaceMacroNames ${packageComponent} TRUE)
+	list(APPEND packageComponents ${interfacePackageComponent})
 	list(APPEND macroNames ${interfaceMacroNames})
 
 	# Write the public names file
@@ -504,25 +504,25 @@ function( cpfGenerateDependencyNamesHeader packageComponent )
 
 	# The private names header can also contain the names of privatly linked dependencies. 
 	# They can not appear in the public header because it will make the short macro names ambigious.
-	cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(privatePackages privateMacroNames ${packageComponent} PRIVATE TRUE)
-	list(APPEND packages ${privatePackages})
+	cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages(privatePackageComponents privateMacroNames ${packageComponent} PRIVATE TRUE)
+	list(APPEND packageComponents ${privatePackageComponents})
 	list(APPEND macroNames ${privateMacroNames})
 
 	# Write the private names file
-	cpfWriteDependencyNamesToFile("${CMAKE_CURRENT_SOURCE_DIR}/${unversionedPackage}DependencyNamesPrivate.h" "${packages}" "${macroNames}")
+	cpfWriteDependencyNamesToFile("${CMAKE_CURRENT_SOURCE_DIR}/${unversionedPackage}DependencyNamesPrivate.h" "${packageComponents}" "${macroNames}")
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfWriteDependencyNamesToFile absFilename packages macroNames )
+function( cpfWriteDependencyNamesToFile absFilename packageComponents macroNames )
 
-	foreach(macroName packageComponent IN ZIP_LISTS macroNames packages)
+	foreach(macroName packageComponent IN ZIP_LISTS macroNames packageComponents)
 		string(APPEND fileContent "#undef ${macroName}\n")
 		string(APPEND fileContent "#define ${macroName} ${packageComponent}\n")
 		string(APPEND fileContent "\n")
 	endforeach()
 	
-	if(packages)
+	if(packageComponents)
 		file(CONFIGURE OUTPUT ${absFilename} CONTENT ${fileContent} NEWLINE_STYLE LF)
 	endif()
 
@@ -562,7 +562,7 @@ function( cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages packagesOut packageVer
 	endforeach()
 	list(REMOVE_DUPLICATES linkedTargets)
 
-	# Get the packages of the targets
+	# Get the package-components of the targets
 	set(linkedCPFPackages)
 	foreach(target ${linkedTargets})
 		get_property(packageName TARGET ${target} PROPERTY INTERFACE_CPF_PACKAGE_NAME)
@@ -577,7 +577,7 @@ function( cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages packagesOut packageVer
 	foreach(linkedPackage ${linkedCPFPackages})
 		cpfGetUnversionedPackageName(unused unversionedNameLinkedPackage unused ${linkedPackage})
 		if(isRoot)
-			# Use a shorter macro name for directly linked packages to reduce clutter in the code.
+			# Use a shorter macro name for directly linked package-components to reduce clutter in the code.
 			list(APPEND packageMacroNames "${unversionedNameLinkedPackage}")
 		else()
 			list(APPEND packageMacroNames "${unversionedNameLinkedPackage}_from_${unversionedNameThisPackage}")

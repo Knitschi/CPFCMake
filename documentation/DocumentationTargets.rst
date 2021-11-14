@@ -37,7 +37,7 @@ To make it work these points must be implemented.
 Adding a dependency graph
 -------------------------
 
-CMake allows to generate a dependency graph for the packages in a CI-project.
+CMake allows to generate a dependency graph for the package-components in a CI-project.
 This dependency graph can be integrated into your doxygen documentation. The doxygen target
 will also create a second *transitive reduced* version of the dependency graph.
 The transitive reduced graph does not show direct dependencies when an indirect dependency exists. 

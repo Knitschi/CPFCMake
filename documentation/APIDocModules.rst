@@ -541,7 +541,7 @@ there should be a :code:`main.cpp` that is used for the executable.
 PRODUCTION_FILES
 ^^^^^^^^^^^^^^^^
 
-For packages of type :code:`GUI_APP` or :code:`CONSOLE_APP`, this variable that must be
+For package-components of type :code:`GUI_APP` or :code:`CONSOLE_APP`, this variable that must be
 added to the executable itself. On windows this can be :code:`.rc` files or the
 icon for the executable.
 
@@ -596,10 +596,10 @@ PLUGIN_DEPENDENCIES
 This keyword opens a sub-list of arguments that are used to define plugin dependencies of the package. 
 Multiple :code:`PLUGIN_DEPENDENCIES` sub-lists can be given to allow having multiple plugin subdirectories.
 
-The plugin targets are shared libraries that are explicitly loaded by the packages executables and on which the
+The plugin targets are shared libraries that are explicitly loaded by the package-components executables and on which the
 package has no link dependency. If a target in the list does not exist when the function is called,
 it will be silently ignored. If a given target is an internal target, an artificial dependency between
-the plugin target and the packages executables is created to make sure the plugin is compilation is up-to-date before the
+the plugin target and the package-components executables is created to make sure the plugin is compilation is up-to-date before the
 executable is build.
 
 Adding this options makes sure that the plugin library is build before the executable and copied besides it
@@ -981,7 +981,7 @@ SOURCE_DIR
 
 The base directory in which sphinx searches for files that contribute to the documentation.
 When the argument is not given, :code:`CMAKE_SOURCE_DIR` is used in order to look for documentation
-files in all packages of the CI-project.
+files in all package-components of the CI-project.
 
 CONFIG_FILE_DIR
 ^^^^^^^^^^^^^^^

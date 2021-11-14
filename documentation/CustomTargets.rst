@@ -217,7 +217,7 @@ clang-tidy_<package>
 """"""""""""""""""""
 
 This target only exists when compiling on Linux with the clang compiler.
-It runs the \c clang-tidy tool on the source files of the packages production
+It runs the \c clang-tidy tool on the source files of the package-components production
 library target.
 
 The target can be disabled with the \c CPF_ENABLE_CLANG_TIDY_TARGET config variable.

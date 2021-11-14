@@ -19,7 +19,7 @@ include(cpfGTAUtilities)
 
 
 #----------------------------------------------------------------------------------------
-# Note that the packages that are owned by the CPF CI-Project must be added via the
+# Note that the package-components that are owned by the CPF CI-Project must be added via the
 # packages.cmake file.
 #
 # Keyword Arguments:
@@ -34,7 +34,7 @@ function( cpfAddPackages )
 
 	cpfInitGlobalState()
 
-	# Add the pipeline target early so packages can add them self as dependencies to it.
+	# Add the pipeline target early so package-components can add them self as dependencies to it.
 	add_custom_target(pipeline)
 
 	# Add the package projects

@@ -66,7 +66,7 @@ endfunction()
 
 #---------------------------------------------------------------------
 # This function only returns the libraries from the input that actually exist.
-# Lower level packages must be added first.
+# Lower level package-components must be added first.
 # For non existing target a warning is issued when CPF_VERBOSE is ON.
 # We allow adding dependencies to non existing targets so we can link to targets that may only be available
 # for some configurations.

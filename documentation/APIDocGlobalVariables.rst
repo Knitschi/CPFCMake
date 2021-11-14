@@ -37,6 +37,12 @@ The variable is set in the \ref cpfAddPackages function and can then be read fro
 the packages \c CMakeLists.txt files.
 
 
+CPF_CURRENT_PACKAGE
+"""""""""""""""""""
+
+It holds the name of the current package project. It is set in the \ref cpfPackageProject function.
+
+
 CPF_CLANG_FORMAT_EXE
 """"""""""""""""""""
 
@@ -90,10 +96,10 @@ Global defaults for the cpfAddCppPackageComponent() function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :ref:`cpfAddCppPackageComponent` function has a lot of parameters. Many of them
-are likely to take the same value across most packages in your CI-project. The CPF provides
+are likely to take the same value across most packages and package-components in your CI-project. The CPF provides
 a list of global variables that you can set in your configuration file
 in order to provide defaults for these arguments.
-If one of your packages needs a different value then you can simply
+If one of your packages or package-components needs a different value then you can simply
 override the the global value by giving a different value to the 
 argument in the local function call. Each variable overrides the
 respective argument without the :code:`CPF_` prefix.
@@ -121,7 +127,7 @@ Others may be overridden by CPFCMake while implementing its functionality.
 Here is a list of CMake variables that CPFCMake expects you to set.
 
 - <b>BUILD_SHARED_LIBS:</b> This can still be used as a global switch for creating
-  shared or static libraries. If you provide library packages for other developers, you should
+  shared or static libraries. If you provide library package-components for other developers, you should
   not set this variable on the package-component level. This allows clients to choose the library
   linkage they want to use.
 - <b>CMAKE_<config>_POSTFIX:</b> CPFCMake sets default values for this variable. You can

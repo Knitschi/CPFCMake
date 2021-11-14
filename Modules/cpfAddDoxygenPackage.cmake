@@ -79,7 +79,7 @@ function( cpfAddDoxygenPackage )
 	set(hasGeneratedDocumentation FALSE)
 	foreach( packageComponent ${documentedPackages})
 		cpfGetPackageDoxFilesTargetName( doxFilesTarget ${packageComponent} )
-		if( TARGET ${doxFilesTarget}) # not all packages may have the doxFilesTarget
+		if( TARGET ${doxFilesTarget}) # not all package-components may have the doxFilesTarget
 			list(APPEND targetDependencies ${doxFilesTarget})
 			get_property( doxFiles TARGET ${doxFilesTarget} PROPERTY CPF_OUTPUT_FILES )
 			list(APPEND generatedDoxFiles ${doxFiles})
@@ -312,7 +312,7 @@ ${longDescription}
 "
 )
 
-	# executable packages do never have compatibility reports.
+	# executable package-components do never have compatibility reports.
 	cpfIsExecutable(isExe ${packageComponent})
 	if(NOT isExe)
 		cpfGetCompatiblityReportLinks(linksOut ${packageComponent})

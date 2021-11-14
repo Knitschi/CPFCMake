@@ -213,7 +213,7 @@ function( cpfAddCppPackageComponent )
 		cpfAddOpenCppCoverageTarget(${packageComponent})
 	endif()
 
-	# A target to generate a .dox file that is used to add links to the packages build results to the package-component documentation.
+	# A target to generate a .dox file that is used to add links to the package-components build results to the package-component documentation.
 	if(${ARG_ENABLE_PACKAGE_DOX_FILE_GENERATION})
 		cpfAddPackageDocsTarget( ${packageComponent} ${ARG_TARGET_NAMESPACE} )
 	endif()
@@ -346,7 +346,7 @@ function( cpfAddPackageBinaryTargets
 	else()
 
 		if(exeFiles)
-			message(FATAL_ERROR "Error! The option EXE_FILES in cpfAddCppPackageComponent() is only relevant for packages of type GUI_APP or CONSOLE_APP.")
+			message(FATAL_ERROR "Error! The option EXE_FILES in cpfAddCppPackageComponent() is only relevant for package-components of type GUI_APP or CONSOLE_APP.")
 		endif()
 
 		###################### Create a library target as package-component main target ##############################
@@ -744,7 +744,7 @@ function( cpfGenerateExportMacroHeader target macroBaseName )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# Call this function to make sure explicitly loaded shared libraries are deployed besides the packages executables in the build and install stage.
+# Call this function to make sure explicitly loaded shared libraries are deployed besides the package-components executables in the build and install stage.
 # The package-component has no knowledge about plugins, so they must be explicitly deployed with this function.
 #
 # pluginDependencies A list where the first element is the relative path of the plugin and the folling elements are the plugin targets.
@@ -1008,9 +1008,9 @@ function( cpfInstallSourceFiles installedFilesOut packageComponent sources outpu
 		
 		cpfToAbsSourcePath(absFile ${file} ${sourceDir})
 
-		# When building, the include directories are the packages binary and source directory.
+		# When building, the include directories are the package-components binary and source directory.
 		# This means we need the path of the header relative to one of the two in order to get the
-		# relative path to the distribution packages install directory right.
+		# relative path to the distribution package-components install directory right.
 		file(RELATIVE_PATH relPathSource ${sourceDir} ${absFile} )
 		file(RELATIVE_PATH relPathBinary ${binaryDir} ${absFile} )
 		cpfGetShorterString( relFilePath ${relPathSource} ${relPathBinary}) # assume the shorter path is the correct one
@@ -1130,8 +1130,8 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # This function adds install rules for the shared libraries that are provided by other
-# internal or external packages. We only add these rules for packages that actually
-# create distribution packages that include depended on shared libraries.
+# internal or external packages. We only add these rules for package-components that actually
+# create distribution package-components that include depended on shared libraries.
 #
 function( cpfAddInstallRulesForDependedOnSharedLibraries packageComponent pluginOptions distributionPackageOptionLists )
 
