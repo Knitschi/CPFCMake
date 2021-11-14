@@ -34,7 +34,7 @@ macro( cpfPackageProject )
 		PACKAGE_FILES 
 	)
 
-	cmake_parse_arguments(ARG "" "${requiredSingleValueKeywords};$optionalSingleValueKeywords}" "${requiredMultiValueKeywords};${optionalMultiValueKeywords}" ${ARGN})
+	cmake_parse_arguments(ARG "" "${requiredSingleValueKeywords};${optionalSingleValueKeywords}" "${requiredMultiValueKeywords};${optionalMultiValueKeywords}" ${ARGN})
 
 	cpfAssertKeywordArgumentsHaveValue("${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfPackageProject()")
 
