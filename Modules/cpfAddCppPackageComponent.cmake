@@ -102,7 +102,7 @@ function( cpfAddCppPackageComponent )
 	cpfGetCurrentSourceDir(packageComponent)
 
 	# Use values of global variables for unset arguments.
-	cpfGetRequiredPackageComponentOption( ARG_TARGET_NAMESPACE ${CPF_CURRENT_PACKAGE} ${packageComponent} TARGET_NAMESPACE)
+	cpfGetRequiredPackageComponentOption(targetNamespace ${CPF_CURRENT_PACKAGE} ${packageComponent} TARGET_NAMESPACE)
 	cpfGetOptionalPackageOption( ARG_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS False)
 	cpfGetOptionalPackageOption( ARG_ENABLE_ABI_API_STABILITY_CHECK_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_ABI_API_STABILITY_CHECK_TARGETS False)
 	cpfGetOptionalPackageOption( ARG_ENABLE_CLANG_FORMAT_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_CLANG_FORMAT_TARGETS False)
@@ -142,16 +142,11 @@ function( cpfAddCppPackageComponent )
 		message(FATAL_ERROR "Library component ${packageComponent} has no public headers. The library can not be used without public headers, so please add the PUBLIC_HEADER argument to the cpfAddCppPackageComponent() call.")
 	endif()
 
-	if(NOT ARG_VERSION_COMPATIBILITY_SCHEME)
-		set(ARG_VERSION_COMPATIBILITY_SCHEME ExactVersion)
-	endif()
-	cpfAssertCompatibilitySchemeOption(${ARG_VERSION_COMPATIBILITY_SCHEME})
-
 	# make sure that the properties of the imported targets follow our assumptions
 	cpfNormalizeImportedTargetProperties( "${linkedLibraries};${linkedTestLibraries}" )
 
 	# Configure the c++ header file with the version.
-	cpfConfigurePackageVersionHeader(${packageComponent} ${PROJECT_VERSION} ${ARG_TARGET_NAMESPACE})
+	cpfConfigurePackageVersionHeader(${packageComponent} ${PROJECT_VERSION} ${targetNamespace})
 
 	# Add the binary targets
 	cpfAddPackageBinaryTargets( 
@@ -159,7 +154,7 @@ function( cpfAddCppPackageComponent )
 		${packageComponent} 
 		"${ARG_BRIEF_DESCRIPTION}"
 		"${ARG_OWNER}"
-		${ARG_TARGET_NAMESPACE} 
+		${targetNamespace} 
 		${ARG_TYPE} 
 		"${ARG_PUBLIC_HEADER}" 
 		"${ARG_PRODUCTION_FILES}"
@@ -169,7 +164,7 @@ function( cpfAddCppPackageComponent )
 		"${ARG_TEST_FILES}" 
 		"${linkedLibraries}" 
 		"${linkedTestLibraries}"
-		${ARG_VERSION_COMPATIBILITY_SCHEME}
+		${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME}
 		${ARG_ENABLE_CLANG_FORMAT_TARGETS}
 		${ARG_ENABLE_PRECOMPILED_HEADER}
 		${ARG_ENABLE_VERSION_RC_FILE_GENERATION}
@@ -215,7 +210,7 @@ function( cpfAddCppPackageComponent )
 
 	# A target to generate a .dox file that is used to add links to the package-components build results to the package-component documentation.
 	if(${ARG_ENABLE_PACKAGE_DOX_FILE_GENERATION})
-		cpfAddPackageDocsTarget( ${packageComponent} ${ARG_TARGET_NAMESPACE} )
+		cpfAddPackageDocsTarget( ${packageComponent} ${targetNamespace} )
 	endif()
 
 	# Plugins must be added before the install targets
@@ -230,12 +225,10 @@ function( cpfAddCppPackageComponent )
 	)
 	
 	# Adds the install rules and the per package-component install targets.
-	cpfAddInstallRulesForCppPackageComponent( ${packageComponent} ${ARG_TARGET_NAMESPACE} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${ARG_VERSION_COMPATIBILITY_SCHEME} )
+	cpfAddInstallRulesForCppPackageComponent(${CPF_CURRENT_PACKAGE} ${packageComponent} ${targetNamespace} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME} )
 
 	# Adds the targets that create the distribution packages.
-	cpfAddDistributionPackageTargets( ${packageComponent} "${distributionPackageOptionLists}" )
-
-	cpfAddPackageInstallTarget(${packageComponent})
+	cpfAddDistributionPackageTargets(  ${packageComponent} "${distributionPackageOptionLists}" )
 
 endfunction() 
 
@@ -538,6 +531,11 @@ function( cpfAddBinaryTarget )
     # Set target properties
 	# Set include directories, that all header are included with #include <package-component/myheader.h>
 	# We do not use special directories for private or public headers. So the include directory is public.
+	file(RELATIVE_PATH relativeComponentDirectory ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+	cpfGetParentDirectory(parentOfComponentDirectory ${relativeComponentDirectory})
+	if(parentOfComponentDirectory)
+		string(PREPEND parentOfComponentDirectory /)
+	endif()
 	if(isInterfaceLib)
 
 		# only use the interface compile options for interface targets
@@ -559,8 +557,8 @@ function( cpfAddBinaryTarget )
 
 		# set include directories
 		set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_INCLUDE_DIRECTORIES  
-			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
-			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>${parentOfComponentDirectory}
+			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>${parentOfComponentDirectory}
 		)
 
 	else()
@@ -571,8 +569,8 @@ function( cpfAddBinaryTarget )
 
 		# set include directories
 		target_include_directories( ${ARG_NAME} PUBLIC 
-			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
-			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>${parentOfComponentDirectory}
+			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>${parentOfComponentDirectory}
 		)
 
 		# set the Visual Studio folder property
@@ -580,7 +578,7 @@ function( cpfAddBinaryTarget )
 
 		# Set the target version
 		set_property( TARGET ${ARG_NAME} PROPERTY VERSION ${PROJECT_VERSION} )
-		if("${ARG_VERSION_COMPATIBILITY_SCHEME}" STREQUAL ExactVersion)
+		if("${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME}" STREQUAL ExactVersion)
 			set_property( TARGET ${ARG_NAME} PROPERTY SOVERSION ${PROJECT_VERSION} )
 		else()
 			message(FATAL_ERROR "Unexpected compatibility scheme!")
@@ -813,10 +811,9 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Adds install rules for the various package-component components.
 #
-function( cpfAddInstallRulesForCppPackageComponent packageComponent namespace pluginOptionLists distributionPackageOptionLists versionCompatibilityScheme )
+function( cpfAddInstallRulesForCppPackageComponent package packageComponent namespace pluginOptionLists distributionPackageOptionLists versionCompatibilityScheme )
 
-	cpfAddInstallRulesForPackageBinaries( ${packageComponent} ${versionCompatibilityScheme} )
-	cpfGenerateAndInstallCMakeConfigFiles( ${packageComponent} ${namespace} ${versionCompatibilityScheme} )
+	cpfAddInstallRulesForPackageBinaries(${package} ${packageComponent} ${versionCompatibilityScheme} )
 	cpfAddInstallRulesForPublicHeaders( ${packageComponent} )
 	cpfAddInstallRulesForPDBFiles( ${packageComponent} )
 	cpfAddInstallRulesForDependedOnSharedLibraries( ${packageComponent} "${pluginOptionLists}" "${distributionPackageOptionLists}" )
@@ -825,20 +822,20 @@ function( cpfAddInstallRulesForCppPackageComponent packageComponent namespace pl
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAddInstallRulesForPackageBinaries packageComponent versionCompatibilityScheme )
+function( cpfAddInstallRulesForPackageBinaries package packageComponent versionCompatibilityScheme )
 	
 	cpfGetProductionTargets( productionTargets ${packageComponent} )
-	cpfAddInstallRulesForBinaryTargets( ${packageComponent} "${productionTargets}" "" ${versionCompatibilityScheme} )
+	cpfAddInstallRulesForBinaryTargets(${package} ${packageComponent} "${productionTargets}" "" ${versionCompatibilityScheme} )
 
 	cpfGetTestTargets( testTargets ${packageComponent})
 	if(testTargets)
-		cpfAddInstallRulesForBinaryTargets( ${packageComponent} "${testTargets}" developer ${versionCompatibilityScheme} )
+		cpfAddInstallRulesForBinaryTargets(${package} ${packageComponent} "${testTargets}" developer ${versionCompatibilityScheme} )
 	endif()
     
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAddInstallRulesForBinaryTargets packageComponent targets component versionCompatibilityScheme )
+function( cpfAddInstallRulesForBinaryTargets package packageComponent targets component versionCompatibilityScheme )
 
 	# Do not install the targets that have been removed from the ALL_BUILD target
 	cpfFilterInTargetsWithProperty( interfaceLibs "${targets}" TYPE INTERFACE_LIBRARY )
@@ -850,7 +847,6 @@ function( cpfAddInstallRulesForBinaryTargets packageComponent targets component 
 	cpfGetRelativeOutputDir( relLibDir ${packageComponent} LIBRARY)
 	cpfGetRelativeOutputDir( relArchiveDir ${packageComponent} ARCHIVE)
 	cpfGetRelativeOutputDir( relIncludeDir ${packageComponent} INCLUDE)
-	cpfGetTargetsExportsName( targetsExportName ${packageComponent})
 		
 	# Add an relative rpath to the executables that points to the lib directory.
 	file(RELATIVE_PATH rpath "${CMAKE_CURRENT_BINARY_DIR}/${relRuntimeDir}" "${CMAKE_CURRENT_BINARY_DIR}/${relLibDir}")
@@ -883,7 +879,7 @@ function( cpfAddInstallRulesForBinaryTargets packageComponent targets component 
 
 		install( 
 			TARGETS ${target}
-			EXPORT ${targetsExportName}
+			EXPORT ${package}
 			RUNTIME 
 				DESTINATION "${relRuntimeDir}"
 				COMPONENT ${component}
@@ -904,11 +900,6 @@ function( cpfAddInstallRulesForBinaryTargets packageComponent targets component 
 
 	endforeach()
 
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-function( cpfGetTargetsExportsName output packageComponent)
-	set(${output} ${packageComponent}Targets PARENT_SCOPE)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
@@ -999,8 +990,8 @@ endfunction()
 function( cpfInstallSourceFiles installedFilesOut packageComponent sources outputType installComponent config )
 
     # Create header pathes relative to the install include directory.
-    set( sourceDir ${${CPF_CURRENT_PACKAGE}_SOURCE_DIR})
-	set( binaryDir ${${CPF_CURRENT_PACKAGE}_BINARY_DIR})
+    set(sourceDir ${CMAKE_CURRENT_SOURCE_DIR})
+	set( binaryDir ${CMAKE_CURRENT_BINARY_DIR})
 	cpfGetRelativeOutputDir( relIncludeDir ${packageComponent} ${outputType})
 
 	set(installedFiles)
@@ -1044,15 +1035,14 @@ function( cpfInstallSourceFiles installedFilesOut packageComponent sources outpu
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGenerateAndInstallCMakeConfigFiles packageComponent namespace compatibilityScheme )
+function( cpfGenerateAndInstallCMakeConfigFiles package namespace compatibilityScheme )
 
 	# Generate the cmake config files
-	set(packageConfigFile ${packageComponent}Config.cmake)
-	set(versionConfigFile ${packageComponent}ConfigVersion.cmake )
+	set(packageConfigFile ${package}Config.cmake)
+	set(versionConfigFile ${package}ConfigVersion.cmake )
 	set(packageConfigFileFull "${CMAKE_CURRENT_BINARY_DIR}/${packageConfigFile}")	# The config file is used by find package-component 
 	set(versionConfigFileFull "${CMAKE_CURRENT_BINARY_DIR}/${versionConfigFile}")
-	cpfGetRelativeOutputDir( relCmakeFilesDir ${packageComponent} CMAKE_PACKAGE_FILES)
-	cpfGetTargetsExportsName( targetsExportName ${packageComponent})
+	cpfGetRelativeOutputDir( relCmakeFilesDir ${package} CMAKE_PACKAGE_FILES)
 
 	configure_package_config_file(
 		${CPF_PACKAGE_CONFIG_TEMPLATE}
@@ -1068,7 +1058,7 @@ function( cpfGenerateAndInstallCMakeConfigFiles packageComponent namespace compa
 	# Install cmake exported targets config file
 	# This can not be done in the configs loop, so we need a generator expression for the output directory
 	install(
-		EXPORT "${targetsExportName}"
+		EXPORT "${package}"
 		NAMESPACE "${namespace}::"
 		DESTINATION "${relCmakeFilesDir}"
 		COMPONENT developer

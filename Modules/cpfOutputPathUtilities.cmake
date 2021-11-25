@@ -104,16 +104,9 @@ endfunction()
 #
 function( cpfGetRelativeOutputDir relativeDirOut packageComponent outputType )
 
-	cpfGetPackagePrefixOutputDir( packagePrefixDir ${packageComponent} )
 	cpfGetTypePartOfOutputDir(typeDir ${packageComponent} ${outputType})
-	set(${relativeDirOut} ${packagePrefixDir}/${typeDir} PARENT_SCOPE )
+	set(${relativeDirOut} ${typeDir} PARENT_SCOPE )
 
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# 
-function( cpfGetPackagePrefixOutputDir outputDir packageComponent )
-	set(${outputDir} ${packageComponent} PARENT_SCOPE )
 endfunction()
 
 #---------------------------------------------------------------------------------------------

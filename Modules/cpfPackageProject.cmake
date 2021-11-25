@@ -37,6 +37,10 @@ macro( cpfPackageProject )
 	cmake_parse_arguments(ARG "" "${requiredSingleValueKeywords};${optionalSingleValueKeywords}" "${requiredMultiValueKeywords};${optionalMultiValueKeywords}" ${ARGN})
 
 	cpfAssertKeywordArgumentsHaveValue("${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfPackageProject()")
+	if(NOT ARG_VERSION_COMPATIBILITY_SCHEME)
+		set(ARG_VERSION_COMPATIBILITY_SCHEME ExactVersion)
+	endif()
+	cpfAssertCompatibilitySchemeOption(${ARG_VERSION_COMPATIBILITY_SCHEME})
 
 	# Look for CXX and C by default.
 	if(NOT ARG_LANGUAGES)
@@ -66,6 +70,8 @@ macro( cpfPackageProject )
     
 	set(CPF_CURRENT_PACKAGE ${package})
 	set(${package}_TARGET_NAMESPACE ${ARG_TARGET_NAMESPACE})
+
+	set(CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME ${ARG_VERSION_COMPATIBILITY_SCHEME})
 
 	set(PROJECT_VERSION ${packageVersion})
 	set(PROJECT_VERSION_MAJOR ${major})
@@ -98,9 +104,19 @@ macro( cpfPackageProject )
 			add_subdirectory(${component})
 		endforeach()
 
+		finalizePackageProject()
+
 	endif()
 	
 endmacro()
+
+#-----------------------------------------------------------
+function( finalizePackageProject )
+
+	cpfGenerateAndInstallCMakeConfigFiles(${CPF_CURRENT_PACKAGE} ${${package}_TARGET_NAMESPACE} ${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME})
+	cpfAddPackageInstallTarget(${CPF_CURRENT_PACKAGE})
+
+endfunction()
 
 #-----------------------------------------------------------
 # Creates the cpfPackageVersion_<package>.cmake file in the Sources directory, by reading the version from git.
