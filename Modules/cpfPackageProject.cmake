@@ -49,6 +49,10 @@ macro( cpfPackageProject )
 		set(languageOption LANGUAGES ${ARG_LANGUAGES})
 	endif()
 
+	# parse argument sublists
+	set(allKeywords ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
+	cpfGetKeywordValueLists(distributionPackageOptionLists DISTRIBUTION_PACKAGES "${allKeywords}" "${ARGN}" packagOptions)
+
 	# The package name is defined by the sub-directory name
     cpfGetCurrentSourceDir(package)
 
@@ -70,6 +74,7 @@ macro( cpfPackageProject )
     
 	set(CPF_CURRENT_PACKAGE ${package})
 	set(${package}_TARGET_NAMESPACE ${ARG_TARGET_NAMESPACE})
+	set(${package}_DISTRIBUTION_PACKAGE_OPTION_LISTS ${distributionPackageOptionLists})
 
 	set(CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME ${ARG_VERSION_COMPATIBILITY_SCHEME})
 
@@ -104,14 +109,14 @@ macro( cpfPackageProject )
 			add_subdirectory(${component})
 		endforeach()
 
-		finalizePackageProject()
+		cpfFinalizePackageProject()
 
 	endif()
 	
 endmacro()
 
 #-----------------------------------------------------------
-function( finalizePackageProject )
+function( cpfFinalizePackageProject )
 
 	set(package ${CPF_CURRENT_PACKAGE})
 
@@ -119,6 +124,13 @@ function( finalizePackageProject )
 	if(hasBinaryComponent) # Currently we can only export the binary targets. Do we need more?
 		cpfGenerateAndInstallCMakeConfigFiles(${package} ${${package}_TARGET_NAMESPACE} ${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME})
 	endif()
+
+	# Adds the targets that create the distribution packages.
+	set(distributionPackageOptionLists ${${package}_DISTRIBUTION_PACKAGE_OPTION_LISTS})
+	if(distributionPackageOptionLists)
+		cpfAddDistributionPackageTargets(${package} "${distributionPackageOptionLists}" )
+	endif()
+
 	cpfAddPackageInstallTarget(${package})
 
 endfunction()

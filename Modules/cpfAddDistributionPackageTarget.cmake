@@ -28,39 +28,41 @@ function( cpfAddGlobalCreatePackagesTarget packageComponents)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-#
 # For argument documentation see the cpfAddCppPackageComponent() function.
-function( cpfAddDistributionPackageTargets packageComponent packageOptionLists )
+#
+function( cpfAddDistributionPackageTargets package packageOptionLists )
 
+	set(distributionPackageTargets)
 	foreach( list ${packageOptionLists})
 
 		cpfParseDistributionPackageOptions( contentType packageFormats distributionPackageFormatOptions excludedTargets "${${list}}")
 
-		# First we create targets that assemble the content of the desired contentType.
+		# First we create targets for each component that assemble the content of the desired contentType.
 		# We have extra targets for this so we can create multiple packages with the same content.
-		cpfGetCollectPackageContentTargetNameAnId( packageContentTarget contentId ${packageComponent} ${contentType} "${excludedTargets}")
-		
-		# Sanity check for the options
-		cpfIsInterfaceLibrary(isIntLib ${packageComponent})
-		if(isIntLib AND (${contentType} STREQUAL CT_RUNTIME OR ${contentType} STREQUAL CT_RUNTIME_PORTABLE))
-			message(FATAL_ERROR 
-"The interface library ${packageComponent} can not have a distribution package with DISTRIBUTION_PACKAGE_CONTENT_TYPE ${contentType} because it has no binary files. \
-Remove that distribution package configuration from the cpfAddCppPackageComponent() call to fix the problem."
-			)
-		endif()
-		
-		if(NOT TARGET ${packageContentTarget})
-			cpfAddPackageContentTarget( ${packageContentTarget} ${packageComponent} ${contentId} ${contentType} )
-		endif()
+		cpfGetDistributionPackageContentId(contentId ${contentType} "${excludedTargets}")
 
+		set(copyComponentContentTargets)
+		cpfGetPackageComponents(packageComponents ${package})
+		foreach(packageComponent ${packageComponents})
+
+			cpfGetCollectPackageContentTargetNameAnId(packageContentTarget ${packageComponent} ${contentType} ${contentId} "${excludedTargets}")
+			if(NOT TARGET ${packageContentTarget})
+				cpfAddCopyPackageContentTarget( ${packageContentTarget} ${packageComponent} ${contentId} ${contentType} )
+				cpfListAppend(copyComponentContentTargets ${packageContentTarget})
+			endif()
+
+		endforeach()
+
+		# Create the targets that create the archives.
 		foreach(packageFormat ${packageFormats})
-			cpfAddDistributionPackageTarget( ${packageComponent} ${packageContentTarget} ${contentId} ${contentType} ${packageFormat} "${distributionPackageFormatOptions}")
+			cpfAddDistributionPackageTarget(distributionPackageTarget ${package} "${copyComponentContentTargets}" ${contentId} ${contentType} ${packageFormat} "${distributionPackageFormatOptions}")
+			cpfListAppend(distributionPackageTargets ${distributionPackageTarget})
 		endforeach()
 
 	endforeach()
 
 	# Create one target to knot up all distribution package targets for the package.
-	cpfAddDistributionPackagesTarget( ${packageComponent} )
+	cpfAddDistributionPackagesTarget(${package} "${distributionPackageTargets}")
 
 endfunction()
 
@@ -68,12 +70,8 @@ endfunction()
 # This function defines the names of the package-component sub-targets that occur in a CMakeProjectFramework project.
 # The contentIdOut is a shorter string that can be used in output names to identifiy the content type.
 #
-function( cpfGetCollectPackageContentTargetNameAnId targetNameOut contentIdOut packageComponent contentType excludedTargets )
-
-	cpfGetDistributionPackageContentId( contentIdLocal ${contentType} "${excludedTargets}")
-	set(${contentIdOut} ${contentIdLocal} PARENT_SCOPE)
-	set(${targetNameOut} pkgContent_${contentIdLocal}_${packageComponent} PARENT_SCOPE )
-
+function( cpfGetCollectPackageContentTargetNameAnId targetNameOut packageComponent contentType contentId excludedTargets )
+	set(${targetNameOut} pkgContent_${contentId}_${packageComponent} PARENT_SCOPE )
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -85,20 +83,18 @@ endfunction()
 # Add a target that bundles all the individual distribution-package targets of the package together.
 # The target also makes sure that old packages in LastBuild are deleted. 
 #
-function( cpfAddDistributionPackagesTarget packageComponent )
+function( cpfAddDistributionPackagesTarget package distributionPackageTargets)
 
-	cpfGetSubtargets(createPackagesTargets "${packageComponent}" INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS)
-	if(createPackagesTargets)
+	if(distributionPackageTargets)
 		
-		cpfGetDistributionPackagesTargetName( targetName ${packageComponent})
+		cpfGetDistributionPackagesTargetName( targetName ${package})
 
 		add_custom_target(
 			${targetName}
-			DEPENDS ${createPackagesTargets}
+			DEPENDS ${distributionPackageTargets}
 		)
 
-		cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
-		set_property(TARGET ${targetName} PROPERTY FOLDER "${packageFolder}/pipeline")
+		set_property(TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
 
 	endif()
 
@@ -116,7 +112,7 @@ function( cpfGetLastBuildPackagesDir dirOut packageComponent)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAddPackageContentTarget targetName packageComponent contentId contentType )
+function( cpfAddCopyPackageContentTarget targetName packageComponent contentId contentType )
 
 	cpfGetPackageContentStagingDir( destDir ${packageComponent} ${contentId})
 	cpfGetPackageInstallComponents( components ${contentType} ${contentId} )
@@ -138,9 +134,11 @@ function( cpfGetPackageInstallComponents componentsOut contentType contentId )
 	elseif( "${contentType}" STREQUAL CT_DEVELOPER )
 		set(components runtime developer )
 	elseif( "${contentType}" STREQUAL CT_SOURCES )
-		set(components sources )
+		set(components sources)
+	elseif( "${contentType}" STREQUAL CT_DOCUMENTATION )
+		set(components documentation)
 	else()
-		message(FATAL_ERROR "Function cpfAddPackageContentTarget() does not support contentType \"${contentType}\"")
+		message(FATAL_ERROR "Function cpfAddCopyPackageContentTarget() does not support contentType \"${contentType}\"")
 	endif()
 
 	set(${componentsOut} "${components}" PARENT_SCOPE)
@@ -167,7 +165,7 @@ endfunction()
 # This is done because cmake creates a temporary "_CPACK_Packages" directory which we do not want in our final Packages directory.
 # Another reason is that the temporary package directory needs an additional directory level with the package content type to prevent simultaneous
 # accesses of cpack to the "_CPACK_Packages" directory. The copy operation allows us to get rid of that extra level in the "Packages" directory.
-function( cpfAddDistributionPackageTarget packageComponent contentTarget contentId contentType packageFormat formatOptions )
+function( cpfAddDistributionPackageTarget distributionPackageTargetNameOut package contentTargets contentId contentType packageFormat formatOptions )
 
 	# Only create debian packages if the dpkg tool is available
 	if("${packageFormat}" STREQUAL DEB )
@@ -177,33 +175,32 @@ function( cpfAddDistributionPackageTarget packageComponent contentTarget content
 			return()
 		endif()
 	endif()
-	
 
-	cpfGetDistributionPackageTargetName( targetName ${packageComponent} ${contentId} ${contentType} ${packageFormat})
-	
-	cpfIsInterfaceLibrary( isIntLib ${packageComponent})
-	if(isIntLib)
-		get_property( version TARGET ${packageComponent} PROPERTY INTERFACE_CPF_VERSION )
-	else()
-		get_property( version TARGET ${packageComponent} PROPERTY VERSION )
-	endif()
+	cpfGetDistributionPackageTargetName( targetName ${package} ${contentId} ${contentType} ${packageFormat})
+	set(version ${PROJECT_VERSION})
+
 
 	# locations / files
-	cpfGetBasePackageFilename( basePackageFileName ${packageComponent} ${version} ${contentId} ${packageFormat})
+	cpfGetBasePackageFilename( basePackageFileName ${package} ${version} ${contentId} ${packageFormat})
 	cpfGetDistributionPackageExtension( extension ${packageFormat})
 	set( shortPackageFilename ${basePackageFileName}.${extension} )
-	cpfGetCPackWorkingDir( packagesOutputDirTemp ${packageComponent} ${contentId})
+	cpfGetCPackWorkingDir( packagesOutputDirTemp ${package} ${contentId})
 	set(absPathPackageFile ${packagesOutputDirTemp}/${shortPackageFilename})
 
 	# Setup and add the commands
 	# Get the cpack command that creates the package-component file
-	cpfGetPackagingCommand( packagingCommand ${packageComponent} ${version} ${contentId} ${contentType} ${packageFormat} ${packagesOutputDirTemp} ${basePackageFileName} "${formatOptions}")
+	cpfGetPackagingCommand( packagingCommand ${package} ${version} ${contentId} ${contentType} ${packageFormat} ${packagesOutputDirTemp} ${basePackageFileName} "${formatOptions}")
 	# Use a stamp-file because the package file name is config dependent.
 	cpfGetTouchTargetStampCommand( touchCommmand stampFile ${targetName})
 
-	get_property( contentStampFile TARGET ${contentTarget} PROPERTY CPF_OUTPUT_FILES)
+	set(contentStampFiles)
+	foreach(contentTarget ${contentTargets})
+		get_property(contentStampFile TARGET ${contentTarget} PROPERTY CPF_OUTPUT_FILES)
+		cpfListAppend(contentStampFiles ${contentStampFile})
+	endforeach()
+	
 	cpfAddStandardCustomCommand(
-		DEPENDS ${contentTarget} ${contentStampFile}
+		DEPENDS ${contentTargets} ${contentStampFiles}
 		COMMANDS ${packagingCommand} ${touchCommmand}
 		OUTPUT ${stampFile}
 	)
@@ -211,24 +208,24 @@ function( cpfAddDistributionPackageTarget packageComponent contentTarget content
 	# Add the target and set its properties
 	add_custom_target(
 		${targetName}
-		DEPENDS ${contentTarget} ${stampFile}
+		DEPENDS ${contentTargets} ${stampFile}
 	)
 
-	set_property( TARGET ${packageComponent} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${targetName})
-	set_property( TARGET ${packageComponent} APPEND PROPERTY INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS ${targetName})
-	cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
-	set_property( TARGET ${targetName} PROPERTY FOLDER "${packageFolder}/private")
+	set_property( TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${targetName})
+	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/private")
 	set_property( TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${stampFile})
 	set_property( TARGET ${targetName} PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS distributionPackages)
 
 	# Add an install rule for the created package file.
-	cpfGetRelativeOutputDir( relDistPackageFilesDir ${packageComponent} DISTRIBUTION_PACKAGE_FILES)
+	cpfGetRelativeOutputDir( relDistPackageFilesDir ${package} DISTRIBUTION_PACKAGE_FILES)
 	install(
 		FILES ${absPathPackageFile}
 		DESTINATION ${relDistPackageFilesDir}
 		COMPONENT distributionPackages
 		EXCLUDE_FROM_ALL	# This has a custom target dependency so we can not include it in the default install target.
 	)
+
+	set(${distributionPackageTargetNameOut} ${targetName} PARENT_SCOPE)
 	
 endfunction()
 

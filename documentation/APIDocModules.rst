@@ -119,12 +119,13 @@ Module cpfPackageProject.cmake
 This module provides the following function.
 
 - cpfPackageProject()
+- cpfFinalizePackageProject()
 
 
-.. _cpfInitPackageProject:
+.. _cpfPackageProject:
 
 cpfPackageProject()
-=======================
+===================
 
 .. code-block:: cmake
 
@@ -138,7 +139,7 @@ cpfPackageProject()
       [MAINTAINER_EMAIL string]
       [LANGUAGES language1 language2 ...]
       [DISTRIBUTION_PACKAGES
-          DISTRIBUTION_PACKAGE_CONTENT_TYPE <CT_RUNTIME|CT_RUNTIME_PORTABLE excludedTargets|CT_DEVELOPER|CT_SOURCES>
+          DISTRIBUTION_PACKAGE_CONTENT_TYPE <CT_RUNTIME|CT_RUNTIME_PORTABLE excludedTargets|CT_DEVELOPER|CT_SOURCES|CT_DOCUMENTATION>
           DISTRIBUTION_PACKAGE_FORMATS <7Z|TBZ2|TGZ|TXZ|TZ|ZIP|DEB ...>
           [DISTRIBUTION_PACKAGE_FORMAT_OPTIONS 
               [SYSTEM_PACKAGES_DEB packageListString ]
@@ -156,7 +157,7 @@ git repository or a provided version file and uses it to initiated the cmake
 variables :code:`PROJECT_VERSION` and :code:`PROJECT_VERSION_<digit>` variables.
 
 
-.. _cpfInitPackageModule_arguments:
+.. _cpfPackageProject_arguments:
 
 Arguments
 ---------
@@ -304,6 +305,14 @@ and the version.cmake files that are used to import the library.
   This is the most simple scheme and relieves developers from the burdon of keeping things compatible.
 
 
+.. _cpfFinalizePackageProject:
+
+cpfFinalizePackageProject()
+===========================
+
+In single component packages this must be called after adding the component.
+It will create some custom targets that are required for installing and creating distribution packages.
+
 
 **************************************
 Module cpfAddCppPackageComponent.cmake
@@ -398,17 +407,23 @@ Here is an example that uses :code:`cpfAddCppPackageComponent()` in a :code:`CMa
   include(cpfAddCppPackageComponent)
   include(cpfConstants)
 
-  set( PACKAGE_NAMESPACE myl )
-
-  set( briefDescription "My awsome library." )
-
-  set( longDescription 
-  "Here you can go on in length about how awsome your library is."
-  )
-
   cpfPackageProject(
-	  PACKAGE_NAME
-	  ${PACKAGE_NAMESPACE}
+      TARGET_NAMESPACE                      myl
+      BRIEF_DESCRIPTION                     "My awsome library."
+      LONG_DESCRIPTION                      "Here you can go on in length about how awsome your library is."
+      WEBPAGE_URL                           "http://www.awsomelib.com/index.html"
+      MAINTAINER_EMAIL                      "hans@awsomelib.com"
+      COMPONENTS                            SINGLE_COMPONENT
+      DISTRIBUTION_PACKAGES
+        DISTRIBUTION_PACKAGE_CONTENT_TYPE 	CT_DEVELOPER
+        DISTRIBUTION_PACKAGE_FORMATS 		7Z
+      DISTRIBUTION_PACKAGES
+        DISTRIBUTION_PACKAGE_CONTENT_TYPE 	CT_RUNTIME
+        DISTRIBUTION_PACKAGE_FORMATS 		ZIP
+      DISTRIBUTION_PACKAGES
+        DISTRIBUTION_PACKAGE_CONTENT_TYPE   CT_RUNTIME Qt5::Core Qt5::Test Qt5::Gui_GL Qt5::QXcbIntegrationPlugin
+        DISTRIBUTION_PACKAGE_FORMATS DEB
+        DISTRIBUTION_PACKAGE_FORMAT_OPTIONS SYSTEM_PACKAGES_DEB "libqt5core5a, libqt5gui5" 
   )
 
   ################# Define package-component files #################
@@ -450,31 +465,9 @@ Here is an example that uses :code:`cpfAddCppPackageComponent()` in a :code:`CMa
       PLUGIN_TARGETS		MyPlugin
   )
 
-  set( archiveDevPackageOptions
-      DISTRIBUTION_PACKAGE_CONTENT_TYPE 	CT_DEVELOPER
-      DISTRIBUTION_PACKAGE_FORMATS 		7Z
-  )
-
-  set( archiveUserPackageOptions
-      DISTRIBUTION_PACKAGE_CONTENT_TYPE 	CT_RUNTIME
-      DISTRIBUTION_PACKAGE_FORMATS 		ZIP
-  )
-
-  set( debianPackageOptions
-      DISTRIBUTION_PACKAGE_CONTENT_TYPE
-          CT_RUNTIME Qt5::Core Qt5::Test Qt5::Gui_GL Qt5::QXcbIntegrationPlugin
-      DISTRIBUTION_PACKAGE_FORMATS DEB
-      DISTRIBUTION_PACKAGE_FORMAT_OPTIONS SYSTEM_PACKAGES_DEB "libqt5core5a, libqt5gui5" 
-  )
-
   ################# Add Package #################
   cpfAddCppPackageComponent( 
-      PACKAGE_NAME            ${PACKAGE_NAME}
-      WEBPAGE_URL             "http://www.awsomelib.com/index.html"
-      MAINTAINER_EMAIL        "hans@awsomelib.com"
       TYPE                    LIB
-      BRIEF_DESCRIPTION       ${briefDescription}
-      LONG_DESCRIPTION        ${longDescription}
       PUBLIC_HEADER           ${PACKAGE_PUBLIC_HEADERS}
       PRODUCTION_FILES        ${PACKAGE_PRODUCTION_FILES}
       FIXTURE_FILES           ${PACKAGE_FIXTURE_FILES}
@@ -483,10 +476,9 @@ Here is an example that uses :code:`cpfAddCppPackageComponent()` in a :code:`CMa
       LINKED_TEST_LIBRARIES   ${PACKAGE_LINKED_TEST_LIBRARIES}
       PLUGIN_DEPENDENCIES     ${qtPlatformPlugins}
       PLUGIN_DEPENDENCIES     ${myPlugin}
-      DISTRIBUTION_PACKAGES   ${archiveDevPackageOptions}
-      DISTRIBUTION_PACKAGES   ${archiveUserPackageOptions}
-      DISTRIBUTION_PACKAGES   ${debianPackageOptions}
   )
+
+  cpfFinalizePackageProject()
 
 
 .. _cpfAddCppPackageComponent_arguments:

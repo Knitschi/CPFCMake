@@ -119,7 +119,7 @@ function( cpfAddCppPackageComponent )
 	# parse argument sublists
 	set( allKeywords ${optionKeywords} ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
 	cpfGetKeywordValueLists( pluginOptionLists PLUGIN_DEPENDENCIES "${allKeywords}" "${ARGN}" pluginOptions)
-	cpfGetKeywordValueLists( distributionPackageOptionLists DISTRIBUTION_PACKAGES "${allKeywords}" "${ARGN}" packagOptions)
+	set(distributionPackageOptionLists ${${package}_DISTRIBUTION_PACKAGE_OPTION_LISTS})
 
 	# By default build test targets.
 	# Hunter sets this to off in order to skip test building.
@@ -226,9 +226,6 @@ function( cpfAddCppPackageComponent )
 	
 	# Adds the install rules and the per package-component install targets.
 	cpfAddInstallRulesForCppPackageComponent(${CPF_CURRENT_PACKAGE} ${packageComponent} ${targetNamespace} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME} )
-
-	# Adds the targets that create the distribution packages.
-	cpfAddDistributionPackageTargets(  ${packageComponent} "${distributionPackageOptionLists}" )
 
 endfunction() 
 
@@ -1211,6 +1208,7 @@ function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut di
 		CT_DEVELOPER
 		CT_RUNTIME
 		CT_SOURCES
+		CT_DOCUMENTATION
 	)
 
 	set(runtimePortableOption CT_RUNTIME_PORTABLE) 
@@ -1244,6 +1242,8 @@ function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut di
 		set(contentType CT_RUNTIME_PORTABLE)
 	elseif(ARG_CT_SOURCES)
 		set(contentType CT_SOURCES)
+	elseif(ARG_CT_DOCUMENTATION)
+		set(contentType CT_DOCUMENTATION)
 	else()
 		message(FATAL_ERROR "Faulty DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddCppPackageComponent().")
 	endif()
@@ -1276,6 +1276,8 @@ function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTa
 		endif()
 	elseif( "${contentType}" STREQUAL CT_SOURCES )
 		set(contentIdLocal src )
+	elseif( "${contentType}" STREQUAL CT_DOCUMENTATION )
+		set(contentIdLocal doc )
 	else()
 		message(FATAL_ERROR "Content type \"${contentType}\" is not supported by function contentTypeOutputNameIdentifier().")
 	endif()

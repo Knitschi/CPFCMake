@@ -235,14 +235,6 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-	# A property that is set on all package-component main targets
-	define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_CREATE_DISTRIBUTION_PACKAGE_SUBTARGETS
-        BRIEF_DOCS "The names of the custom sub-target that create distribution-packages for the package."
-        FULL_DOCS " "
-    )
-
     # A property that is set on shared library targets
 	define_property(
         TARGET
