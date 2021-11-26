@@ -7,6 +7,11 @@ include_guard(GLOBAL)
 function ( cpfGetParentDirectory parantDirOut absDirOrFilePath )
 	
 	get_filename_component( dir ${absDirOrFilePath} DIRECTORY)
+	if("${dir}" STREQUAL "")
+		set( ${parantDirOut} "" PARENT_SCOPE)
+		return()
+	endif()
+
 	string(FIND ${dir} "/" index REVERSE)			# get the index of the last directory separator
 	cpfIncrement(index)
 	cpfRightSideOfString(dirName ${dir} ${index})
