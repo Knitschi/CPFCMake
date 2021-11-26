@@ -652,8 +652,7 @@ endfunction()
 #-----------------------------------------------------------
 function( cpfGetPackageComponents componentsOut package )
 
-	cpfGetAbsPackageDirectory(packageDir ${package} "${CPF_ROOT_DIR}")
-	get_property(packageComponents DIRECTORY "${packageDir}" PROPERTY CPF_PACKAGE_COMPONENTS)
+	get_property(packageComponents DIRECTORY "${${package}_SOURCE_DIR}" PROPERTY CPF_PACKAGE_COMPONENTS)
 
 	if("${packageComponents}" STREQUAL SINGLE_COMPONENT)
 		set(packageComponents ${package})
