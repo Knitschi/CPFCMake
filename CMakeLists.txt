@@ -105,5 +105,7 @@ cpfAddFilePackageComponent(
     SOURCES ${files}
 )
 
+finalizePackageProject()
+
 # Add a test target
 cpfAddRunCMakeTestScriptTarget( "Tests/run_tests.cmake" "${files}" )
