@@ -37,7 +37,7 @@ endfunction()
 function( cpfIsMultiComponentPackage isMultiOut package )
 
 	cpfGetAbsPackageDirectory(packageDir ${package} "${CPF_ROOT_DIR}")
-	get_property(components DIRECTORY ${packageDir} PROPERTY CPF_PACKAGE_COMPONENTS)
+	get_property(components DIRECTORY "${packageDir}" PROPERTY CPF_PACKAGE_COMPONENTS)
 	if("${components}" STREQUAL SINGLE_COMPONENT)
 		set(${isMultiOut} FALSE PARENT_SCOPE)
 	else()
@@ -629,6 +629,37 @@ function( cpfGetNamesAndMacrosOfDirectlyLinkedCPFPackages packagesOut packageVer
 
 	set(${packagesOut} "${linkedCPFPackages}" PARENT_SCOPE)
 	set(${packageVersionMacroNamesOut} "${packageMacroNames}" PARENT_SCOPE)
+
+endfunction()
+
+#-----------------------------------------------------------
+function( cpfHasAtLeastOneBinaryComponent hasBinaryComponentOut package )
+
+	cpfGetPackageComponents( components "${package}" )
+
+	foreach(component ${components})
+		cpfIsBinaryTarget(isBinTarget ${component})
+		if(isBinTarget)
+			set(${hasBinaryComponentOut} TRUE PARENT_SCOPE)
+			return()
+		endif()
+	endforeach()
+
+	set(${hasBinaryComponentOut} FALSE PARENT_SCOPE)
+
+endfunction()
+
+#-----------------------------------------------------------
+function( cpfGetPackageComponents componentsOut package )
+
+	cpfGetAbsPackageDirectory(packageDir ${package} "${CPF_ROOT_DIR}")
+	get_property(packageComponents DIRECTORY "${packageDir}" PROPERTY CPF_PACKAGE_COMPONENTS)
+
+	if("${packageComponents}" STREQUAL SINGLE_COMPONENT)
+		set(packageComponents ${package})
+	endif()
+
+	set(${componentsOut} ${packageComponents} PARENT_SCOPE)
 
 endfunction()
 

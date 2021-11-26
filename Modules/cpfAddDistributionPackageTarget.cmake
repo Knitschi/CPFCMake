@@ -119,7 +119,7 @@ endfunction()
 function( cpfAddPackageContentTarget targetName packageComponent contentId contentType )
 
 	cpfGetPackageContentStagingDir( destDir ${packageComponent} ${contentId})
-	cpfGetPackageComponents( components ${contentType} ${contentId} )
+	cpfGetPackageInstallComponents( components ${contentType} ${contentId} )
 	cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
 	cpfAddInstallTarget( ${packageComponent} ${targetName} "${components}" ${destDir} TRUE ${packageFolder}/private)
 
@@ -128,7 +128,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Returns a list of components that belong to a contentType.
 #
-function( cpfGetPackageComponents componentsOut contentType contentId )
+function( cpfGetPackageInstallComponents componentsOut contentType contentId )
 
 	set(components)
 	if( "${contentType}" STREQUAL CT_RUNTIME )

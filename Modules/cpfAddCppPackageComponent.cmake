@@ -533,7 +533,7 @@ function( cpfAddBinaryTarget )
 	# We do not use special directories for private or public headers. So the include directory is public.
 	file(RELATIVE_PATH relativeComponentDirectory ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 	cpfGetParentDirectory(parentOfComponentDirectory ${relativeComponentDirectory})
-	if(parentOfComponentDirectory)
+	if(NOT ("${parentOfComponentDirectory}" STREQUAL ""))
 		string(PREPEND parentOfComponentDirectory /)
 	endif()
 	if(isInterfaceLib)

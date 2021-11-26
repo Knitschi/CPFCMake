@@ -46,7 +46,8 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 function(cpfAddInstallTarget package installTargetName components destDir clearDestDir vsTargetFolder )
 
-	get_property(packageComponents DIRECTORY "${${package}_SOURCE_DIR}" PROPERTY CPF_PACKAGE_COMPONENTS)
+	cpfGetPackageComponents(packageComponents ${package})
+
 	set(fileDependencies)
 	set(targetDependencies)
 	foreach(packageComponent ${packageComponents})

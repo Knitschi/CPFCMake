@@ -113,8 +113,13 @@ endmacro()
 #-----------------------------------------------------------
 function( finalizePackageProject )
 
-	cpfGenerateAndInstallCMakeConfigFiles(${CPF_CURRENT_PACKAGE} ${${package}_TARGET_NAMESPACE} ${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME})
-	cpfAddPackageInstallTarget(${CPF_CURRENT_PACKAGE})
+	set(package ${CPF_CURRENT_PACKAGE})
+
+	cpfHasAtLeastOneBinaryComponent(hasBinaryComponent ${package})
+	if(hasBinaryComponent) # Currently we can only export the binary targets. Do we need more?
+		cpfGenerateAndInstallCMakeConfigFiles(${package} ${${package}_TARGET_NAMESPACE} ${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME})
+	endif()
+	cpfAddPackageInstallTarget(${package})
 
 endfunction()
 
