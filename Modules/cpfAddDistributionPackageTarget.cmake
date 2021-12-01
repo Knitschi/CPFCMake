@@ -269,13 +269,13 @@ function( cpfGetBasePackageFilename nameWEOut packageComponent version contentId
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetPackagingCommand commandOut packageComponent version contentId contentType packageFormat packageOutputDir baseFileName formatOptions )
+function( cpfGetPackagingCommand commandOut package version contentId contentType packageFormat packageOutputDir baseFileName formatOptions )
 
 	cpfIsArchiveFormat( isArchiveGenerator ${packageFormat} )
 	if( isArchiveGenerator  )
-		cpfGetArchivePackageCommand( command ${packageComponent} ${version} ${contentId} ${contentType} ${packageFormat} ${packageOutputDir} ${baseFileName} )
+		cpfGetArchivePackageCommand( command ${package} ${version} ${contentId} ${contentType} ${packageFormat} ${packageOutputDir} ${baseFileName} )
 	elseif( "${packageFormat}" STREQUAL DEB )
-		cpfGetDebianPackageCommand( command ${packageComponent} ${version} ${contentId} ${contentType} ${packageFormat} ${packageOutputDir} ${baseFileName} "${formatOptions}" )
+		cpfGetDebianPackageCommand( command ${package} ${version} ${contentId} ${contentType} ${packageFormat} ${packageOutputDir} ${baseFileName} "${formatOptions}" )
 	else()
 		message(FATAL_ERROR "Package format \"${packageFormat}\" is not supported by function cpfGetPackagingCommand()")
 	endif()
@@ -287,9 +287,9 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # This function creates a cpack command that creates one of the compressed archive packages
 # 
-function( cpfGetArchivePackageCommand commandOut packageComponent version contentId contentType packageFormat packageOutputDir baseFileName )
+function( cpfGetArchivePackageCommand commandOut package version contentId contentType packageFormat packageOutputDir baseFileName )
 
-	cpfGetPackageContentStagingDir( packageContentDir ${packageComponent} ${contentId})
+	cpfGetPackageContentStagingDir( packageContentDir ${package} ${contentId})
 
 	set(configOption)
 	if(NOT (${contentId} STREQUAL src))
@@ -299,14 +299,14 @@ function( cpfGetArchivePackageCommand commandOut packageComponent version conten
 	# Setup the cpack command for creating the package
 	set( command
 "cpack -G \"${packageFormat}\" \
--D CPACK_PACKAGE_NAME=${packageComponent} \
+-D CPACK_PACKAGE_NAME=${package} \
 -D CPACK_PACKAGE_VERSION=${version} \
 -D CPACK_INSTALLED_DIRECTORIES=\"${packageContentDir}\"$<SEMICOLON>. \
 -D CPACK_PACKAGE_FILE_NAME=\"${baseFileName}\" \
--D CPACK_PACKAGE_DESCRIPTION=\"${CPF_PACKAGE_DESCRIPTION}\" \
+-D CPACK_PACKAGE_DESCRIPTION=\"${${package}_BRIEF_DESCRIPTION}\" \
 -D CPACK_PACKAGE_DIRECTORY=\"${packageOutputDir}\" \
 ${configOption} \
--P ${packageComponent} \
+-P ${packaget} \
 ")
 	set( ${commandOut} ${command} PARENT_SCOPE)
 
@@ -315,7 +315,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # This function creates a cpack command that creates debian package .dpkg 
 # 
-function( cpfGetDebianPackageCommand commandOut packageComponent version contentId contentType packageFormat packageOutputDir baseFileName formatOptions )
+function( cpfGetDebianPackageCommand commandOut package version contentId contentType packageFormat packageOutputDir baseFileName formatOptions )
 
 	cmake_parse_arguments(
 		ARG
@@ -325,15 +325,16 @@ function( cpfGetDebianPackageCommand commandOut packageComponent version content
 		"${formatOptions}"
 	)
 
-	cpfGetPackageContentStagingDir( packageContentDir ${packageComponent} ${contentId})
+	cpfGetPackageContentStagingDir( packageContentDir ${package} ${contentId})
 	
 	# todo get string for package dependencies
 	# example "libc6 (>= 2.3.1-6), libc6 (< 2.4)"
 	# todo package description durchschl�usen
 
-	get_property( description TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION )
-	get_property( homepage TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PACKAGE_WEBPAGE_URL )
-	get_property( maintainer TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL )
+	set( briefDescription ${${package}_BRIEF_DESCRIPTION})
+	set( longDescription ${${package}_LONG_DESCRIPTION})
+	set( homepage ${${package}_WEBPAGE_URL})
+	set( maintainerMail ${${package}_MAINTAINER_EMAIL})
 	
 	set(configOption)
 	if(NOT (${contentId} STREQUAL src))
@@ -344,19 +345,19 @@ function( cpfGetDebianPackageCommand commandOut packageComponent version content
 	# Setup the cpack command for creating the package
 	set( command
 "cpack -G \"${packageFormat}\" \
--D CPACK_PACKAGE_NAME=${packageComponent} \
+-D CPACK_PACKAGE_NAME=${package} \
 -D CPACK_PACKAGE_VERSION=${version} \
 -D CPACK_INSTALLED_DIRECTORIES=\"${packageContentDir}\"$<SEMICOLON>. \
 -D CPACK_PACKAGE_FILE_NAME=\"${baseFileName}\" \
--D CPACK_PACKAGE_DESCRIPTION=\"${CPF_PACKAGE_DESCRIPTION}\" \
+-D CPACK_PACKAGE_DESCRIPTION=\"${briefDescription}\" \
 -D CPACK_PACKAGE_DIRECTORY=\"${packageOutputDir}\" \
--D CPACK_PACKAGE_CONTACT=\"${maintainer}\" \
+-D CPACK_PACKAGE_CONTACT=\"${maintainerMail}\" \
 -D CPACK_DEBIAN_FILE_NAME=DEB-DEFAULT \
 -D CPACK_DEBIAN_PACKAGE_DEPENDS=\"${ARG_SYSTEM_PACKAGES_DEB}\" \
--D CPACK_DEBIAN_PACKAGE_DESCRIPTION=\"${description}\" \
+-D CPACK_DEBIAN_PACKAGE_DESCRIPTION=\"${longDescription}\" \
 -D CPACK_DEBIAN_PACKAGE_HOMEPAGE=\"${homepage}\" \
 ${configOption} \
--P ${packageComponent} \
+-P ${package} \
 ")
 	set( ${commandOut} ${command} PARENT_SCOPE)
 

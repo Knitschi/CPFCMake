@@ -289,8 +289,8 @@ endfunction()
 #-------------------------------------------------------------------------
 function( cpfAddPackageDocumentationDoxFileCommands fileOut packageComponent packageNamespace )
 
-	get_property( briefDescription TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION )
-	get_property( longDescription TARGET ${packageComponent} PROPERTY INTERFACE_CPF_LONG_PACKAGE_DESCRIPTION )
+	get_property( briefDescription TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_COMPONENT_DESCRIPTION )
+	get_property( longDescription TARGET ${packageComponent} PROPERTY INTERFACE_CPF_LONG_PACKAGE_COMPONENT_DESCRIPTION )
 
 	set( fileContent "
 /// The namespace of the ${packageComponent} package.
@@ -298,7 +298,7 @@ namespace ${packageNamespace} {
 
 /**
 
-\\defgroup ${packageComponent}Group ${packageComponent}
+\\defgroup ${package} ${packageComponent}
 \\brief ${briefDescription}
 
 ${longDescription}

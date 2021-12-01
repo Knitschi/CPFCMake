@@ -191,6 +191,19 @@ It is also reccomended that you use this internally as well because it makes you
 cmake code ignorant to the fact if a target is imported or *inlined*.
 
 
+BRIEF_DESCRIPTION
+^^^^^^^^^^^^^^^^^
+
+A short description in one sentence about what the package does. This is only relevant if a 
+debian distribution package archive is created.
+
+
+LONG_DESCRIPTION
+^^^^^^^^^^^^^^^^
+
+A longer description of the package. This is only relevant if a 
+debian distribution package is created.
+
 
 OWNER
 ^^^^^
@@ -211,23 +224,12 @@ WEBPAGE_URL
 A web address from where the source-code and/or the documentation of the package can be obtained.
 This is required for Debian packages.
 
-If you plan to allow using a package as :code:`EXTERNAL` package in some other CI-project,
-you have to hard-code this value in the packages CMakeLists file. Using a variable from the
-CI-project in order to remove duplication between your packages will not work, because clients
-will not have the value of that variable.
-
 
 MAINTAINER_EMAIL
 ^^^^^^^^^^^^^^^^
 
 An email address under which the maintainers of the package can be reached.
-This is required for Debian packages.
-Setting this argument overrides the value of the global :code:`CPF_MAINTAINER_EMAIL` variable for this package.
-
-If you plan to allow using a package as :code:`EXTERNAL` package in some other CI-project,
-you have to hard-code this value in the packages CMakeLists file. Using a variable from the
-CI-project in order to remove duplication between your packages will not work, because clients
-will not have the value of that variable.
+This is only used when creating Debian distribution packages.
 
 
 DISTRIBUTION_PACKAGES
@@ -334,6 +336,8 @@ cpfAddCppPackageComponent()
 
   cpfAddCppPackageComponent(
       TYPE <GUI_APP|CONSOLE_APP|LIB|INTERFACE_LIB>
+      [BRIEF_DESCRIPTION string]
+      [LONG_DESCRIPTION string]
       [PUBLIC_HEADER file1 [file2 ...]]
       [PRODUCTION_FILES file1 [file2 ...]]
       [EXE_FILES file1 [file2 ...]]
@@ -359,6 +363,7 @@ cpfAddCppPackageComponent()
       [ENABLE_VERSION_RC_FILE_GENERATION bool]
       [TEST_EXE_ARGUMENTS arg1 [arg2 ...]]
       [HAS_GOOGLE_TEST_EXE bool]
+      [CPP_NAMESPACE] string
   )
 
 
@@ -409,8 +414,6 @@ Here is an example that uses :code:`cpfAddCppPackageComponent()` in a :code:`CMa
 
   cpfPackageProject(
       TARGET_NAMESPACE                      myl
-      BRIEF_DESCRIPTION                     "My awsome library."
-      LONG_DESCRIPTION                      "Here you can go on in length about how awsome your library is."
       WEBPAGE_URL                           "http://www.awsomelib.com/index.html"
       MAINTAINER_EMAIL                      "hans@awsomelib.com"
       COMPONENTS                            SINGLE_COMPONENT
@@ -502,16 +505,14 @@ BRIEF_DESCRIPTION
 
 A short description in one sentence about what the package-component does. This is included
 in the generated documentation page of the package-component and in some distribution package
-types. It is also displayed on the *Details* tab of the file-properties window of 
-the generated main binary file when compiling with MSVC.
+types. On Windows it is also displayed on the *Details* tab of the file-properties window of 
+the generated main binary file.
 
 
 LONG_DESCRIPTION
 ^^^^^^^^^^^^^^^^
 
-A longer description of the package. This is included
-in the generated documentation page of the package-component and in some distribution package
-types.
+A longer description of the package. This is included in the generated doxygen documentation page of the package-component.
 
 
 PUBLIC_HEADER
@@ -722,6 +723,12 @@ When this option is set to true, :code:`cpfAddCppPackageComponent()` will create
 create test executable. Set this option to true when you use the <a href="https://github.com/csoltenborn/GoogleTestAdapter">GoogleTestAdapter</a> 
 and it fails to find your tests.
 
+
+CPP_NAMESPACE
+^^^^^^^^^^^^^
+
+The C++ namespace that is used in the generated cpfPackageVersion_<package>.h header file. It defaults to the :code:`TARGET_NAMESPACE` of the
+current package project if not given.
 
 
 .. _cpfQt5AddUIAndQrcFiles:

@@ -63,6 +63,9 @@ function( cpfAddCppPackageComponent )
 		ENABLE_VALGRIND_TARGET
 		ENABLE_VERSION_RC_FILE_GENERATION
 		HAS_GOOGLE_TEST_EXE
+		CPP_NAMESPACE
+		BRIEF_DESCRIPTION
+		LONG_DESCRIPTION
 	)
 
 	set( requiredMultiValueKeywords
@@ -103,18 +106,18 @@ function( cpfAddCppPackageComponent )
 
 	# Use values of global variables for unset arguments.
 	cpfGetRequiredPackageComponentOption(targetNamespace ${CPF_CURRENT_PACKAGE} ${packageComponent} TARGET_NAMESPACE)
-	cpfGetOptionalPackageOption( ARG_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS False)
-	cpfGetOptionalPackageOption( ARG_ENABLE_ABI_API_STABILITY_CHECK_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_ABI_API_STABILITY_CHECK_TARGETS False)
-	cpfGetOptionalPackageOption( ARG_ENABLE_CLANG_FORMAT_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_CLANG_FORMAT_TARGETS False)
-	cpfGetOptionalPackageOption( ARG_ENABLE_CLANG_TIDY_TARGET ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_CLANG_TIDY_TARGET False)
-	cpfGetOptionalPackageOption( ARG_ENABLE_OPENCPPCOVERAGE_TARGET ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_OPENCPPCOVERAGE_TARGET False)
-	cpfGetOptionalPackageOption( ARG_ENABLE_PACKAGE_DOX_FILE_GENERATION ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_PACKAGE_DOX_FILE_GENERATION False)
-	cpfGetOptionalPackageOption( ARG_ENABLE_PRECOMPILED_HEADER ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_PRECOMPILED_HEADER False)
-	cpfGetOptionalPackageOption( ARG_ENABLE_RUN_TESTS_TARGET ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_RUN_TESTS_TARGET True)
-	cpfGetOptionalPackageOption( ARG_ENABLE_VALGRIND_TARGET ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_VALGRIND_TARGET False)
-	cpfGetOptionalPackageOption( ARG_ENABLE_VERSION_RC_FILE_GENERATION ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_VERSION_RC_FILE_GENERATION True)
-	cpfGetOptionalPackageOption( ARG_COMPILE_OPTIONS ${CPF_CURRENT_PACKAGE} ${packageComponent} COMPILE_OPTIONS "" False)
-	cpfGetOptionalPackageOption( ARG_IS_GOOGLE_TEST_EXE ${CPF_CURRENT_PACKAGE} ${packageComponent} IS_GOOGLE_TEST_EXE False)
+	cpfGetOptionalPackageComponentOption( ARG_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS False)
+	cpfGetOptionalPackageComponentOption( ARG_ENABLE_ABI_API_STABILITY_CHECK_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_ABI_API_STABILITY_CHECK_TARGETS False)
+	cpfGetOptionalPackageComponentOption( ARG_ENABLE_CLANG_FORMAT_TARGETS ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_CLANG_FORMAT_TARGETS False)
+	cpfGetOptionalPackageComponentOption( ARG_ENABLE_CLANG_TIDY_TARGET ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_CLANG_TIDY_TARGET False)
+	cpfGetOptionalPackageComponentOption( ARG_ENABLE_OPENCPPCOVERAGE_TARGET ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_OPENCPPCOVERAGE_TARGET False)
+	cpfGetOptionalPackageComponentOption( ARG_ENABLE_PACKAGE_DOX_FILE_GENERATION ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_PACKAGE_DOX_FILE_GENERATION False)
+	cpfGetOptionalPackageComponentOption( ARG_ENABLE_PRECOMPILED_HEADER ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_PRECOMPILED_HEADER False)
+	cpfGetOptionalPackageComponentOption( ARG_ENABLE_RUN_TESTS_TARGET ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_RUN_TESTS_TARGET True)
+	cpfGetOptionalPackageComponentOption( ARG_ENABLE_VALGRIND_TARGET ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_VALGRIND_TARGET False)
+	cpfGetOptionalPackageComponentOption( ARG_ENABLE_VERSION_RC_FILE_GENERATION ${CPF_CURRENT_PACKAGE} ${packageComponent} ENABLE_VERSION_RC_FILE_GENERATION True)
+	cpfGetOptionalPackageComponentOption( ARG_COMPILE_OPTIONS ${CPF_CURRENT_PACKAGE} ${packageComponent} COMPILE_OPTIONS "" False)
+	cpfGetOptionalPackageComponentOption( ARG_IS_GOOGLE_TEST_EXE ${CPF_CURRENT_PACKAGE} ${packageComponent} IS_GOOGLE_TEST_EXE False)
 
 	# parse argument sublists
 	set( allKeywords ${optionKeywords} ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
@@ -142,11 +145,15 @@ function( cpfAddCppPackageComponent )
 		message(FATAL_ERROR "Library component ${packageComponent} has no public headers. The library can not be used without public headers, so please add the PUBLIC_HEADER argument to the cpfAddCppPackageComponent() call.")
 	endif()
 
+	if("${ARG_CPP_NAMESPACE}" STREQUAL "")
+		set(ARG_CPP_NAMESPACE ${${package}_TARGET_NAMESPACE})
+	endif()
+
 	# make sure that the properties of the imported targets follow our assumptions
 	cpfNormalizeImportedTargetProperties( "${linkedLibraries};${linkedTestLibraries}" )
 
 	# Configure the c++ header file with the version.
-	cpfConfigurePackageVersionHeader(${packageComponent} ${PROJECT_VERSION} ${targetNamespace})
+	cpfConfigurePackageVersionHeader(${packageComponent} ${PROJECT_VERSION} ${ARG_CPP_NAMESPACE})
 
 	# Add the binary targets
 	cpfAddPackageBinaryTargets( 
@@ -164,7 +171,7 @@ function( cpfAddCppPackageComponent )
 		"${ARG_TEST_FILES}" 
 		"${linkedLibraries}" 
 		"${linkedTestLibraries}"
-		${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME}
+		${${package}_VERSION_COMPATIBILITY_SCHEME}
 		${ARG_ENABLE_CLANG_FORMAT_TARGETS}
 		${ARG_ENABLE_PRECOMPILED_HEADER}
 		${ARG_ENABLE_VERSION_RC_FILE_GENERATION}
@@ -173,10 +180,8 @@ function( cpfAddCppPackageComponent )
 	)
 
 	# set some package-component properties
-	set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
-	set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_LONG_PACKAGE_DESCRIPTION ${ARG_LONG_DESCRIPTION} )
-	set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PACKAGE_WEBPAGE_URL ${ARG_WEBPAGE_URL} )
-	set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL} )
+	set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_COMPONENT_DESCRIPTION ${ARG_BRIEF_DESCRIPTION} )
+	set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_LONG_PACKAGE_COMPONENT_DESCRIPTION ${ARG_LONG_DESCRIPTION} )
 	
 	# Generate the "<package-component>DependencyNames.h" header file.
 	if(CPF_ENABLE_DEPENDENCY_NAMES_HEADER_GENERATION)
@@ -210,7 +215,7 @@ function( cpfAddCppPackageComponent )
 
 	# A target to generate a .dox file that is used to add links to the package-components build results to the package-component documentation.
 	if(${ARG_ENABLE_PACKAGE_DOX_FILE_GENERATION})
-		cpfAddPackageDocsTarget( ${packageComponent} ${targetNamespace} )
+		cpfAddPackageDocsTarget( ${packageComponent} ${ARG_CPP_NAMESPACE} )
 	endif()
 
 	# Plugins must be added before the install targets
@@ -225,7 +230,7 @@ function( cpfAddCppPackageComponent )
 	)
 	
 	# Adds the install rules and the per package-component install targets.
-	cpfAddInstallRulesForCppPackageComponent(${CPF_CURRENT_PACKAGE} ${packageComponent} ${targetNamespace} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME} )
+	cpfAddInstallRulesForCppPackageComponent(${CPF_CURRENT_PACKAGE} ${packageComponent} "${pluginOptionLists}" "${distributionPackageOptionLists}" ${${CPF_CURRENT_PACKAGE}_VERSION_COMPATIBILITY_SCHEME} )
 
 endfunction() 
 
@@ -302,7 +307,7 @@ function( cpfAddPackageBinaryTargets
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 			BRIEF_DESCRIPTION ${shortDescription}
-			OWNER ${owner}
+			OWNER ${${CPF_CURRENT_PACKAGE}_OWNER}
 			COMPILE_OPTIONS ${compileOptions}
 	    )
 
@@ -324,7 +329,7 @@ function( cpfAddPackageBinaryTargets
 				ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
 				ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 				BRIEF_DESCRIPTION "Contains the functionality of the ${packageComponent} application."
-				OWNER ${owner}
+				OWNER ${${CPF_CURRENT_PACKAGE}_OWNER}
 				COMPILE_OPTIONS ${compileOptions}
 			)
 
@@ -357,7 +362,7 @@ function( cpfAddPackageBinaryTargets
 				ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
 				ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 				BRIEF_DESCRIPTION ${shortDescription}
-				OWNER ${owner}
+				OWNER ${${CPF_CURRENT_PACKAGE}_OWNER}
 				COMPILE_OPTIONS ${compileOptions}
 			)
 
@@ -385,7 +390,7 @@ function( cpfAddPackageBinaryTargets
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 			BRIEF_DESCRIPTION "A library that contains utilities for tests of the ${libraryTarget} library."
-			OWNER ${owner}
+			OWNER ${${CPF_CURRENT_PACKAGE}_OWNER}
 			COMPILE_OPTIONS ${compileOptions}
         )
 
@@ -413,7 +418,7 @@ function( cpfAddPackageBinaryTargets
 			ENABLE_PRECOMPILED_HEADER ${enablePrecompiledHeader}
 			ENABLE_VERSION_RC_FILE_GENERATION ${enableVersionRcGeneration}
 			BRIEF_DESCRIPTION "Runs tests of the ${libraryTarget} library."
-			OWNER ${owner}
+			OWNER ${${CPF_CURRENT_PACKAGE}_OWNER}
 			COMPILE_OPTIONS ${compileOptions}
         )
 		set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET ${unitTestsTarget} )
@@ -575,7 +580,7 @@ function( cpfAddBinaryTarget )
 
 		# Set the target version
 		set_property( TARGET ${ARG_NAME} PROPERTY VERSION ${PROJECT_VERSION} )
-		if("${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME}" STREQUAL ExactVersion)
+		if("${${CPF_CURRENT_PACKAGE}_VERSION_COMPATIBILITY_SCHEME}" STREQUAL ExactVersion)
 			set_property( TARGET ${ARG_NAME} PROPERTY SOVERSION ${PROJECT_VERSION} )
 		else()
 			message(FATAL_ERROR "Unexpected compatibility scheme!")
@@ -598,9 +603,6 @@ function( cpfAddBinaryTarget )
 	# sets all the <bla>_OUTPUT_DIRECTORY_<config> options
 	cpfSetTargetOutputDirectoriesAndNames(${ARG_PACKAGE_COMPONENT} ${ARG_NAME})
 
-	# sort files into folders in visual studio
-	cpfSetIDEDirectoriesForTargetSources(${ARG_NAME})
-
 	# Add an alias target to allow using namespaced names for inlined packages.
 	cpfAddAliasTarget(${ARG_NAME} ${ARG_TARGET_NAMESPACE})
 
@@ -619,6 +621,9 @@ function( cpfAddBinaryTarget )
 			OWNER ${ARG_OWNER}
 		)
 	endif()
+
+	# sort files into folders in visual studio
+	cpfSetIDEDirectoriesForTargetSources(${ARG_NAME})
 
 endfunction()
 
@@ -808,7 +813,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Adds install rules for the various package-component components.
 #
-function( cpfAddInstallRulesForCppPackageComponent package packageComponent namespace pluginOptionLists distributionPackageOptionLists versionCompatibilityScheme )
+function( cpfAddInstallRulesForCppPackageComponent package packageComponent pluginOptionLists distributionPackageOptionLists versionCompatibilityScheme )
 
 	cpfAddInstallRulesForPackageBinaries(${package} ${packageComponent} ${versionCompatibilityScheme} )
 	cpfAddInstallRulesForPublicHeaders( ${packageComponent} )

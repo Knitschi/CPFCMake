@@ -147,7 +147,7 @@ endfunction()
 #
 function(cpfGetRequiredPackageComponentOption optionOut package packageComponent optionKeyword)
 	
-	cpfGetOptionalPackageOption(option ${package} ${packageComponent} ${optionKeyword} "")
+	cpfGetOptionalPackageComponentOption(option ${package} ${packageComponent} ${optionKeyword} "")
 	if("${option}" STREQUAL "")
 		message(FATAL_ERROR "Error! Missing variable option. You need to set one of the following variables CPF_${optionKeyword}, ${package}_${optionKeyword}, ${package}_${packageComponent}_${optionKeyword} or the function key-word-argument.")
 	endif()
@@ -158,7 +158,7 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # Similar to cpfGetRequiredPackageComponentOption() but does not fail if neither of the variables
 # is set. In this case it will return the provided default argument.
-function(cpfGetOptionalPackageOption optionOut package packageComponent optionKeyword defaultValue)
+function(cpfGetOptionalPackageComponentOption optionOut package packageComponent optionKeyword defaultValue)
 	
 	if(NOT ("${ARG_${optionKeyword}}" STREQUAL ""))
 		set(${optionOut} "${ARG_${optionKeyword}}" PARENT_SCOPE)

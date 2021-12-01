@@ -37,9 +37,10 @@ macro( cpfPackageProject )
 	cmake_parse_arguments(ARG "" "${requiredSingleValueKeywords};${optionalSingleValueKeywords}" "${requiredMultiValueKeywords};${optionalMultiValueKeywords}" ${ARGN})
 
 	cpfAssertKeywordArgumentsHaveValue("${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfPackageProject()")
-	if(NOT ARG_VERSION_COMPATIBILITY_SCHEME)
-		set(ARG_VERSION_COMPATIBILITY_SCHEME ExactVersion)
+	if(NOT ("${ARG_VERSION_COMPATIBILITY_SCHEME}" STREQUAL ""))
+		message(WARNING "Function ${CMAKE_CURRENT_FUNCTION}() currently ignores the VERSION_COMPATIBILITY_SCHEME argument and uses \"ExactVersion\" by default.")
 	endif()
+	set(ARG_VERSION_COMPATIBILITY_SCHEME ExactVersion)
 	cpfAssertCompatibilitySchemeOption(${ARG_VERSION_COMPATIBILITY_SCHEME})
 
 	# Look for CXX and C by default.
@@ -75,8 +76,12 @@ macro( cpfPackageProject )
 	set(CPF_CURRENT_PACKAGE ${package})
 	set(${package}_TARGET_NAMESPACE ${ARG_TARGET_NAMESPACE})
 	set(${package}_DISTRIBUTION_PACKAGE_OPTION_LISTS ${distributionPackageOptionLists})
-
-	set(CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME ${ARG_VERSION_COMPATIBILITY_SCHEME})
+	set(${package}_BRIEF_DESCRIPTION ${ARG_BRIEF_DESCRIPTION})
+	set(${package}_LONG_DESCRIPTION ${ARG_LONG_DESCRIPTION})
+	set(${package}_WEBPAGE_URL ${ARG_WEBPAGE_URL})
+	set(${package}_OWNER ${ARG_OWNER})
+	set(${package}_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL})
+	set(${package}_VERSION_COMPATIBILITY_SCHEME ${ARG_VERSION_COMPATIBILITY_SCHEME})
 
 	set(PROJECT_VERSION ${packageVersion})
 	set(PROJECT_VERSION_MAJOR ${major})
@@ -122,13 +127,13 @@ function( cpfFinalizePackageProject )
 
 	cpfHasAtLeastOneBinaryComponent(hasBinaryComponent ${package})
 	if(hasBinaryComponent) # Currently we can only export the binary targets. Do we need more?
-		cpfGenerateAndInstallCMakeConfigFiles(${package} ${${package}_TARGET_NAMESPACE} ${CPF_CURRENT_PACKAGE_VERSION_COMPATIBILITY_SCHEME})
+		cpfGenerateAndInstallCMakeConfigFiles(${package} ${${package}_TARGET_NAMESPACE} ${${package}_VERSION_COMPATIBILITY_SCHEME})
 	endif()
 
 	# Adds the targets that create the distribution packages.
 	set(distributionPackageOptionLists ${${package}_DISTRIBUTION_PACKAGE_OPTION_LISTS})
 	if(distributionPackageOptionLists)
-		cpfAddDistributionPackageTargets(${package} "${distributionPackageOptionLists}" )
+		cpfAddDistributionPackageTargets(${package} "${distributionPackageOptionLists}")
 	endif()
 
 	cpfAddPackageInstallTarget(${package})

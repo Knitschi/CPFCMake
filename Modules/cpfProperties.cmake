@@ -22,7 +22,7 @@ function( cpfDefineProperties )
 	# A property that is set on all package-component main targets.
     define_property(
         TARGET
-        PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_DESCRIPTION
+        PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_COMPONENT_DESCRIPTION
         BRIEF_DOCS "Contains a short description about what the package-component is good for."
         FULL_DOCS " "
     )
@@ -30,24 +30,8 @@ function( cpfDefineProperties )
 	# A property that is set on all package-component main targets.
     define_property(
         TARGET
-        PROPERTY INTERFACE_CPF_LONG_PACKAGE_DESCRIPTION
+        PROPERTY INTERFACE_CPF_LONG_PACKAGE_COMPONENT_DESCRIPTION
         BRIEF_DOCS "Contains a long description about what the package-component is good for."
-        FULL_DOCS " "
-    )
-
-	# A property that is set on all package-component main targets.
-    define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_PACKAGE_WEBPAGE_URL
-        BRIEF_DOCS "A web address from where the source-code and/or the documentation of the package-component can be obtained."
-        FULL_DOCS " "
-    )
-    
-	# A property that is set on all package-component main targets.
-    define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_PACKAGE_MAINTAINER_EMAIL
-        BRIEF_DOCS "An email address under which the maintainers of the package-component can be reached."
         FULL_DOCS " "
     )
 
