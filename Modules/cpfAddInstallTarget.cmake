@@ -37,7 +37,7 @@ function(cpfGetPossibleInstallComponents componentsOut)
 		developer
 		sources
 		documentation
-		distributionPackages
+		packageArchives
 		PARENT_SCOPE
 	)
 
@@ -50,7 +50,7 @@ function(cpfAddInstallTarget package installTargetName components destDir clearD
 
 	set(fileDependencies)
 	set(targetDependencies)
-	foreach(packageComponent ${packageComponents} ${package}) # The package dummy target may hold the distribution package targets as subtargets.
+	foreach(packageComponent ${packageComponents} ${package}) # The package dummy target may hold the package archive targets as subtargets.
 		cpfGetInstallTargetDependencies( fileDependenciesComponent targetDependenciesComponent ${packageComponent} "${components}")
 		cpfListAppend(fileDependencies ${fileDependenciesComponent})
 		cpfListAppend(targetDependencies ${targetDependenciesComponent})

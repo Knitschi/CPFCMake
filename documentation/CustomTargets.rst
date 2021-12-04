@@ -40,7 +40,7 @@ Here is a list of targets that can exist once per CPF project.
 - `ALL_BUILD (Visual Studio) / all (Makefiles)`_
 - `clang-format`_
 - `clang-tidy`_
-- `distributionPackages`_
+- `packageArchives`_
 - `install`_
 - `install_all`_
 - `opencppcoverage`_
@@ -59,7 +59,7 @@ Here is a list of targets that can exist once per CPF package.
 - :ref:`abicompliancechecker_package`
 - :ref:`clang-format_package`
 - :ref:`clang-tidy_package`
-- :ref:`distributionPackages_package`
+- :ref:`packageArchives_package`
 - :ref:`install_package`
 - :ref:`opencppcoverage_package`
 - :ref:`package`
@@ -115,10 +115,10 @@ clang-tidy
 
 This target bundles the \ref clang-tidy_package targets.
 
-distributionPackages
+packageArchives
 """"""""""""""""""""
 
-This target bundles the \ref distributionPackages_package targets.
+This target bundles the \ref packageArchives_package targets.
 
 
 .. _install:
@@ -193,8 +193,8 @@ project configurations that use *Gcc* with debug flags and for shared library pa
 **Report compatibility**
 The basic functionality is to create html reports that compare the abi/api-compatibility of
 a previous libray package-component version with the current one. The reporst are added to the project
-web-page. To enable this, the target must be able to download previously generated distribution 
-packages of that package-component from the project web-page, which must contain generated abi-dump files. 
+web-page. To enable this, the target must be able to download previously generated package archives
+of that package-component from the project web-page, which must contain generated abi-dump files. 
 This complex requirement makes the target somewhat fragile. This functionality can be 
 disabled with the \c CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS config variable.
 
@@ -222,14 +222,14 @@ library target.
 
 The target can be disabled with the \c CPF_ENABLE_CLANG_TIDY_TARGET config variable.
 
-.. _distributionPackages_package:
+.. _packageArchives_package:
 
-distributionPackages_<package>
-""""""""""""""""""""""""""""""
+packageArchives_<package>
+"""""""""""""""""""""""""
 
-Creates all *distribution packages* of the package. A *distribution package* is a file that is
+Creates all *package archives* of the package. A *package archive* is a file that is
 distributed to users of the package. This can be a zip file that contains the binaries or sources or 
-an installer. The target is only created if the \c addPackage() function has the \c DISTRIBUTION_PACKAGES
+an installer. The target is only created if the \c addPackage() function has the \c PACKAGE_ARCHIVES
 argument set.
 
 .. _install_package:

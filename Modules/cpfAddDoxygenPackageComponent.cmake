@@ -237,8 +237,8 @@ endfunction()
 
 #-------------------------------------------------------------------------
 # This targets generates .dox files that provide the doxygen documentation for the package.
-# The documentation contains the given briefDescription, longDescription and links to the packages distribution
-# packages, coverage reports and abi/api compatibility reports.
+# The documentation contains the given briefDescription, longDescription and links to the packages package archives,
+# coverage reports and abi/api compatibility reports.
 # The documentation can be extended by using \addtogroup <package>Group in another doxygen comment.
 #
 # Problem:
@@ -307,7 +307,7 @@ ${longDescription}
 
 \\note The links can be broken if no project configuration creates the linked pages.
 
-- <a href=\"../${CPF_DOWNLOADS_DIR}/${packageComponent}\">Downloads</a> (Will work if distribution packages are created.)
+- <a href=\"../${CPF_DOWNLOADS_DIR}/${packageComponent}\">Downloads</a> (Will work if package archives are created.)
 - <a href=\"../${CPF_OPENCPPCOVERAGE_DIR}/index.html\">OpenCppCoverage Reports</a> (Will work if at least one test target and the CPF_ENABLE_OPENCPPCOVERAGE_TARGET option is enabled for a windows build)
 
 "

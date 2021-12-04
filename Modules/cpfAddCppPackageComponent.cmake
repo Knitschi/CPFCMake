@@ -18,7 +18,7 @@ include(cpfAddClangTidyTarget)
 include(cpfAddRunTestsTarget)
 include(cpfAddDeploySharedLibrariesTarget)
 include(cpfAddInstallTarget)
-include(cpfAddDistributionPackageTarget)
+include(cpfAddPackageArchiveTarget)
 include(cpfAddCompatibilityCheckTarget)
 include(cpfAddDoxygenPackageComponent)
 include(cpfAddVersionRcTarget)
@@ -1003,7 +1003,7 @@ function( cpfInstallSourceFiles installedFilesOut packageComponent sources outpu
 
 		# When building, the include directories are the package-components binary and source directory.
 		# This means we need the path of the header relative to one of the two in order to get the
-		# relative path to the distribution package-components install directory right.
+		# relative path to the package archive-components install directory right.
 		file(RELATIVE_PATH relPathSource ${sourceDir} ${absFile} )
 		file(RELATIVE_PATH relPathBinary ${binaryDir} ${absFile} )
 		cpfGetShorterString( relFilePath ${relPathSource} ${relPathBinary}) # assume the shorter path is the correct one
@@ -1123,13 +1123,13 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # This function adds install rules for the shared libraries that are provided by other
 # internal or external packages. We only add these rules for package-components that actually
-# create distribution package-components that include depended on shared libraries.
+# create package archive-components that include depended on shared libraries.
 #
 function( cpfAddInstallRulesForDependedOnSharedLibraries packageComponent pluginOptions distributionPackageOptionLists )
 
 	cpfGetDependedOnSharedLibrariesAndDirectories( libraries directories ${packageComponent} "${pluginOptions}" )
 
-	# Add install rules for each distribution package-component that has a runtime-portable content.
+	# Add install rules for each package archive-component that has a runtime-portable content.
 	set(contentIds)
 	foreach( list ${distributionPackageOptionLists})
 
@@ -1198,14 +1198,14 @@ function( removeExcludedTargets librariesOut directoriesOut libraries directorie
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# This function was introduced to only have one definition of the distribution package option keywords
+# This function was introduced to only have one definition of the package archive option keywords
 function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut distributionPackageFormatOptionsOut excludedTargetsOut argumentList )
 
 	cmake_parse_arguments(
 		ARG 
 		"" 
 		"" 
-		"DISTRIBUTION_PACKAGE_CONTENT_TYPE;DISTRIBUTION_PACKAGE_FORMATS;DISTRIBUTION_PACKAGE_FORMAT_OPTIONS"
+		"PACKAGE_ARCHIVE_CONTENT_TYPE;PACKAGE_ARCHIVE_FORMATS;PACKAGE_ARCHIVE_FORMAT_OPTIONS"
 		${argumentList}
 	)
 
@@ -1222,11 +1222,11 @@ function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut di
 		"${contentTypeOptions}"
 		""
 		"${runtimePortableOption}"
-		"${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}"
+		"${ARG_PACKAGE_ARCHIVE_CONTENT_TYPE}"
 	)
 	
 	# Check that only one content type was given.
-	cpfContains(isRuntimeAndDependenciesType "${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" ${runtimePortableOption})
+	cpfContains(isRuntimeAndDependenciesType "${ARG_PACKAGE_ARCHIVE_CONTENT_TYPE}" ${runtimePortableOption})
 	cpfPrependMulti( argOptions ARG_ "${contentTypeOptions}")
 	set(nrOptions 0)
 	foreach(option ${isRuntimeAndDependenciesType} ${argOptions})
@@ -1236,7 +1236,7 @@ function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut di
 	endforeach()
 	
 	if( NOT (${nrOptions} EQUAL 1) )
-		message(FATAL_ERROR "Each DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddCppPackageComponent() must contain exactly one of these options: ${contentTypeOptions};${runtimePortableOption}. The given option was ${ARG_DISTRIBUTION_PACKAGE_CONTENT_TYPE}" )
+		message(FATAL_ERROR "Each PACKAGE_ARCHIVE_CONTENT_TYPE option in cpfAddCppPackageComponent() must contain exactly one of these options: ${contentTypeOptions};${runtimePortableOption}. The given option was ${ARG_PACKAGE_ARCHIVE_CONTENT_TYPE}" )
 	endif()
 	
 	if(ARG_CT_DEVELOPER)
@@ -1250,12 +1250,12 @@ function( cpfParseDistributionPackageOptions contentTypeOut packageFormatsOut di
 	elseif(ARG_CT_DOCUMENTATION)
 		set(contentType CT_DOCUMENTATION)
 	else()
-		message(FATAL_ERROR "Faulty DISTRIBUTION_PACKAGE_CONTENT_TYPE option in cpfAddCppPackageComponent().")
+		message(FATAL_ERROR "Faulty PACKAGE_ARCHIVE_CONTENT_TYPE option in cpfAddCppPackageComponent().")
 	endif()
 	
 	set(${contentTypeOut} ${contentType} PARENT_SCOPE)
-	set(${packageFormatsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMATS} PARENT_SCOPE)
-	set(${distributionPackageFormatOptionsOut} ${ARG_DISTRIBUTION_PACKAGE_FORMAT_OPTIONS} PARENT_SCOPE)
+	set(${packageFormatsOut} ${ARG_PACKAGE_ARCHIVE_FORMATS} PARENT_SCOPE)
+	set(${distributionPackageFormatOptionsOut} ${ARG_PACKAGE_ARCHIVE_FORMAT_OPTIONS} PARENT_SCOPE)
 	set(${excludedTargetsOut} ${ARG_CT_RUNTIME_PORTABLE} PARENT_SCOPE)
 
 endfunction()
@@ -1292,7 +1292,7 @@ function( cpfGetDistributionPackageContentId contentIdOut contentType excludedTa
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# This function parses the distribution package options of the package and returns a list
+# This function parses the package archive options of the package and returns a list
 # with the content-ids of all runtime-portable packages.
 function( addSharedLibraryDependenciesInstallRules packageComponent contentId libraries directories )
 

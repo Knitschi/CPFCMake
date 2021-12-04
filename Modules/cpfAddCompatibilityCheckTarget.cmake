@@ -40,11 +40,11 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # This function adds custom targets which call the abi-compliance-checker tool.
-function( cpfAddAbiCheckerTargets packageComponent distributionPackageOptionLists enableCompatibilityReportTargets enableStabilityCheckTargets )
+function( cpfAddAbiCheckerTargets packageComponent packageArchiveOptionLists enableCompatibilityReportTargets enableStabilityCheckTargets )
 	
 	cpfAssertUserSettingsForCompatibilityChecksMakeSense( 
 		${packageComponent}
-		"${distributionPackageOptionLists}"
+		"${packageArchiveOptionLists}"
 		${enableCompatibilityReportTargets}
 		${enableStabilityCheckTargets} 
 	)
@@ -52,7 +52,7 @@ function( cpfAddAbiCheckerTargets packageComponent distributionPackageOptionList
 	if( enableCompatibilityReportTargets )
 
 		cpfGetLastBuildAndLastReleaseVersion( lastBuildVersion lastReleaseVersion)
-		cpfHasDevBinDistributionPackage( unused packageFormat "${distributionPackageOptionLists}" )
+		cpfHasDevBinDistributionPackage( unused packageFormat "${packageArchiveOptionLists}" )
 		cpfDownloadOldAbiDumps( ${packageComponent} ${packageFormat} ${lastBuildVersion} ${lastReleaseVersion} )
 		
 		# Add The targets that create and use the abi-dumps.
@@ -86,7 +86,7 @@ function( cpfAddAbiCheckerTargets packageComponent distributionPackageOptionList
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAssertUserSettingsForCompatibilityChecksMakeSense packageComponent distributionPackageOptionLists enableCompatibilityReportTargets enableStabilityCheckTargets )
+function( cpfAssertUserSettingsForCompatibilityChecksMakeSense packageComponent packageArchiveOptionLists enableCompatibilityReportTargets enableStabilityCheckTargets )
 
 	# If user requests compatibility checks, the compiler settings must support it. 
 	if(enableCompatibilityReportTargets)
@@ -137,14 +137,14 @@ The compatibility check targets require the version information from to reposito
 			message(FATAL_ERROR ${errorMessage} )
 		endif()
 		
-		# Make sure that the package has a dev-bin distribution package which holds the dump file.
-		cpfHasDevBinDistributionPackage( hasDevBinPackage unused "${distributionPackageOptionLists}")
+		# Make sure that the package has a dev-bin package archive which holds the dump file.
+		cpfHasDevBinDistributionPackage( hasDevBinPackage unused "${packageArchiveOptionLists}")
 		if(NOT hasDevBinPackage)
 			set(errorMessage "\
 Error with project settings!\n\
-Option [CPF_]ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS was set to ON but package ${packageComponent} does not create a distribution package with content type CT_DEVELOPER. \
+Option [CPF_]ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS was set to ON but package ${packageComponent} does not create a package archive with content type CT_DEVELOPER. \
 The packages with content type CT_DEVELOPER contain the abi dump files for previously build libraries which are needed to compare the abi-compliance. \
-You need to add an DISTRIBUTION_PACKAGES to your call of cpfAddCppPackageComponent() with the DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_DEVELOPER sub-option to remove this error.\n\
+You need to add an PACKAGE_ARCHIVES to your call of cpfAddCppPackageComponent() with the PACKAGE_ARCHIVE_CONTENT_TYPE CT_DEVELOPER sub-option to remove this error.\n\
 			")
 			message(FATAL_ERROR ${errorMessage} )
 		endif()
@@ -191,9 +191,9 @@ function( cpfCompileSettingsSupportAbiDumper boolOut )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfHasDevBinDistributionPackage hasDevBinPackageOut packageFormatOut distributionPackageOptionLists )
+function( cpfHasDevBinDistributionPackage hasDevBinPackageOut packageFormatOut packageArchiveOptionLists )
 
-	foreach( list ${distributionPackageOptionLists})
+	foreach( list ${packageArchiveOptionLists})
 	
 		cpfParseDistributionPackageOptions( contentType packageFormats unused unused "${${list}}")
 		
@@ -297,7 +297,7 @@ function( cpfDownloadAndExtractPackage packageComponent packageFormat packageUrl
 		# We only issue a warning here to not break builds when the package-components are not available.
 		# This can happen when the variable CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS has been switched ON, or parts of the build have
 		# been disabled during maintanance.
-		message( "Warning: Could not download released distribution package from ${packageUrl}. Comparing the current ABI/API with that package will not be possible.")
+		message( "Warning: Could not download released package archive from ${packageUrl}. Comparing the current ABI/API with that package will not be possible.")
  	else()
 		# extract the package
 		cpfExecuteProcess( unused "cmake -E tar x ${shortName}" "${downloadDir}" DONT_INTERCEPT_OUTPUT )

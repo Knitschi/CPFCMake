@@ -20,7 +20,7 @@ Here are some examples to explain how the function argument notation must be int
   or more paths to source files. If not otherwise specified, paths must be absolute or relative to :code:`CMAKE_CURRENT_SOURCE_DIR`.
 - :code:`[ENABLE_CLANG_TIDY_TARGET bool]`: The function expects the optional key-word :code:`ENABLE_CLANG_TIDY_TARGET` followed by
   either :code:`TRUE` or :code:`FALSE`.
-- :code:`DISTRIBUTION_PACKAGE_FORMATS <7Z|TBZ2|TGZ ...>`: The function expects the required key-word :code:`DISTRIBUTION_PACKAGE_FORMATS` to be followed by
+- :code:`PACKAGE_ARCHIVE_FORMATS <7Z|TBZ2|TGZ ...>`: The function expects the required key-word :code:`PACKAGE_ARCHIVE_FORMATS` to be followed by
   one or multiple values of the listed enum :code:`7Z`, :code:`TBZ2` and :code:`TGZ`.
 
 
@@ -138,13 +138,13 @@ cpfPackageProject()
       [WEBPAGE_URL string]
       [MAINTAINER_EMAIL string]
       [LANGUAGES language1 language2 ...]
-      [DISTRIBUTION_PACKAGES
-          DISTRIBUTION_PACKAGE_CONTENT_TYPE <CT_RUNTIME|CT_RUNTIME_PORTABLE excludedTargets|CT_DEVELOPER|CT_SOURCES|CT_DOCUMENTATION>
-          DISTRIBUTION_PACKAGE_FORMATS <7Z|TBZ2|TGZ|TXZ|TZ|ZIP|DEB ...>
-          [DISTRIBUTION_PACKAGE_FORMAT_OPTIONS 
+      [PACKAGE_ARCHIVES
+          PACKAGE_ARCHIVE_CONTENT_TYPE <CT_RUNTIME|CT_RUNTIME_PORTABLE excludedTargets|CT_DEVELOPER|CT_SOURCES|CT_DOCUMENTATION>
+          PACKAGE_ARCHIVE_FORMATS <7Z|TBZ2|TGZ|TXZ|TZ|ZIP|DEB ...>
+          [PACKAGE_ARCHIVE_FORMAT_OPTIONS 
               [SYSTEM_PACKAGES_DEB packageListString ]
           ]
-          [DISTRIBUTION_PACKAGE_CONTENT_TYPE ...] 
+          [PACKAGE_ARCHIVE_CONTENT_TYPE ...] 
       ...]
       [VERSION_COMPATIBILITY_SCHEME [ExactVersion] ]
   )
@@ -195,14 +195,14 @@ BRIEF_DESCRIPTION
 ^^^^^^^^^^^^^^^^^
 
 A short description in one sentence about what the package does. This is only relevant if a 
-debian distribution package archive is created.
+debian package archive is created.
 
 
 LONG_DESCRIPTION
 ^^^^^^^^^^^^^^^^
 
 A longer description of the package. This is only relevant if a 
-debian distribution package is created.
+debian package archive is created.
 
 
 OWNER
@@ -229,56 +229,56 @@ MAINTAINER_EMAIL
 ^^^^^^^^^^^^^^^^
 
 An email address under which the maintainers of the package can be reached.
-This is only used when creating Debian distribution packages.
+This is only used when creating Debian package archives.
 
 
-DISTRIBUTION_PACKAGES
+PACKAGE_ARCHIVES
 ^^^^^^^^^^^^^^^^^^^^^
 
 This keyword opens a sub-list of arguments that are used to specify a list of packages that have the same content, but different formats.
 The argument can be given multiple times, in order to define a variety of package formats and content types.
-The argument takes two lists as sub-arguments. A distribution package is created for each combination of the
+The argument takes two lists as sub-arguments. A package archive is created for each combination of the
 elements in the sub-argument lists.
 For example: 
-argument :code:`DISTRIBUTION_PACKAGES DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_RUNTIME_PORTABLE DISTRIBUTION_PACKAGE_FORMATS ZIP;7Z`
+argument :code:`PACKAGE_ARCHIVES PACKAGE_ARCHIVE_CONTENT_TYPE CT_RUNTIME_PORTABLE PACKAGE_ARCHIVE_FORMATS ZIP;7Z`
 will cause the creation of a zip and a 7z archive that both contain the packages executables and all depended on shared libraries.
-Adding another argument :code:`DISTRIBUTION_PACKAGES DISTRIBUTION_PACKAGE_CONTENT_TYPE CT_RUNTIME DISTRIBUTION_PACKAGE_FORMATS DEB`
+Adding another argument :code:`PACKAGE_ARCHIVES PACKAGE_ARCHIVE_CONTENT_TYPE CT_RUNTIME PACKAGE_ARCHIVE_FORMATS DEB`
 will cause the additional creation of a debian package that relies on external dependencies being provided by other packages.
 
 **Sub-Options:**
 
-DISTRIBUTION_PACKAGE_CONTENT_TYPE 
+PACKAGE_ARCHIVE_CONTENT_TYPE 
 """""""""""""""""""""""""""""""""               
 
-- :code:`CT_RUNTIME`: The distribution-package contains the executables and shared libraries that are produced by this package.
+- :code:`CT_RUNTIME`: The package archive contains the executables and shared libraries that are produced by this package.
   This can be used for packages that either do not depend on any shared libraries or only on shared libraries that
   are provided externally by the system.
 
-- :code:`CT_RUNTIME_PORTABLE listExcludedTargets`: The distribution-package will include the packages executables 
+- :code:`CT_RUNTIME_PORTABLE listExcludedTargets`: The package archive will include the packages executables 
   and shared libraries and all depended on shared libraries. This is useful for creating *portable* packages
   that do not rely on any system provided shared libraries.
   The :code:`CT_RUNTIME_PORTABLE` keyword can be followed by a list of depended on targets that belong
   to shared libraries that should not be included in the package, because they are provided by the system. 
 
-- :code:`CT_DEVELOPER`: The distribution-package will include all package binaries, header files and cmake config files for 
+- :code:`CT_DEVELOPER`: The package archive will include all package binaries, header files and cmake config files for 
   importing the package in another project. This content type is supposed to be used for binary library packages
   that are used in other projects. Note that for msvc debug configurations the package will also include source files
   to allow debugging into the package. The package does not include dependencies which are supposed to be imported
   separately by consuming projects.
 
-- :code:`CT_SOURCES`: The distribution-package contains the files that are needed to compile the package.
+- :code:`CT_SOURCES`: The package archive contains the files that are needed to compile the package.
 
 
-DISTRIBUTION_PACKAGE_FORMATS
+PACKAGE_ARCHIVE_FORMATS
 """"""""""""""""""""""""""""
 
 - :code:`7Z |TBZ2 | TGZ | TXZ | TZ | ZIP`: Packs the distributed files into one of the following archive formats: .7z, .tar.bz2, .tar.gz, .tar.xz, tar.Z, .zip
 - :code:`DEB`: Creates a debian package .deb file. This will only be created when the dpkg tool is available.
 
-DISTRIBUTION_PACKAGE_FORMAT_OPTIONS
+PACKAGE_ARCHIVE_FORMAT_OPTIONS
 """""""""""""""""""""""""""""""""""
 
-A list of keyword arguments that contain further options for the creation of the distribution packages.
+A list of keyword arguments that contain further options for the creation of the package archives.
 
 - :code:`[SYSTEM_PACKAGES_DEB]`: This is only relevant when using the DEB package format. 
   The option must be a string that contains the names and versions of the debian packages 
@@ -313,7 +313,7 @@ cpfFinalizePackageProject()
 ===========================
 
 In single component packages this must be called after adding the component.
-It will create some custom targets that are required for installing and creating distribution packages.
+It will create some custom targets that are required for installing and creating package archives.
 
 
 **************************************
@@ -417,16 +417,16 @@ Here is an example that uses :code:`cpfAddCppPackageComponent()` in a :code:`CMa
       WEBPAGE_URL                           "http://www.awsomelib.com/index.html"
       MAINTAINER_EMAIL                      "hans@awsomelib.com"
       COMPONENTS                            SINGLE_COMPONENT
-      DISTRIBUTION_PACKAGES
-        DISTRIBUTION_PACKAGE_CONTENT_TYPE 	CT_DEVELOPER
-        DISTRIBUTION_PACKAGE_FORMATS 		7Z
-      DISTRIBUTION_PACKAGES
-        DISTRIBUTION_PACKAGE_CONTENT_TYPE 	CT_RUNTIME
-        DISTRIBUTION_PACKAGE_FORMATS 		ZIP
-      DISTRIBUTION_PACKAGES
-        DISTRIBUTION_PACKAGE_CONTENT_TYPE   CT_RUNTIME Qt5::Core Qt5::Test Qt5::Gui_GL Qt5::QXcbIntegrationPlugin
-        DISTRIBUTION_PACKAGE_FORMATS DEB
-        DISTRIBUTION_PACKAGE_FORMAT_OPTIONS SYSTEM_PACKAGES_DEB "libqt5core5a, libqt5gui5" 
+      PACKAGE_ARCHIVES
+        PACKAGE_ARCHIVE_CONTENT_TYPE 	CT_DEVELOPER
+        PACKAGE_ARCHIVE_FORMATS 		7Z
+      PACKAGE_ARCHIVES
+        PACKAGE_ARCHIVE_CONTENT_TYPE 	CT_RUNTIME
+        PACKAGE_ARCHIVE_FORMATS 		ZIP
+      PACKAGE_ARCHIVES
+        PACKAGE_ARCHIVE_CONTENT_TYPE   CT_RUNTIME Qt5::Core Qt5::Test Qt5::Gui_GL Qt5::QXcbIntegrationPlugin
+        PACKAGE_ARCHIVE_FORMATS DEB
+        PACKAGE_ARCHIVE_FORMAT_OPTIONS SYSTEM_PACKAGES_DEB "libqt5core5a, libqt5gui5" 
   )
 
   ################# Define package-component files #################
@@ -504,7 +504,7 @@ BRIEF_DESCRIPTION
 ^^^^^^^^^^^^^^^^^
 
 A short description in one sentence about what the package-component does. This is included
-in the generated documentation page of the package-component and in some distribution package
+in the generated documentation page of the package-component and in some package archive
 types. On Windows it is also displayed on the *Details* tab of the file-properties window of 
 the generated main binary file.
 
@@ -520,7 +520,7 @@ PUBLIC_HEADER
 
 All header files that declare functions or classes that are supposed to be
 used by consumers of a library package. The public headers will automatically
-be put into binary distribution packages, while header files in the :code:`PRODUCTION_FILES`
+be put into binary package archives, while header files in the :code:`PRODUCTION_FILES`
 are not included.
 
 

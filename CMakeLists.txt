@@ -29,7 +29,7 @@ set( files
 	documentation/ConfigurationManagement.rst
 	documentation/CPFCMake.rst
 	documentation/CustomTargets.rst
-	documentation/DistributionPackages.rst
+	documentation/PackageArchives.rst
 	documentation/DocumentationTargets.rst
 	documentation/TestTargets.rst
 	documentation/Versioning.rst
@@ -41,7 +41,7 @@ set( files
 	Modules/cpfAddClangFormatTarget.cmake
 	Modules/cpfAddCompatibilityCheckTarget.cmake
 	Modules/cpfAddDeploySharedLibrariesTarget.cmake
-	Modules/cpfAddDistributionPackageTarget.cmake
+	Modules/cpfAddPackageArchiveTarget.cmake
 	Modules/cpfAddDoxygenPackageComponent.cmake
 	Modules/cpfAddFilePackageComponent.cmake
 	Modules/cpfAddInstallTarget.cmake

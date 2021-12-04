@@ -12,7 +12,7 @@ include(cpfAddAcyclicTarget)
 include(cpfAddPipelineTargetDependencies)
 include(cpfAddRunTestsTarget)
 include(cpfAddCompatibilityCheckTarget)
-include(cpfAddDistributionPackageTarget)
+include(cpfAddPackageArchiveTarget)
 include(cpfAddValgrindTarget)
 include(cpfAddOpenCppCoverageTarget)
 include(cpfGTAUtilities)
@@ -77,7 +77,7 @@ function( cpfAddPackages )
 	cpfAddGlobalValgrindTarget("${packages}")
 	# opencppcoverage
 	cpfAddGlobalOpenCppCoverageTarget("${packages}")
-	# distributionPackages
+	# packageArchives
 	cpfAddGlobalCreatePackagesTarget("${packages}")
 	# abiComplianceCheck
 	cpfAddGlobalAbiCheckerTarget("${packages}")

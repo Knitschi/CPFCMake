@@ -13,12 +13,12 @@ include(cpfAddInstallTarget)
 #
 function( cpfAddGlobalCreatePackagesTarget packageComponents)
 
-    set(targetName distributionPackages)
+    set(targetName packageArchives)
 	
 	set(packageTargets)
 	foreach(packageComponent ${packageComponents})
-		cpfGetDistributionPackagesTargetName( packageTarget ${packageComponent})
-		if(TARGET ${packageTarget}) # not all packages may create distribution packages
+		cpfGetPackageArchivesTargetName( packageTarget ${packageComponent})
+		if(TARGET ${packageTarget}) # not all packages may create package archives
 			cpfListAppend( packageTargets ${packageTarget})
 		endif()
 	endforeach()
@@ -30,9 +30,9 @@ endfunction()
 #----------------------------------------------------------------------------------------
 # For argument documentation see the cpfAddCppPackageComponent() function.
 #
-function( cpfAddDistributionPackageTargets package packageOptionLists )
+function( cpfAddPackageArchiveTargets package packageOptionLists )
 
-	set(distributionPackageTargets)
+	set(packageArchiveTargets)
 	foreach( list ${packageOptionLists})
 
 		cpfParseDistributionPackageOptions( contentType packageFormats distributionPackageFormatOptions excludedTargets "${${list}}")
@@ -55,14 +55,14 @@ function( cpfAddDistributionPackageTargets package packageOptionLists )
 
 		# Create the targets that create the archives.
 		foreach(packageFormat ${packageFormats})
-			cpfAddDistributionPackageTarget(distributionPackageTarget ${package} "${copyComponentContentTargets}" ${contentId} ${contentType} ${packageFormat} "${distributionPackageFormatOptions}")
-			cpfListAppend(distributionPackageTargets ${distributionPackageTarget})
+			cpfAddPackageArchiveTarget(distributionPackageTarget ${package} "${copyComponentContentTargets}" ${contentId} ${contentType} ${packageFormat} "${distributionPackageFormatOptions}")
+			cpfListAppend(packageArchiveTargets ${distributionPackageTarget})
 		endforeach()
 
 	endforeach()
 
-	# Create one target to knot up all distribution package targets for the package.
-	cpfAddDistributionPackagesTarget(${package} "${distributionPackageTargets}")
+	# Create one target to knot up all package archive targets for the package.
+	cpfAddPackageArchivesTarget(${package} "${packageArchiveTargets}")
 
 endfunction()
 
@@ -75,23 +75,23 @@ function( cpfGetCollectPackageContentTargetNameAnId targetNameOut packageCompone
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetDistributionPackageTargetName targetNameOut packageComponent contentId contentType packageFormat )
-	set( ${targetNameOut} distPckg_${contentId}_${packageFormat}_${packageComponent} PARENT_SCOPE)
+function( cpfGetPackageArchiveTargetName targetNameOut packageComponent contentId contentType packageFormat )
+	set( ${targetNameOut} pckgArchive_${contentId}_${packageFormat}_${packageComponent} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# Add a target that bundles all the individual distribution-package targets of the package together.
+# Add a target that bundles all the individual package archive targets of the package together.
 # The target also makes sure that old packages in LastBuild are deleted. 
 #
-function( cpfAddDistributionPackagesTarget package distributionPackageTargets)
+function( cpfAddPackageArchivesTarget package packageArchiveTargets)
 
-	if(distributionPackageTargets)
+	if(packageArchiveTargets)
 		
-		cpfGetDistributionPackagesTargetName( targetName ${package})
+		cpfGetPackageArchivesTargetName( targetName ${package})
 
 		add_custom_target(
 			${targetName}
-			DEPENDS ${distributionPackageTargets}
+			DEPENDS ${packageArchiveTargets}
 		)
 
 		set_property(TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
@@ -101,8 +101,8 @@ function( cpfAddDistributionPackagesTarget package distributionPackageTargets)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetDistributionPackagesTargetName targetNameOut packageComponent)
-	set( ${targetNameOut} distributionPackages_${packageComponent} PARENT_SCOPE)
+function( cpfGetPackageArchivesTargetName targetNameOut packageComponent)
+	set( ${targetNameOut} packageArchives_${packageComponent} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------
@@ -146,7 +146,7 @@ function( cpfGetPackageInstallComponents componentsOut contentType contentId )
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# returns the "private" _packaging directory which is used while creating the distribution packages. 
+# returns the "private" _packaging directory which is used while creating the package archives. 
 function( cpfGetPackagingDir dirOut )
 	# Note that the temp dir needs the contentid level to make sure that instances of cpack do not access the same _CPack_Packages directories, which causes errors.
 	set( ${dirOut} "${CMAKE_CURRENT_BINARY_DIR}/${CPF_PACKAGES_ASSEMBLE_DIR}" PARENT_SCOPE) 
@@ -159,13 +159,13 @@ function( cpfGetPackageContentStagingDir stagingDirOut packageComponent contentI
 endfunction()
 
 #----------------------------------------------------------------------------------------
-# This function adds target that creates a distribution package. The command specifies how this is done.
+# This function adds target that creates a package archive. The command specifies how this is done.
 #
 # Note that packages are created in a temporary directory and later copied to the "Packages" directory.
 # This is done because cmake creates a temporary "_CPACK_Packages" directory which we do not want in our final Packages directory.
 # Another reason is that the temporary package directory needs an additional directory level with the package content type to prevent simultaneous
 # accesses of cpack to the "_CPACK_Packages" directory. The copy operation allows us to get rid of that extra level in the "Packages" directory.
-function( cpfAddDistributionPackageTarget distributionPackageTargetNameOut package contentTargets contentId contentType packageFormat formatOptions )
+function( cpfAddPackageArchiveTarget packageArchiveTargetNameOut package contentTargets contentId contentType packageFormat formatOptions )
 
 	# Only create debian packages if the dpkg tool is available
 	if("${packageFormat}" STREQUAL DEB )
@@ -176,13 +176,13 @@ function( cpfAddDistributionPackageTarget distributionPackageTargetNameOut packa
 		endif()
 	endif()
 
-	cpfGetDistributionPackageTargetName( targetName ${package} ${contentId} ${contentType} ${packageFormat})
+	cpfGetPackageArchiveTargetName( targetName ${package} ${contentId} ${contentType} ${packageFormat})
 	set(version ${PROJECT_VERSION})
 
 
 	# locations / files
 	cpfGetBasePackageFilename( basePackageFileName ${package} ${version} ${contentId} ${packageFormat})
-	cpfGetDistributionPackageExtension( extension ${packageFormat})
+	cpfGetPackageArchiveExtension( extension ${packageFormat})
 	set( shortPackageFilename ${basePackageFileName}.${extension} )
 	cpfGetCPackWorkingDir( packagesOutputDirTemp ${package} ${contentId})
 	set(absPathPackageFile ${packagesOutputDirTemp}/${shortPackageFilename})
@@ -214,18 +214,18 @@ function( cpfAddDistributionPackageTarget distributionPackageTargetNameOut packa
 	set_property( TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${targetName})
 	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/private")
 	set_property( TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${stampFile})
-	set_property( TARGET ${targetName} PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS distributionPackages)
+	set_property( TARGET ${targetName} PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS packageArchives)
 
 	# Add an install rule for the created package file.
-	cpfGetRelativeOutputDir( relDistPackageFilesDir ${package} DISTRIBUTION_PACKAGE_FILES)
+	cpfGetRelativeOutputDir( relPackageArchiveFilesDir ${package} DISTRIBUTION_PACKAGE_FILES)
 	install(
 		FILES ${absPathPackageFile}
-		DESTINATION ${relDistPackageFilesDir}
-		COMPONENT distributionPackages
+		DESTINATION ${relPackageArchiveFilesDir}
+		COMPONENT packageArchives
 		EXCLUDE_FROM_ALL	# This has a custom target dependency so we can not include it in the default install target.
 	)
 
-	set(${distributionPackageTargetNameOut} ${targetName} PARENT_SCOPE)
+	set(${packageArchiveTargetNameOut} ${targetName} PARENT_SCOPE)
 	
 endfunction()
 

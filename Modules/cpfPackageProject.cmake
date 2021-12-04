@@ -30,7 +30,7 @@ macro( cpfPackageProject )
 
 	set(optionalMultiValueKeywords
 		LANGUAGES
-		DISTRIBUTION_PACKAGES
+		PACKAGE_ARCHIVES
 		PACKAGE_FILES 
 	)
 
@@ -52,7 +52,7 @@ macro( cpfPackageProject )
 
 	# parse argument sublists
 	set(allKeywords ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})
-	cpfGetKeywordValueLists(distributionPackageOptionLists DISTRIBUTION_PACKAGES "${allKeywords}" "${ARGN}" packagOptions)
+	cpfGetKeywordValueLists(distributionPackageOptionLists PACKAGE_ARCHIVES "${allKeywords}" "${ARGN}" packagOptions)
 
 	# The package name is defined by the sub-directory name
     cpfGetCurrentSourceDir(package)
@@ -130,10 +130,10 @@ function( cpfFinalizePackageProject )
 		cpfGenerateAndInstallCMakeConfigFiles(${package} ${${package}_TARGET_NAMESPACE} ${${package}_VERSION_COMPATIBILITY_SCHEME})
 	endif()
 
-	# Adds the targets that create the distribution packages.
+	# Adds the targets that create the package archives.
 	set(distributionPackageOptionLists ${${package}_DISTRIBUTION_PACKAGE_OPTION_LISTS})
 	if(distributionPackageOptionLists)
-		cpfAddDistributionPackageTargets(${package} "${distributionPackageOptionLists}")
+		cpfAddPackageArchiveTargets(${package} "${distributionPackageOptionLists}")
 	endif()
 
 	cpfAddPackageInstallTarget(${package})

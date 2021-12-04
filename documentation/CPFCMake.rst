@@ -33,7 +33,7 @@ Index
   CustomTargets
   PackagesCMake
   TestTargets
-  DistributionPackages
+  PackageArchives
   DocumentationTargets
   Versioning
   UsageProblems

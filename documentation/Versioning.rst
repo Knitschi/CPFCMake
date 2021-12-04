@@ -11,7 +11,7 @@ Version Tags
 
 The source of a version number is the Git repository that contains the package or CI-repository. During the *generate step*, The CPF
 determines the current version number of each package by reading the release version tags of the repository.
-This version number is then used by the *CPF* while creating distribution packages or in the production code. 
+This version number is then used by the *CPF* while creating package archives or in the production code. 
 Because of the fully automated versioning-pipeline of a CPF project, developers can rely that builds of two different
 commits will never have the same version number.
 
