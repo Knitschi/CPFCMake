@@ -5,8 +5,6 @@ include_guard(GLOBAL)
 include(cpfPathUtilities)
 include(cpfMiscUtilities)
 
-
-
 #-------------------------------------------------------------------------
 # Documentation in APIDocs.dox
 macro( cpfPackageProject )
@@ -31,7 +29,7 @@ macro( cpfPackageProject )
 	set(optionalMultiValueKeywords
 		LANGUAGES
 		PACKAGE_ARCHIVES
-		PACKAGE_FILES 
+		PACKAGE_FILES
 	)
 
 	cmake_parse_arguments(ARG "" "${requiredSingleValueKeywords};${optionalSingleValueKeywords}" "${requiredMultiValueKeywords};${optionalMultiValueKeywords}" ${ARGN})
@@ -56,6 +54,9 @@ macro( cpfPackageProject )
 
 	# The package name is defined by the sub-directory name
     cpfGetCurrentSourceDir(package)
+
+	# Find dependet on packages
+	cpfFindPackageDependencies(${package})
 
 	cpfConfigurePackageVersionFile(${package})
 
@@ -90,11 +91,12 @@ macro( cpfPackageProject )
 	set(PROJECT_VERSION_TWEAK ${commitId})
 
 	cpfGetPackageVersionFileName(versionFile ${package})
-
+	cpfGetFullPackageDependenciesFilePathIfItExists(dependenciesFile ${package})
 	set(packageSources
 		${ARG_PACKAGE_FILES}
 		CMakeLists.txt
 		${versionFile}
+		#${dependenciesFile}
 	)
 
 	set_property(DIRECTORY ${CMAKE_CURRENT_LIST_DIR} PROPERTY CPF_PACKAGE_COMPONENTS ${ARG_COMPONENTS})
@@ -184,3 +186,40 @@ function( cpfConfigurePackageVersionHeader package version packageNamespace)
 	cpfConfigureFileWithVariables( "${CPF_ABS_TEMPLATE_DIR}/packageVersion.h.in" "${absPathVersionHeader}" PACKAGE_NAME CPF_PACKAGE_VERSION PACKAGE_NAMESPACE ) 
 
 endfunction()
+
+#-----------------------------------------------------------
+function( cpfGetFullPackageDependenciesFilePathIfItExists pathOut package)
+	
+	cpfGetFullPackageDependenciesFilePath(dependenciesFile ${package})
+	if(EXISTS ${dependenciesFile})
+		set(${pathOut} "${dependenciesFile}" PARENT_SCOPE)
+	else()
+		set(${pathOut} "" PARENT_SCOPE)
+	endif()
+
+endfunction()
+
+#-----------------------------------------------------------
+function( cpfFindPackageDependencies package)
+
+	cpfGetFullPackageDependenciesFilePathIfItExists(dependenciesFile ${package})
+	if(${dependenciesFile})
+		cpfReadVariablesFromFile(variables values ${dependenciesFile})
+
+		cpfContains(hasRequirements "${variables}" "CPF_PACKAGE_DEPENDENCIES")
+		if(NOT hasRequirements)
+			message(FATAL_ERROR "File \"${dependenciesFile}\" does not contain the required definition of the CPF_PACKAGE_DEPENDENCIES variable.\nThe file should at least contain an empty definition in the form of\nset(CPF_PACKAGE_DEPENDENCIES)")
+		endif()
+
+		list(FIND variables CPF_PACKAGE_DEPENDENCIES index)
+		list(GET values ${index} allDependencyRequirements)
+
+		cpfGetKeywordValueLists(dependencyRequirementLists CPF_PACKAGE "" "${allDependencyRequirements}" findPackageArguments)
+		foreach(requirementList ${dependencyRequirementLists})
+			find_package(${${requirementList}})
+		endforeach()
+	endif()
+
+endfunction()
+
+#-----------------------------------------------------------

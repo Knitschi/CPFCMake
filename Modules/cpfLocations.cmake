@@ -36,6 +36,12 @@ function( cpfGetAbsPackageDirectory packageDirOut package cpfRootDir )
 	set( ${packageDirOut} "${cpfRootDir}/${CPF_SOURCE_DIR}/${package}" PARENT_SCOPE)
 endfunction()
 
+# returns the full path of the CPFPackageDependencyRequirements.cmake file.
+function( cpfGetFullPackageDependenciesFilePath pathOut package)
+	cpfGetAbsPackageDirectory(packageDir ${package} "${CPF_ROOT_DIR}")
+	set(${pathOut} "${packageDir}/CPFPackageDependencyRequirements.cmake" PARENT_SCOPE)
+endfunction()
+
 # This function defines the name of a packages version file. 
 # currently this is: cpfPackageVersion_<package>.cmake 
 function( cpfGetPackageVersionFileName filenameOut package )
