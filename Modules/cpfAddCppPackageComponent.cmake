@@ -155,6 +155,8 @@ function( cpfAddCppPackageComponent )
 	# Configure the c++ header file with the version.
 	cpfConfigurePackageVersionHeader(${packageComponent} ${PROJECT_VERSION} ${ARG_CPP_NAMESPACE})
 
+	cpfAddPackageSources(ARG_PRODUCTION_FILES ${CPF_CURRENT_PACKAGE})
+
 	# Add the binary targets
 	cpfAddPackageBinaryTargets( 
 		productionLibrary

@@ -96,7 +96,7 @@ macro( cpfPackageProject )
 		${ARG_PACKAGE_FILES}
 		CMakeLists.txt
 		${versionFile}
-		#${dependenciesFile}
+		${dependenciesFile}
 	)
 
 	set_property(DIRECTORY ${CMAKE_CURRENT_LIST_DIR} PROPERTY CPF_PACKAGE_COMPONENTS ${ARG_COMPONENTS})
@@ -203,12 +203,12 @@ endfunction()
 function( cpfFindPackageDependencies package)
 
 	cpfGetFullPackageDependenciesFilePathIfItExists(dependenciesFile ${package})
-	if(${dependenciesFile})
+	if(NOT ("${dependenciesFile}" STREQUAL ""))
 		cpfReadVariablesFromFile(variables values ${dependenciesFile})
-
+		
 		cpfContains(hasRequirements "${variables}" "CPF_PACKAGE_DEPENDENCIES")
 		if(NOT hasRequirements)
-			message(FATAL_ERROR "File \"${dependenciesFile}\" does not contain the required definition of the CPF_PACKAGE_DEPENDENCIES variable.\nThe file should at least contain an empty definition in the form of\nset(CPF_PACKAGE_DEPENDENCIES)")
+			message(FATAL_ERROR "File \"${dependenciesFile}\" does not contain the required definition of the CPF_PACKAGE_DEPENDENCIES variable.\nThe file should at least contain an empty definition in the form of set(CPF_PACKAGE_DEPENDENCIES)")
 		endif()
 
 		list(FIND variables CPF_PACKAGE_DEPENDENCIES index)
