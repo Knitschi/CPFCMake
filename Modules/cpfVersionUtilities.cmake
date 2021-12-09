@@ -151,7 +151,6 @@ function( cpfVersionIsCompatibleToRequirement isCompatibleOut availableVersion r
 			endif()
 		endif()
 	elseif("${compatibilityScheme}" STREQUAL ExactVersion)
-		devMessage("check exact version ${requiredVersion}  ${availableVersion}")
 		if(${requiredVersion} STREQUAL ${availableVersion})
 			set(isCompatible TRUE)
 		endif()
