@@ -84,6 +84,7 @@ function( cpfGetLastVersionTagOfBranch lastVersionTagOut branch repositoryDir al
 	# "83.54.32-rc"						release-version with comment. The version of a release must be "clean" so it can be directly used in binary names.
 	# "abc12.43.5"						Should not match unclean release version
 
+	cpfGetCPFVersionRegExp(cpfVersionRegExp)
 	cpfGetFirstMatch( latestVersionTag "${tags}" "^[0-9]+[.][0-9]+[.][0-9]+([.]([0-9]+[\\-])?[0-9a-z]+([\\-][0-9a-zA-Z\\-\\_]*)?)?$")
 	set(releaseVersionTag NOTFOUND)
 	if(${latestVersionTag} STREQUAL NOTFOUND)
@@ -101,11 +102,6 @@ function( cpfGetLastVersionTagOfBranch lastVersionTagOut branch repositoryDir al
 		set(${lastVersionTagOut} ${latestVersionTag} PARENT_SCOPE)
 	endif()
 
-endfunction()
-
-#----------------------------------------------------------------------------------------
-function( cpfGetReleaseVersionRegExp regexpOut )
-	set( ${regexpOut} "^[0-9]+[.][0-9]+[.][0-9]+$" PARENT_SCOPE) 
 endfunction()
 
 #----------------------------------------------------------------------------------------

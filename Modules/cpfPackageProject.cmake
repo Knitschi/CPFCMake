@@ -127,6 +127,10 @@ function( cpfFinalizePackageProject )
 
 	set(package ${CPF_CURRENT_PACKAGE})
 
+	# Set package properties for values that are needed outside the package directory.
+	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_PACKAGE_VERSION_COMPATIBILITY_SCHEME ${${package}_VERSION_COMPATIBILITY_SCHEME})
+	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_VERSION ${PROJECT_VERSION})
+
 	cpfHasAtLeastOneBinaryComponent(hasBinaryComponent ${package})
 	if(hasBinaryComponent) # Currently we can only export the binary targets. Do we need more?
 		cpfGenerateAndInstallCMakeConfigFiles(${package} ${${package}_TARGET_NAMESPACE} ${${package}_VERSION_COMPATIBILITY_SCHEME})
@@ -216,7 +220,48 @@ function( cpfFindPackageDependencies package)
 
 		cpfGetKeywordValueLists(dependencyRequirementLists CPF_PACKAGE "" "${allDependencyRequirements}" findPackageArguments)
 		foreach(requirementList ${dependencyRequirementLists})
-			find_package(${${requirementList}})
+
+			# Check that at least the package name and version exists in the list.
+			cpfListLength(length "${${requirementList}}")
+			if(${length} LESS 2)
+				message(FATAL_ERROR "The package dependency definition in file \"${dependenciesFile}\" following the CPF_PACKAGE keyword must at least contain a package name and version number.")
+			endif()
+
+			list(GET ${requirementList} 0 requiredPackage)
+			list(GET ${requirementList} 1 requiredVersion)
+
+			# Check if we have a version range. This is currently not supported.
+			if(TARGET ${requiredPackage})
+				# Ignore the target if it was already imported 
+				get_property(isImported TARGET ${requiredPackage} PROPERTY IMPORTED)
+				if(NOT isImported)
+
+					get_property(compatibilityScheme TARGET ${requiredPackage} PROPERTY INTERFACE_CPF_PACKAGE_VERSION_COMPATIBILITY_SCHEME)
+					# We are dealing with an inlined package.
+					# In this case we need to check the version requirements on our own.
+					if(compatibilityScheme)
+						get_property(availableVersion TARGET ${requiredPackage} PROPERTY INTERFACE_CPF_VERSION)
+						cpfVersionIsCompatibleToRequirement(isCompatible ${availableVersion} ${requiredVersion} ${compatibilityScheme})
+
+						devMessage("${isCompatible}, available ${availableVersion}, required ${requiredVersion}")
+
+						if(NOT isCompatible)
+							message(FATAL_ERROR "The required version ${requiredVersion} of package ${requiredPackage} is not compatible to the available version ${availableVersion}. ${requiredPackage} uses compatibility scheme \"${compatibilityScheme}\".")
+						endif()
+					else()
+						message(FATAL_ERROR "The required dependency ${requiredPackage} is an inlined package that was not created with the cpfPackageProject() function. This is not supported.")
+					endif()
+
+				else()
+					# We are dealing with a package that has been imported by a different package in the project.
+					message(FATAL_ERROR "Case not yet handled. TODO test if this can be triggered.")
+				endif()
+
+			else()
+				# Try to import the required package if it is not availabe as inlined package.
+				find_package(${${requirementList}})
+			endif()
+
 		endforeach()
 	endif()
 

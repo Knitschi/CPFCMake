@@ -11,7 +11,22 @@ include(cpfConstants)
 # 
 function( cpfDefineProperties )
 
-	# A property that is set on all package-component targets.
+    # ----------------------- PROPERTIES OF PACKAGES ----------------------------
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_VERSION
+        BRIEF_DOCS "Contains the version number of the package."
+        FULL_DOCS " "
+    )
+
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_PACKAGE_VERSION_COMPATIBILITY_SCHEME
+        BRIEF_DOCS "Contains the packages version compatibility scheme."
+        FULL_DOCS " "
+    )
+
+    # ----------------------- PROPERTIES OF PACKAGE COMPONENTS (package component main target) ----------------------------
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_PACKAGE_COMPONENT_NAME
@@ -19,15 +34,13 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-	# A property that is set on all package-component main targets.
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_BRIEF_PACKAGE_COMPONENT_DESCRIPTION
         BRIEF_DOCS "Contains a short description about what the package-component is good for."
         FULL_DOCS " "
     )
-    
-	# A property that is set on all package-component main targets.
+
     define_property(
         TARGET
         PROPERTY INTERFACE_CPF_LONG_PACKAGE_COMPONENT_DESCRIPTION
@@ -35,6 +48,105 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_PACKAGE_COMPONENT_SUBTARGETS
+        BRIEF_DOCS "A list of all targets that are associated with the package-component including the main target."
+        FULL_DOCS " "
+    )
+
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS
+        BRIEF_DOCS "A list of all binary targets that are associated with the package-component including the main target."
+        FULL_DOCS " "
+    )
+
+	define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET
+        BRIEF_DOCS "For executables this contains the name of the helper implementation library target. For library targets this contains the name of the main target."
+        FULL_DOCS " "
+    )
+
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET
+        BRIEF_DOCS "The library the contains test utilities."
+        FULL_DOCS " "
+    )
+
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_TESTS_SUBTARGET
+        BRIEF_DOCS "The test-executable binary target."
+        FULL_DOCS " "
+    )
+
+	define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET
+        BRIEF_DOCS "The name of the target that installs all package-component components to the location defined by CMAKE_INSTALL_PREFIX."
+        FULL_DOCS " "
+    )
+
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_VALGRIND_SUBTARGET
+        BRIEF_DOCS "Contains the name of a sub-target that runs Valgrind or OpenCppCoverage."
+        FULL_DOCS " "
+    )
+
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_OPENCPPCOVERAGE_SUBTARGET
+        BRIEF_DOCS "Contains the name of a sub-target that runs Valgrind or OpenCppCoverage."
+        FULL_DOCS " "
+    )
+
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_RUN_CPP_TESTS_SUBTARGET
+        BRIEF_DOCS "The name of the sub-target that runs a cpp executable with all automated tests."
+        FULL_DOCS " "
+    )
+
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET
+        BRIEF_DOCS "The name of the sub-target that runs all automated tests."
+        FULL_DOCS " "
+    )
+
+    define_property(
+        TARGET
+        PROPERTY INTERFACE_CPF_RUN_FAST_TESTS_SUBTARGET
+        BRIEF_DOCS "The name of the sub-target that runs only the fast tests."
+        FULL_DOCS " "
+    )
+
+	define_property(
+        TARGET
+        PROPERTY CPF_DOXYGEN_SUBTARGET
+        BRIEF_DOCS "The name of a custom sub-target that runs doxygen in order to generate an xml tags file that contains documentation information of the modules source files."
+        FULL_DOCS " "
+    )
+
+	define_property(
+        TARGET
+        PROPERTY CPF_DOXYGEN_CONFIG_SUBTARGET
+        BRIEF_DOCS "The name of a custom sub-target that generates the per target doxygen config file by copying the global file and overwriting some options."
+        FULL_DOCS " "
+    )
+
+    define_property(
+		TARGET
+		PROPERTY INTERFACE_CPF_ABI_CHECK_SUBTARGETS
+		BRIEF_DOCS "The names of all custom sub-target that call the abi-compliance-checker tool."
+		FULL_DOCS " "
+    )
+
+    # ----------------------- PROPERTIES OF PACKAGE COMPONENT MAIN OR SUB-TARGETS ----------------------------
     # A property that is set on interface library targets.
     define_property(
         TARGET
@@ -51,46 +163,6 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-	# A property that is set on all package-component main targets that have the same name as their package.
-    define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS
-        BRIEF_DOCS "A list of all targets that are associated with the package-component including the main target."
-        FULL_DOCS " "
-    )
-
-    # A property that is set on all main targets that have the same name as their package.
-    define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS
-        BRIEF_DOCS "A list of all binary targets that are associated with the package-component including the main target."
-        FULL_DOCS " "
-    )
-
-	# A property that is set on all main targets.
-	define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET
-        BRIEF_DOCS "For executables this contains the name of the helper implementation library target. For library targets this contains the name of the main target."
-        FULL_DOCS " "
-    )
-
-    # A property that is set on all main targets.
-    define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET
-        BRIEF_DOCS "The library the contains test utilities."
-        FULL_DOCS " "
-    )
-
-    # A property that is set on all main targets.
-    define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_TESTS_SUBTARGET
-        BRIEF_DOCS "The test-executable binary target."
-        FULL_DOCS " "
-    )
-
     # A property that is set on interface library targets.
     define_property(
         TARGET
@@ -104,14 +176,6 @@ function( cpfDefineProperties )
         TARGET
         PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS
         BRIEF_DOCS "A list with install-components that are provided by the target. If no components are given, it means that the target does not contribute any installable files to the package."
-        FULL_DOCS " "
-    )
-
-	# A property that is set on all package-component main targets
-	define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET
-        BRIEF_DOCS "The name of the target that installs all package-component components to the location defined by CMAKE_INSTALL_PREFIX."
         FULL_DOCS " "
     )
 
@@ -139,59 +203,11 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 
-	# A property that is set on all package-component main targets.
-    define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_VALGRIND_SUBTARGET
-        BRIEF_DOCS "Contains the name of a sub-target that runs Valgrind or OpenCppCoverage."
-        FULL_DOCS " "
-    )
-
-    # A property that is set on all package-component main targets.
-    define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_OPENCPPCOVERAGE_SUBTARGET
-        BRIEF_DOCS "Contains the name of a sub-target that runs Valgrind or OpenCppCoverage."
-        FULL_DOCS " "
-    )
-
 	# A property that is set on the dynamic analysis targets.
     define_property(
         TARGET
         PROPERTY CPF_CPPCOVERAGE_OUTPUT
         BRIEF_DOCS "Contains a list of .cov files that are generated by running OpenCppCoverage."
-        FULL_DOCS " "
-    )
-
-    # A property that is set on some package-component main targets
-    define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_RUN_CPP_TESTS_SUBTARGET
-        BRIEF_DOCS "The name of the sub-target that runs a cpp executable with all automated tests."
-        FULL_DOCS " "
-    )
-
-    # A property that is set on some package-component main targets
-    define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_RUN_TESTS_SUBTARGET
-        BRIEF_DOCS "The name of the sub-target that runs all automated tests."
-        FULL_DOCS " "
-    )
-
-	# A property that is set on all package-component main targets
-    define_property(
-        TARGET
-        PROPERTY INTERFACE_CPF_RUN_FAST_TESTS_SUBTARGET
-        BRIEF_DOCS "The name of the sub-target that runs only the fast tests."
-        FULL_DOCS " "
-    )
-
-	# A property that is set on the modules main binary target.
-	define_property(
-        TARGET
-        PROPERTY CPF_DOXYGEN_SUBTARGET
-        BRIEF_DOCS "The name of a custom sub-target that runs doxygen in order to generate an xml tags file that contains documentation information of the modules source files."
         FULL_DOCS " "
     )
 
@@ -203,14 +219,6 @@ function( cpfDefineProperties )
         FULL_DOCS " "
     )
 	
-	# A property that is set on the modules main binary target.
-	define_property(
-        TARGET
-        PROPERTY CPF_DOXYGEN_CONFIG_SUBTARGET
-        BRIEF_DOCS "The name of a custom sub-target that generates the per target doxygen config file by copying the global file and overwriting some options."
-        FULL_DOCS " "
-    )
-
 	# A property that is set on the CPF_DOXYGEN_CONFIG_SUBTARGET targets.
 	define_property(
         TARGET
@@ -225,14 +233,6 @@ function( cpfDefineProperties )
         PROPERTY INTERFACE_CPF_ABI_DUMP_SUBTARGET
         BRIEF_DOCS "The names of the custom sub-target that create the abi dumps."
         FULL_DOCS " "
-    )
-    
-    # A property that is set on all package-component main targets
-    define_property(
-		TARGET
-		PROPERTY INTERFACE_CPF_ABI_CHECK_SUBTARGETS
-		BRIEF_DOCS "The names of all custom sub-target that call the abi-compliance-checker tool."
-		FULL_DOCS " "
     )
 
 	# A property that is set on some targets

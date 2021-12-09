@@ -439,7 +439,7 @@ function( cpfAddPackageBinaryTargets
 	# Set some properties
 	set(binaryTargets ${libraryTarget} ${exeTarget} ${fixtureTarget} ${unitTestsTarget})
     set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS ${binaryTargets})
-	set_property(TARGET ${packageComponent} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${binaryTargets})
+	set_property(TARGET ${packageComponent} APPEND PROPERTY INTERFACE_CPF_PACKAGE_COMPONENT_SUBTARGETS ${binaryTargets})
     set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET ${libraryTarget})
 	set( ${outProductionLibrary} ${libraryTarget} PARENT_SCOPE)
 

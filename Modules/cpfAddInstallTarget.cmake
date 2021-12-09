@@ -80,7 +80,7 @@ function(cpfAddInstallTarget package installTargetName components destDir clearD
 	# Set target properties
 	set_property(TARGET ${installTargetName} PROPERTY CPF_OUTPUT_FILES ${stampFile} )
 	set_property(TARGET ${installTargetName} PROPERTY FOLDER ${vsTargetFolder} )
-	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${installTargetName} )
+	set_property(TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_COMPONENT_SUBTARGETS ${installTargetName} )
 
 endfunction()
 
@@ -91,7 +91,7 @@ function( cpfGetInstallTargetDependencies fileDependenciesOut targetDependencies
 	set(fileDependencies)
 	set(targetDependencies)
 
-	get_property(subtargets TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS)
+	get_property(subtargets TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PACKAGE_COMPONENT_SUBTARGETS)
 
 	foreach(target ${subtargets})
 

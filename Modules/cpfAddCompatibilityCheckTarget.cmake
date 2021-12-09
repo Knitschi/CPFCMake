@@ -369,7 +369,7 @@ function( cpfAddAbiDumpTarget packageComponent binaryTarget headerListFile )
 	set_property(TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${abiDumpFile} )
 	set_property(TARGET ${targetName} PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS developer )
 	set_property(TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_ABI_DUMP_SUBTARGET ${targetName} )
-	set_property(TARGET ${packageComponent} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${targetName} )
+	set_property(TARGET ${packageComponent} APPEND PROPERTY INTERFACE_CPF_PACKAGE_COMPONENT_SUBTARGETS ${targetName} )
 
 endfunction()
 

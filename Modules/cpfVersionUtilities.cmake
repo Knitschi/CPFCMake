@@ -37,24 +37,36 @@ endfunction()
 # first number as major version, the second number as minor version  and the last part
 # as commitIdOut if it exists.
 # 
-function( cpfSplitVersion majorOut minorOut patchOut commitIdOut versionString)
-	
+function(cpfSplitVersion majorOut minorOut patchOut commitIdOut versionString)
+
+	set(majorVersion "")
+	set(minorVersion "")
+	set(patchNr "")
+	set(commitsNr "")
+
 	cpfSplitString( versionList ${versionString} ".")
-	list(GET versionList 0 majorVersion)
-	list(GET versionList 1 minorVersion)
-	list(GET versionList 2 patchNr)
+	cpfListLength(length "${versionList}")
+	
+	if(${length} GREATER 0)
+		list(GET versionList 0 majorVersion)
+	endif()
+
+	if(${length} GREATER 1)
+		list(GET versionList 1 minorVersion)
+	endif()
+
+	if(${length} GREATER 2)
+		list(GET versionList 2 patchNr)
+	endif()
+
+	if( ${length} GREATER 3 )
+		list(GET versionList 3 commitsNr)
+	endif()
 
 	set(${majorOut} ${majorVersion} PARENT_SCOPE)
 	set(${minorOut} ${minorVersion} PARENT_SCOPE)
 	set(${patchOut} ${patchNr} PARENT_SCOPE)
-
-	cpfListLength(length "${versionList}" )
-	if( ${length} GREATER 3 )
-		list(GET versionList 3 commitsNr)
-		set( ${commitIdOut} ${commitsNr} PARENT_SCOPE)
-	else()
-		set( ${commitIdOut} "" PARENT_SCOPE)
-	endif()
+	set(${commitIdOut} ${commitsNr} PARENT_SCOPE)
 
 endfunction()
 
@@ -109,4 +121,49 @@ function( cpfGetLastBuildAndLastReleaseVersion lastBuildVersionOut lastReleaseVe
 	
 endfunction()
 
+#----------------------------------------------------------------------------------------
+# Returns true if the availableVersion meats the version Requirement of the requiredVersion
+# in combination with the provided combatibilityScheme. 
+# 
+# Arguments:
+# compatibilityScheme: Can be one of <AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion>
+#					   Note that these are the schemes that are defined in the CMakePackageConfigHelpers documentation
+#					   https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#module:CMakePackageConfigHelpers
+# 
+function( cpfVersionIsCompatibleToRequirement isCompatibleOut availableVersion requiredVersion compatibilityScheme )
 
+	set(isCompatible FALSE)
+	cpfSplitVersion( majorRequired minorRequired patchRequired commitIdRequired ${requiredVersion})
+	cpfSplitVersion( majorAvailable minorAvailable patchAvailable commitIdAvailable ${availableVersion})
+
+	if("${compatibilityScheme}" STREQUAL AnyNewerVersion)
+		if(${requiredVersion} VERSION_LESS_EQUAL ${availableVersion})
+			set(isCompatible TRUE)
+		endif()
+	elseif("${compatibilityScheme}" STREQUAL SameMajorVersion)
+		if(${majorRequired} EQUAL ${majorAvailable})
+			set(isCompatible TRUE)
+		endif()
+	elseif("${compatibilityScheme}" STREQUAL SameMinorVersion)
+		if(${majorRequired} EQUAL ${majorAvailable})
+			if(${minorRequired} EQUAL ${minorAvailable})
+				set(isCompatible TRUE)
+			endif()
+		endif()
+	elseif("${compatibilityScheme}" STREQUAL ExactVersion)
+		devMessage("check exact version ${requiredVersion}  ${availableVersion}")
+		if(${requiredVersion} STREQUAL ${availableVersion})
+			set(isCompatible TRUE)
+		endif()
+	else()
+		message(FATAL_ERROR "Argument compatibilityScheme in function ${CMAKE_CURRENT_FUNCTION}() was set to invalid value \"${compatibilityScheme}\". Alowed values are AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion.")
+	endif()
+
+	set(${isCompatibleOut} ${isCompatible} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetReleaseVersionRegExp regexpOut )
+	set( ${regexpOut} "^[0-9]+[.][0-9]+[.][0-9]+$" PARENT_SCOPE) 
+endfunction()

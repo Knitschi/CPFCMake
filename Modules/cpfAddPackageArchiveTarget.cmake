@@ -211,7 +211,7 @@ function( cpfAddPackageArchiveTarget packageArchiveTargetNameOut package content
 		DEPENDS ${contentTargets} ${stampFile}
 	)
 
-	set_property( TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_SUBTARGETS ${targetName})
+	set_property( TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_COMPONENT_SUBTARGETS ${targetName})
 	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/private")
 	set_property( TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${stampFile})
 	set_property( TARGET ${targetName} PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS packageArchives)
