@@ -212,7 +212,7 @@ function( cpfFindPackageDependencies package)
 		
 		cpfContains(hasRequirements "${variables}" "CPF_PACKAGE_DEPENDENCIES")
 		if(NOT hasRequirements)
-			message(FATAL_ERROR "File \"${dependenciesFile}\" does not contain the required definition of the CPF_PACKAGE_DEPENDENCIES variable.\nThe file should at least contain an empty definition in the form of set(CPF_PACKAGE_DEPENDENCIES)")
+			message(FATAL_ERROR "File \"${dependenciesFile}\" does not contain the required definition of the CPF_PACKAGE_DEPENDENCIES variable.\nIf provided, the file should at least contain one definition for a dependency in the form of set(CPF_PACKAGE_DEPENDENCIES CPF_PACKAGE <depended-on-package> <version>)")
 		endif()
 
 		list(FIND variables CPF_PACKAGE_DEPENDENCIES index)
