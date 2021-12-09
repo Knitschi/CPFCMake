@@ -130,11 +130,18 @@ endfunction()
 #					   Note that these are the schemes that are defined in the CMakePackageConfigHelpers documentation
 #					   https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#module:CMakePackageConfigHelpers
 # 
-function( cpfVersionIsCompatibleToRequirement isCompatibleOut availableVersion requiredVersion compatibilityScheme )
+function( cpfVersionIsCompatibleToRequirement isCompatibleOut availableVersion requiredVersion compatibilityScheme ignoreDirty)
 
 	set(isCompatible FALSE)
 	cpfSplitVersion( majorRequired minorRequired patchRequired commitIdRequired ${requiredVersion})
 	cpfSplitVersion( majorAvailable minorAvailable patchAvailable commitIdAvailable ${availableVersion})
+
+	if(ignoreDirty)
+		cpfIsDirtyVersion(isDirty ${availableVersion})
+		if(isDirty)
+			cpfStringRemoveRight(availableVersion ${availableVersion} 6)
+		endif()
+	endif()
 
 	if("${compatibilityScheme}" STREQUAL AnyNewerVersion)
 		if(${requiredVersion} VERSION_LESS_EQUAL ${availableVersion})

@@ -241,7 +241,7 @@ function( cpfFindPackageDependencies package)
 					# In this case we need to check the version requirements on our own.
 					if(compatibilityScheme)
 						get_property(availableVersion TARGET ${requiredPackage} PROPERTY INTERFACE_CPF_VERSION)
-						cpfVersionIsCompatibleToRequirement(isCompatible ${availableVersion} ${requiredVersion} ${compatibilityScheme})
+						cpfVersionIsCompatibleToRequirement(isCompatible ${availableVersion} ${requiredVersion} ${compatibilityScheme} TRUE)
 						if(NOT isCompatible)
 							message(FATAL_ERROR "The required version ${requiredVersion} of package ${requiredPackage} is not compatible to the available version ${availableVersion}. ${requiredPackage} uses compatibility scheme \"${compatibilityScheme}\".")
 						endif()
