@@ -252,13 +252,13 @@ function( cpfGetShortDevBinPackageName shortNameOut packageComponent config vers
 
 	cpfGetDistributionPackageContentId( contentId CT_DEVELOPER "")
 	cpfGetBasePackageFilename( basePackageFileName ${packageComponent} ${config} ${version} ${contentId} ${packageFormat})
-	cpfGetDistributionPackageExtension( extension ${packageFormat})
+	cpfGetPackageArchiveExtension( extension ${packageFormat})
 	set( ${shortNameOut} ${basePackageFileName}.${extension} PARENT_SCOPE)
 
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetDistributionPackageExtension extensionOut packageFormat )
+function( cpfGetPackageArchiveExtension extensionOut packageFormat )
 
 	if( "${packageFormat}" STREQUAL 7Z )
 		set(extensionLocal 7z)
@@ -275,7 +275,7 @@ function( cpfGetDistributionPackageExtension extensionOut packageFormat )
 	elseif( "${packageFormat}" STREQUAL DEB )
 		set(extensionLocal deb)
 	else()
-		message(FATAL_ERROR "Package format \"${packageFormat}\" is not supported by function cpfGetDistributionPackageExtension().")
+		message(FATAL_ERROR "Package format \"${packageFormat}\" is not supported by function cpfGetPackageArchiveExtension().")
 	endif()
 
 	set(${extensionOut} ${extensionLocal} PARENT_SCOPE)
@@ -550,7 +550,7 @@ function( cpfGetLocationOfDownloadedDumpFile dumpFileOut packageComponent binary
 	
 	# get the name of the directory that is created when the package-component is extracted (the archive filename without the archive extensions)
 	cpfGetShortDevBinPackageName( archiveFileName ${packageComponent} ${CMAKE_BUILD_TYPE} ${version} ${packageFormat} )
-	cpfGetDistributionPackageExtension( archiveExtension ${packageFormat})
+	cpfGetPackageArchiveExtension( archiveExtension ${packageFormat})
 	# remove the extension
 	string(LENGTH ${archiveExtension} length)
 	cpfIncrement(length) # + 1 for the dot
