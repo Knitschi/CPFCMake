@@ -256,6 +256,7 @@ function( cpfFindPackageDependencies package)
 
 			else()
 				# Try to import the required package if it is not availabe as inlined package.
+				cpfDebugMessage("Call find_package() with arguments \"${${requirementList}}\"")
 				find_package(${${requirementList}})
 			endif()
 
