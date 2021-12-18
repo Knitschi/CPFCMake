@@ -34,7 +34,13 @@ function( cpfAddSphinxPackageComponent )
 
     cpfPrintAddPackageComponentStatusMessage("Sphinx")
 
+	cpfGetLastNodeOfCurrentSourceDir(packageComponent)
+
 	cpfAssertKeywordArgumentsHaveValue( "${requiredSingleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddSphinxPackageComponent()")
+
+	# Get values of cmake per-package global variables.
+	cpfSetPerComponentGlobalCMakeVariables(${CPF_CURRENT_PACKAGE} ${packageComponent})
+
     cpfAssertProjectVersionDefined()
     cpfFindSphinxBuild()
 
@@ -81,7 +87,6 @@ function( cpfAddSphinxPackageComponent )
         OUTPUT ${keyOutputFile}
     )
 
-    cpfGetCurrentSourceDir(packageComponent)
 	cpfAddPackageSources(sourceFiles ${CPF_CURRENT_PACKAGE})
 
 	cpfAddStandardCustomTarget(

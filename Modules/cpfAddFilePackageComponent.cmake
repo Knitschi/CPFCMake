@@ -25,7 +25,10 @@ function( cpfAddFilePackageComponent )
 
     cpfAssertProjectVersionDefined()
 
-    cpfGetCurrentSourceDir(packageComponent)
+    cpfGetLastNodeOfCurrentSourceDir(packageComponent)
+
+    # Get values of cmake per-package global variables.
+	cpfSetPerComponentGlobalCMakeVariables(${CPF_CURRENT_PACKAGE} ${packageComponent})
 
     cpfAddPackageSources(ARG_SOURCES ${CPF_CURRENT_PACKAGE})
 

@@ -4,11 +4,9 @@ include_guard(GLOBAL)
 #-----------------------------------------------------------
 # Returns the name of the current source directory as packageNameOut.
 #
-function(cpfGetCurrentSourceDir dirOut)
-
-    cpfGetParentDirectory( dir "${CMAKE_CURRENT_SOURCE_DIR}/blub")
+function(cpfGetLastNodeOfCurrentSourceDir dirOut)
+    cpfGetLastPathNode(dir "${CMAKE_CURRENT_SOURCE_DIR}")
     set(${dirOut} "${dir}" PARENT_SCOPE)
-
 endfunction()
 
 #-----------------------------------------------------------------------------------------
@@ -195,27 +193,48 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Returns all packages from the packages.cmake file
 #
-function( cpfGetAllPackages packagesOut )
+function( cpfGetPackages ownedPackagesOut externalPackagesOut )
 
-	set(packages)
+	set(ownedPackages)
+	set(externalPackages)
 
-	cpfGetPackageVariableLists( listNames ${CPF_ROOT_DIR} packageVariables)
+	cpfGetPackageVariableLists(listNames ${CPF_ROOT_DIR} packageVariables)
 	foreach(listName ${listNames})
+
 		cmake_parse_arguments(ARG "" "OWNED" "" ${${listName}})
 		cmake_parse_arguments(ARG "" "EXTERNAL" "" ${${listName}})
 
 		if(ARG_OWNED)
-			cpfListAppend(packages ${ARG_OWNED})
+			cpfGetLastPathNode(package ${ARG_OWNED})
+			#devMessage("${ARG_OWNED} - ${package}")
+			cpfListAppend(ownedPackages ${package})
 		elseif(ARG_EXTERNAL)
-			cpfListAppend(packages ${ARG_EXTERNAL})
+			cpfGetLastPathNode(package ${ARG_EXTERNAL})
+			#devMessage("${ARG_EXTERNAL} - ${package}")
+			cpfListAppend(externalPackages ${package})
 		else()
 			message(FATAL_ERROR "Error! Unexpected case when parsing CPF_PACKAGES lists.")
 		endif()
 
 	endforeach()
 
-	set(${packagesOut} "${packages}" PARENT_SCOPE)
+	set(${ownedPackagesOut} "${ownedPackages}" PARENT_SCOPE)
+	set(${externalPackagesOut} "${externalPackages}" PARENT_SCOPE)
 
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function(cpfGetAllPackages packagesOut)
+	cpfGetPackages(ownedPackages externalPackages)
+	set(${packagesOut} "${ownedPackages};${externalPackages}" PARENT_SCOPE)
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns a list with the owned packages from the packages.cmake file
+#
+function( cpfGetOwnedPackages packagesOut rootDir )
+	cpfGetPackages(ownedPackages externalPackages)
+	set(${packagesOut} "${ownedPackages}" PARENT_SCOPE)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
@@ -232,17 +251,33 @@ function( cpfGetPackageVariableLists packageVariableListsOut rootDir outputListB
 
 	set(packageIndex -1)
 	set(currentVariableList)
+	set(packageVariableLists)
 	foreach(element ${packages})
 		
 		isOwnedOrExternal( isNewPackageKeyword ${element} )
 		if(isNewPackageKeyword)
 			cpfIncrement(packageIndex)
+			
+			# We need to clear the list variable because we later lift it to the PARENT_SCOPE
+			# which means that it may already defined here by previous calls.
+			set(${outputListBaseName}${packageIndex})	
+
 			set(currentVariableList ${outputListBaseName}${packageIndex})
 			cpfListAppend(packageVariableLists ${currentVariableList})
 		endif()
 
 		cpfListAppend(${currentVariableList} ${element})
 
+	endforeach()
+
+	# Check that all lists only contain two elements (keyword and package name).
+	# This is done to catch old use cases where override variables could be added to the package list
+	# which is no longer supported.
+	foreach(list ${packageVariableLists})
+		cpfListLength(length "${${list}}")
+		if(NOT (${length} EQUAL 2))
+			message(FATAL_ERROR "Error! The variable CPF_PACKAGES in the packages.cmake must be a list of [OWNED|EXTERNAL] <package> pairs. Found \"${${list}}\" instead.")
+		endif()
 	endforeach()
 
 	set( ${packageVariableListsOut} "${packageVariableLists}" PARENT_SCOPE)
@@ -300,75 +335,21 @@ function( isOwnedOrExternal isOut var )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-# Returns a list with the owned packages from the packages.cmake file
-#
-function( cpfGetOwnedPackages packagesOut rootDir )
-
-	set(packages)
-
-	cpfGetPackageVariableLists( listNames ${rootDir} packageVariables)
-	foreach(listName ${listNames})
-		
-		cmake_parse_arguments(ARG "" "OWNED" "" ${${listName}})
-		if(ARG_OWNED)
-			cpfListAppend(packages ${ARG_OWNED})
-		endif()
-
-	endforeach()
-
-	set(${packagesOut} "${packages}" PARENT_SCOPE)
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
 # Reads the packages and overridden variables from the packages.cmake file and adds
 # the packages as subdirectories.
 #
 function( cpfAddPackageSubdirectories )
 
-	cpfGetPackageDefaultValueVariables(overridableVariables)
-
 	cpfGetPackageVariableLists( listNames ${CPF_ROOT_DIR} packageVariables)
 	foreach(listName ${listNames})
-		
-		# The second element must be the package name.
-		list(GET ${listName} 1 package )
-		cmake_parse_arguments(ARG "" "${overridableVariables}" "" ${${listName}})
 
-		# Override the global variables with the values from the list.
-		foreach(variable ${overridableVariables})
-			if(NOT "${ARG_${variable}}" STREQUAL "")
-				set(${variable} ${ARG_${variable}})
-				cpfDebugMessage("Override ${variable} with \"${ARG_${variable}}\"")
-			endif()
-		endforeach()
+		# The second element must be the package name.
+		list(GET ${listName} 1 packageDir )
 
 		# Now add the subdirectory.
-		add_subdirectory(${package})
+		add_subdirectory(${packageDir})
 
 	endforeach()
-
-endfunction()
-
-#---------------------------------------------------------------------------------------------
-# Returns the names of the variables that can be overridden in the packages.cmake file.
-function( cpfGetPackageDefaultValueVariables variablesOut )
-
-	set( variables 
-		BUILD_SHARED_LIBS
-		CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS
-		CPF_ENABLE_ABI_API_STABILITY_CHECK_TARGETS
-		CPF_ENABLE_CLANG_TIDY_TARGET
-		CPF_ENABLE_OPENCPPCOVERAGE_TARGET
-		CPF_ENABLE_PACKAGE_DOX_FILE_GENERATION
-		CPF_ENABLE_PRECOMPILED_HEADER
-		CPF_ENABLE_RUN_TESTS_TARGET
-		CPF_ENABLE_VALGRIND_TARGET
-		CPF_ENABLE_VERSION_RC_FILE_GENERATION
-		CPF_COMPILE_OPTIONS
-	)
-
-	set(${variablesOut} "${variables}" PARENT_SCOPE)
 
 endfunction()
 
@@ -407,7 +388,7 @@ endfunction()
 #--------------------------------------------------------------------------------------------
 function( cpfPrintAddPackageComponentStatusMessage packageType )
 
-	cpfGetCurrentSourceDir(packageComponent)
+	cpfGetLastNodeOfCurrentSourceDir(packageComponent)
 	cpfGetTagsOfHEAD( tags "${CMAKE_CURRENT_SOURCE_DIR}" )
 	set(tagged)
 	if(tags)

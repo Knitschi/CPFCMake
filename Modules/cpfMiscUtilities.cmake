@@ -175,6 +175,73 @@ function(cpfGetOptionalPackageComponentOption optionOut package packageComponent
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Implements the mechanism that allows setting package and package-component specific values
+# for certain CMake variables.
+#
+function( cpfSetPerPackageGlobalCMakeVariables package )
+
+	cpfGetPerPackageCMakeVariables(cmakeVariables)
+
+	foreach(variable ${cmakeVariables})
+		if(NOT ("${${package}_${variable}}" STREQUAL ""))
+			set(${variable} "${${package}_${variable}}" PARENT_SCOPE)
+		endif()
+	endforeach()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Implements the mechanism that allows setting package and package-component specific values
+# for certain CMake variables.
+#
+function( cpfSetPerComponentGlobalCMakeVariables package packageComponent )
+
+	cpfGetPerPackageCMakeVariables(cmakeVariables)
+
+	foreach(variable ${cmakeVariables})
+		if(NOT ("${${package}_${packageComponent}_${variable}}" STREQUAL ""))
+			set(${variable} "${${package}_${packageComponent}_${variable}}" PARENT_SCOPE)
+		endif()
+	endforeach()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Defines all CMake variables that can be set per package or package-component.
+function( cpfGetPerPackageCMakeVariables variablesOut )
+
+	set(cmakeVariables 
+		BUILD_SHARED_LIBS
+		CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+		CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY
+		CMAKE_LIBRARY_OUTPUT_DIRECTORY
+		CMAKE_PDB_OUTPUT_DIRECTORY
+		CMAKE_RUNTIME_OUTPUT_DIRECTORY
+	)
+
+	set(cmakeVariablesConfig
+		CMAKE_ARCHIVE_OUTPUT_DIRECTORY_config
+		CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY_config
+		CMAKE_config_POSTFIX
+		CMAKE_LIBRARY_OUTPUT_DIRECTORY_config
+		CMAKE_PDB_OUTPUT_DIRECTORY_config
+		CMAKE_RUNTIME_OUTPUT_DIRECTORY_config
+	)
+
+	cpfGetConfigVariableSuffixes(suffixes)
+	foreach(configVariable ${cmakeVariablesConfig})
+		foreach(suffix ${suffixes})
+			string(REPLACE config ${suffix} ${configVariable} variable ${configVariable})
+			cpfListAppend(cmakeVariables ${variable})
+		endforeach()
+	endforeach()
+
+	set(${variablesOut} ${cmakeVariables} PARENT_SCOPE)
+
+endfunction()
+
+
+#----------------------------------------------------------------------------------------
 # A common variant of executing a process that will cause an cmake error when the command fails.
 # You can add an optional argument PRINT to display the output of the command.
 # Note that the function strips trailing whitespaces (line-endings) from the output.
@@ -333,5 +400,6 @@ function( cpfConfigureFileWithVariables input output variables )
 	endforeach()
 	configure_file( "${input}" "${output}" )
 endfunction()
+
 
 

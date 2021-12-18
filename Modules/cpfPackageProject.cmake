@@ -53,7 +53,10 @@ macro( cpfPackageProject )
 	cpfGetKeywordValueLists(distributionPackageOptionLists PACKAGE_ARCHIVES "${allKeywords}" "${ARGN}" packagOptions)
 
 	# The package name is defined by the sub-directory name
-    cpfGetCurrentSourceDir(package)
+    cpfGetLastNodeOfCurrentSourceDir(package)
+
+	# Read the per package global cmake variables.
+	cpfSetPerPackageGlobalCMakeVariables(${package})
 
 	# Find dependet on packages
 	cpfFindPackageDependencies(${package})

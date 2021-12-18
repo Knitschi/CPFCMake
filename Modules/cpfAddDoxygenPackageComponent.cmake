@@ -51,18 +51,25 @@ function( cpfAddDoxygenPackageComponent )
 
 	cpfPrintAddPackageComponentStatusMessage("Doxygen")
 
+	if(NOT ARG_PROJECT_NAME)
+		set(ARG_PROJECT_NAME ${CPF_CI_PROJECT})
+	endif()
+
+	cpfGetLastNodeOfCurrentSourceDir( packageComponent )
+
 	cpfAssertKeywordArgumentsHaveValue( "${singleValueKeywords};${requiredMultiValueKeywords}" ARG "cpfAddDoxygenPackageComponent()")
 	cpfAssertProjectVersionDefined()
+
+	# Get per package variables
+	cpfGetOptionalPackageComponentOption(ARG_DOXYGEN_BIN_DIR ${CPF_CURRENT_PACKAGE} ${packageComponent} DOXYGEN_BIN_DIR "")
+
+	# Get values of cmake per-package global variables.
+	cpfSetPerComponentGlobalCMakeVariables(${CPF_CURRENT_PACKAGE} ${packageComponent})
 
 	cpfFindRequiredProgram( TOOL_DOXYGEN doxygen "A tool that generates documentation files by reading in-code comments" "${ARG_DOXYGEN_BIN_DIR}")
 	cpfFindRequiredProgram( TOOL_DOXYINDEXER doxyindexer "A tool that generates search indexes for doxygen generated html files" "${ARG_DOXYGEN_BIN_DIR}")
 	cpfFindRequiredProgram( TOOL_TRED tred "A tool from the graphviz library that creates a transitive reduced version of a graphviz graph" "")
 
-	if(NOT ARG_PROJECT_NAME)
-		set(ARG_PROJECT_NAME ${CPF_CI_PROJECT})
-	endif()
-
-	cpfGetCurrentSourceDir( packageComponent )
 	cpfAddPackageSources(ARG_SOURCES ${CPF_CURRENT_PACKAGE})
 
 

@@ -88,6 +88,8 @@ abi-compliance-checker
 This target bundles the \ref abicompliancechecker_package targets.
 
 
+.. _acyclic:
+
 acyclic
 """""""
 

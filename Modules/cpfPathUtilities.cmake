@@ -4,6 +4,7 @@ include_guard(GLOBAL)
 
 #----------------------------------------------------------------------------------------
 # Writes the name of the immediate parent directory to parantDirOut
+#
 function ( cpfGetParentDirectory parantDirOut absDirOrFilePath )
 	
 	get_filename_component( dir ${absDirOrFilePath} DIRECTORY)
@@ -16,6 +17,24 @@ function ( cpfGetParentDirectory parantDirOut absDirOrFilePath )
 	cpfIncrement(index)
 	cpfRightSideOfString(dirName ${dir} ${index})
 	set( ${parantDirOut} ${dirName}  PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# path: bli/bla/blub -> returns blub
+# path: blub	     -> returns blub
+#
+function (cpfGetLastPathNode lastNodeOut path)
+	
+	string(FIND ${path} "/" index REVERSE)			# get the index of the last directory separator
+	if(${index} EQUAL -1)
+		set(${lastNodeOut} ${path} PARENT_SCOPE)
+		return()
+	endif()
+
+	cpfIncrement(index)
+	cpfRightSideOfString(lastNode ${path} ${index})
+	set(${lastNodeOut} ${lastNode} PARENT_SCOPE)
 
 endfunction()
 

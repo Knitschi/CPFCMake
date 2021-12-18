@@ -558,6 +558,8 @@ TEST_FILES
 All files that belong to the test executable target.
 
 
+.. _COMPILE_OPTIONS:
+
 COMPILE_OPTIONS
 ^^^^^^^^^^^^^^^
 
@@ -606,6 +608,8 @@ must be deployed so they are found by the executable. This if often a :code:`plu
 :code:`PLUGIN_TARGETS`: The name of the targets that provide the plugin libraries.
 
 
+.. _ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS:
+
 ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -614,6 +618,8 @@ This option is ignored on non-Linux platforms.
 Setting this argument overrides the value of the global :code:`CPF_ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS` variable for this package.
 
 
+.. _ENABLE_ABI_API_STABILITY_CHECK_TARGETS:
+
 ENABLE_ABI_API_STABILITY_CHECK_TARGETS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -621,6 +627,8 @@ This option can be used to enable or disable the enforcement of version compatib
 and the last release version. It requires option :code:`ENABLE_ABI_API_COMPATIBILITY_REPORT_TARGETS` to be set.
 Setting this argument overrides the value of the global :code:`CPF_ENABLE_ABI_API_STABILITY_CHECK_TARGETS` variable for this package.
 
+
+.. _ENABLE_CLANG_FORMAT_TARGETS:
 
 ENABLE_CLANG_FORMAT_TARGETS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -639,6 +647,9 @@ Enabling the clang-format target requires two dependencies.
    argument to your project to make it visible in the Visual Studio solution. 
    Read the `clang-format`_ documentation to see what you have to put into that file.
 
+
+.. _ENABLE_CLANG_TIDY_TARGET:
+
 ENABLE_CLANG_TIDY_TARGET
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -647,6 +658,8 @@ This option is ignored if the compiler is not clang.
 Setting this argument overrides the value of the global :code:`CPF_ENABLE_CLANG_TIDY_TARGET` variable for this package.
 
 
+.. _ENABLE_OPENCPPCOVERAGE_TARGET:
+
 ENABLE_OPENCPPCOVERAGE_TARGET
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -654,6 +667,8 @@ This option can be used to enable or disable the :ref:`opencppcoverage_package` 
 This option is ignored on non-Windows platforms.
 Setting this argument overrides the value of the global :code:`CPF_ENABLE_OPENCPPCOVERAGE_TARGET` variable for this package.
 
+
+.. _ENABLE_PACKAGE_DOX_FILE_GENERATION:
 
 ENABLE_PACKAGE_DOX_FILE_GENERATION
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -672,6 +687,8 @@ binary targets. Using the this option requires the cotire dependency.
 Setting this argument overrides the value of the global :code:`CPF_ENABLE_PRECOMPILED_HEADER` variable for this package.
 
 
+.. _ENABLE_RUN_TESTS_TARGET:
+
 ENABLE_RUN_TESTS_TARGET
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -679,6 +696,8 @@ This option can be used to enable or disable the :ref:`runAllTests_package` and 
 targets. The option is ignored if the package-component does not have a test executable.
 Setting this argument overrides the value of the global :code:`CPF_ENABLE_RUN_TESTS_TARGET` variable for this package.
 
+
+.. _ENABLE_VALGRIND_TARGET:
 
 ENABLE_VALGRIND_TARGET
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -826,7 +845,7 @@ cpfAddDoxygenPackageComponent()
 
 .. code-block:: cmake
 
-  cpfAddFilePackageComponent(
+  cpfAddDoxygenPackageComponent(
       [PROJECT_NAME name]
       DOXYGEN_CONFIG_FILE absPath
       DOXYGEN_LAYOUT_FILE absPath
@@ -838,6 +857,7 @@ cpfAddDoxygenPackageComponent()
       [PROJECT_LOGO absPath]
       [PLANTUML_JAR_PATH absPath]
       [RUN_DOXYINDEXER]
+      [DOXYGEN_BIN_DIR]
   )
 
 
@@ -943,6 +963,14 @@ RUN_DOXYINDEXER
 This option can be added to also run the doxyindexer tool to generate the :code:`searchdata.db`
 directory that is required when using the server-side search feature of doxygen.
 The directory will be created in the :code:`Generated/\<config\>/html/cgi-bin` directory.
+
+
+.. _DOXYGEN_BIN_DIR:
+
+DOXYGEN_BIN_DIR
+^^^^^^^^^^^^^^^
+
+This option can be set to the directory that contains the doxygen executable if CPFCMake is not able to find the correct one.
 
 
 *****************************************
