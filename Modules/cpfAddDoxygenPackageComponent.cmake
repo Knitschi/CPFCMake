@@ -81,13 +81,13 @@ function( cpfAddDoxygenPackageComponent )
 	set(doxygenHtmlSubdir html)
 
 	# Get dependencies
-	cpfGetOwnedPackages( documentedPackages ${CPF_ROOT_DIR})
+	cpfGetOwnedPackages(documentedPackages)
 	cpfListAppend(documentedPackages "${ARG_ADDITIONAL_PACKAGES}")
 	set(generatedDoxFiles)
 	set(targetDependencies)
 	set(hasGeneratedDocumentation FALSE)
-	foreach( packageComponent ${documentedPackages})
-		cpfGetPackageDoxFilesTargetName( doxFilesTarget ${packageComponent} )
+	foreach(package ${documentedPackages})
+		cpfGetPackageDoxFilesTargetName(doxFilesTarget ${package} )
 		if( TARGET ${doxFilesTarget}) # not all package-components may have the doxFilesTarget
 			list(APPEND targetDependencies ${doxFilesTarget})
 			get_property( doxFiles TARGET ${doxFilesTarget} PROPERTY CPF_OUTPUT_FILES )
@@ -150,11 +150,12 @@ function( cpfAddDoxygenPackageComponent )
 	endif()
 
 	# Exclude non-owned packages from the documentation unless they were not explicitly added to the documentation.
-	cpfGetAllPackages( allPackageComponents )
-	foreach( packageComponent ${allPackageComponents})
-		cpfContains( isDocumented "${documentedPackages}" ${packageComponent} )
+	cpfGetAllPackages(allPackages)
+	foreach( package ${allPackages})
+		cpfContains(isDocumented "${documentedPackages}" ${package} )
 		if(NOT isDocumented)
-			list(APPEND appendedLines "EXCLUDE += \"${CMAKE_SOURCE_DIR}/${packageComponent}\"")
+			cpfGetAbsPackageDirectory(packageDir ${package})
+			list(APPEND appendedLines "EXCLUDE += \"${packageDir}\"")
 		endif()
 	endforeach()
 

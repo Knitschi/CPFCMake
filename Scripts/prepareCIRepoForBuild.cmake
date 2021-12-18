@@ -47,12 +47,12 @@ if(doReleaseTag)
         set(packageRepoDir ${ROOT_DIR})
     else()
         # Check the package directory exists
-        cpfGetAbsPackageDirectory( packageDir ${RELEASED_PACKAGE} "${ROOT_DIR}")
+        cpfGetAbsPackageDirectoryFromPackagesFile( packageDir ${RELEASED_PACKAGE} "${ROOT_DIR}")
         if(NOT EXISTS ${packageDir})
             message( FATAL_ERROR "Error! The CI-project does not contain a directory for the given package \"${RELEASED_PACKAGE}\".")
         endif()
         # Check the package is owned by this CI-project.
-        cpfGetOwnedPackages( ownedPackages "${ROOT_DIR}")
+        cpfGetOwnedPackagesFromRootDir(ownedPackages "${ROOT_DIR}")
         cpfContains(isOwnedPackage "${ownedPackages}" ${RELEASED_PACKAGE})
         if(NOT isOwnedPackage)
             message( FATAL_ERROR "Error! The CI-project does not own the given package \"${RELEASED_PACKAGE}\". It can only set release tags for owned packages.")
@@ -137,7 +137,7 @@ else()
         foreach( package ${ownedLoosePackages} )
             message( STATUS "Check package ${package}")
 
-            cpfGetAbsPackageDirectory( packageDir ${package} ${ROOT_DIR})
+            cpfGetAbsPackageDirectoryFromPackagesFile( packageDir ${package} ${ROOT_DIR})
 
             # Checkout the tracked branch
             cpfGetPackagesTrackedBranch( packageBranch ${package} ${ROOT_DIR})
@@ -172,7 +172,7 @@ else()
 
                 # Commit the changes made to the packges.
                 foreach(package ${ownedLoosePackages})
-                    cpfGetAbsPackageDirectory( packageDir ${package} "${ROOT_DIR}")
+                    cpfGetAbsPackageDirectoryFromPackagesFile( packageDir ${package} "${ROOT_DIR}")
                     cpfGitStatus("${packageDir}") # This call fixed some strange problems where cpfWorkingDirectoryIsDirty() returned incorrect values.
                     cpfWorkingDirectoryIsDirty(isDirty "${packageDir}")
                     if(isDirty)

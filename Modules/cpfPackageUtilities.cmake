@@ -34,7 +34,7 @@ endfunction()
 #------------------------------------------------------------------------------------------
 function( cpfIsMultiComponentPackage isMultiOut package )
 
-	cpfGetAbsPackageDirectory(packageDir ${package} "${CPF_ROOT_DIR}")
+	cpfGetAbsPackageDirectory(packageDir ${package})
 	get_property(components DIRECTORY "${packageDir}" PROPERTY CPF_PACKAGE_COMPONENTS)
 	if("${components}" STREQUAL SINGLE_COMPONENT)
 		set(${isMultiOut} FALSE PARENT_SCOPE)
@@ -52,7 +52,7 @@ function( cpfAddPackageSources sourcesVarName package )
 
 	cpfIsMultiComponentPackage(isMulti ${package})
 	if(NOT isMulti)
-		cpfGetAbsPackageDirectory(packageDir ${package} "${CPF_ROOT_DIR}")
+		cpfGetAbsPackageDirectory(packageDir ${package})
 		get_property(packageSources DIRECTORY ${packageDir} PROPERTY CPF_PACKAGE_SOURCES)
 		set(${sourcesVarName} "${${sourcesVarName}};${packageSources}" PARENT_SCOPE)
 	endif()
@@ -193,12 +193,12 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Returns all packages from the packages.cmake file
 #
-function( cpfGetPackages ownedPackagesOut externalPackagesOut )
+function( cpfGetPackages ownedPackagesOut externalPackagesOut rootDir)
 
 	set(ownedPackages)
 	set(externalPackages)
 
-	cpfGetPackageVariableLists(listNames ${CPF_ROOT_DIR} packageVariables)
+	cpfGetPackageVariableLists(listNames ${rootDir} packageVariables)
 	foreach(listName ${listNames})
 
 		cmake_parse_arguments(ARG "" "OWNED" "" ${${listName}})
@@ -225,15 +225,23 @@ endfunction()
 
 #---------------------------------------------------------------------------------------------
 function(cpfGetAllPackages packagesOut)
-	cpfGetPackages(ownedPackages externalPackages)
+	cpfGetPackages(ownedPackages externalPackages ${CPF_ROOT_DIR})
 	set(${packagesOut} "${ownedPackages};${externalPackages}" PARENT_SCOPE)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Returns a list with the owned packages from the packages.cmake file
 #
-function( cpfGetOwnedPackages packagesOut rootDir )
-	cpfGetPackages(ownedPackages externalPackages)
+function( cpfGetOwnedPackages packagesOut )
+	cpfGetPackages(ownedPackages externalPackages ${CPF_ROOT_DIR})
+	set(${packagesOut} "${ownedPackages}" PARENT_SCOPE)
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns a list with the owned packages from the packages.cmake file
+#
+function( cpfGetOwnedPackagesFromRootDir packagesOut rootDir )
+	cpfGetPackages(ownedPackages externalPackages ${rootDir})
 	set(${packagesOut} "${ownedPackages}" PARENT_SCOPE)
 endfunction()
 
@@ -343,7 +351,7 @@ function( cpfAddPackageSubdirectories )
 	cpfGetPackageVariableLists( listNames ${CPF_ROOT_DIR} packageVariables)
 	foreach(listName ${listNames})
 
-		# The second element must be the package name.
+		# The second element must be the package directory.
 		list(GET ${listName} 1 packageDir )
 
 		# Now add the subdirectory.
@@ -354,12 +362,34 @@ function( cpfAddPackageSubdirectories )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
+# Returns the root directory of a package in a CPF project
+# This function is slower but can be used in scripts.
+function( cpfGetAbsPackageDirectoryFromPackagesFile packageDirOut package rootDir)
+
+	cpfGetPackageVariableLists(listNames ${rootDir} packageVariables)
+	foreach(listName ${listNames})
+
+		list(GET ${listName} 1 packageDir )
+		cpfGetLastPathNode(packageFromList ${packageDir})
+
+		if(${packageFromList} STREQUAL ${package})
+			set(${packageDirOut} "${packageDir}" PARENT_SCOPE)
+			return()
+		endif()
+
+	endforeach()
+
+	set(${packageDirOut} "" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
 # Returns the owned packages that are not in the same repository as the CI-project.
 #  
 function( cpfGetOwnedLoosePackages loosePackagesOut rootDir )
 
 	set(loosePackages)
-	cpfGetOwnedPackages( ownedPackages ${rootDir})
+	cpfGetOwnedPackagesFromRootDir( ownedPackages ${rootDir})
 	foreach(package ${ownedPackages})
 		cpfIsLoosePackage( isLoose ${package} ${rootDir})
 		if(isLoose)
@@ -374,7 +404,7 @@ endfunction()
 # Returns true if the package-component is not in the same repository as the ci-project.
 function( cpfIsLoosePackage isLooseOut package rootDir)
 
-	cpfGetAbsPackageDirectory( packageDir ${package} ${rootDir})
+	cpfGetAbsPackageDirectoryFromPackageFile( packageDir ${package} ${rootDir})
 	cpfGetHashOfTag( packageHash HEAD "${packageDir}")
 	cpfGetHashOfTag( rootHash HEAD "${rootDir}")
 	if( ${packageHash} STREQUAL ${rootHash} )
@@ -415,13 +445,13 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # returns the absolute paths to the repository directories that are owned by the CPF project located at rootDir
 #
-function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)
+function(cpfGetOwnedRepositoryDirectories dirsOut rootDir)
 
 	# Get all directories that may belong to different owned repositories
-	cpfGetOwnedPackages( ownedPackages ${rootDir})
+	cpfGetOwnedPackagesFromRootDir(ownedPackages ${rootDir})
 	set( possibleRepoDirectories ${rootDir} )
 	foreach(package ${ownedPackages})
-		cpfGetAbsPackageDirectory( packageDirOut ${package} ${rootDir})
+		cpfGetAbsPackageDirectoryFromPackageFile( packageDirOut ${package} ${rootDir})
 		list(APPEND possibleRepoDirectories ${packageDirOut})
 	endforeach()
 

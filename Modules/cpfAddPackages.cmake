@@ -61,7 +61,7 @@ function( cpfAddPackages )
 	set_property(TARGET pipeline PROPERTY SOURCES ${SOLUTION_FILES})
 
 	cpfGetAllPackages(packages)
-	cpfGetOwnedPackages(ownedPackages "${CPF_ROOT_DIR}")
+	cpfGetOwnedPackages(ownedPackages)
 
 	# clang format
 	cpfAddGlobalClangFormatTarget("${ownedPackages}" )

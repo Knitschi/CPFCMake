@@ -31,14 +31,15 @@ set( CPF_PACKAGES_FILE "packages.cmake")
 
 ###### Parameterized locations ######
 
-# returns the root directory of a package in a CPF project
-function( cpfGetAbsPackageDirectory packageDirOut package cpfRootDir )
-	set( ${packageDirOut} "${cpfRootDir}/${CPF_SOURCE_DIR}/${package}" PARENT_SCOPE)
+# Returns the root directory of a package in a CPF project
+# This function can not be used in scripts.
+function( cpfGetAbsPackageDirectory packageDirOut package)
+	set(${packageDirOut} "${${package}_SOURCE_DIR}" PARENT_SCOPE)
 endfunction()
 
 # returns the full path of the CPFPackageDependencyRequirements.cmake file.
 function( cpfGetFullPackageDependenciesFilePath pathOut package)
-	cpfGetAbsPackageDirectory(packageDir ${package} "${CPF_ROOT_DIR}")
+	cpfGetAbsPackageDirectory(packageDir ${package})
 	set(${pathOut} "${packageDir}/CPFPackageDependencyRequirements.cmake" PARENT_SCOPE)
 endfunction()
 
