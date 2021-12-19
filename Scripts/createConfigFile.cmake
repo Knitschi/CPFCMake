@@ -1,10 +1,13 @@
 
 # This script is used to generated ${CPF_CONFIG}.config.cmake files in the Configuration sub directory.
 # ARGUMENTS
-# DERIVED_CONFIG			- The base name of the generated file.
-# PARENT_CONFIG				- The base name of an inherited config file.
-# LIST_CONFIGURATIONS		- Set to true to only print the already existing configurations.
-
+# DERIVED_CONFIG				- The base name of the generated file.
+# PARENT_CONFIG					- The base name of an inherited config file.
+# LIST_CONFIGURATIONS			- Set to true to only print the already existing configurations.
+# CPF_ROOT_DIR						- The absolute path to the projects root directory.
+# CPFCMake_DIR					- The absolute path to the CPFCMake package.
+# CIBuildConfigurations_DIR		- The absolute path to the CIBuildConfigurations package.
+#
 include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 
 include(cpfConstants)
@@ -15,7 +18,11 @@ include(cpfPathUtilities)
 include(cpfAssertions)
 include(cpfConfigUtilities)
 
-cpfNormalizeAbsPath( CPF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../..")
+cpfAssertScriptArgumentDefined(CPF_ROOT_DIR)
+cpfAssertScriptArgumentDefined(CPFCMake_DIR)
+cpfAssertScriptArgumentDefined(CIBuildConfigurations_DIR)
+
+message("") # empty line to separate the output from the calling output.
 
 if(LIST_CONFIGURATIONS)
 
@@ -30,7 +37,7 @@ if(LIST_CONFIGURATIONS)
 	endif()
 
 	# Project configs
-	cpfGetConfigurationsInDirectory( projectConfigs "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/${CPF_PROJECT_CONFIGURATIONS_DIR}"	)
+	cpfGetConfigurationsInDirectory( projectConfigs "${CIBuildConfigurations_DIR}"	)
 	if(projectConfigs)
 		message(STATUS "Project configurations:")
 		foreach(config ${projectConfigs})
@@ -40,7 +47,7 @@ if(LIST_CONFIGURATIONS)
 	endif()
 
 	# CPF configs
-	cpfGetConfigurationsInDirectory( cpfConfigs "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/${CPF_DEFAULT_CONFIGS_DIR}"	)
+	cpfGetConfigurationsInDirectory( cpfConfigs "${CPFCMake_DIR}/${CPF_DEFAULT_CONFIGS_DIR}"	)
 	if(cpfConfigs)
 		message(STATUS "CPF base configurations:")
 		foreach(config ${cpfConfigs})
@@ -55,7 +62,7 @@ else() # Do the file generation
 	cpfAssertScriptArgumentDefined(PARENT_CONFIG)
 
 	# Find the location of the inherited configuration
-	cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}" FALSE)
+	cpfFindConfigFile( fullInheritedConfigFile "${PARENT_CONFIG}" FALSE "${CPFCMake_DIR}" "${CIBuildConfigurations_DIR}")
 
 	# CREATE CONFIG-FILE CONTENT 
 	cpfNormalizeAbsPath( pathToVariables "${CMAKE_CURRENT_LIST_DIR}/../Modules")
@@ -76,7 +83,8 @@ else() # Do the file generation
 	# Add definitions for the variables that were set by using the "-D"-options.
 	cpfListAppend( fileContent "# Overridden or new cache variables." )
 	cpfGetScriptDOptionVariableNames( dVariables )
-	list(REMOVE_ITEM dVariables DERIVED_CONFIG PARENT_CONFIG )
+	# Remove the values that are used by this script.
+	list(REMOVE_ITEM dVariables DERIVED_CONFIG PARENT_CONFIG)
 	foreach( variable ${dVariables})
 		cpfIsCacheVariable( isCacheVar ${variable})
 		if(isCacheVar) 
@@ -106,13 +114,15 @@ else() # Do the file generation
 
 
 	# Write the lines in fileContent to the config file.
-	cpfGetFullConfigFilePath(configFilename ${DERIVED_CONFIG})
+	cpfGetFullConfigFilePath(configFilename ${DERIVED_CONFIG} "${CPF_ROOT_DIR}")
 	file(REMOVE "${configFilename}")
 
 	set(commandList)
 	foreach( line IN LISTS fileContent)
 		file( APPEND "${configFilename}" "${line}\n")
 	endforeach()
+
+	message("Created project instance specific configuration file \"${configFilename}\"")
 
 endif()
 

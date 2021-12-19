@@ -42,7 +42,7 @@ function( cpfAddPackages )
 
 	# GlobalFiles
 	# A target that holds some project wide files
-	cpfGetFullConfigFilePath(configFile ${CPF_CONFIG})
+	cpfGetFullConfigFilePath(configFile ${CPF_CONFIG} "${CPF_ROOT_DIR}")
 	set( SOLUTION_FILES 
 		${ARG_GLOBAL_FILES}
 		CMakeLists.txt

@@ -21,7 +21,7 @@ set(CPF_TARGET_DEPENDENCY_GRAPH_FILE "${CMAKE_BINARY_DIR}/CPFDependencies.dot")
 set(CPF_GRAPHVIZ_OPTIONS_FILE "CMakeGraphVizOptions.cmake" )
 
 # Developer Config file related
-set( CPF_PACKAGE_CONFIG_TEMPLATE ${CMAKE_SOURCE_DIR}/${CPF_CMAKE_DIR}/Templates/Config.cmake.in )
+set( CPF_PACKAGE_CONFIG_TEMPLATE Templates/Config.cmake.in )
 set( CPF_DEFAULT_CONFIGS_DIR DefaultConfigurations)
 set( CPF_CONFIG_FILE_ENDING ".config.cmake")
 
@@ -55,8 +55,8 @@ function( cpfGetPackageComponentVersionCppHeaderFileName filenameOut packageComp
 endfunction()
 
 # This function defines the full path to the currently used config file.
-function( cpfGetFullConfigFilePath filenameOut config)
-	set( ${filenameOut} "${CPF_ROOT_DIR}/${CPF_CONFIG_DIR}/${config}${CPF_CONFIG_FILE_ENDING}" PARENT_SCOPE)
+function( cpfGetFullConfigFilePath filenameOut config rootDir)
+	set( ${filenameOut} "${rootDir}/${CPF_CONFIG_DIR}/${config}${CPF_CONFIG_FILE_ENDING}" PARENT_SCOPE)
 endfunction()
 
 # This function defines the relative dir from the html directory to the package release files of the last build
@@ -99,6 +99,6 @@ set( CPF_CURRENT_TO_LAST_RELEASE_DIR LastReleaseToCurrent )
 
 
 # absolute dirs
-set( CPF_ABS_TEMPLATE_DIR "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/Templates")							# The directory that holds the file templates of the CPFCMake package.
-set( CPF_ABS_SCRIPT_DIR "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/Scripts")								# The directory that holds the scripts of the CPFCMake package.
+set( CPF_ABS_TEMPLATE_DIR "${CPFCMake_DIR}/Templates")							# The directory that holds the file templates of the CPFCMake package.
+set( CPF_ABS_SCRIPT_DIR "${CPFCMake_DIR}/Scripts")								# The directory that holds the scripts of the CPFCMake package.
 set( CPF_PROJECT_HTML_ABS_DIR ${CMAKE_BINARY_DIR}/html)														# The directory that contains the html page of the project

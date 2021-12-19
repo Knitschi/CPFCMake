@@ -1052,7 +1052,7 @@ function( cpfGenerateAndInstallCMakeConfigFiles package namespace compatibilityS
 	cpfGetRelativeOutputDir( relCmakeFilesDir ${package} CMAKE_PACKAGE_FILES)
 
 	configure_package_config_file(
-		${CPF_PACKAGE_CONFIG_TEMPLATE}
+		${CPFCMake_DIR}/${CPF_PACKAGE_CONFIG_TEMPLATE}
 		"${packageConfigFileFull}"
 		INSTALL_DESTINATION ${relCmakeFilesDir}
 	)

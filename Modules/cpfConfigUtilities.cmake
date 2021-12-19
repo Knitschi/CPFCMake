@@ -235,7 +235,7 @@ endfunction()
 # If multiple files with the same base-name exist, the one in the directory that comes
 # first in the above list is taken.
 #
-function( cpfFindConfigFile absFilePathOut configName userConfigOnly )
+function( cpfFindConfigFile absFilePathOut configName userConfigOnly cpfCMakeDir CIBuildConfigurationsDir )
 
 	if(EXISTS "${configName}")
 		set( ${absFilePathOut} "${configName}" PARENT_SCOPE )
@@ -243,8 +243,8 @@ function( cpfFindConfigFile absFilePathOut configName userConfigOnly )
 
 		set( searchLocations )
 		if(NOT userConfigOnly)
-			cpfListAppend( searchLocations "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/${CPF_PROJECT_CONFIGURATIONS_DIR}")			# project default configs
-			cpfListAppend( searchLocations "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/CPFCMake/${CPF_DEFAULT_CONFIGS_DIR}")		# CPF provided standard configs
+			cpfListAppend( searchLocations "${CIBuildConfigurationsDir}")			# project default configs
+			cpfListAppend( searchLocations "${cpfCMakeDir}/${CPF_DEFAULT_CONFIGS_DIR}")		# CPF provided standard configs
 		endif()
 
 		# Note that it is important that the users config file comes last in the list.
