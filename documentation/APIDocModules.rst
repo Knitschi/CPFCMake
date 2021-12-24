@@ -973,6 +973,8 @@ DOXYGEN_BIN_DIR
 This option can be set to the directory that contains the doxygen executable if CPFCMake is not able to find the correct one.
 
 
+.. _cpfAddSphinxPackageComponent:
+
 *****************************************
 Module cpfAddSphinxPackageComponent.cmake
 *****************************************
@@ -1039,6 +1041,59 @@ when you use the :code:`source_suffix` variable in your sphinx config file
 to enable the parsing of other file types. Getting this wrong will break the
 out-of-date mechanism for the created target. This means that the build-system
 may not always re-build the target after making changes to the source files.
+
+
+.. _cpfAddPythonPackageComponent:
+
+*****************************************
+Module cpfAddPythonPackageComponent.cmake
+*****************************************
+
+This module provides the following function.
+
+- cpfAddPythonPackageComponent()
+
+
+cpfAddPythonPackageComponent()
+==============================
+
+.. code-block:: cmake
+
+  cpfAddPythonPackageComponent(
+      SOURCES                           file1 ...
+      [TEST_SCRIPT]                     relativeScriptPath
+      [TEST_SCRIPT_ARGUMENTS]           args
+  )
+
+
+This functions adds a file package that contains the given source files. It can also create
+unit test run targets if the :code:`TEST_SCRIPT` is given. The function will create a
+:code:`cpfPackageVersion_<package-component>.py` file in the packages source directory which
+can be used to retrieve the version of the component. This file should be generated in
+the binary directory but due to lacking python knowledge I currently do not know how to
+handle this situation. So the current work-around is to git-ignore the generated file in
+the source tree.
+
+
+Arguments
+---------
+
+SOURCES
+^^^^^^^
+
+A list with all the files that belong to the package component. Paths can be either relative
+to the current source directory or absolute.
+
+TEST_SCRIPT
+^^^^^^^^^^^
+
+A path to a pathon file that runs the unit tests of the package-component. If this is given
+an extra runAllTests_<package-component> target is created that can be build to run the tests.
+
+TEST_SCRIPT_ARGUMENTS
+^^^^^^^^^^^^^^^^^^^^^
+
+This can be used to hand additional arguments to the :code:`TEST_SCRIPT`.
 
 
 

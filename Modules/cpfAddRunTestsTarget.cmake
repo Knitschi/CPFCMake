@@ -114,10 +114,11 @@ function( cpfAddRunPython3TestTarget testScript args sourceFiles dependedOnTarge
 		# Since there is no generated file for the depended on cmake packages, we get there source files instead
 		# to make the out-of-date mechanism work.
 		cpfGetAllDependedOnSourceFiles(sourceFiles "${sourceFiles}" "${dependedOnTargets}")
+
 		# Get the basic command for running a python script in module mode
 		cpfGetRunPythonModuleCommand( runScriptCommand "${CMAKE_CURRENT_SOURCE_DIR}/${testScript}")
-		set( runTestsCommand "${runScriptCommand} ${args}")
-		cpfAddCustomTestTarget(${runTestsCommand} "${sourceFiles}" "${dependedOnExternalFiles}" )
+		set(runTestsCommand "${runScriptCommand} ${args}")
+		cpfAddCustomTestTarget("${runTestsCommand}" "${sourceFiles}" "${dependedOnExternalFiles}" )
 
 	endif()
 endfunction()

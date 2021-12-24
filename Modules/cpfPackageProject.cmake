@@ -181,13 +181,13 @@ function( cpfConfigurePackageVersionFile package )
 endfunction()
 
 #-----------------------------------------------------------
-function( cpfConfigurePackageVersionHeader package version packageNamespace)
+function( cpfConfigurePackageComponentVersionHeader packageComponent version packageComponentNamespace)
 
-	set( PACKAGE_NAME ${package})
-	set( PACKAGE_NAMESPACE ${packageNamespace})
+	set( PACKAGE_NAME ${packageComponent})
+	set( PACKAGE_NAMESPACE ${packageComponentNamespace})
 	set( CPF_PACKAGE_VERSION ${version} )
 
-	cpfGetPackageComponentVersionCppHeaderFileName( versionHeaderFile ${package})
+	cpfGetPackageComponentVersionCppHeaderFileName( versionHeaderFile ${packageComponent})
 	set( absPathVersionHeader "${CMAKE_CURRENT_BINARY_DIR}/${versionHeaderFile}")
 
 	cpfConfigureFileWithVariables( "${CPF_ABS_TEMPLATE_DIR}/packageVersion.h.in" "${absPathVersionHeader}" PACKAGE_NAME CPF_PACKAGE_VERSION PACKAGE_NAMESPACE ) 

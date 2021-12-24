@@ -46,12 +46,24 @@ endfunction()
 # This function defines the name of a packages version file. 
 # currently this is: cpfPackageVersion_<package>.cmake 
 function( cpfGetPackageVersionFileName filenameOut package )
-	set( ${filenameOut} cpfPackageVersion_${package}.cmake PARENT_SCOPE)
+	cpfGetPackageVersionBaseFileName(baseName ${package})
+	set(${filenameOut} ${baseName}.cmake PARENT_SCOPE)
 endfunction()
 
-# This function defines the name of a package-components c++ header version file. 
+# This function defines the name of a package c++ header version file. 
 function( cpfGetPackageComponentVersionCppHeaderFileName filenameOut packageComponent )
-	set( ${filenameOut} cpfPackageVersion_${packageComponent}.h PARENT_SCOPE)
+	cpfGetPackageVersionBaseFileName(baseName ${packageComponent})
+	set(${filenameOut} ${baseName}.h PARENT_SCOPE)
+endfunction()
+
+# This function defines the name of a packages python version file. 
+function( cpfGetPackageComponentVersionPythonFileName filenameOut packageComponent )
+	cpfGetPackageVersionBaseFileName(baseName ${packageComponent})
+	set(${filenameOut} ${baseName}.py PARENT_SCOPE)
+endfunction()
+
+function( cpfGetPackageVersionBaseFileName filenameOut packageComponent )
+	set(${filenameOut} cpfPackageVersion_${packageComponent} PARENT_SCOPE)
 endfunction()
 
 # This function defines the full path to the currently used config file.
