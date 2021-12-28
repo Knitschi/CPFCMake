@@ -59,6 +59,7 @@ macro( cpfPackageProject )
 	cpfSetPerPackageGlobalCMakeVariables(${package})
 
 	# Find dependet on packages
+	set(${package}_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 	cpfFindPackageDependencies(${package})
 
 	cpfConfigurePackageVersionFile(${package})
@@ -76,7 +77,7 @@ macro( cpfPackageProject )
 		VERSION ${major}.${minor}.${patch}
 		${languageOption}
     )
-    
+
 	set(CPF_CURRENT_PACKAGE ${package})
 	set(${package}_TARGET_NAMESPACE ${ARG_TARGET_NAMESPACE})
 	set(${package}_DISTRIBUTION_PACKAGE_OPTION_LISTS ${distributionPackageOptionLists})
@@ -86,7 +87,7 @@ macro( cpfPackageProject )
 	set(${package}_OWNER ${ARG_OWNER})
 	set(${package}_MAINTAINER_EMAIL ${ARG_MAINTAINER_EMAIL})
 	set(${package}_VERSION_COMPATIBILITY_SCHEME ${ARG_VERSION_COMPATIBILITY_SCHEME})
-
+    
 	set(PROJECT_VERSION ${packageVersion})
 	set(PROJECT_VERSION_MAJOR ${major})
 	set(PROJECT_VERSION_MINOR ${minor})
