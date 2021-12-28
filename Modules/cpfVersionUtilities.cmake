@@ -26,7 +26,7 @@ endfunction()
 # Returns the path to the version.cmake file in the source tree or in the binary tree depending on which exists.
 function( getExistingPackageVersionFile absPathOut package )
 
-	cpfGetPackageVersionFileName( versionFile ${package})
+	cpfGetPackageVersionFileName(versionFile ${package})
 	set(sourceTreePath "${CMAKE_CURRENT_SOURCE_DIR}/${versionFile}")
 	set(binaryTreePath "${CMAKE_CURRENT_BINARY_DIR}/${versionFile}")
 

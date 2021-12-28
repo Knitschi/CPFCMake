@@ -93,12 +93,12 @@ macro( cpfPackageProject )
 	set(PROJECT_VERSION_PATCH ${patch})
 	set(PROJECT_VERSION_TWEAK ${commitId})
 
-	cpfGetPackageVersionFileName(versionFile ${package})
+	getExistingPackageVersionFile(absVersionFile ${package})
 	cpfGetFullPackageDependenciesFilePathIfItExists(dependenciesFile ${package})
 	set(packageSources
 		${ARG_PACKAGE_FILES}
 		CMakeLists.txt
-		${versionFile}
+		${absVersionFile}
 		${dependenciesFile}
 	)
 

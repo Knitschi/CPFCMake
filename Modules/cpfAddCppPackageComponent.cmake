@@ -120,7 +120,7 @@ function( cpfAddCppPackageComponent )
 
 
 	# Get package options
-	set(targetNamespace ${CPF_CURRENT_PACKAGE}_TARGET_NAMESPACE)
+	set(targetNamespace ${${CPF_CURRENT_PACKAGE}_TARGET_NAMESPACE})
 
 	# parse argument sublists
 	set( allKeywords ${optionKeywords} ${requiredSingleValueKeywords} ${optionalSingleValueKeywords} ${requiredMultiValueKeywords} ${optionalMultiValueKeywords})

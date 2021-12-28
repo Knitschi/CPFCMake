@@ -29,6 +29,15 @@ function( cpfAssertTrue variableName )
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Triggers an error if the variable is an empty string.
+#
+function( cpfAssertNotEmpty variableName)
+	if("${${variableName}}" STREQUAL "")
+		message(FATAL_ERROR "Assertion failed! Variable ${variableName} was empty.")
+	endif()
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # Asserts the the variable PROJECT_VERSION is defined.
 #
 function( cpfAssertProjectVersionDefined )
