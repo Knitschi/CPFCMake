@@ -306,7 +306,7 @@ function( cpfGetArchivePackageCommand commandOut package version contentId conte
 -D CPACK_PACKAGE_DESCRIPTION=\"${${package}_BRIEF_DESCRIPTION}\" \
 -D CPACK_PACKAGE_DIRECTORY=\"${packageOutputDir}\" \
 ${configOption} \
--P ${packaget} \
+-P ${package} \
 ")
 	set( ${commandOut} ${command} PARENT_SCOPE)
 
