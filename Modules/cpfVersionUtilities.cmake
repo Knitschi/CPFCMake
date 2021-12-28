@@ -2,17 +2,25 @@ include_guard(GLOBAL)
 
 #---------------------------------------------------------------------------------------------
 # This function reads the package version from a packages version file.
-function( cpfGetPackageVersionFromFile versionOut package absPackageSourceDir )
+function( cpfGetPackageVersionFromFileInSourcOrBuildTree versionOut package absPackageSourceDir )
 
-	getExistingPackageVersionFile( versionFile ${package} )
+	getExistingPackageVersionFile(versionFile ${package})
+	cpfGetPackageVersionFromFile(version ${package} ${versionFile})
+	set(${versionOut} ${version} PARENT_SCOPE)
 
-	include("${versionFile}")
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+function( cpfGetPackageVersionFromFile versionOut package absPathVersionFile )
+
+	include("${absPathVersionFile}")
 	if( "${CPF_${package}_VERSION}" STREQUAL "")
-		message(FATAL_ERROR "Could not read value of variable CPF_${package}_VERSION from file \"${absPackageSourceDir}/${versionFile}\"." )
+		message(FATAL_ERROR "Could not read value of variable CPF_${package}_VERSION from file \"${absPathVersionFile}\"." )
 	endif()
 	set( ${versionOut} ${CPF_${package}_VERSION} PARENT_SCOPE)
 
 endfunction()
+
 
 #---------------------------------------------------------------------------------------------
 # Returns the path to the version.cmake file in the source tree or in the binary tree depending on which exists.

@@ -25,8 +25,8 @@ function(cpfAddPythonPackageComponent)
 
     cpfAddPackageSources(ARG_SOURCES ${CPF_CURRENT_PACKAGE})
 
-    cpfGeneratePythonVersionFile(versionFile ${packageComponent} ${PROJECT_VERSION})
-    cpfListAppend(ARG_SOURCES ${versionFile})
+    #cpfGeneratePythonVersionFile(versionFile ${packageComponent} ${PROJECT_VERSION})
+    #cpfListAppend(ARG_SOURCES ${versionFile})
 
     cpfAddStandardCustomTarget(
         PACKAGE ${CPF_CURRENT_PACKAGE}
@@ -43,6 +43,7 @@ endfunction()
 
 
 #-----------------------------------------------------------
+#[[
 function(cpfGeneratePythonVersionFile versionFileOut packageComponent version)
 
     set( PACKAGE_COMPONENT_NAME ${packageComponent})
@@ -52,11 +53,12 @@ function(cpfGeneratePythonVersionFile versionFileOut packageComponent version)
     # This is created in the source directory because I was not sure how we can properly
     # add the build directory to the python path. Currently there is no way to generate
     # python projects which could be used to handle the paths from which scripts are read.
-	set( absPathVersionFile "${CMAKE_CURRENT_SOURCE_DIR}/${versionFile}")
+	set( absPathVersionFile "${CMAKE_CURRENT_BINARY_DIR}/${versionFile}")
 
 	cpfConfigureFileWithVariables( "${CPF_ABS_TEMPLATE_DIR}/packageVersion.py.in" "${absPathVersionFile}" PACKAGE_COMPONENT_NAME CPF_PACKAGE_VERSION)
 
     set(${versionFileOut} "${absPathVersionFile}" PARENT_SCOPE)
 
 endfunction()
+]]
 

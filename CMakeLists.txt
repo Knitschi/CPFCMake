@@ -83,6 +83,7 @@ set( files
 	Scripts/configureFile.cmake
 	Scripts/createConfigFile.cmake
 	Scripts/executeCommandForConfig.cmake
+	Scripts/getPackageVersion.cmake
 	Scripts/getVersionFromRepository.cmake
 	Scripts/prepareCIRepoForBuild.cmake
 	Scripts/printScriptFileVariables.cmake

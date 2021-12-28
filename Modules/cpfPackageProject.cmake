@@ -64,7 +64,7 @@ macro( cpfPackageProject )
 	cpfConfigurePackageVersionFile(${package})
 
 	# get the version number of the packages version file
-	cpfGetPackageVersionFromFile( packageVersion ${package} ${CMAKE_CURRENT_LIST_DIR})
+	cpfGetPackageVersionFromFileInSourcOrBuildTree( packageVersion ${package} ${CMAKE_CURRENT_LIST_DIR})
 
 	cpfSplitVersion( major minor patch commitId ${packageVersion})
 
