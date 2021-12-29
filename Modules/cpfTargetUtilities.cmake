@@ -552,7 +552,7 @@ function( getAbsPathsOfTargetSources absPathsOut target)
 	# sources can have relative or absolute pathes
 	set(absPaths)
 	foreach( file ${sources})
-		cpfToAbsSourcePath( absPath ${file} ${sourceDir})
+		cpfToAbsSourcePath(absPath ${file} ${sourceDir})
 		cpfListAppend( absPaths ${absPath})
 	endforeach()
 

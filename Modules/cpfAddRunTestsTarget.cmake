@@ -111,7 +111,7 @@ endfunction()
 function( cpfAddRunPython3TestTarget testScript args sourceFiles dependedOnTargets dependedOnExternalFiles)
 	if(TOOL_PYTHON3)
 
-		# Since there is no generated file for the depended on cmake packages, we get there source files instead
+		# Since there is no generated file for the depended-on cmake packages, we get their source files instead
 		# to make the out-of-date mechanism work.
 		cpfGetAllDependedOnSourceFiles(sourceFiles "${sourceFiles}" "${dependedOnTargets}")
 

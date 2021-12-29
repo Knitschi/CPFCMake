@@ -516,12 +516,17 @@ endfunction()
 #----------------------------------------------------------------------------------------
 function( cpfGetAllDependedOnSourceFiles filesOut sourceFiles dependedOnPackageComponents )
 
-	cpfPrependMulti( absSourceFiles "${CMAKE_CURRENT_SOURCE_DIR}/" "${sourceFiles}")
+	# Transform the sourceFiles to absolute paths.
+	set(absSourceFiles)
+	foreach(file ${sourceFiles})
+		cpfToAbsSourcePath(absPath ${file} ${CMAKE_CURRENT_SOURCE_DIR})
+		cpfListAppend(absSourceFiles ${absPath})
+	endforeach()
 
 	# Get the sources from the depended on packages.
-	foreach( packageComponent ${dependedOnPackageComponents})
-		getAbsPathsOfTargetSources( absSources ${packageComponent})
-		cpfListAppend( absSourceFiles ${absSources})
+	foreach(packageComponent ${dependedOnPackageComponents})
+		getAbsPathsOfTargetSources(absSources ${packageComponent})
+		cpfListAppend(absSourceFiles ${absSources})
 	endforeach()
 
 	set(${filesOut} "${absSourceFiles}" PARENT_SCOPE)
