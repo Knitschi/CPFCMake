@@ -23,7 +23,7 @@ function( cpfAddPackageInstallTarget package )
 	# Add the install_<package> target that installs all install-components of the package-component to the install prefix.
 	cpfGetPossibleInstallComponents(components)
 	set(installTargetName install_${package})
-	cpfAddInstallTarget( ${package} ${installTargetName} "${components}" ${CMAKE_INSTALL_PREFIX}/${package} FALSE ${package}/pipeline)
+	cpfAddInstallTarget( ${package} ${installTargetName} "${components}" ${CMAKE_INSTALL_PREFIX} FALSE ${package}/pipeline)
 	# Add the target to the packaget property.
 	set_property(TARGET ${package} PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET ${installTargetName} )
 
