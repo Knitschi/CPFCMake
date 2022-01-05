@@ -13,5 +13,4 @@ set( CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/Gcc.cmake" CACHE PATH "The 
 set( CMAKE_BUILD_TYPE "Debug" CACHE STRING "The compile configuration used by single configuration make tools." FORCE)
 
 # LOCATIONS
-set( HUNTER_ROOT "$ENV{HOME}/HunterPackages" CACHE PATH "The directory where the package manager will download and compile external packages." FORCE)
 set( CPF_TEST_FILES_DIR "$ENV{HOME}/temp/CPF_tests/${CPF_CONFIG}" CACHE PATH "The directory under which the automated tests may create temporary files." FORCE) 
