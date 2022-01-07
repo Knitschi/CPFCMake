@@ -404,7 +404,7 @@ endfunction()
 # Returns true if the package-component is not in the same repository as the ci-project.
 function( cpfIsLoosePackage isLooseOut package rootDir)
 
-	cpfGetAbsPackageDirectoryFromPackageFile( packageDir ${package} ${rootDir})
+	cpfGetAbsPackageDirectoryFromPackagesFile( packageDir ${package} ${rootDir})
 	cpfGetHashOfTag( packageHash HEAD "${packageDir}")
 	cpfGetHashOfTag( rootHash HEAD "${rootDir}")
 	if( ${packageHash} STREQUAL ${rootHash} )
@@ -451,7 +451,7 @@ function(cpfGetOwnedRepositoryDirectories dirsOut rootDir)
 	cpfGetOwnedPackagesFromRootDir(ownedPackages ${rootDir})
 	set( possibleRepoDirectories ${rootDir} )
 	foreach(package ${ownedPackages})
-		cpfGetAbsPackageDirectoryFromPackageFile( packageDirOut ${package} ${rootDir})
+		cpfGetAbsPackageDirectoryFromPackagesFile( packageDirOut ${package} ${rootDir})
 		list(APPEND possibleRepoDirectories ${packageDirOut})
 	endforeach()
 
