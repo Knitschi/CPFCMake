@@ -152,7 +152,7 @@ else()
             endif()
         endforeach()
 
-        # Format the owned packags if the project has a .clang-tidy file.
+        # Format the owned packags if the project has a .clang-format file.
         if(EXISTS "${ROOT_DIR}/Sources/.clang-format")
             # Currently the build-job from CPFMachines will pass in an empty config if the project
             # has no configuration that builds on the debian node. The problem is that we need to set
@@ -162,12 +162,12 @@ else()
             if(NOT CONFIG)
                 message(WARNING "Running clang-format is not possible since the CIBuildConfigurations.json file does not contain any configuration for the Debian build-slave.")
             else()
-                # Execute clang-tidy by building the clang-format target.
+                # Execute clang-format by building the clang-format target.
                 # As long as we only do this on Linux we can use the python3 command directly.
                 # I failed to do this using the FindPython3 module, because it does not work in script mode.
                 message(STATUS "Run clang-format")
                 cpfExecuteProcess( unused "python3 Sources/CPFBuildscripts/0_CopyScripts.py" ${ROOT_DIR})
-                cpfExecuteProcess( unused "conan install -pr \"${ROOT_DIR}/Sources/CIBuildConfigurations/ConanProfile-${CONFIG}\" -if \"${ROOT_DIR}/Configuration/${CONFIG}\" Sources --build=missing" ${ROOT_DIR})
+                #cpfExecuteProcess( unused "conan install -pr \"${ROOT_DIR}/Sources/CIBuildConfigurations/ConanProfile-${CONFIG}\" -if \"${ROOT_DIR}/Configuration/${CONFIG}\" Sources --build=missing" ${ROOT_DIR})
                 cpfExecuteProcess( unused "python3 4_Make.py ${CONFIG} --target clang-format" ${ROOT_DIR})
 
                 # Commit the changes made to the packges.

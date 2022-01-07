@@ -373,7 +373,7 @@ function( cpfGetAbsPackageDirectoryFromPackagesFile packageDirOut package rootDi
 		cpfGetLastPathNode(packageFromList ${packageDir})
 
 		if(${packageFromList} STREQUAL ${package})
-			set(${packageDirOut} "${packageDir}" PARENT_SCOPE)
+			set(${packageDirOut} "${rootDir}/${CPF_SOURCE_DIR}/${packageDir}" PARENT_SCOPE)
 			return()
 		endif()
 
@@ -405,6 +405,7 @@ endfunction()
 function( cpfIsLoosePackage isLooseOut package rootDir)
 
 	cpfGetAbsPackageDirectoryFromPackagesFile( packageDir ${package} ${rootDir})
+
 	cpfGetHashOfTag( packageHash HEAD "${packageDir}")
 	cpfGetHashOfTag( rootHash HEAD "${rootDir}")
 	if( ${packageHash} STREQUAL ${rootHash} )
