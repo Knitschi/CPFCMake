@@ -443,8 +443,6 @@ function( cpfAddSubTargetBundleTarget targetName packages subtargetProperty addi
 		endif()
 	endforeach()
 
-	devMessage("${targetName} ${packageComponents}")
-
 	cpfAddPackageComponentsSubTargetBundleTarget(${targetName} "${packageComponents}" ${subtargetProperty} "${additionalDependencies}")
 
 endfunction()
