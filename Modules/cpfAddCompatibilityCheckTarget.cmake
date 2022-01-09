@@ -77,7 +77,7 @@ function( cpfAddAbiCheckerTargets packageComponent packageArchiveOptionLists ena
 		# Add a target to bundle all abi check targets of one packageComponent into one and to remove old reports.
 		cpfGetPackageVersionCompatibilityCheckTarget( targetName ${packageComponent})
 		cpfAddCleanOutputDirsCommands( cleanStamps ${targetName} "${reportFiles};${reportFileApiCheck};${reportFileAbiCheck}" )
-		cpfAddSubTargetBundleTarget( ${targetName} ${packageComponent} INTERFACE_CPF_ABI_CHECK_SUBTARGETS "${cleanStamps}")
+		cpfAddPackageComponentsSubTargetBundleTarget( ${targetName} ${packageComponent} INTERFACE_CPF_ABI_CHECK_SUBTARGETS "${cleanStamps}")
 
 		# Add install rules
 		cpfAddInstallRuleForAbiDumpFiles(${packageComponent})

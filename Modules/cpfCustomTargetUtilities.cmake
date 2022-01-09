@@ -422,11 +422,31 @@ endfunction()
 
 #----------------------------------------------------------------------------------------
 # Adds a bundle-target that bundles all the subtargets from the package-component property
-function( cpfAddSubTargetBundleTarget targetName packageComponents subtargetProperty additionalDependencies )
+function( cpfAddPackageComponentsSubTargetBundleTarget targetName packageComponents subtargetProperty additionalDependencies )
+	
 	cpfGetSubtargets( dependedOnTargets "${packageComponents}" ${subtargetProperty})
 	if(dependedOnTargets)
 		cpfAddBundleTarget( ${targetName} "${dependedOnTargets};${additionalDependencies}" )
 	endif()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+# Adds a bundle-target that bundles all the subtargets from the package-component property 
+function( cpfAddSubTargetBundleTarget targetName packages subtargetProperty additionalDependencies )
+
+	set(packageComponents)
+	foreach(package ${packages})
+		cpfGetPackageComponents(components ${package})
+		if(components)
+			cpfListAppend(packageComponents "${components}")
+		endif()
+	endforeach()
+
+	devMessage("${targetName} ${packageComponents}")
+
+	cpfAddPackageComponentsSubTargetBundleTarget(${targetName} "${packageComponents}" ${subtargetProperty} "${additionalDependencies}")
+
 endfunction()
 
 #----------------------------------------------------------------------------------------

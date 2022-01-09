@@ -8,7 +8,7 @@ function( cpfAddGlobalClangFormatTarget packages)
     endif()
 
     set(targetName clang-format)
-    
+
     # add bundle target
     cpfAddSubTargetBundleTarget( ${targetName} "${packages}" INTERFACE_CPF_CLANG_FORMAT_SUBTARGET "")
 
