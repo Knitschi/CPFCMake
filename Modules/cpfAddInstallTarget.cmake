@@ -9,8 +9,18 @@ include(cpfAddDeploySharedLibrariesTarget)
 
 #---------------------------------------------------------------------------------------------
 # Adds a bundle target for all install_<package> targets
-function( cpfAddGlobalInstallTarget )
-	cpfAddSubTargetBundleTarget( install_all "${packages}" INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET "")
+function( cpfAddGlobalInstallTarget packages)
+
+	set(packageInstallTargets)
+	foreach(package ${packages})
+		if(TARGET ${package})
+			get_property(packageInstallTarget TARGET ${package} PROPERTY INTERFACE_CPF_INSTALL_PACKAGE_SUBTARGET)
+			cpfListAppend(packageInstallTargets ${packageInstallTarget})
+		endif()
+	endforeach()
+
+	cpfAddBundleTarget(install_all "${packageInstallTargets}" )
+
 endfunction()
 
 #---------------------------------------------------------------------------------------------
