@@ -12,6 +12,9 @@
 # RELEASED_PACKAGE: This option must hold the name of a package or be empty. It is only used when a release version
 #                   tag is created for the specified package. If the value is empty, the CI-project repository is tagged.
 # CONFIG:           The configuration that is used to build the clang-format target.
+# CPFCMake_DIR                  Required for running the 0_CopyScripts command.
+# CPFBuildscript_DIR            Required for running the 0_CopyScripts command.
+# CIBuildConfigurations_DIR     Required for running the 0_CopyScripts command.
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 
@@ -25,6 +28,9 @@ cpfAssertScriptArgumentDefined(GIT_REF)
 cpfAssertScriptArgumentDefined(TAGGING_OPTION)
 cpfAssertScriptArgumentDefined(RELEASED_PACKAGE)
 cpfAssertScriptArgumentDefined(CONFIG)
+cpfAssertScriptArgumentDefined(CPFCMake_DIR)
+cpfAssertScriptArgumentDefined(CPFBuildscript_DIR)
+cpfAssertScriptArgumentDefined(CIBuildConfigurations_DIR)
 
 # Checkout the requested reference of the CI-repository
 # This is necessary because the GitSCM step always
@@ -166,7 +172,7 @@ else()
                 # As long as we only do this on Linux we can use the python3 command directly.
                 # I failed to do this using the FindPython3 module, because it does not work in script mode.
                 message(STATUS "Run clang-format")
-                cpfExecuteProcess( unused "python3 Sources/CPFBuildscripts/0_CopyScripts.py" ${ROOT_DIR})
+                cpfExecuteProcess( unused "python3 \"${CPFBuildscripts_DIR}/0_CopyScripts.py\" --CPFCMake_DIR \"${CPFCMake_DIR}\" --CIBuildConfigurations_DIR \"${CIBuildConfigurations_DIR}\"" ${ROOT_DIR})
                 #cpfExecuteProcess( unused "conan install -pr \"${ROOT_DIR}/Sources/CIBuildConfigurations/ConanProfile-${CONFIG}\" -if \"${ROOT_DIR}/Configuration/${CONFIG}\" Sources --build=missing" ${ROOT_DIR})
                 cpfExecuteProcess( unused "python3 4_Make.py ${CONFIG} --target clang-format" ${ROOT_DIR})
 
