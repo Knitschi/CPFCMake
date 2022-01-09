@@ -13,7 +13,7 @@
 #                   tag is created for the specified package. If the value is empty, the CI-project repository is tagged.
 # CONFIG:           The configuration that is used to build the clang-format target.
 # CPFCMake_DIR                  Required for running the 0_CopyScripts command.
-# CPFBuildscript_DIR            Required for running the 0_CopyScripts command.
+# CPFBuildscripts_DIR            Required for running the 0_CopyScripts command.
 # CIBuildConfigurations_DIR     Required for running the 0_CopyScripts command.
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
@@ -29,7 +29,7 @@ cpfAssertScriptArgumentDefined(TAGGING_OPTION)
 cpfAssertScriptArgumentDefined(RELEASED_PACKAGE)
 cpfAssertScriptArgumentDefined(CONFIG)
 cpfAssertScriptArgumentDefined(CPFCMake_DIR)
-cpfAssertScriptArgumentDefined(CPFBuildscript_DIR)
+cpfAssertScriptArgumentDefined(CPFBuildscripts_DIR)
 cpfAssertScriptArgumentDefined(CIBuildConfigurations_DIR)
 
 # Checkout the requested reference of the CI-repository
