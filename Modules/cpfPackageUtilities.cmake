@@ -443,51 +443,6 @@ function( cpfPrintAddPackageStatusMessage package version)
 
 endfunction()
 
-#---------------------------------------------------------------------------------------------
-# returns the absolute paths to the repository directories that are owned by the CPF project located at rootDir
-#
-function(cpfGetOwnedRepositoryDirectories dirsOut rootDir)
-
-	# Get all directories that may belong to different owned repositories
-	cpfGetOwnedPackagesFromRootDir(ownedPackages ${rootDir})
-	set( possibleRepoDirectories ${rootDir} )
-	foreach(package ${ownedPackages})
-		cpfGetAbsPackageDirectoryFromPackagesFile( packageDirOut ${package} ${rootDir})
-		list(APPEND possibleRepoDirectories ${packageDirOut})
-	endforeach()
-
-	# Check which of these repositories belong together (have the same hash of the HEAD).
-	# Get list of all current hashes
-	set(hashes)
-	foreach(repoDir ${possibleRepoDirectories})
-		cpfGetHashOfTag( hashHEAD HEAD "${repoDir}")
-		list(APPEND hashes ${hashHEAD})
-	endforeach()
-
-	# Get indexes of duplicated elements in list
-	set(duplicatedIndexes)
-	foreach(hash ${hashes})
-		cpfFindAllInList( indexes "${hashes}" ${hash})
-		cpfSplitList( unused duplIndexes "${indexes}" 1)
-		list(APPEND duplicatedIndexes ${duplIndexes})
-	endforeach()
-
-	# Get directories of non duplicated hashes
-	set(uniqueRepoDirs)
-	set(index 0)
-	foreach(hash ${hashes})
-		cpfContains(isDuplicated "${duplicatedIndexes}" ${index})
-		if(NOT isDuplicated)
-			list(GET possibleRepoDirectories ${index} repoDir)
-			list(APPEND uniqueRepoDirs ${repoDir})
-		endif()
-		cpfIncrement(index)
-	endforeach()
-
-	set(${dirsOut} "${uniqueRepoDirs}" PARENT_SCOPE)
-
-endfunction()
-
 #----------------------------------------------------------------------------------------
 # read all sources from all binary targets of the given packages
 function( cpfGetAllNonGeneratedPackageSources sourceFiles packageComponents )

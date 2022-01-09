@@ -217,7 +217,7 @@ endfunction()
 function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)
 
 	# Get all directories that may belong to different owned repositories
-	cpfGetOwnedPackages( ownedPackages ${rootDir})
+	cpfGetOwnedPackagesFromRootDir( ownedPackages ${rootDir})
 	set( possibleRepoDirectories ${rootDir} )
 	foreach(package ${ownedPackages})
 		cpfGetAbsPackageDirectory( packageDirOut ${package} ${rootDir})
