@@ -524,7 +524,7 @@ function( cpfGitPush remote branch dir)
 	)
 
 	if(NOT (${result} EQUAL 0))
-		message(FATAL_ERROR "Error! Git push on repository at \"${dir}\" failed.\nStdOut: ${stdOut}\n ErrOut: ${errOut}")
+		message(FATAL_ERROR "Error! Command \"git push ${remote} ${branch}\" push on repository at \"${dir}\" failed.\nStdOut: ${stdOut}\n ErrOut: ${errOut}")
 	endif()
 
 endfunction()
