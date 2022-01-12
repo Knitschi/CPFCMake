@@ -62,8 +62,7 @@ cpfGitCommit("Updates \"${BUILD_RESULTS_REPOSITORY_PROJECT_SUBDIR}\" with the bu
 # Push to the master
 cpfGitPullRebase(origin master ${projectDir})
 
-# debug temporaryli remove push
-# cpfGitPush(origin master ${projectDir})
+cpfGitPush(origin master ${projectDir})
 
 # Push to the alternative remote
 if(DEFINED WEB_SERVER_BUILD_RESULTS_REPOSITORY AND WEB_SERVER_BUILD_RESULTS_REPOSITORY)
