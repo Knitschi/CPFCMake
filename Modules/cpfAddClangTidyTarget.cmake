@@ -34,6 +34,11 @@ function( cpfAddClangTidyTarget binaryTarget )
 	cpfGetCompiler(compiler)
     if( ${compiler} STREQUAL Clang)
     
+        if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
+            cpfGetFullConfigFilePath(configFile ${CPF_CONFIG} ${CPF_ROOT_DIR})
+            message(FATAL_ERROR "You need to add the line \"set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE CACHE BOOL \"\" FORCE)\" to your configuration file \"${configFile}\" when clang-tidy targets are enabled.")
+        endif()
+
 		# Add an extra target for running uic. 
 		# Usually uic is automatically run before building, but we want to build
 		# this target without building the binaries so we need an extra target
@@ -107,6 +112,8 @@ function( cpfAddClangTidyTarget binaryTarget )
 		)
         set_property(TARGET ${binaryTarget} PROPERTY INTERFACE_CPF_CLANG_TIDY_SUBTARGET ${targetName})
 
+    else()
+        message( WARNING "clang-tidy targets can only be added when using the clang-compiler.")
     endif()
     
 endfunction()
