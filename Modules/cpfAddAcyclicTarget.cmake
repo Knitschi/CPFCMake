@@ -13,6 +13,8 @@ function( cpfAddAcyclicTarget )
         return()
     endif()
 
+    cpfFindRequiredProgram(TOOL_ACYCLIC acyclic "A tool from the graphviz library that can check if a graphviz graph is acyclic" "")
+    
     set(targetName acyclic)
 
     # Add the command for doing the acyclicity check

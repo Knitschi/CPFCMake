@@ -19,7 +19,7 @@ function( cpfFindRequiredTools )
 			cpfFindRequiredProgram(TOOL_CLANG_TIDY ${CPF_CLANG_TIDY_EXE} "A tool from the LLVM project that performs static analysis of cpp code" "")
 		
 		endif()
-		cpfFindRequiredProgram( TOOL_ACYCLIC acyclic "A tool from the graphviz library that can check if a graphviz graph is acyclic" "")
+
 	endif()
 
 	if(CPF_ENABLE_CLANG_FORMAT_TARGETS)
