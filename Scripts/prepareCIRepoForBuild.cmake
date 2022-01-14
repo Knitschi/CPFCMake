@@ -12,6 +12,7 @@
 # RELEASED_PACKAGE: This option must hold the name of a package or be empty. It is only used when a release version
 #                   tag is created for the specified package. If the value is empty, the CI-project repository is tagged.
 # CONFIG:           The configuration that is used to build the clang-format target.
+# PACKAGE_MANAGER:  The package manager that is used to retrieve the projects dependencies. Currently this can be "" and "conan"        
 # CPFCMake_DIR                  Required for running the 0_CopyScripts command.
 # CPFBuildscripts_DIR            Required for running the 0_CopyScripts command.
 # CIBuildConfigurations_DIR     Required for running the 0_CopyScripts command.
@@ -173,7 +174,11 @@ else()
                 # I failed to do this using the FindPython3 module, because it does not work in script mode.
                 message(STATUS "Run clang-format")
                 cpfExecuteProcess( unused "python3 \"${CPFBuildscripts_DIR}/0_CopyScripts.py\" --CPFCMake_DIR \"${CPFCMake_DIR}\" --CIBuildConfigurations_DIR \"${CIBuildConfigurations_DIR}\"" "${ROOT_DIR}")
-                #cpfExecuteProcess( unused "conan install -pr \"${ROOT_DIR}/Sources/CIBuildConfigurations/ConanProfile-${CONFIG}\" -if \"${ROOT_DIR}/Configuration/${CONFIG}\" Sources --build=missing" ${ROOT_DIR})
+                # Get dependency requirements.
+                if("${PACKAGE_MANAGER}" STREQUAL "conan")
+                    cpfExecuteProcess( unused "conan install -pr \"${CONFIG}\" -if \"${ROOT_DIR}/Configuration/${CONFIG}\" --build=missing" ${ROOT_DIR})
+                endif()
+                # Format the sources by building the clang-format target.
                 cpfExecuteProcess( unused "python3 4_Make.py ${CONFIG} --target clang-format" "${ROOT_DIR}")
 
                 # Commit the changes made to the packges.
