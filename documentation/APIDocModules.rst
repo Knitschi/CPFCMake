@@ -714,7 +714,6 @@ By default the CPF generates a version.rc file for MSVC that is used
 to inject some version information into the binary files. If this
 version.rc file does not fit your needs, you can disable its generation
 with this option and provide your custom made :code:`.rc` file.
-Setting this argument overrides the value of the global :code:`CPF_ENABLE_VERSION_RC_FILE_GENERATION` variable for this package.
 
 
 TEST_EXE_ARGUMENTS

@@ -207,6 +207,10 @@ function( cpfAddCppPackageComponent )
 	endif()
 	
 	if(${ARG_ENABLE_RUN_TESTS_TARGET})
+		if(NOT CPF_ENABLE_TEST_EXE_TARGETS)
+			message(FATAL_ERROR "Option ENABLE_RUN_TESTS_TARGET of package-component ${packageComponent} is TRUE but CPF_ENABLE_TEST_EXE_TARGETS is FALSE. Either set CPF_ENABLE_TEST_EXE_TARGETS to TRUE or ENABLE_RUN_TESTS_TARGET to FALSE.")
+		endif()
+
 		cpfAddRunCppTestsTargets(${packageComponent} "${ARG_TEST_EXE_ARGUMENTS}")
 	endif()
 
@@ -399,16 +403,12 @@ function( cpfAddPackageBinaryTargets
 			COMPILE_OPTIONS ${compileOptions}
         )
 
-		# respect an option that is used by hunter to not compile test targets
-		if(${packageComponent}_BUILD_TESTS STREQUAL OFF )
-			set_property(TARGET ${fixtureTarget} PROPERTY EXCLUDE_FROM_ALL TRUE )
-		endif()
 		set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET ${fixtureTarget} )
         
     endif()
 
     ################### Create unit test exe ##############################
-	if( testFiles )
+	if(testFiles AND CPF_ENABLE_TEST_TARGETS)
         set( unitTestsTarget ${libraryTarget}${CPF_TESTS_TARGET_ENDING})
         cpfAddBinaryTarget(
 			PACKAGE_COMPONENT ${packageComponent}
@@ -427,11 +427,6 @@ function( cpfAddPackageBinaryTargets
 			COMPILE_OPTIONS ${compileOptions}
         )
 		set_property(TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TESTS_SUBTARGET ${unitTestsTarget} )
-
-		# respect an option that is used by hunter to not compile test targets
-		if(${packageComponent}_BUILD_TESTS STREQUAL OFF)
-			set_property(TARGET ${unitTestsTarget} PROPERTY EXCLUDE_FROM_ALL TRUE )
-		endif()
 
 		if(isGoogleTestExe)
 			cpfGenerateGoogleTestAdapterHelperFiles(${unitTestsTarget})
