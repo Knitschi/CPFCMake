@@ -176,7 +176,7 @@ else()
                 cpfExecuteProcess( unused "python3 \"${CPFBuildscripts_DIR}/0_CopyScripts.py\" --CPFCMake_DIR \"${CPFCMake_DIR}\" --CIBuildConfigurations_DIR \"${CIBuildConfigurations_DIR}\"" "${ROOT_DIR}")
                 # Get dependency requirements.
                 if("${PACKAGE_MANAGER}" STREQUAL "conan")
-                    cpfExecuteProcess( unused "conan install -pr \"${CONFIG}\" -if \"${ROOT_DIR}/Configuration/${CONFIG}\" --build=missing" ${ROOT_DIR})
+                    cpfExecuteProcess( unused "conan install . -pr \"${CONFIG}\" -if \"Configuration/${CONFIG}\" --build=missing" ${ROOT_DIR})
                 endif()
                 # Format the sources by building the clang-format target.
                 cpfExecuteProcess( unused "python3 4_Make.py ${CONFIG} --target clang-format" "${ROOT_DIR}")
