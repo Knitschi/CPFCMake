@@ -176,7 +176,7 @@ else()
 
                 # Get dependency requirements.
                 if("${PACKAGE_MANAGER}" STREQUAL "conan")
-                    set(conanCommand "conan install . -pr \"${CPFBuildscripts_DIR}/${CONFIG}\" -if \"Configuration/${CONFIG}\" --build=missing")
+                    set(conanCommand "conan install . -pr \"${CIBuildConfigurations_DIR}/${CONFIG}\" -if \"Configuration/${CONFIG}\" --build=missing")
                     message(STATUS "Run \"${conanCommand}\"")
                     cpfExecuteProcess( unused ${conanCommand} ${ROOT_DIR})
                 else()
