@@ -176,8 +176,9 @@ else()
 
                 # Get dependency requirements.
                 if("${PACKAGE_MANAGER}" STREQUAL "conan")
-                    message(STATUS "Run conan install")
-                    cpfExecuteProcess( unused "conan install . -pr \"${CPFBuildscripts_DIR}/${CONFIG}\" -if \"Configuration/${CONFIG}\" --build=missing" ${ROOT_DIR})
+                    set(conanCommand "conan install . -pr \"${CPFBuildscripts_DIR}/${CONFIG}\" -if \"Configuration/${CONFIG}\" --build=missing")
+                    message(STATUS "Run \"${conanCommand}\"")
+                    cpfExecuteProcess( unused ${conanCommand} ${ROOT_DIR})
                 else()
                     cpfExecuteProcess( unused "python3 \"${CPFBuildscripts_DIR}/0_CopyScripts.py\" --CPFCMake_DIR \"${CPFCMake_DIR}\" --CIBuildConfigurations_DIR \"${CIBuildConfigurations_DIR}\"" "${ROOT_DIR}")
                 endif()
