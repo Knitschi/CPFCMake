@@ -36,7 +36,7 @@ function( cpfAddClangTidyTarget binaryTarget )
     
         if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
             cpfGetFullConfigFilePath(configFile ${CPF_CONFIG} ${CPF_ROOT_DIR})
-            message(FATAL_ERROR "You need to add the line \"set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE CACHE BOOL \"\" FORCE)\" to your configuration file \"${configFile}\" when clang-tidy targets are enabled.")
+            message(FATAL_ERROR "You need to set the CMake -D option CMAKE_EXPORT_COMPILE_COMMANDS to TRUE when clang-tidy targets are enabled with option CPF_ENABLE_CLANG_TIDY_TARGET.")
         endif()
 
 		# Add an extra target for running uic. 
