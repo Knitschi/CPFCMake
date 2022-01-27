@@ -294,10 +294,8 @@ endfunction()
 # Returns FALSE if there are no changes in the current working directory
 function( cpfWorkingDirectoryIsDirty isDirtyOut repositoryDir)
 
-	cpfGetHashOfTag( HEADhash HEAD "${repositoryDir}")
-
 	execute_process(
-		COMMAND git;diff-index;--quiet;${HEADhash}
+		COMMAND git;diff-index;--quiet;HEAD
 		WORKING_DIRECTORY "${repositoryDir}"
 		RESULT_VARIABLE result
 	)
