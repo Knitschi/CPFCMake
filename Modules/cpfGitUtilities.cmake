@@ -5,6 +5,7 @@ include_guard(GLOBAL)
 include(cpfStringUtilities)
 include(cpfListUtilities)
 include(cpfVersionUtilities)
+include(cpfMiscUtilities)
 
 #----------------------------------------------------------------------------------------
 # Returns true if the tag exists somewhere in the repository
