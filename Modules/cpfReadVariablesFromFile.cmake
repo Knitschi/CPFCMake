@@ -3,7 +3,7 @@ include_guard(GLOBAL)
 # This module contains functions that are used to retrieve cmake variables and cache-variables that
 # are defined in .cmake files.
 
-
+include(cpfListUtilities)
 
 
 #---------------------------------------------------------------------------------------------
