@@ -14,6 +14,7 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 include(cpfPackageUtilities)
+include(cpfGitUtilities)
 
 cpfAssertScriptArgumentDefined(CPF_ROOT_DIR)
 
