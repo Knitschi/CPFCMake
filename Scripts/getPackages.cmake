@@ -26,7 +26,7 @@ foreach(listName ${listNames})
     list(GET ${listName} 1 packageDir )
     # Get package name
     cpfGetLastPathNode(package "${packageDir}")
-    cpfGetCurrentVersionFromGitRepository(version "${packageDir}")
+    cpfGetCurrentVersionFromGitRepository(version "${CPF_ROOT_DIR}/${packageDir}")
 
     message("${package}@${version}")
 
