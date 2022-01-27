@@ -1,6 +1,7 @@
 include_guard(GLOBAL)
 
 include(cpfReadVariablesFromFile)
+include(cpfListUtilities)
 
 #-----------------------------------------------------------
 # Returns the name of the current source directory as packageNameOut.
