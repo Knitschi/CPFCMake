@@ -28,10 +28,14 @@ function( cpfAddPackageClangTidyTarget package)
 
     set(targetName clang-tidy_${package})
 
-    # add bundle target
-    cpfAddSubTargetBundleTarget(${targetName} "${package}" INTERFACE_CPF_CLANG_TIDY_SUBTARGET "")
-    if(TARGET  ${targetName})
-        set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+    if(NOT (TARGET ${targetName}))
+        # add bundle target
+        cpfAddSubTargetBundleTarget(${targetName} "${package}" INTERFACE_CPF_CLANG_TIDY_SUBTARGET "")
+        if(TARGET  ${targetName})
+            set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+            add_dependencies(pipeline_${package} ${targetName})
+        endif()
+    else()
         add_dependencies(pipeline_${package} ${targetName})
     endif()
 

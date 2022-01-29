@@ -24,12 +24,18 @@ function( cpfAddPackageClangFormatTarget package)
 
     set(targetName clang-format_${package})
 
-    # add bundle target
-    cpfAddSubTargetBundleTarget(${targetName} "${package}" INTERFACE_CPF_CLANG_FORMAT_SUBTARGET "")
-    if(TARGET  ${targetName})
-        set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+    if(NOT (TARGET ${targetName}))
+        # add bundle target
+        cpfAddSubTargetBundleTarget(${targetName} "${package}" INTERFACE_CPF_CLANG_FORMAT_SUBTARGET "")
+        if(TARGET ${targetName})
+            set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+            add_dependencies(pipeline_${package} ${targetName})
+        endif()
+    else()
         add_dependencies(pipeline_${package} ${targetName})
     endif()
+
+    
 
 endfunction()
 

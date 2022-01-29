@@ -27,10 +27,15 @@ function( cpfAddGlobalAbiCheckerTarget packages )
 	endforeach()
 
 	if(targets)
-		cpfGetAbiComplianceCheckerBundleTargetBaseName(targetName)
-		cpfAddBundleTarget(${targetName}_${package} "${targets}")
-		set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+
+		cpfGetAbiComplianceCheckerBundleTargetBaseName(baseTargetName)
+		set(targetName ${baseTargetNam}_${package})
+		if(NOT (TARGET ${targetName}))
+			cpfAddBundleTarget(${targetName} "${targets}")
+			set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+		endif()
 		add_dependencies(pipeline_${package} ${targetName})
+
 	endif()
 
 endfunction()

@@ -17,11 +17,17 @@ endfunction()
 function( cpfAddPackageOpenCppCoverageTarget package)
 
 	set(targetName OpenCppCoverage_${package})
-	cpfAddBundleOpenCppCoverageTarget(${targetName} ${package})
-	if(TARGET ${targetName})
-		set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+
+	if(NOT (TARGET ${targetName}))
+		cpfAddBundleOpenCppCoverageTarget(${targetName} ${package})
+		if(TARGET ${targetName})
+			set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+			add_dependencies(pipeline_${package} ${targetName})
+		endif()
+	else()
 		add_dependencies(pipeline_${package} ${targetName})
 	endif()
+
 endfunction()
 
 #--------------------------------------------------------------------------------------

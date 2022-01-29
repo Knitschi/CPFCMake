@@ -29,12 +29,16 @@ function( cpfAddPackageValgrindTarget package)
     if(gccClangDebug)
 
 		set(targetName valgrind_${package})
-
-		# add bundle target
-		cpfAddSubTargetBundleTarget(${targetName} "${package}" INTERFACE_CPF_VALGRIND_SUBTARGET "")
-		set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
-		add_dependencies(pipeline_${package} ${targetName})
-
+		if(NOT (TARGET ${targetName}))
+			# add bundle target
+			cpfAddSubTargetBundleTarget(${targetName} "${package}" INTERFACE_CPF_VALGRIND_SUBTARGET "")
+			if(TARGET ${targetName})
+				set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+				add_dependencies(pipeline_${package} ${targetName})
+			endif()
+		else()
+			add_dependencies(pipeline_${package} ${targetName})
+		endif()
 	endif()
 
 endfunction()
