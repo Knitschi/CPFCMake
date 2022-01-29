@@ -11,13 +11,13 @@ include(cpfAddInstallTarget)
 #----------------------------------------------------------------------------------------
 # Adds a global target that makes sure that all the per package-component createArchivePackage targets are build.
 #
-function( cpfAddGlobalCreatePackagesTarget packageComponents)
+function( cpfAddGlobalCreatePackagesTarget packages)
 
     set(targetName packageArchives)
 	
 	set(packageTargets)
-	foreach(packageComponent ${packageComponents})
-		cpfGetPackageArchivesTargetName( packageTarget ${packageComponent})
+	foreach(package ${packages})
+		cpfGetPackageArchivesTargetName(packageTarget ${package})
 		if(TARGET ${packageTarget}) # not all packages may create package archives
 			cpfListAppend( packageTargets ${packageTarget})
 		endif()
@@ -75,8 +75,8 @@ function( cpfGetCollectPackageContentTargetNameAnId targetNameOut packageCompone
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfGetPackageArchiveTargetName targetNameOut packageComponent contentId contentType packageFormat )
-	set( ${targetNameOut} pckgArchive_${contentId}_${packageFormat}_${packageComponent} PARENT_SCOPE)
+function( cpfGetPackageArchiveTargetName targetNameOut package contentId contentType packageFormat )
+	set( ${targetNameOut} pckgArchive_${contentId}_${packageFormat}_${package} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------------------

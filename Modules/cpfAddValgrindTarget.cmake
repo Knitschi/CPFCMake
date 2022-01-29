@@ -19,6 +19,27 @@ function( cpfAddGlobalValgrindTarget packages)
 endfunction()
 
 #----------------------------------------------------------------------------------------
+function( cpfAddPackageValgrindTarget package)
+
+    if(NOT CPF_ENABLE_VALGRIND_TARGET)
+        return()
+    endif()
+
+    cpfIsGccClangDebug(gccClangDebug)
+    if(gccClangDebug)
+
+		set(targetName valgrind_${package})
+
+		# add bundle target
+		cpfAddSubTargetBundleTarget(${targetName} "${package}" INTERFACE_CPF_VALGRIND_SUBTARGET "")
+		set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+		add_dependencies(pipeline_${package} ${targetName})
+
+	endif()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # Creates the custom target that runs the test executable with valgrind.
 # 
 # This will only be added when the configuration uses gcc and debug flags.

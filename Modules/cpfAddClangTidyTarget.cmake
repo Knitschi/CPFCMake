@@ -24,6 +24,20 @@ function( cpfAddGlobalClangTidyTarget packages)
 endfunction()
 
 #----------------------------------------------------------------------------------------
+function( cpfAddPackageClangTidyTarget package)
+
+    set(targetName clang-tidy_${package})
+
+    # add bundle target
+    cpfAddSubTargetBundleTarget(${targetName} "${package}" INTERFACE_CPF_CLANG_TIDY_SUBTARGET "")
+    if(TARGET  ${targetName})
+        set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+        add_dependencies(pipeline_${package} ${targetName})
+    endif()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # Adds a custom target that runs the clang-tidy on all .cpp files that belong to the given target.
 #
 # Arguments:

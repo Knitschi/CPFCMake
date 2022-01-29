@@ -1,5 +1,6 @@
 include_guard(GLOBAL)
 
+#--------------------------------------------------------------------------------------
 # See api docs for ducumentation.
 function( cpfAddGlobalClangFormatTarget packages)
 
@@ -11,6 +12,24 @@ function( cpfAddGlobalClangFormatTarget packages)
 
     # add bundle target
     cpfAddSubTargetBundleTarget( ${targetName} "${packages}" INTERFACE_CPF_CLANG_FORMAT_SUBTARGET "")
+
+endfunction()
+
+#--------------------------------------------------------------------------------------
+function( cpfAddPackageClangFormatTarget package)
+
+    if(NOT CPF_ENABLE_CLANG_FORMAT_TARGETS)
+        return()
+    endif()
+
+    set(targetName clang-format_${package})
+
+    # add bundle target
+    cpfAddSubTargetBundleTarget(${targetName} "${package}" INTERFACE_CPF_CLANG_FORMAT_SUBTARGET "")
+    if(TARGET  ${targetName})
+        set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+        add_dependencies(pipeline_${package} ${targetName})
+    endif()
 
 endfunction()
 

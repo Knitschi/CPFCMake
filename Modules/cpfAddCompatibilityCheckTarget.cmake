@@ -13,17 +13,44 @@ include(cpfVersionUtilities)
 
 #----------------------------------------------------------------------------------------
 # Adds a bundle target, that can be used to run the abi-compliance-check targets for all packages. 
-function( cpfAddGlobalAbiCheckerTarget packageComponents )
+function( cpfAddGlobalAbiCheckerTarget packages )
 	
 	set(targets)
-	foreach( packageComponent ${packageComponents})
-		cpfGetPackageVersionCompatibilityCheckTarget( target ${packageComponent})
-		if(TARGET ${target})
-			cpfListAppend( targets ${target})
-		endif()
+	foreach(package ${packages})
+		cpfGetPackageComponents(components ${package})
+		foreach(component ${components})
+			cpfGetPackageVersionCompatibilityCheckTarget(target ${component})
+			if(TARGET ${target})
+				cpfListAppend(targets ${target})
+			endif()
+		endforeach()
 	endforeach()
+
+	if(targets)
+		cpfGetAbiComplianceCheckerBundleTargetBaseName(targetName)
+		cpfAddBundleTarget(${targetName}_${package} "${targets}")
+		set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+		add_dependencies(pipeline_${package} ${targetName})
+	endif()
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function(cpfAddPackageAbiCheckerTarget package )
+	
+	set(targets)
+
+	cpfGetPackageVersionCompatibilityCheckTarget( target ${package})
+	if(TARGET ${target})
+		cpfListAppend( targets ${target})
+	endif()
+
 	cpfGetAbiComplianceCheckerBundleTargetBaseName(targetName)
 	cpfAddBundleTarget( ${targetName} "${targets}")
+	if(TARGET ${targetName})
+	    set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+        add_dependencies(pipeline_${package} ${targetName})
+	endif()
 	
 endfunction()
 

@@ -9,6 +9,24 @@ include(cpfLocations)
 #
 function( cpfAddGlobalOpenCppCoverageTarget packages)
 
+	cpfAddBundleOpenCppCoverageTarget(OpenCppCoverage ${packages})
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfAddPackageOpenCppCoverageTarget package)
+
+	set(targetName OpenCppCoverage_${package})
+	cpfAddBundleOpenCppCoverageTarget(${targetName} ${package})
+	if(TARGET ${targetName})
+		set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+		add_dependencies(pipeline_${package} ${targetName})
+	endif()
+endfunction()
+
+#--------------------------------------------------------------------------------------
+function( cpfAddBundleOpenCppCoverageTarget targetName packages)
+
     if(NOT CPF_ENABLE_OPENCPPCOVERAGE_TARGET)
         return()
     endif()
@@ -16,8 +34,6 @@ function( cpfAddGlobalOpenCppCoverageTarget packages)
 	cpfGetMSVCDebugConfigs( msvcDebugConfigs )
 
     if(msvcDebugConfigs)
-
-        set(targetName OpenCppCoverage)
 
         #Locations
         set(htmlReportDir ${CMAKE_BINARY_DIR}/${targetName}/$<CONFIG>/${html})

@@ -15,6 +15,22 @@ function( cpfAddGlobalRunAllTestsTarget packages)
 endfunction()
 
 #----------------------------------------------------------------------------------------
+# Creates a custom target that executes all unit and expensive tests of the given packages
+#
+function( cpfAddPackageRunAllTestsTarget package)
+
+	if(CPF_ENABLE_RUN_TESTS_TARGET)
+		set(targetName runAllTests_${package})
+		cpfAddSubTargetBundleTarget(${targetName} "${package}" INTERFACE_CPF_RUN_CPP_TESTS_SUBTARGET "")
+		if(TARGET ${targetName})
+			set_property(TARGET ${targetName} PROPERTY FOLDER  ${package}/package)
+			add_dependencies(pipeline_${package} ${targetName})
+		endif()
+	endif()
+	
+endfunction()
+
+#----------------------------------------------------------------------------------------
 # Creates a custom target that executes all unit tests of the given packages
 
 function( cpfAddGlobalRunUnitTestsTarget packages)

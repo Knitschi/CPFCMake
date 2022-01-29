@@ -4,6 +4,12 @@ include_guard(GLOBAL)
 
 include(cpfPathUtilities)
 include(cpfMiscUtilities)
+include(cpfAddClangTidyTarget)
+include(cpfAddClangFormatTarget)
+include(cpfAddCompatibilityCheckTarget)
+include(cpfAddOpenCppCoverageTarget)
+include(cpfAddRunTestsTarget)
+include(cpfAddValgrindTarget)
 
 #-------------------------------------------------------------------------
 # Documentation in APIDocs.dox
@@ -146,7 +152,36 @@ function( cpfFinalizePackageProject )
 		cpfAddPackageArchiveTargets(${package} "${distributionPackageOptionLists}")
 	endif()
 
+	cpfAddPackageBundleTargets(${package})
+
+endfunction()
+
+#-----------------------------------------------------------
+function(cpfAddPackageBundleTargets package)
+
+	# Add per package bundle targets.
+	add_custom_target(pipeline_${package})
+	set_property(TARGET pipeline_${package} PROPERTY FOLDER ${package}/package )
+	add_dependencies(pipeline_${package} ${package})
+
+	cpfGetPackageComponents(components ${package})
+	cpfGetSubtargets(binaryTargets "${components}" INTERFACE_CPF_BINARY_SUBTARGETS)
+	if(binaryTargets)
+		add_dependencies(pipeline_${package} ${binaryTargets})
+	endif()
+
+	cpfGetPackageArchivesTargetName(archiveTarget ${package})
+	if(TARGET ${archiveTarget})
+		add_dependencies(pipeline_${package} ${archiveTarget})
+	endif()
+
 	cpfAddPackageInstallTarget(${package})
+	cpfAddPackageClangFormatTarget(${package})
+	cpfAddPackageClangTidyTarget(${package})
+	cpfAddPackageRunAllTestsTarget(${package})
+	cpfAddPackageValgrindTarget(${package})
+	cpfAddPackageOpenCppCoverageTarget(${package})
+	cpfAddPackageAbiCheckerTarget(${package})
 
 endfunction()
 

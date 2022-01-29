@@ -10,8 +10,6 @@ include(cpfCustomTargetUtilities)
 # Takes a list of all the package-components that belong to the project
 function( cpfAddPipelineTargetDependencies packages)
 
-	set( targetName pipeline)
-
 	# A collection of the targets that should be contained in the pipeline.
 	set( targets
 		acyclic
