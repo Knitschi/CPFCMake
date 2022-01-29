@@ -26,6 +26,8 @@ foreach(packageSubdir ${ownedPackageSubdirs})
     cpfGetLastPathNode(package "${packageSubdir}")
     cpfGetCurrentVersionFromGitRepository(version "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/${packageSubdir}")
 
-    message("${package}@${version}")
+    # Note that only STATUS and TRACE write to stdout which forces us to use those.
+    # The Groovy sh() and bat() functions can only read from stdout and not from stderr.
+    message(STATUS "${package}@${version}")
 
 endforeach()
