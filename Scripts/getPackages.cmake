@@ -4,7 +4,7 @@
 # theOtherPackage@3.2.2.4-fdg33
 # aThirdPackage@1.2.3
 #
-# that contains the owned packages and their version numbers.
+# that contains the OWNED packages and their version numbers.
 #
 # Arguments:
 # CPF_ROOT_DIR
@@ -18,15 +18,12 @@ include(cpfGitUtilities)
 
 cpfAssertScriptArgumentDefined(CPF_ROOT_DIR)
 
+cpfGetPackageSubdirectories(ownedPackageSubdirs externalPackageSubdirs ${CPF_ROOT_DIR})
+foreach(packageSubdir ${ownedPackageSubdirs})
 
-cpfGetPackageVariableLists( listNames ${CPF_ROOT_DIR} packageVariables)
-foreach(listName ${listNames})
-
-    # The second element must be the package directory.
-    list(GET ${listName} 1 packageDir )
     # Get package name
-    cpfGetLastPathNode(package "${packageDir}")
-    cpfGetCurrentVersionFromGitRepository(version "${CPF_ROOT_DIR}/${packageDir}")
+    cpfGetLastPathNode(package "${packageSubdir}")
+    cpfGetCurrentVersionFromGitRepository(version "${CPF_ROOT_DIR}/${packageSubdir}")
 
     message("${package}@${version}")
 

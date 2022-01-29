@@ -198,8 +198,32 @@ endfunction()
 #
 function( cpfGetPackages ownedPackagesOut externalPackagesOut rootDir)
 
+	cpfGetPackageSubdirectories(ownedPackageSubdirs externalPackageSubdirs ${rootDir})
+
 	set(ownedPackages)
+	foreach(ownedPackageSubdir ${ownedPackageSubdirs})
+		cpfGetLastPathNode(package ${ownedPackageSubdir})
+		cpfListAppend(ownedPackages ${package})
+	endforeach()
+
 	set(externalPackages)
+	foreach(externalPackageSubdir ${externalPackageSubdirs})
+		cpfGetLastPathNode(package ${externalPackageSubdir})
+		cpfListAppend(externalPackages ${package})
+	endforeach()
+
+	set(${ownedPackagesOut} "${ownedPackages}" PARENT_SCOPE)
+	set(${externalPackagesOut} "${externalPackages}" PARENT_SCOPE)
+
+endfunction()
+
+#---------------------------------------------------------------------------------------------
+# Returns all packages from the packages.cmake file
+#
+function( cpfGetPackageSubdirectories ownedPackageSubdirsOut externalPackageSubdirsOut rootDir)
+
+	set(ownedPackageSubdirs)
+	set(externalPackageSubdirs)
 
 	cpfGetPackageVariableLists(listNames ${rootDir} packageVariables)
 	foreach(listName ${listNames})
@@ -208,21 +232,17 @@ function( cpfGetPackages ownedPackagesOut externalPackagesOut rootDir)
 		cmake_parse_arguments(ARG "" "EXTERNAL" "" ${${listName}})
 
 		if(ARG_OWNED)
-			cpfGetLastPathNode(package ${ARG_OWNED})
-			#devMessage("${ARG_OWNED} - ${package}")
-			cpfListAppend(ownedPackages ${package})
+			cpfListAppend(ownedPackageSubdirs ${ARG_OWNED})
 		elseif(ARG_EXTERNAL)
-			cpfGetLastPathNode(package ${ARG_EXTERNAL})
-			#devMessage("${ARG_EXTERNAL} - ${package}")
-			cpfListAppend(externalPackages ${package})
+			cpfListAppend(externalPackageSubdirs ${ARG_EXTERNAL})
 		else()
 			message(FATAL_ERROR "Error! Unexpected case when parsing CPF_PACKAGES lists.")
 		endif()
 
 	endforeach()
 
-	set(${ownedPackagesOut} "${ownedPackages}" PARENT_SCOPE)
-	set(${externalPackagesOut} "${externalPackages}" PARENT_SCOPE)
+	set(${ownedPackageSubdirsOut} "${ownedPackageSubdirs}" PARENT_SCOPE)
+	set(${externalPackageSubdirsOut} "${externalPackageSubdirss}" PARENT_SCOPE)
 
 endfunction()
 
