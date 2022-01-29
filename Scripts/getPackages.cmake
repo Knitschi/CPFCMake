@@ -15,6 +15,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/../cpfInit.cmake)
 include(cpfPackageUtilities)
 include(cpfGitUtilities)
+include(cpfLocations)
 
 cpfAssertScriptArgumentDefined(CPF_ROOT_DIR)
 
@@ -23,7 +24,7 @@ foreach(packageSubdir ${ownedPackageSubdirs})
 
     # Get package name
     cpfGetLastPathNode(package "${packageSubdir}")
-    cpfGetCurrentVersionFromGitRepository(version "${CPF_ROOT_DIR}/${packageSubdir}")
+    cpfGetCurrentVersionFromGitRepository(version "${CPF_ROOT_DIR}/${CPF_SOURCE_DIR}/${packageSubdir}")
 
     message("${package}@${version}")
 
