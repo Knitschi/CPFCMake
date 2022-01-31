@@ -114,13 +114,21 @@ macro( cpfPackageProject )
 
 	if(NOT ("${ARG_COMPONENTS}" STREQUAL "SINGLE_COMPONENT"))
 
+
 		# For multi component packages we add an extra target that holds the package level files.
+		set(targetName ${package})
+		# Check if there is a package component with the same name.
+		cpfContains(hasComponentWithPackageName "${ARG_COMPONENTS}" ${package})
+		if(hasComponentWithPackageName)
+			set(targetName ${package}Package)
+		endif()
+
 		add_custom_target(
-			${package}
+			${targetName}
 			SOURCES ${packageSources}
 		)
 
-		set_property(TARGET ${package} PROPERTY FOLDER ${package})
+		set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/package)
 
 		foreach(component ${ARG_COMPONENTS})
 			add_subdirectory(${component})

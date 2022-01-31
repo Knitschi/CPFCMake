@@ -42,16 +42,11 @@ function( cpfAddPackageArchiveTargets package packageOptionLists )
 		cpfGetDistributionPackageContentId(contentId ${contentType} "${excludedTargets}")
 
 		set(copyComponentContentTargets)
-		cpfGetPackageComponents(packageComponents ${package})
-		foreach(packageComponent ${packageComponents})
-
-			cpfGetCollectPackageContentTargetNameAnId(packageContentTarget ${packageComponent} ${contentType} ${contentId} "${excludedTargets}")
-			if(NOT TARGET ${packageContentTarget})
-				cpfAddCopyPackageContentTarget( ${packageContentTarget} ${packageComponent} ${contentId} ${contentType} )
-				cpfListAppend(copyComponentContentTargets ${packageContentTarget})
-			endif()
-
-		endforeach()
+		cpfGetCollectPackageContentTargetNameAnId(packageContentTarget ${package} ${contentType} ${contentId} "${excludedTargets}")
+		if(NOT TARGET ${packageContentTarget})
+			cpfAddCopyPackageContentTarget( ${packageContentTarget} ${package} ${contentId} ${contentType} )
+			cpfListAppend(copyComponentContentTargets ${packageContentTarget})
+		endif()
 
 		# Create the targets that create the archives.
 		foreach(packageFormat ${packageFormats})
@@ -94,7 +89,7 @@ function( cpfAddPackageArchivesTarget package packageArchiveTargets)
 			DEPENDS ${packageArchiveTargets}
 		)
 
-		set_property(TARGET ${targetName} PROPERTY FOLDER "${package}/pipeline")
+		set_property(TARGET ${targetName} PROPERTY FOLDER "${package}/package/pipeline")
 
 	endif()
 
@@ -112,12 +107,11 @@ function( cpfGetLastBuildPackagesDir dirOut packageComponent)
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAddCopyPackageContentTarget targetName packageComponent contentId contentType )
+function( cpfAddCopyPackageContentTarget targetName package contentId contentType )
 
-	cpfGetPackageContentStagingDir( destDir ${packageComponent} ${contentId})
+	cpfGetPackageContentStagingDir( destDir ${package} ${contentId})
 	cpfGetPackageInstallComponents( components ${contentType} ${contentId} )
-	cpfGetComponentVSFolder(packageFolder ${CPF_CURRENT_PACKAGE} ${packageComponent})
-	cpfAddInstallTarget( ${packageComponent} ${targetName} "${components}" ${destDir} TRUE ${packageFolder}/private)
+	cpfAddInstallTarget( ${package} ${targetName} "${components}" ${destDir} TRUE ${package}/package/private)
 
 endfunction()
 
@@ -212,7 +206,7 @@ function( cpfAddPackageArchiveTarget packageArchiveTargetNameOut package content
 	)
 
 	set_property( TARGET ${package} APPEND PROPERTY INTERFACE_CPF_PACKAGE_COMPONENT_SUBTARGETS ${targetName})
-	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/private")
+	set_property( TARGET ${targetName} PROPERTY FOLDER "${package}/package/private")
 	set_property( TARGET ${targetName} PROPERTY CPF_OUTPUT_FILES ${stampFile})
 	set_property( TARGET ${targetName} PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS packageArchives)
 

@@ -236,7 +236,7 @@ function( cpfAddDoxygenPackageComponent )
 	# Set an install rule for the generated files.
 	install( 
 		DIRECTORY ${absDoxygenOutputDir}
-		DESTINATION ${packageComponent}/doc
+		DESTINATION doc/${packageComponent}
 		COMPONENT documentation
 		EXCLUDE_FROM_ALL					# Must be exluded from all, because all custom targets are excluded from all.
 	)
