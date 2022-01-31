@@ -559,8 +559,9 @@ function( cpfAddBinaryTarget )
 
 		# set include directories
 		set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_INCLUDE_DIRECTORIES  
-			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>${parentOfComponentDirectory}
-			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>${parentOfComponentDirectory}
+			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/${parentOfComponentDirectory}>
+			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/${parentOfComponentDirectory}>
+			$<INSTALL_INTERFACE:include>
 		)
 
 	else()
@@ -571,8 +572,9 @@ function( cpfAddBinaryTarget )
 
 		# set include directories
 		target_include_directories( ${ARG_NAME} PUBLIC 
-			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>${parentOfComponentDirectory}
-			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>${parentOfComponentDirectory}
+			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/${parentOfComponentDirectory}>
+			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/${parentOfComponentDirectory}>
+			$<INSTALL_INTERFACE:include>
 		)
 
 		# set the Visual Studio folder property
