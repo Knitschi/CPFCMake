@@ -242,7 +242,7 @@ function( cpfGetPackageSubdirectories ownedPackageSubdirsOut externalPackageSubd
 	endforeach()
 
 	set(${ownedPackageSubdirsOut} "${ownedPackageSubdirs}" PARENT_SCOPE)
-	set(${externalPackageSubdirsOut} "${externalPackageSubdirss}" PARENT_SCOPE)
+	set(${externalPackageSubdirsOut} "${externalPackageSubdirs}" PARENT_SCOPE)
 
 endfunction()
 

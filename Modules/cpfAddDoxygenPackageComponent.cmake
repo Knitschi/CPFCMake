@@ -152,7 +152,7 @@ function( cpfAddDoxygenPackageComponent )
 	# Exclude non-owned packages from the documentation unless they were not explicitly added to the documentation.
 	cpfGetAllPackages(allPackages)
 	foreach( package ${allPackages})
-		cpfContains(isDocumented "${documentedPackages}" ${package} )
+		cpfContains(isDocumented "${documentedPackages}" ${package})
 		if(NOT isDocumented)
 			cpfGetAbsPackageDirectory(packageDir ${package})
 			list(APPEND appendedLines "EXCLUDE += \"${packageDir}\"")
