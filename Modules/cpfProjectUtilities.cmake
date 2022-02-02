@@ -220,7 +220,7 @@ function( cpfGetOwnedRepositoryDirectories dirsOut rootDir)
 	cpfGetOwnedPackagesFromRootDir( ownedPackages ${rootDir})
 	set( possibleRepoDirectories ${rootDir} )
 	foreach(package ${ownedPackages})
-		cpfGetAbsPackageDirectory( packageDirOut ${package} ${rootDir})
+		cpfGetAbsPackageDirectoryFromPackagesFile(packageDirOut ${package} ${rootDir})
 		list(APPEND possibleRepoDirectories ${packageDirOut})
 	endforeach()
 

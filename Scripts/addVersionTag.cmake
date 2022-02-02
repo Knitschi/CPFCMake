@@ -37,7 +37,7 @@ foreach( repoDir ${ownedRepoDirs} )
 		message("-- The repository \"${repoDir}\" is already tagged. Skip tagging.")
 		continue()
 	else()
-		cpfGetCurrentVersionFromGitRepository( newVersion ${repoDir})
+		cpfGetCurrentVersionFromGitRepository(newVersion ${repoDir})
 		# Add the new Tag
 		message("-- Set new internal version tag ${newVersion} for repository \"${repoDir}\".")
 		cpfExecuteProcess( d "git tag ${newVersion}" "${repoDir}")
