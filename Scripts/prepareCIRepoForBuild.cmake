@@ -73,7 +73,7 @@ if(doReleaseTag)
     cpfGetCurrentVersionFromGitRepository( currentPackageVersion ${packageRepoDir})
     cpfIsReleaseVersion( isRelease ${currentPackageVersion})
     if(isRelease)
-        message(FATAL_ERROR "Error! The current commit is already at release version ${lastVersionTag}. Overwriting existing releases is not allowed.")
+        message(FATAL_ERROR "Error! The current commit is already at release version ${currentPackageVersion}. Overwriting existing releases is not allowed.")
     endif()
 
     # Proceed with the tagging.
