@@ -23,8 +23,6 @@ cpfAssertScriptArgumentDefined(ROOT_DIR)
 cpfGetOwnedRepositoryDirectories( ownedRepoDirs "${ROOT_DIR}" )
 foreach( repoDir ${ownedRepoDirs} )
 	
-	devMessage(${repoDir})
-
 	# Make sure our version tags are up to date
 	cpfExecuteProcess( d "git fetch --tags" "${repoDir}")
 	
