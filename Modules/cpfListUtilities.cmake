@@ -219,3 +219,12 @@ function( cpfSetDifference listOut listA listB )
 endfunction()
 
 
+#----------------------------------------------------------------------------------------
+function( cpfSum sumOut list )
+	set(sum 0)	
+	foreach(element ${list})
+		math(EXPR sum "${sum} + ${element}")
+	endforeach()
+	set(${sumOut} ${sum} PARENT_SCOPE)
+endfunction()
+

@@ -151,3 +151,78 @@ function( cpfJoinArguments argumentStringOut arguments )
 	set(${argumentStringOut} ${commandString} PARENT_SCOPE)
 
 endfunction()
+
+
+#----------------------------------------------------------------------------------------
+# Tags n variable names with lists that hold values from one column and returns a string
+# that is formatted in table shape. The first value in each column will be used as header.
+# Keyword Argument: COLUMN_VARIABLES	holds a list of variable names that hold column values.
+# 
+#
+function( cpfToTableString stringOut )
+
+	cmake_parse_arguments(ARG "" "" "COLUMN_VARIABLES" ${ARGN})
+
+	# Get the required length for each column.
+	set(columnWidths)
+	foreach(column ${ARG_COLUMN_VARIABLES})
+		cpfGetMaxElementLength(length "${${column}}")
+		# add thre for the spacing between the columns.
+		cpfIncrement(length)
+		cpfIncrement(length) 
+		cpfIncrement(length) 
+		cpfListAppend(columnWidths ${length})
+	endforeach()
+
+	# Compute the table width
+	cpfSum(totalWidth "${columnWidths}")
+
+	# Iterate over rows to construct the string.
+	set(tableString)
+	list(GET ARG_COLUMN_VARIABLES 0 column0)
+	cpfListLength(rows "${${column0}}")
+	cpfDecrement(rows)
+	cpfListLength(cols "${ARG_COLUMN_VARIABLES}")
+	cpfDecrement(cols)
+	foreach(rowIndex RANGE ${rows})
+
+		# Add header line after first row
+		if(${rowIndex} EQUAL 1)
+			string(REPEAT "-" ${totalWidth} headerLine)
+			string(APPEND tableString "${headerLine}\n")
+		endif()
+
+		set(rowString)
+		foreach(colIndex RANGE ${cols})
+
+			list(GET columnWidths ${colIndex} columnWidth)
+			list(GET ARG_COLUMN_VARIABLES ${colIndex} column)
+			list(GET ${column} ${rowIndex} element)
+			string(LENGTH ${element} elementSize)
+			math(EXPR padding "${columnWidth} - ${elementSize}")
+			string(REPEAT " " ${padding} paddingString)
+			string(APPEND rowString "${paddingString}${element}")
+
+		endforeach()
+		string(APPEND tableString "${rowString}\n")
+
+	endforeach()
+
+	set(${stringOut} ${tableString} PARENT_SCOPE)
+
+endfunction()
+
+#----------------------------------------------------------------------------------------
+function( cpfGetMaxElementLength maxLengthOut list )
+
+	set(maxLength 0)
+	foreach(element ${list})
+		string(LENGTH ${element} length)
+		if(${length} GREATER ${maxLength})
+			set(maxLength ${length})
+		endif()
+	endforeach()
+
+	set(${maxLengthOut} ${maxLength} PARENT_SCOPE)
+
+endfunction()

@@ -265,6 +265,12 @@ function( cpfFindPackageDependencies package)
 		list(FIND variables CPF_PACKAGE_DEPENDENCIES index)
 		list(GET values ${index} allDependencyRequirements)
 
+		# Lists for collecting error information.
+		set(failedRequiredPackages)
+		set(failedRequiredVersions)
+		set(failedAvailableVersions)
+		set(failedCompatibilitySchemes)
+
 		cpfGetKeywordValueLists(dependencyRequirementLists CPF_PACKAGE "" "${allDependencyRequirements}" findPackageArguments)
 		foreach(requirementList ${dependencyRequirementLists})
 
@@ -290,7 +296,10 @@ function( cpfFindPackageDependencies package)
 						get_property(availableVersion TARGET ${requiredPackage} PROPERTY INTERFACE_CPF_VERSION)
 						cpfVersionIsCompatibleToRequirement(isCompatible ${availableVersion} ${requiredVersion} ${compatibilityScheme} TRUE)
 						if(NOT isCompatible)
-							message(FATAL_ERROR "The required version ${requiredVersion} of package ${requiredPackage} is not compatible to the available version ${availableVersion}. ${requiredPackage} uses compatibility scheme \"${compatibilityScheme}\".")
+							cpfListAppend(failedRequiredPackages ${requiredPackage})
+							cpfListAppend(failedRequiredVersions ${requiredVersion})
+							cpfListAppend(failedAvailableVersions ${availableVersion})
+							cpfListAppend(failedCompatibilitySchemes ${compatibilityScheme})
 						endif()
 					else()
 						message(FATAL_ERROR "The required dependency ${requiredPackage} is an inlined package that was not created with the cpfPackageProject() function. This is not supported.")
@@ -308,6 +317,25 @@ function( cpfFindPackageDependencies package)
 			endif()
 
 		endforeach()
+
+		# Print error message for all missing package requirements.
+		if(failedRequiredPackages)
+
+			set(errorMessage "\n\tPackage ${package} has unsatisfied dependency requirements of inlined packages!\n\n")
+
+			list(PREPEND failedRequiredPackages "Required Package")
+			list(PREPEND failedAvailableVersions "Available Version")
+			list(PREPEND failedRequiredVersions "Required Version")
+			list(PREPEND failedCompatibilitySchemes "Compatibility Scheme")
+
+			cpfToTableString(requirementFailsTable COLUMN_VARIABLES failedRequiredPackages failedAvailableVersions failedRequiredVersions failedCompatibilitySchemes)
+			string(APPEND errorMessage "${requirementFailsTable}")
+
+			message(NOTICE "${errorMessage}")
+			message(FATAL_ERROR "")
+
+		endif()
+
 	endif()
 
 endfunction()
