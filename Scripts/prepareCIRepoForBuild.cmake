@@ -184,7 +184,7 @@ else()
                 endif()
 
                 # Format the sources by building the clang-format target.
-                cpfExecuteProcess( unused "python3 4_Make.py ${CONFIG} --target clang-format" "${ROOT_DIR}")
+                cpfExecuteProcess( unused "python3 3_Make.py ${CONFIG} --target clang-format" "${ROOT_DIR}")
 
                 # Commit the changes made to the packges.
                 foreach(package ${ownedLoosePackages})
