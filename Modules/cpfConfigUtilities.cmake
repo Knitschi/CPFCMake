@@ -125,7 +125,8 @@ endfunction()
 function( cpfCompilerProducesPdbFiles hasPdbOutput config )
 
 	set( hasPdbFlag FALSE )
-	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL MSVC) # note that clang-cl does not produce compiler.pdb files so we can not simply use MSVC
+
+	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC") # note that clang-cl does not produce compiler.pdb files so we can not simply use MSVC
 		cpfToConfigSuffix(configSuffix ${config})
 		cpfSplitString( flagsList "${CMAKE_CXX_FLAGS_${configSuffix}}" " ")
 		cpfContainsOneOf( hasPdbFlag "${flagsList}" /Zi;/ZI )
@@ -155,7 +156,7 @@ endfunction()
 function( cpfIsGccClangDebug var )
 
 	cpfGetCompiler(compiler)
-	if(${compiler} STREQUAL Clang OR ${compiler} STREQUAL Gcc)
+	if(${compiler} STREQUAL "Clang" OR ${compiler} STREQUAL "Gcc")
 
 		cpfGetCxxFlags( flags ${CMAKE_BUILD_TYPE})
 		cpfContains( hasDebugFlag "${flags}" -g )
