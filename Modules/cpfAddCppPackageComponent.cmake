@@ -408,7 +408,7 @@ function( cpfAddPackageBinaryTargets
     endif()
 
     ################### Create unit test exe ##############################
-	if(testFiles AND CPF_ENABLE_TEST_TARGETS)
+	if(testFiles AND CPF_ENABLE_TEST_EXE_TARGETS)
         set( unitTestsTarget ${libraryTarget}${CPF_TESTS_TARGET_ENDING})
         cpfAddBinaryTarget(
 			PACKAGE_COMPONENT ${packageComponent}
@@ -880,6 +880,9 @@ function( cpfAddInstallRulesForBinaryTargets package packageComponent targets co
 			endif()
 
 		endif()
+
+		
+		devMessage("add rule for target ${target} in component ${package}")
 
 		install( 
 			TARGETS ${target}
