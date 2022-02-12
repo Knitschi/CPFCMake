@@ -126,7 +126,7 @@ function( cpfGetPackageInstallComponents componentsOut contentType contentId )
 	elseif( "${contentType}" STREQUAL CT_RUNTIME_PORTABLE )
 		set(components runtime ${contentId} )
 	elseif( "${contentType}" STREQUAL CT_DEVELOPER )
-		set(components runtime developer )
+		set(components runtime developer sources )	# Includes the sources to allow debugging.
 	elseif( "${contentType}" STREQUAL CT_SOURCES )
 		set(components sources)
 	elseif( "${contentType}" STREQUAL CT_DOCUMENTATION )
