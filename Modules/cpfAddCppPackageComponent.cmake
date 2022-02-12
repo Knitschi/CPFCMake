@@ -881,9 +881,6 @@ function( cpfAddInstallRulesForBinaryTargets package packageComponent targets co
 
 		endif()
 
-		
-		devMessage("add rule for target ${target} in component ${package}")
-
 		install( 
 			TARGETS ${target}
 			EXPORT ${package}
