@@ -212,7 +212,8 @@ function( cpfAddDoxygenPackageComponent )
 		${targetDependencies}
 		${searchDataXmlFile}
 	)
-	set(targetSources 
+	set(targetSources
+		CMakeLists.txt
 		${ARG_SOURCES}
 		${ARG_DOXYGEN_CONFIG_FILE}
 		${ARG_DOXYGEN_LAYOUT_FILE}
@@ -240,6 +241,9 @@ function( cpfAddDoxygenPackageComponent )
 		COMPONENT documentation
 		EXCLUDE_FROM_ALL					# Must be exluded from all, because all custom targets are excluded from all.
 	)
+
+	# Set an install rule for the source files.
+	cpfInstallSourceFiles( relFiles ${CPF_CURRENT_PACKAGE} "${targetSources}" SOURCE developer "" )
 
 endfunction()
 
