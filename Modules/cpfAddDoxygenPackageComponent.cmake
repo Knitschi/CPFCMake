@@ -243,7 +243,7 @@ function( cpfAddDoxygenPackageComponent )
 	)
 
 	# Set an install rule for the source files.
-	cpfInstallSourceFiles( relFiles ${CPF_CURRENT_PACKAGE} "${targetSources}" SOURCE developer "" )
+	cpfInstallSourceFiles( relFiles ${CPF_CURRENT_PACKAGE} "${targetSources}" SOURCE sources "" )
 
 endfunction()
 

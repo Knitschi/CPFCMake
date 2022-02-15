@@ -172,7 +172,7 @@ endfunction()
 function( cpfAddInstallRulesForPackageFiles package packageTarget packageFiles )
 
 	# Assume that package files are only relevenat for building the project.
-	cpfInstallSourceFiles( relFiles ${package} "${packageFiles}" SOURCE developer "" )
+	cpfInstallSourceFiles( relFiles ${package} "${packageFiles}" SOURCE sources "" )
 
 endfunction( )
 
