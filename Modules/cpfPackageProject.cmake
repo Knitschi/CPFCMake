@@ -129,6 +129,9 @@ macro( cpfPackageProject )
 		)
 
 		set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/package)
+		set_property(TARGET ${targetName} APPEND PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS sources )
+
+		cpfAddInstallRulesForPackageFiles(${targetName} "${packageSources}")
 
 		foreach(component ${ARG_COMPONENTS})
 			add_subdirectory(${component})
@@ -163,6 +166,14 @@ function( cpfFinalizePackageProject )
 	cpfAddPackageBundleTargets(${package})
 
 endfunction()
+
+#-----------------------------------------------------------
+function( cpfAddInstallRulesForPackageFiles packageTarget packageFiles )
+	
+	# Assume that package files are only relevenat for building the project.
+	cpfInstallSourceFiles( relFiles ${packageTarget} "${packageFiles}" SOURCE developer "" )
+
+endfunction( )
 
 #-----------------------------------------------------------
 function(cpfAddPackageBundleTargets package)
