@@ -197,7 +197,7 @@ function( cpfAddCppPackageComponent )
 
 	# add a target the will be build before the binary target and that will copy all 
 	# depended on shared libraries to the targets output directory.
-	cpfAddDeploySharedLibrariesTarget(${packageComponent})
+	cpfAddDeploySharedLibrariesTarget(${package} ${packageComponent})
 
 	# Adds target that runs clang-tidy on the given files.
     # Currently this is only added for the production target because clang-tidy does not filter out warnings that come over the GTest macros from external code.
@@ -228,7 +228,7 @@ function( cpfAddCppPackageComponent )
 	endif()
 
 	# Plugins must be added before the install targets
-	cpfAddPlugins( ${packageComponent} "${pluginOptionLists}" )
+	cpfAddPlugins(${package} ${packageComponent} "${pluginOptionLists}" )
 	 
 	# Adds a target the creates abi-dumps when using clang or gcc with debug options.
 	cpfAddAbiCheckerTargets( 
@@ -538,6 +538,7 @@ function( cpfAddBinaryTarget )
 	if(NOT ("${parentOfComponentDirectory}" STREQUAL ""))
 		string(PREPEND parentOfComponentDirectory /)
 	endif()
+
 	if(isInterfaceLib)
 
 		# only use the interface compile options for interface targets
@@ -561,7 +562,7 @@ function( cpfAddBinaryTarget )
 		set_property(TARGET ${ARG_NAME} PROPERTY INTERFACE_INCLUDE_DIRECTORIES  
 			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/${parentOfComponentDirectory}>
 			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/${parentOfComponentDirectory}>
-			$<INSTALL_INTERFACE:include>
+			$<INSTALL_INTERFACE:include/${parentOfComponentDirectory}>
 		)
 
 	else()
@@ -574,7 +575,7 @@ function( cpfAddBinaryTarget )
 		target_include_directories( ${ARG_NAME} PUBLIC 
 			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/${parentOfComponentDirectory}>
 			$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/${parentOfComponentDirectory}>
-			$<INSTALL_INTERFACE:include>
+			$<INSTALL_INTERFACE:include/${parentOfComponentDirectory}>
 		)
 
 		# set the Visual Studio folder property
@@ -603,7 +604,7 @@ function( cpfAddBinaryTarget )
 	set_property( TARGET ${ARG_NAME} APPEND PROPERTY INTERFACE_CPF_PUBLIC_HEADER ${ARG_PUBLIC_HEADER})
 
 	# sets all the <bla>_OUTPUT_DIRECTORY_<config> options
-	cpfSetTargetOutputDirectoriesAndNames(${ARG_PACKAGE_COMPONENT} ${ARG_NAME})
+	cpfSetTargetOutputDirectoriesAndNames(${CPF_CURRENT_PACKAGE} ${ARG_PACKAGE_COMPONENT} ${ARG_NAME})
 
 	# Add an alias target to allow using namespaced names for inlined packages.
 	cpfAddAliasTarget(${ARG_NAME} ${ARG_TARGET_NAMESPACE})
@@ -751,7 +752,7 @@ endfunction()
 #
 # pluginDependencies A list where the first element is the relative path of the plugin and the folling elements are the plugin targets.
 # 
-function( cpfAddPlugins packageComponent pluginOptionLists )
+function(cpfAddPlugins package packageComponent pluginOptionLists)
 
 	cpfGetExecutableTargets( exeTargets ${packageComponent})
 	if(NOT exeTargets)
@@ -768,7 +769,7 @@ function( cpfAddPlugins packageComponent pluginOptionLists )
 		cpfIncrement(index)
 		if(TARGET ${plugin})
 			add_dependencies( ${packageComponent} ${plugin}) # adds the artifical dependency
-			cpfAddDeploySharedLibsToBuildStageTarget( ${packageComponent} ${plugin} ${subdirectory} ) 
+			cpfAddDeploySharedLibsToBuildStageTarget(${package} ${packageComponent} ${plugin} ${subdirectory} ) 
 		endif()
 	endforeach()
 
@@ -818,10 +819,10 @@ endfunction()
 function( cpfAddInstallRulesForCppPackageComponent package packageComponent pluginOptionLists distributionPackageOptionLists versionCompatibilityScheme )
 
 	cpfAddInstallRulesForPackageBinaries(${package} ${packageComponent} ${versionCompatibilityScheme} )
-	cpfAddInstallRulesForPublicHeaders( ${packageComponent} )
-	cpfAddInstallRulesForPDBFiles( ${packageComponent} )
-	cpfAddInstallRulesForDependedOnSharedLibraries( ${packageComponent} "${pluginOptionLists}" "${distributionPackageOptionLists}" )
-	cpfAddInstallRulesForSources( ${packageComponent} )
+	cpfAddInstallRulesForPublicHeaders(${package} ${packageComponent})
+	cpfAddInstallRulesForPDBFiles(${package} ${packageComponent})
+	cpfAddInstallRulesForDependedOnSharedLibraries(${packageComponent} "${pluginOptionLists}" "${distributionPackageOptionLists}" )
+	cpfAddInstallRulesForSources(${package} ${packageComponent})
 
 endfunction()
 
@@ -910,7 +911,7 @@ endfunction()
 # This function adds install rules for the files that are required for debugging.
 # This is currently the pdb and source files for msvc configurations.
 #
-function( cpfAddInstallRulesForPDBFiles packageComponent )
+function( cpfAddInstallRulesForPDBFiles package packageComponent )
 
 	get_property(targets TARGET ${packageComponent} PROPERTY INTERFACE_CPF_BINARY_SUBTARGETS)
 
@@ -956,7 +957,7 @@ function( cpfAddInstallRulesForPDBFiles packageComponent )
 
 					cpfGetTargetSourcesWithoutPrefixHeader( sources ${target} )
 					cpfGetFilepathsWithExtensions( cppSources "${sources}" "${CPF_CXX_SOURCE_FILE_EXTENSIONS}" )
-					cpfInstallSourceFiles( relFiles ${packageComponent} "${cppSources}" SOURCE developer ${config} )
+					cpfInstallSourceFiles( relFiles ${package} "${cppSources}" SOURCE developer ${config} )
 
 					# Add the installed files to the target property
 					cpfPrependMulti(relInstallPaths "${relSourceDir}/" "${shortSourceNames}" )
@@ -971,7 +972,7 @@ function( cpfAddInstallRulesForPDBFiles packageComponent )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAddInstallRulesForPublicHeaders packageComponent)
+function( cpfAddInstallRulesForPublicHeaders package packageComponent)
 
 	set(outputType INCLUDE)
 	set(installComponent developer)
@@ -979,29 +980,29 @@ function( cpfAddInstallRulesForPublicHeaders packageComponent)
 	# Install rules for production headers
 	get_property( productionLib TARGET ${packageComponent} PROPERTY INTERFACE_CPF_PRODUCTION_LIB_SUBTARGET)
 	get_property( header TARGET ${productionLib} PROPERTY INTERFACE_CPF_PUBLIC_HEADER)
-	cpfInstallSourceFiles( relBasicHeader ${packageComponent} "${header}" ${outputType} ${installComponent} "")
+	cpfInstallSourceFiles( relBasicHeader ${package} "${header}" ${outputType} ${installComponent} "")
 	
 	# Install rules for test fixture library headers
 	get_property( fixtureTarget TARGET ${packageComponent} PROPERTY INTERFACE_CPF_TEST_FIXTURE_SUBTARGET)
 	if(TARGET ${fixtureTarget})
 		get_property( header TARGET ${fixtureTarget} PROPERTY INTERFACE_CPF_PUBLIC_HEADER)
-		cpfInstallSourceFiles( relfixtureHeader ${packageComponent} "${header}" ${outputType} ${installComponent} "")
+		cpfInstallSourceFiles( relfixtureHeader ${package} "${header}" ${outputType} ${installComponent} "")
 	endif()
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfInstallSourceFiles installedFilesOut packageComponent sources outputType installComponent config )
+function( cpfInstallSourceFiles installedFilesOut package sources outputType installComponent config )
 
     # Create header pathes relative to the install include directory.
-    set(sourceDir ${CMAKE_CURRENT_SOURCE_DIR})
-	set( binaryDir ${CMAKE_CURRENT_BINARY_DIR})
-	cpfGetRelativeOutputDir( relIncludeDir ${packageComponent} ${outputType})
+    set(sourceDir ${${package}_SOURCE_DIR})
+	set(binaryDir ${${package}_BINARY_DIR})
+	cpfGetRelativeOutputDir(relIncludeDir ${package} ${outputType})
 
 	set(installedFiles)
 	foreach( file ${sources})
 		
-		cpfToAbsSourcePath(absFile ${file} ${sourceDir})
+		cpfToAbsSourcePath(absFile ${file} ${CMAKE_CURRENT_SOURCE_DIR})
 
 		# When building, the include directories are the package-components binary and source directory.
 		# This means we need the path of the header relative to one of the two in order to get the
@@ -1012,6 +1013,7 @@ function( cpfInstallSourceFiles installedFilesOut packageComponent sources outpu
 
 		# prepend the include/<package-component> directory
 		get_filename_component( relDestDir ${relFilePath} DIRECTORY)
+
 		if(relDestDir)
 			set(relDestDir ${relIncludeDir}/${relDestDir} )
 		else()
@@ -1325,7 +1327,7 @@ function( addSharedLibraryDependenciesInstallRules packageComponent contentId li
 endfunction()
 
 #----------------------------------------------------------------------------------------
-function( cpfAddInstallRulesForSources packageComponent )
+function( cpfAddInstallRulesForSources package packageComponent )
 
 	set(outputType INCLUDE)
 	set(installComponent developer)
@@ -1338,7 +1340,7 @@ function( cpfAddInstallRulesForSources packageComponent )
 		cpfListAppend(packageSourceFiles ${sources})
 		set_property(TARGET ${target} APPEND PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS sources )
 	endforeach()
-	cpfInstallSourceFiles( relFiles ${packageComponent} "${packageSourceFiles}" SOURCE sources "" )
+	cpfInstallSourceFiles( relFiles ${package} "${packageSourceFiles}" SOURCE sources "" )
 
 endfunction()
 

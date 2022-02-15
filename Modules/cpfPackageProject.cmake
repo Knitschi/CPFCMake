@@ -85,6 +85,7 @@ macro( cpfPackageProject )
     )
 
 	set(CPF_CURRENT_PACKAGE ${package})
+	set(${package}_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 	set(${package}_TARGET_NAMESPACE ${ARG_TARGET_NAMESPACE})
 	set(${package}_DISTRIBUTION_PACKAGE_OPTION_LISTS ${distributionPackageOptionLists})
 	set(${package}_BRIEF_DESCRIPTION ${ARG_BRIEF_DESCRIPTION})
@@ -131,7 +132,7 @@ macro( cpfPackageProject )
 		set_property(TARGET ${targetName} PROPERTY FOLDER ${package}/package)
 		set_property(TARGET ${targetName} APPEND PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS sources )
 
-		cpfAddInstallRulesForPackageFiles(${targetName} "${packageSources}")
+		cpfAddInstallRulesForPackageFiles(${package} ${targetName} "${packageSources}")
 
 		foreach(component ${ARG_COMPONENTS})
 			add_subdirectory(${component})
@@ -168,10 +169,10 @@ function( cpfFinalizePackageProject )
 endfunction()
 
 #-----------------------------------------------------------
-function( cpfAddInstallRulesForPackageFiles packageTarget packageFiles )
-	
+function( cpfAddInstallRulesForPackageFiles package packageTarget packageFiles )
+
 	# Assume that package files are only relevenat for building the project.
-	cpfInstallSourceFiles( relFiles ${packageTarget} "${packageFiles}" SOURCE developer "" )
+	cpfInstallSourceFiles( relFiles ${package} "${packageFiles}" SOURCE developer "" )
 
 endfunction( )
 

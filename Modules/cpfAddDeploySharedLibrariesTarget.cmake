@@ -10,19 +10,19 @@ include(cpfOutputPathUtilities)
 # linkedLibrarie can contain all linked libraries of the target. The function will pick
 # the shared libraries by itself. 
 #
-function( cpfAddDeploySharedLibrariesTarget packageComponent )
+function( cpfAddDeploySharedLibrariesTarget package packageComponent )
 
 	# Only deploy shared libraries on windows. On Linux CMake uses the RPATH to make it work.
 	if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL Windows)
 		return()
 	endif()
 
-	cpfAddDeploySharedLibsToBuildStageTarget( ${packageComponent} "" "" ) 
+	cpfAddDeploySharedLibsToBuildStageTarget(${package} ${packageComponent} "" "" ) 
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAddDeploySharedLibsToBuildStageTarget packageComponent libs subdirectory)
+function( cpfAddDeploySharedLibsToBuildStageTarget package packageComponent libs subdirectory)
 
 	# Add one custom target to copy all external libs.
 	cpfGetIndexedTargetName(targetName deployExternal_${packageComponent})
@@ -41,12 +41,12 @@ function( cpfAddDeploySharedLibsToBuildStageTarget packageComponent libs subdire
 
 			# Deploy the dll files
 			cpfGetLibFilePath( libFile ${lib} ${config})
-			cpfAddDeployCommand( outputs ${targetName} ${packageComponent} ${config} "${subdirectory}" ${lib} ${libFile} "${outputs}")
+			cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${subdirectory}" ${lib} ${libFile} "${outputs}")
 
 			# Deploy the linker pdb files if they are available.
 			cpfGetImportedLibPdbFilePath( libPdbFile ${lib} ${config})
 			if(libPdbFile)
-				cpfAddDeployCommand( outputs ${targetName} ${packageComponent} ${config} "${subdirectory}" ${lib} ${libPdbFile} "${outputs}")
+				cpfAddDeployCommand( outputs ${targetName} ${package} ${config} "${subdirectory}" ${lib} ${libPdbFile} "${outputs}")
 			endif()
 
 		endforeach()
@@ -70,9 +70,9 @@ function( cpfGetIndexedTargetName indexedName baseName )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfAddDeployCommand outputsOut targetName packageComponent config outputSubDir lib libFile existingOutputs )
+function( cpfAddDeployCommand outputsOut targetName package config outputSubDir lib libFile existingOutputs )
 
-	cpfGetSharedLibraryOutputDir( targetDir ${packageComponent} ${config} )
+	cpfGetSharedLibraryOutputDir( targetDir ${package} ${config} )
 
 	get_filename_component( shortName ${libFile} NAME)
 

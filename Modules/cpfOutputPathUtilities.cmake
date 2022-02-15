@@ -94,17 +94,17 @@ function( cpfGetTargetOutputBaseName nameOut target config)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetAbsOutputDir absDirOut packageComponent outputType config )
-	cpfGetRelativeOutputDir(relativeDir ${packageComponent} ${outputType})
+function( cpfGetAbsOutputDir absDirOut package outputType config )
+	cpfGetRelativeOutputDir(relativeDir ${package} ${outputType})
 	set(${absDirOut} "${CMAKE_BINARY_DIR}/BuildStage/${config}/${relativeDir}" PARENT_SCOPE)
 endfunction()
 
 #---------------------------------------------------------------------------------------------
 # Note that this function defines a part of the directory structure of the deployed files
 #
-function( cpfGetRelativeOutputDir relativeDirOut packageComponent outputType )
+function( cpfGetRelativeOutputDir relativeDirOut package outputType )
 
-	cpfGetTypePartOfOutputDir(typeDir ${packageComponent} ${outputType})
+	cpfGetTypePartOfOutputDir(typeDir ${package} ${outputType})
 	set(${relativeDirOut} ${typeDir} PARENT_SCOPE )
 
 endfunction()
@@ -123,7 +123,7 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # This function defines the part of the output directory that comes after the config/package add_subdirectory
 #
-function( cpfGetTypePartOfOutputDir typeDir packageComponent outputType )
+function( cpfGetTypePartOfOutputDir typeDir package outputType )
 
 	# handle relative dirs that are the same on all platforms
 	if(${outputType} STREQUAL ARCHIVE)
@@ -135,11 +135,11 @@ function( cpfGetTypePartOfOutputDir typeDir packageComponent outputType )
 		# We put the linker pdb files parallel to the dll, because msvc looks for them there.
 		set(typeDirLocal . )
 	elseif(${outputType} STREQUAL INCLUDE)
-		set(typeDirLocal include/${packageComponent})
+		set(typeDirLocal include/${package})
 	elseif(${outputType} STREQUAL CMAKE_PACKAGE_FILES)
-		set(typeDirLocal lib/cmake/${packageComponent}) 
+		set(typeDirLocal lib/cmake/${package})
 	elseif(${outputType} STREQUAL SOURCE )
-		set(typeDirLocal src/${packageComponent}) 
+		set(typeDirLocal src/${package}) 
 	elseif(${outputType} STREQUAL DISTRIBUTION_PACKAGE_FILES)
 		set(typeDirLocal DistributionPackages)
 	elseif(${outputType} STREQUAL OTHER )
@@ -175,17 +175,17 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # Sets the <binary-type>_OUTOUT_DIRECTORY_<config> properties of the given target.
 #
-function( cpfSetTargetOutputDirectoriesAndNames packageComponent target )
+function( cpfSetTargetOutputDirectoriesAndNames package packageComponent target )
 
 	cpfGetConfigurations( configs)
 	foreach(config ${configs})
-		cpfSetAllOutputDirectoriesAndNames(${target} ${packageComponent} ${config} )
+		cpfSetAllOutputDirectoriesAndNames(${target} ${package} ${packageComponent} ${config} )
 	endforeach()
 
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfSetAllOutputDirectoriesAndNames target packageComponent config )
+function( cpfSetAllOutputDirectoriesAndNames target package packageComponent config )
 
 	# The output directory properties can not be set on interface libraries.
 	cpfIsInterfaceLibrary(isIntLib ${target})
@@ -199,13 +199,13 @@ function( cpfSetAllOutputDirectoriesAndNames target packageComponent config )
 	string(TOUPPER ${config} uConfig)
 	set_property( TARGET ${target} PROPERTY ${uConfig}_POSTFIX "" )
 
-	cpfSetOutputDirAndName( ${target} ${packageComponent} ${config} RUNTIME)
-	cpfSetOutputDirAndName( ${target} ${packageComponent} ${config} LIBRARY)
-	cpfSetOutputDirAndName( ${target} ${packageComponent} ${config} ARCHIVE)
+	cpfSetOutputDirAndName( ${target} ${package} ${config} RUNTIME)
+	cpfSetOutputDirAndName( ${target} ${package} ${config} LIBRARY)
+	cpfSetOutputDirAndName( ${target} ${package} ${config} ARCHIVE)
 
 	cpfCompilerProducesPdbFiles(hasOutput ${config})
 	if(hasOutput)
-		cpfSetOutputDirAndName( ${target} ${packageComponent} ${config} COMPILE_PDB)
+		cpfSetOutputDirAndName( ${target} ${package} ${config} COMPILE_PDB)
 		set_property(TARGET ${target} PROPERTY COMPILE_PDB_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX}-compiler) # we overwrite the filename to make it more meaningful
 	endif()
 
@@ -213,7 +213,7 @@ function( cpfSetAllOutputDirectoriesAndNames target packageComponent config )
 	if(hasOutput)
 		# Note that we use the same name and path for linker as are used for the dlls files.
 		# When consuming imported targets we guess that the pdb files have these locations. 
-		cpfSetOutputDirAndName( ${target} ${packageComponent} ${config} PDB)
+		cpfSetOutputDirAndName( ${target} ${package} ${config} PDB)
 		set_property(TARGET ${target} PROPERTY PDB_NAME_${configSuffix} ${target}${CMAKE_${configSuffix}_POSTFIX})
 	endif()
 
@@ -222,9 +222,9 @@ endfunction()
 #---------------------------------------------------------------------------------------------
 # This function sets the output name property to make sure that the same target file names are
 # achieved across all platforms.
-function( cpfSetOutputDirAndName target packageComponent config outputType )
+function( cpfSetOutputDirAndName target package config outputType )
 
-	cpfGetAbsOutputDir(outputDir ${packageComponent} ${outputType} ${config})
+	cpfGetAbsOutputDir(outputDir ${package} ${outputType} ${config})
 	cpfToConfigSuffix(configSuffix ${config})
 	set_property(TARGET ${target} PROPERTY ${outputType}_OUTPUT_DIRECTORY_${configSuffix} ${outputDir})
 	# use the config postfix for all target types
@@ -284,12 +284,12 @@ function( cpfGetAbsPathOfTargetOutputFile output target config )
 endfunction()
 
 #---------------------------------------------------------------------------------------------
-function( cpfGetSharedLibraryOutputDir outputDir target config )
+function( cpfGetSharedLibraryOutputDir outputDir package config )
 
     if(${CMAKE_SYSTEM_NAME} STREQUAL Windows )
-		cpfGetAbsOutputDir(sourceDir ${target} RUNTIME ${config})
+		cpfGetAbsOutputDir(sourceDir ${package} RUNTIME ${config})
     elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-		cpfGetAbsOutputDir(sourceDir ${target} LIBRARY ${config})
+		cpfGetAbsOutputDir(sourceDir ${package} LIBRARY ${config})
     else()
         message(FATAL_ERROR "Function cpfGetSharedLibraryOutputDir() must be extended for system ${CMAKE_SYSTEM_NAME}")
     endif()
