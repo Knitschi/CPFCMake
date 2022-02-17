@@ -98,7 +98,7 @@ function( cpfAddOpenCppCoverageTarget packageComponent)
 	# check preconditions
 	cpfAssertDefined(CPF_TEST_FILES_DIR)
 
-	set(targetName opencppcoverage_${packageComponent})
+	set(targetName OpenCppCoverage_${packageComponent})
 	set(binaryDir ${CMAKE_CURRENT_BINARY_DIR}/${targetName})
 	file(MAKE_DIRECTORY ${binaryDir})
 
