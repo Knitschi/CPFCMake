@@ -14,7 +14,7 @@ function( cpfAddPipelineTargetDependencies packages)
 	set( targets
 		acyclic
 		packageArchives 	# Because of the global nature of the clearLastBuild command that is included in this target, we can not depend on the package-component targets directly.
-		opencppcoverage			# Because the global target assembles the OpenCppCoverage report from the individual reports, we can not use properties for this.
+		OpenCppCoverage			# Because the global target assembles the OpenCppCoverage report from the individual reports, we can not use properties for this.
 	)
 	
 	# A set package-component properties that contain custom targets that should be
