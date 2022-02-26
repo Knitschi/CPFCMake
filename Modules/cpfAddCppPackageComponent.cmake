@@ -535,9 +535,6 @@ function( cpfAddBinaryTarget )
 	# We do not use special directories for private or public headers. So the include directory is public.
 	file(RELATIVE_PATH relativeComponentDirectory ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 	cpfGetParentDirectory(parentOfComponentDirectory ${relativeComponentDirectory})
-	if(NOT ("${parentOfComponentDirectory}" STREQUAL ""))
-		string(PREPEND parentOfComponentDirectory /)
-	endif()
 
 	if(isInterfaceLib)
 
@@ -895,10 +892,6 @@ function( cpfAddInstallRulesForBinaryTargets package packageComponent targets co
 			ARCHIVE
 				DESTINATION "${relArchiveDir}"
 				COMPONENT developer
-			# This sets the import targets include directories to <package-component>/include, 
-			# so clients can also include with <package-component/bla.h>
-			INCLUDES
-				DESTINATION "${relIncludeDir}/.."
 		)
 
 		set_property(TARGET ${target} APPEND PROPERTY INTERFACE_CPF_INSTALL_COMPONENTS ${component} ${additionalComponent} )
